@@ -80,6 +80,12 @@ impl orml_tokens::Config for Test {
 	type NontransferableTokensAllowList = Nothing;
 }
 
+pub const NATIVE_CURRENCY_ID: u32 = 0;
+
+parameter_types! {
+	pub const NativeCurrencyId: u32 = NATIVE_CURRENCY_ID;
+}
+
 impl swap::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = MultiTokenCurrencyAdapter<Test>;

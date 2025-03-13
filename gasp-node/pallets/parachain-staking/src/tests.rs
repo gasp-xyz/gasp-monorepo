@@ -30,7 +30,7 @@ use crate::mock::{
 use crate::{
 	assert_eq_events, assert_event_emitted, assert_last_event, Bond, CandidateBondChange,
 	CandidateBondRequest, CollatorStatus, DelegationChange, DelegationRequest, DelegatorAdded,
-	Error, Event, MetadataUpdateAction, PairedOrLiquidityToken, PayoutRounds, RoundAggregatorInfo,
+	Error, Event, MetadataUpdateAction, PayoutRounds, RoundAggregatorInfo,
 	RoundCollatorRewardInfo, TotalSelected,
 };
 use frame_support::{assert_noop, assert_ok, traits::tokens::currency::MultiTokenCurrency};
@@ -4164,7 +4164,7 @@ fn adding_removing_staking_token_works() {
 			// Add 3 as a staking token
 			assert_ok!(Stake::add_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(3u32),
+				3u32,
 				100u32
 			));
 			assert_ok!(Stake::join_candidates(
@@ -4228,7 +4228,7 @@ fn adding_removing_staking_token_works() {
 			assert_noop!(
 				Stake::add_staking_liquidity_token(
 					Origin::root(),
-					PairedOrLiquidityToken::Liquidity(3u32),
+					3u32,
 					100u32
 				),
 				Error::<Test>::StakingLiquidityTokenAlreadyListed
@@ -4237,7 +4237,7 @@ fn adding_removing_staking_token_works() {
 			assert_noop!(
 				Stake::remove_staking_liquidity_token(
 					Origin::root(),
-					PairedOrLiquidityToken::Liquidity(4u32),
+					4u32,
 					100u32
 				),
 				Error::<Test>::StakingLiquidityTokenNotListed
@@ -4246,7 +4246,7 @@ fn adding_removing_staking_token_works() {
 			// Remove a liquidity token
 			assert_ok!(Stake::remove_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(3u32),
+				3u32,
 				100u32
 			));
 			// Candidate cannot join using it.
@@ -4263,22 +4263,22 @@ fn adding_removing_staking_token_works() {
 			// Add more staking tokens
 			assert_ok!(Stake::add_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(4u32),
+				4u32,
 				100u32
 			));
 			assert_ok!(Stake::add_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(5u32),
+				5u32,
 				100u32
 			));
 			assert_ok!(Stake::add_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(6u32),
+				6u32,
 				100u32
 			));
 			assert_ok!(Stake::add_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(7u32),
+				7u32,
 				100u32
 			));
 
@@ -4470,7 +4470,7 @@ fn token_valuations_works() {
 
 			assert_ok!(Stake::remove_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(3u32),
+				3u32,
 				100u32
 			));
 
@@ -4501,43 +4501,6 @@ fn token_valuations_works() {
 			];
 			expected.append(&mut new);
 			assert_eq_events!(expected.clone());
-		});
-}
-
-#[test]
-fn paired_or_liquidity_token_works() {
-	ExtBuilder::default()
-		.with_default_staking_token(vec![(1, 100), (2, 100), (3, 100), (4, 100), (5, 100)])
-		.with_default_token_candidates(vec![(1, 20), (2, 20)])
-		.build()
-		.execute_with(|| {
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				PairedOrLiquidityToken::Paired(7000u32),
-				100u32
-			));
-			assert_eq!(Stake::staking_liquidity_tokens().get(&70), Some(&None));
-
-			assert_ok!(Stake::add_staking_liquidity_token(
-				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(700u32),
-				100u32
-			));
-			assert_eq!(Stake::staking_liquidity_tokens().get(&700), Some(&None));
-
-			assert_ok!(Stake::remove_staking_liquidity_token(
-				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(70u32),
-				100u32
-			),);
-			assert_eq!(Stake::staking_liquidity_tokens().get(&70), None);
-
-			assert_ok!(Stake::remove_staking_liquidity_token(
-				Origin::root(),
-				PairedOrLiquidityToken::Paired(70000u32),
-				100u32
-			));
-			assert_eq!(Stake::staking_liquidity_tokens().get(&700), None);
 		});
 }
 
@@ -4615,7 +4578,7 @@ fn token_valuations_works_with_aggregators() {
 
 			assert_ok!(Stake::remove_staking_liquidity_token(
 				Origin::root(),
-				PairedOrLiquidityToken::Liquidity(2u32),
+				2u32,
 				100u32
 			));
 

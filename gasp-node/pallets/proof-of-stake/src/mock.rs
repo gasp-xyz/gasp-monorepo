@@ -183,7 +183,7 @@ mockall::mock! {
 		type CurrencyId = TokenId;
 		type Balance = Balance;
 
-		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<PoolInfo<TokenId, Balance>, DispatchError>;
+		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<Vec<PoolInfo<TokenId, Balance>>, DispatchError>;
 
 		fn check_can_valuate(base_id: TokenId, pool_id: TokenId) -> Result<(), DispatchError>;
 
@@ -207,7 +207,7 @@ impl Valuate for MockValuationApi {
 	fn find_paired_pool(
 		base_id: TokenId,
 		asset_id: TokenId,
-	) -> Result<PoolInfo<TokenId, Balance>, DispatchError> {
+	) -> Result<Vec<PoolInfo<TokenId, Balance>>, DispatchError> {
 		unimplemented!()
 	}
 
@@ -445,7 +445,7 @@ impl ExtBuilder {
 			let is_liquidity_token_mock = MockValuationApi::check_pool_exist_context();
 			is_liquidity_token_mock.expect().return_const(Ok(()));
 			let get_liquidity_asset_mock = MockValuationApi::find_paired_pool_context();
-			get_liquidity_asset_mock.expect().return_const(Ok((10u32, (0, 0), (0, 0))));
+			get_liquidity_asset_mock.expect().return_const(Ok(vec![(10u32, (0, 0), (0, 0))]));
 			let valuate_liquidity_token_mock = MockValuationApi::get_valuation_for_paired_context();
 			valuate_liquidity_token_mock.expect().return_const(11u128);
 			let get_pool_state_mock = MockValuationApi::get_reserve_and_lp_supply_context();

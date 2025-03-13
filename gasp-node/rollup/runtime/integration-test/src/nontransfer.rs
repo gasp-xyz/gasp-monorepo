@@ -42,6 +42,19 @@ pub(crate) fn events() -> Vec<RuntimeEvent> {
 		.collect::<Vec<_>>()
 }
 
+fn assert_last_event_successful_swap() {
+	let events = events();
+	let last_event = events.last().expect("events expected").clone();
+	let found = match last_event {
+		RuntimeEvent::Market(pallet_market::Event::AssetsSwapped{..}) => true,
+		_ => false,
+	};
+	assert!(
+		found,
+		"expected event successful_swap is not equal to the last event {last_event:?}",
+	);
+}
+
 fn assert_has_event(generic_event: RuntimeEvent) {
 	let events = events();
 	let system_event: RuntimeEvent = generic_event.clone().into();
@@ -227,7 +240,7 @@ fn test_market_should_not_block() {
 			0,
 		));
 
-		// user & foundation cannot sell, ARB bot can
+		// user, foundation and ARB bot can sell
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
 			RuntimeOrigin::signed(bob),
 			vec![POOL_ID],
@@ -236,12 +249,7 @@ fn test_market_should_not_block() {
 			ASSET_ID_1,
 			0,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
 			RuntimeOrigin::signed(foundation),
 			vec![POOL_ID],
@@ -250,12 +258,7 @@ fn test_market_should_not_block() {
 			ASSET_ID_1,
 			0,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset(
 			RuntimeOrigin::signed(AccountId::from(ARB)),
 			vec![POOL_ID],
@@ -264,12 +267,7 @@ fn test_market_should_not_block() {
 			ASSET_ID_1,
 			0,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
 			RuntimeOrigin::signed(bob),
 			vec![POOL_ID],
@@ -278,12 +276,7 @@ fn test_market_should_not_block() {
 			NATIVE_ASSET_ID,
 			UNIT * 2,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
 			RuntimeOrigin::signed(foundation),
 			vec![POOL_ID],
@@ -292,12 +285,7 @@ fn test_market_should_not_block() {
 			NATIVE_ASSET_ID,
 			UNIT * 2,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 		assert_ok!(pallet_market::Pallet::<Runtime>::multiswap_asset_buy(
 			RuntimeOrigin::signed(AccountId::from(ARB)),
 			vec![POOL_ID],
@@ -306,11 +294,6 @@ fn test_market_should_not_block() {
 			NATIVE_ASSET_ID,
 			UNIT * 2,
 		));
-		assert_last_event(RuntimeEvent::Market(pallet_market::Event::<Runtime>::SwapFailed {
-			error: ConvertError::maybe_convert(DispatchError::from(
-				pallet_market::Error::<Runtime>::NontransferableToken,
-			))
-			.unwrap(),
-		}));
+		assert_last_event_successful_swap();
 	});
 }

@@ -263,13 +263,13 @@ benchmarks! {
 		assert!(y > liquidity_token_count);
 		for i in liquidity_token_count..(y - 1u32){
 			let liquidity_token_id = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
-			Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(liquidity_token_id), i)?;
+			Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), liquidity_token_id, i)?;
 		}
 
 		let created_liquidity_token =
 			create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get() * x.into())).unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), y - 1));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, y - 1));
 
 
 		let candidate_count: u32 = Pallet::<T>::candidate_pool().0.len().try_into().unwrap();
@@ -310,7 +310,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -346,7 +346,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -419,7 +419,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -462,7 +462,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 		let candidate_count: u32 = Pallet::<T>::candidate_pool().0.len().try_into().unwrap();
@@ -486,7 +486,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -512,7 +512,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -548,7 +548,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -582,7 +582,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -622,7 +622,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -658,7 +658,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -696,7 +696,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -734,7 +734,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -800,7 +800,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -835,7 +835,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -886,7 +886,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -921,7 +921,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -963,7 +963,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1008,7 +1008,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1053,7 +1053,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1101,7 +1101,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1151,7 +1151,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1199,7 +1199,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1245,7 +1245,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1297,7 +1297,7 @@ benchmarks! {
 
 		let mut liquidity_token_count: u32 = Pallet::<T>::staking_liquidity_tokens().len().try_into().unwrap();
 
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), liquidity_token_count));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, liquidity_token_count));
 
 		liquidity_token_count = liquidity_token_count + 1u32;
 
@@ -1349,12 +1349,12 @@ benchmarks! {
 		assert!(x > liquidity_token_count);
 		for i in liquidity_token_count..(x){
 			let liquidity_token_id = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
-			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(liquidity_token_id), i));
+			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), liquidity_token_id, i));
 		}
 
 		let liquidity_token_id = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
 
-	}: _(RawOrigin::Root, PairedOrLiquidityToken::Liquidity(liquidity_token_id), x)
+	}: _(RawOrigin::Root, liquidity_token_id, x)
 	verify {
 		assert!(
 			Pallet::<T>::staking_liquidity_tokens()
@@ -1369,13 +1369,13 @@ benchmarks! {
 		assert!(x > liquidity_token_count);
 		for i in liquidity_token_count..(x - 1u32){
 			let token_id = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
-			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(token_id), i));
+			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), token_id, i));
 		}
 
 		let token_id = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(token_id), x - 1u32));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), token_id, x - 1u32));
 
-	}: _(RawOrigin::Root, PairedOrLiquidityToken::Liquidity(token_id), x)
+	}: _(RawOrigin::Root, token_id, x)
 	verify {
 		assert!(
 			!Pallet::<T>::staking_liquidity_tokens()
@@ -1404,7 +1404,7 @@ benchmarks! {
 			let created_liquidity_token =
 				create_staking_liquidity_for_funding::<T>(None).unwrap();
 
-			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), 1000));
+			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, 1000));
 
 			let seed = USER_SEED - i;
 			let collator = create_funded_collator::<T>(
@@ -1494,7 +1494,7 @@ benchmarks! {
 			let created_liquidity_token =
 				create_staking_liquidity_for_funding::<T>(None).unwrap();
 
-			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), 1000));
+			assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, 1000));
 
 			let seed = USER_SEED - i;
 			let collator = create_funded_collator::<T>(
@@ -1711,7 +1711,7 @@ benchmarks! {
 		// create X - 1 Tokens now and then remaining one
 		for i in start_liquidity_token_count..(x-1){
 			let created_liquidity_token = create_staking_liquidity_for_funding::<T>(Some(T::MinCandidateStk::get())).unwrap();
-			Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), i).unwrap();
+			Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, i).unwrap();
 			// <pallet_issuance::Pallet<T> as PoolPromoteApi>::update_pool_promotion(created_liquidity_token, Some(1));
 			T::RewardsApi::enable(created_liquidity_token, 1);
 		}
@@ -1719,7 +1719,7 @@ benchmarks! {
 		// Now to prepare the liquidity token we will use for collator and delegators
 		let amount = ((z*(y+1)) as u128 * 100 * DOLLAR).to_balance::<T>() + T::MinCandidateStk::get() * DOLLAR.to_balance::<T>();
 		let created_liquidity_token = create_staking_liquidity_for_funding::<T>(Some(amount)).unwrap();
-		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), PairedOrLiquidityToken::Liquidity(created_liquidity_token), x));
+		assert_ok!(Pallet::<T>::add_staking_liquidity_token(RawOrigin::Root.into(), created_liquidity_token, x));
 		// <pallet_issuance::Pallet<T> as PoolPromoteApi>::update_pool_promotion(created_liquidity_token, Some(1));
 		T::RewardsApi::enable(created_liquidity_token, 1);
 
