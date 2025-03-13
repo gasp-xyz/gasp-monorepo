@@ -5,8 +5,9 @@ use l2api::L2Interface;
 use std::{collections::{BTreeMap, HashMap, VecDeque}};
 use tokio::sync::mpsc::error::TryRecvError;
 use tokio::sync::mpsc;
+use tokio::time::timeout;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum FerryAction {
     Ferry { withdrawal: Withdrawal, prio: U256 },
     CloseFerriedWithdrawal { withdrawal: Withdrawal },
@@ -77,6 +78,7 @@ where
 
         if let Some(w) = req_to_ferrry {
             if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await?{
+                tracing::trace!("tracing withdrawal {w}");
                 let status = self.l1.ferry_withdrawal(w.clone()).await;
                 match status {
                     Ok(hash) => {
@@ -126,16 +128,17 @@ where
     pub async fn close_all_withdrawals(& mut self) -> Result<(), FerryError> {
         while let Some(w) = self.closable_withdrawals.pop_back() {
             let result = self.close_withdrawal(w).await;
-            let post_status = self.l1.get_status(w.withdrawal_hash()).await?;
-            match (result, post_status) {
-                (Ok(_), _) => {
+            match result {
+                Ok(_) => {
                     tracing::debug!("withdrawal closed successfully {w}");
                 }
-                (Err(e), RequestStatus::Closed) => {
-                    tracing::warn!("withdrawal closed by someone else");
-                }
-                (Err(e), _) => {
-                    return Err(e);
+                Err(e) => {
+                    if let RequestStatus::Closed = self.l1.get_status(w.withdrawal_hash()).await? {
+                        tracing::debug!("withdrawal closed by someone else");
+                    } else {
+                        tracing::warn!("failed to close withdrawal {w} {e}");
+                        return Err(e);
+                    }
                 }
             }
         }
@@ -183,18 +186,20 @@ where
         loop {
 
             loop {
-                match self.input.try_recv(){
-                    Ok( FerryAction::Ferry { withdrawal, prio }) => {
+                // fetch as many elemenets from queue at once as possible
+                match timeout(tokio::time::Duration::from_secs_f64(0.25), self.input.recv()).await{
+                    Ok( Some(FerryAction::Ferry { withdrawal, prio })) => {
                             self.track_balance(withdrawal.token_address).await?;
                             self.ferryable_withdrawals.insert(withdrawal.request_id.id, (prio, withdrawal));
                     },
-                    Ok(FerryAction::CloseFerriedWithdrawal { withdrawal }) => {
+                    Ok(Some(FerryAction::CloseFerriedWithdrawal { withdrawal })) => {
                         self.closable_withdrawals.push_front(withdrawal);
                     },
-                    Err(TryRecvError::Empty) => {
+                    Err(_elapsed) => {
+                        tracing::info!("no new messages found yet");
                         break;
                     },
-                    Err(TryRecvError::Disconnected) => {
+                    Ok(None) => {
                         tracing::info!("input channel closed, bye!");
                         return Ok(());
                     },
@@ -221,10 +226,17 @@ where
 #[cfg(test)]
 mod test{
     use super::*;
-    use gasp_types::{Origin, RequestId};
+    use async_std::sync;
+    use futures::stream;
+    use gasp_types::{Origin, RequestId, H256};
     use l1api::mock::MockL1;
     use l2api::mock::MockL2;
+    use mockall::{predicate::{always, eq}, Sequence};
     use tracing_test::traced_test;
+
+    use std::{sync::{atomic::AtomicBool, mpsc::channel as sync_channel, Arc}, time::Duration};
+
+
     const ACCOUNT : [u8; 20] = [1;20];
     const ENABLED_TOKEN1 : [u8; 20] = [2;20];
     const ENABLED_TOKEN2 : [u8; 20] = [3;20];
@@ -259,6 +271,7 @@ mod test{
         let (input, output) = mpsc::channel(100);
         l1.expect_erc20_balance().returning(|_,_| Ok(10u128));
         l1.expect_get_latest_finalized_request_id().returning(|| Ok(None));
+        l1.expect_ferry_withdrawal().times(0);
 
         input.send(FerryAction::Ferry {
             withdrawal: Withdrawal {
@@ -277,8 +290,187 @@ mod test{
             ferry.run().await.unwrap();
         });
 
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        drop(input);
+        handle.await.unwrap();
 
+    }
+
+
+    #[traced_test]
+    #[tokio::test]
+    async fn test_ferry_acutally_ferries_withdrawal(){
+        let mut l1 = MockL1::new();
+        let l2 = MockL2::new();
+
+        let (input, output) = mpsc::channel(100);
+
+        let withdrawal = Withdrawal {
+                request_id: RequestId{id: 1.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+        };
+
+        l1.expect_erc20_balance().returning(|_,_| Ok(100u128.into()));
+        l1.expect_get_latest_finalized_request_id().returning(|| Ok(None));
+        l1.expect_get_status().returning(|_| Ok(RequestStatus::Pending));
+        l1.expect_ferry_withdrawal().times(1).return_once(|_| Ok(H256::default()));
+
+        input.send(FerryAction::Ferry {
+            withdrawal,
+            prio: 10.into(),
+        }).await.unwrap();
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+
+        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+
+        drop(input);
+        handle.await.unwrap();
+
+    }
+
+
+    pub async fn wait_for(mtx: Arc<AtomicBool>, duration: Duration) -> bool{
+        let now = tokio::time::Instant::now();
+        while mtx.load(std::sync::atomic::Ordering::Relaxed) == false {
+            if now.elapsed() > duration {
+                return false;
+            }
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        }
+        return true;
+    }
+
+    #[traced_test]
+    #[tokio::test]
+    async fn test_ferry_withdrawals_by_priority(){
+        let mut l1 = MockL1::new();
+        let l2 = MockL2::new();
+        let signal = Arc::new(AtomicBool::new(false));
+        let (input, output) = mpsc::channel(100);
+
+        let low_prio_withdrawal = Withdrawal {
+                request_id: RequestId{id: 2.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+        };
+
+        let high_prio_withdrawal = Withdrawal {
+                request_id: RequestId{id: 3.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 50.into(),
+                recipient: RECIPIENT,
+        };
+
+        tracing::info!("hello world");
+        l1.expect_erc20_balance().returning(|_,_| Ok(100u128.into()));
+        l1.expect_get_latest_finalized_request_id().returning(|| Ok(None));
+        l1.expect_get_status().returning(|_| Ok(RequestStatus::Pending));
+
+        let mut seq = Sequence::new();
+        l1.expect_ferry_withdrawal().times(1)
+            .in_sequence(&mut seq)
+            .with(eq(high_prio_withdrawal)).returning(|_|Ok(H256::default()));
+
+        let notify = signal.clone();
+        l1.expect_ferry_withdrawal().times(1)
+            .in_sequence(&mut seq)
+            .with(eq(low_prio_withdrawal)).return_once(move |_|{
+                notify.store(true, std::sync::atomic::Ordering::Relaxed);
+                Ok(H256::default())
+            });
+
+
+        input.send(FerryAction::Ferry {
+            withdrawal: low_prio_withdrawal,
+            prio: 10.into(),
+        }).await.unwrap();
+
+        input.send(FerryAction::Ferry {
+            withdrawal: high_prio_withdrawal,
+            prio: 50.into(),
+        }).await.unwrap();
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+        assert!(wait_for(signal, Duration::from_secs(5)).await);
+        drop(input);
+        handle.await.unwrap();
+
+    }
+
+    #[traced_test]
+    #[tokio::test]
+    async fn prioriorize_closing_over_ferrying(){
+        let mut l1 = MockL1::new();
+        let mut l2 = MockL2::new();
+        let signal = Arc::new(AtomicBool::new(false));
+        let (input, output) = mpsc::channel(100);
+
+        let closable_withdrawal = Withdrawal {
+                request_id: RequestId{id: 1.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+        };
+        let ferryable_withdrawal = Withdrawal {
+                request_id: RequestId{id: 2.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+        };
+
+        input.send(FerryAction::Ferry {
+            withdrawal: ferryable_withdrawal,
+            prio: 50.into(),
+        }).await.unwrap();
+
+        input.send(FerryAction::CloseFerriedWithdrawal {
+            withdrawal: closable_withdrawal,
+        }).await.unwrap();
+
+
+        l1.expect_erc20_balance().returning(|_,_| Ok(100u128.into()));
+        l1.expect_get_latest_finalized_request_id().returning(|| Ok(Some(1)));
+
+        l1.expect_get_status().with(eq(ferryable_withdrawal.withdrawal_hash())).returning(|_| Ok(RequestStatus::Pending));
+        l1.expect_get_status().with(eq(closable_withdrawal.withdrawal_hash())).returning(|_| Ok(RequestStatus::Ferried(ACCOUNT)));
+        l2.expect_header_stream().return_once(|_| Ok(Box::pin(stream::iter( vec![ Ok((1u32, [0u8; 32].into())), ]))));
+
+        l1.expect_get_merkle_root().returning(|_| Ok(Some(([0u8; 32], (1, 1)))));
+        l2.expect_get_merkle_proof().returning(|_,_,_,_| Ok(Vec::default()));
+
+        let notify = signal.clone();
+        let mut seq = Sequence::new();
+        l1.expect_close_withdrawal().times(1).in_sequence(&mut seq).with(eq(closable_withdrawal), always(), always()).returning(|_,_,_|
+                Ok(H256::default())
+        );
+        l1.expect_ferry_withdrawal().times(1).in_sequence(&mut seq).with(eq(ferryable_withdrawal)).return_once(move |_|
+            {
+                notify.store(true, std::sync::atomic::Ordering::Relaxed);
+                Ok(H256::default())
+            }
+        );
+
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+        assert!(wait_for(signal, Duration::from_secs(5)).await);
         drop(input);
         handle.await.unwrap();
 
