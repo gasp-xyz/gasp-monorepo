@@ -2,17 +2,18 @@ use futures::{FutureExt, StreamExt};
 use gasp_types::{Chain, Withdrawal, U256};
 use l1api::{types::RequestStatus, L1Error, L1Interface};
 use l2api::L2Interface;
-use std::collections::{BTreeMap, HashMap, VecDeque};
+use std::{collections::{BTreeMap, HashMap, VecDeque}};
+use tokio::sync::mpsc::error::TryRecvError;
 use tokio::sync::mpsc;
 
 #[derive(Debug, PartialEq)]
-pub enum L1Action {
+pub enum FerryAction {
     Ferry { withdrawal: Withdrawal, prio: U256 },
     CloseFerriedWithdrawal { withdrawal: Withdrawal },
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum ExecutorError {
+pub enum FerryError {
     #[error("Could not find merkle root for request id {0}")]
     UnknownMerkleRoot(U256),
 
@@ -23,18 +24,18 @@ pub enum ExecutorError {
     L2Error(#[from] l2api::L2Error),
 }
 
-pub struct Executor<L1, L2> {
+pub struct Ferry<L1, L2> {
     l1: L1,
     l2: L2,
     chain: Chain,
     account: [u8; 20],
-    input: mpsc::Receiver<L1Action>,
+    input: mpsc::Receiver<FerryAction>,
     closable_withdrawals: VecDeque<Withdrawal>,
     ferryable_withdrawals: HashMap<U256, (U256, Withdrawal)>,
     balances: HashMap<[u8; 20], U256>,
 }
 
-impl<L1, L2> Executor<L1, L2>
+impl<L1, L2> Ferry<L1, L2>
 where
     L1: L1Interface,
     L2: L2Interface,
@@ -44,7 +45,7 @@ where
         l2: L2,
         account: [u8; 20],
         chain: Chain,
-        input: mpsc::Receiver<L1Action>,
+        input: mpsc::Receiver<FerryAction>,
     ) -> Self {
         Self {
             l1,
@@ -58,7 +59,7 @@ where
         }
     }
 
-    pub async fn ferry_withdrawal(&mut self) -> Result<(), ExecutorError> {
+    pub async fn ferry_withdrawal(&mut self) -> Result<(), FerryError> {
         let balances = self.balances.clone();
         let latest_finalized = self.l1.get_latest_finalized_request_id().await?.unwrap_or_default();
         let len = self.ferryable_withdrawals.len();
@@ -96,14 +97,14 @@ where
     }
 
 
-    pub async fn close_withdrawal(&self, withdrawal: Withdrawal) -> Result<(), ExecutorError> {
+    pub async fn close_withdrawal(&self, withdrawal: Withdrawal) -> Result<(), FerryError> {
         if let RequestStatus::Ferried(_) = self.l1.get_status(withdrawal.withdrawal_hash()).await? {
             let req_id = withdrawal.request_id.id.try_into().unwrap();
             let (root, range) = self
                 .l1
                 .get_merkle_root(req_id)
                 .await?
-                .ok_or(ExecutorError::UnknownMerkleRoot(withdrawal.request_id.id))?;
+                .ok_or(FerryError::UnknownMerkleRoot(withdrawal.request_id.id))?;
 
             let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
             let (_, at) = stream.next().await.expect("infinite stream")?;
@@ -122,7 +123,7 @@ where
         }
     }
 
-    pub async fn close_all_withdrawals(& mut self) -> Result<(), ExecutorError> {
+    pub async fn close_all_withdrawals(& mut self) -> Result<(), FerryError> {
         while let Some(w) = self.closable_withdrawals.pop_back() {
             let result = self.close_withdrawal(w).await;
             let post_status = self.l1.get_status(w.withdrawal_hash()).await?;
@@ -141,7 +142,7 @@ where
         Ok(())
     }
 
-    pub async fn get_balance(&self, token_address: [u8;20]) -> Result<U256, ExecutorError> {
+    pub async fn get_balance(&self, token_address: [u8;20]) -> Result<U256, FerryError> {
         let balance = if (token_address == l1api::NATIVE_TOKEN_ADDRESS) {
             self.l1.native_balance(self.account).await?
         }else{
@@ -152,7 +153,7 @@ where
 
 
     #[tracing::instrument(skip_all)]
-    pub async fn refresh_balances(&mut self) -> Result<(), ExecutorError> {
+    pub async fn refresh_balances(&mut self) -> Result<(), FerryError> {
         let tokens = self.balances.iter().map(|(token,amount)| 
             self.get_balance(*token)
             .map(|result| result.map(|balance| (*token, balance)))
@@ -170,7 +171,7 @@ where
         Ok(())
     }
 
-    pub async fn track_balance(&mut self, token_address: [u8;20]) -> Result<(), ExecutorError> {
+    pub async fn track_balance(&mut self, token_address: [u8;20]) -> Result<(), FerryError> {
         if let None = self.balances.get(&token_address) {
             let balance = self.get_balance(token_address).await?;
             self.balances.insert(token_address, balance.into());
@@ -178,17 +179,24 @@ where
         Ok(())
     }
 
-    pub async fn run(&mut self) -> Result<(), ExecutorError> {
+    pub async fn run(&mut self) -> Result<(), FerryError> {
         loop {
 
-            while let Ok(req) = self.input.try_recv(){
-                match req {
-                    L1Action::Ferry { withdrawal, prio } => {
-                        self.track_balance(withdrawal.token_address).await?;
-                        self.ferryable_withdrawals.insert(withdrawal.request_id.id, (prio, withdrawal));
+            loop {
+                match self.input.try_recv(){
+                    Ok( FerryAction::Ferry { withdrawal, prio }) => {
+                            self.track_balance(withdrawal.token_address).await?;
+                            self.ferryable_withdrawals.insert(withdrawal.request_id.id, (prio, withdrawal));
                     },
-                    L1Action::CloseFerriedWithdrawal { withdrawal } => {
+                    Ok(FerryAction::CloseFerriedWithdrawal { withdrawal }) => {
                         self.closable_withdrawals.push_front(withdrawal);
+                    },
+                    Err(TryRecvError::Empty) => {
+                        break;
+                    },
+                    Err(TryRecvError::Disconnected) => {
+                        tracing::info!("input channel closed, bye!");
+                        return Ok(());
                     },
                 }
             }
@@ -212,9 +220,69 @@ where
 
 #[cfg(test)]
 mod test{
+    use super::*;
+    use gasp_types::{Origin, RequestId};
+    use l1api::mock::MockL1;
+    use l2api::mock::MockL2;
+    use tracing_test::traced_test;
+    const ACCOUNT : [u8; 20] = [1;20];
+    const ENABLED_TOKEN1 : [u8; 20] = [2;20];
+    const ENABLED_TOKEN2 : [u8; 20] = [3;20];
+    const DUMMY_TOKEN : [u8; 20] = [4;20];
+    const RECIPIENT : [u8; 20] = [5;20];
 
-    fn works_fine_when_there_is_nothing_to_process(){
+
+    #[traced_test]
+    #[tokio::test]
+    async fn works_fine_when_there_is_nothing_to_process(){
+        let l1 = MockL1::new();
+        let l2 = MockL2::new();
+
+        let (input, output) = mpsc::channel(100);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        drop(input);
+        handle.await.unwrap();
+    }
+
+    #[traced_test]
+    #[tokio::test]
+    async fn test_ferry_ignores_requests_that_can_not_affort(){
+        let mut l1 = MockL1::new();
+        let l2 = MockL2::new();
+
+        let (input, output) = mpsc::channel(100);
+        l1.expect_erc20_balance().returning(|_,_| Ok(10u128));
+        l1.expect_get_latest_finalized_request_id().returning(|| Ok(None));
+
+        input.send(FerryAction::Ferry {
+            withdrawal: Withdrawal {
+                request_id: RequestId{id: 1.into(), origin: Origin::L2 },
+                token_address: ENABLED_TOKEN1,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+            },
+            prio: 10.into(),
+        }).await.unwrap();
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
+        drop(input);
+        handle.await.unwrap();
 
     }
+
 
 }

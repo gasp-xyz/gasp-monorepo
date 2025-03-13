@@ -3,7 +3,7 @@ use clap::Parser;
 mod cli;
 mod hunter;
 mod filter;
-mod executor;
+mod ferry;
 #[cfg(test)]
 mod test;
 

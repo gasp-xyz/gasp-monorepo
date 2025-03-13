@@ -1,4 +1,4 @@
-use crate::executor::L1Action;
+use crate::ferry::FerryAction;
 use gasp_types::{Withdrawal, U256};
 use l1api::L1Interface;
 use l2api::L2Interface;
@@ -9,7 +9,7 @@ pub struct Filter<L1, L2> {
     l1: L1,
     l2: L2,
     input: mpsc::Receiver<Withdrawal>,
-    output: mpsc::Sender<L1Action>,
+    output: mpsc::Sender<FerryAction>,
     enabled: HashSet<[u8; 20]>,
 }
 
@@ -22,7 +22,7 @@ where
         l1: L1,
         l2: L2,
         input: mpsc::Receiver<Withdrawal>,
-        output: mpsc::Sender<L1Action>,
+        output: mpsc::Sender<FerryAction>,
         enabled: Vec<[u8; 20]>,
     ) -> Self {
         Self {
@@ -41,7 +41,7 @@ where
             let profit = w.ferry_tip;
             if is_enabled && !profit.is_zero() {
                 self.output
-                    .send(L1Action::Ferry {
+                    .send(FerryAction::Ferry {
                         withdrawal: w,
                         prio: profit,
                     })
@@ -126,7 +126,7 @@ mod test {
         task.await.unwrap();
 
         assert_eq!(
-            L1Action::Ferry{
+            FerryAction::Ferry{
                 withdrawal: enabled_withdrawal1,
                 prio: 11u128.into(),
             },
@@ -134,7 +134,7 @@ mod test {
         );
 
         assert_eq!(
-            L1Action::Ferry{
+            FerryAction::Ferry{
                 withdrawal: enabled_withdrawal2,
                 prio: 10u128.into(),
             },
