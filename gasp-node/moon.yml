@@ -966,7 +966,8 @@ tasks:
       - '/ferry-withdrawal/**/*.ts'
       - '/ferry-withdrawal/package.json'
       - '/ferry-withdrawal/yarn.lock'
-      - "/contracts/lib/**/*.sol"
+      - "/contracts/lib/forge-std/src/**/*.sol"
+      - "/contracts/lib/eigenlayer-middleware/src/**/*.sol"
       - "/contracts/src/**/*.sol"
       - "/contracts/test/**/*.sol"
       - "/contracts/script/**/*.sol"
