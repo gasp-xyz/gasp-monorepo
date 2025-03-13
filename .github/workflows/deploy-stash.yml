@@ -1,0 +1,166 @@
+name: '[stash] Deploy `stash` to Google App Engine'
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'frontend'
+        type: choice
+        options:
+          - frontend
+          - holesky
+          - staging
+          - prod
+  push:
+    branches:
+      - main
+    paths:
+      - "stash/**/*"
+      - ".github/workflows/stash.yml"
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: stash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'stash/.nvmrc'
+          cache: 'yarn'
+          cache-dependency-path: "./stash/yarn.lock"
+
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env frontend.enc.env 'yarn run build'
+      - run: sops exec-env frontend.enc.env 'yarn run test:unit'
+
+  deploy-frontend:
+    name: Deploy `stash` to `frontend` environment
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
+    runs-on: ubuntu-24.04
+    environment: "stash-frontend"
+    defaults:
+      run:
+        working-directory: stash
+    env:
+      ENVIRONMENT: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+
+      - name: Deploy to Google App Engine
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet
+
+  deploy-holesky:
+    name: Deploy `stash` to `holesky` environment
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'holesky') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    runs-on: ubuntu-24.04
+    needs: build
+    defaults:
+      run:
+        working-directory: stash
+    environment: "stash-holesky"
+    env:
+      ENVIRONMENT: holesky
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+
+      - name: Deploy to Google App Engine
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet
+
+  deploy-staging:
+    name: Deploy `stash` to `staging` environment
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    runs-on: ubuntu-24.04
+    needs: build
+    defaults:
+      run:
+        working-directory: stash
+    environment: "stash-staging"
+    env:
+      ENVIRONMENT: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+
+      - name: Deploy to Google App Engine
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet
+
+  deploy-prod:
+    name: Deploy `stash` to `prod` environment
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    runs-on: ubuntu-24.04
+    needs: build
+    defaults:
+      run:
+        working-directory: stash
+    environment: "stash-prod"
+    env:
+      ENVIRONMENT: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
+
+      - run: yarn install --immutable
+      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
+
+      - name: Deploy to Google App Engine
+        run: |
+          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
+          gcloud app deploy app.tmp.yaml --quiet

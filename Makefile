@@ -44,9 +44,6 @@ deploy-all-to-anvil-and-save-state: deploy-eigenlayer-contracts-to-anvil-and-sav
 deploy-alt-l1-contracts-and-save-state:
 	./tests/integration/deploy-alt-l1-contracts-and-save-anvil-state.sh
 
-deploy-all-contracts-via-multistage-and-save-state:
-	./tests/integration/deploy-all-contracts-via-multistage-and-save-anvil-state.sh
-
 deploy-all-contracts-and-save-state:
 	./tests/integration/deploy-all-contracts-and-save-anvil-state.sh
 
@@ -69,6 +66,7 @@ bindings-rs: ## generates rust bindings
 	cp -rf ./gasp-avs/bindings ./updater/
 
 bindings-rs-alloy: ## generates rust alloy bindings
+	forge --version | grep "forge 0.3.0"
 	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
 	cd ./sequencer/bindings && cargo fmt
 

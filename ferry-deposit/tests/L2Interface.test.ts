@@ -14,7 +14,7 @@ describe('L2Interface', () => {
     it('should fetch balances from local chain', async () => {
       let api = await getApi(URI);
       let l2 = new L2Api(api);
-      let balances = await l2.getBalances(hexToU8a(ALITH));
+      let balances = await l2.getBalance(hexToU8a(ALITH));
       expect(balances.length).toBeGreaterThan(0);
       for (let [_key, value] of balances) {
         expect(value).toBeGreaterThan(0);

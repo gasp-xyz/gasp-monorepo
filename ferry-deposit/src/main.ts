@@ -4,7 +4,9 @@ import type { HeaderExtended } from "@polkadot/api-derive/type/types";
 import { hexToU8a, u8aToHex } from "@polkadot/util";
 import "dotenv/config";
 import { signTx } from "gasp-sdk";
+import { reportBalance, serveMetrics } from "./metrics.js";
 import "gasp-types";
+
 import {
 	BLOCK_DELAY,
 	ETH_CHAIN_URL,
@@ -26,6 +28,8 @@ async function main() {
 	const api = await getApi(MANGATA_NODE_URL);
 	const l2 = new L2Api(api);
 	const l1 = new L1Api(ETH_CHAIN_URL, BLOCK_DELAY);
+	serveMetrics();
+	reportBalance(l2);
 
 	logger.info(`Ferry Deposit`);
 	logger.info(`L1             : ${ETH_CHAIN_URL}`);

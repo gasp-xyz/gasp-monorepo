@@ -10,10 +10,10 @@ out/
 *.env
 *.log
 .DS_Store
+.gas-snapshot
 .pnp.*
 .solcx-lock-*
 coverage.json
 lcov.info
 package-lock.json
 pnpm-lock.yaml
-yarn.lock

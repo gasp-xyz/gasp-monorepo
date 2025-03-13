@@ -6,10 +6,11 @@ Stash is a service that serves some configurations and also caches some blockcha
 
 
 ### Hosts
-| Environment                                                                              | URL                                                                   |
-|------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [FRONTEND](https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com)    | `https://mangata-stash-rollup-dev-dot-direct-pixel-353917.oa.r.appspot.com` |
-| [HOLESKY](https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com) | `https://mangata-stash-rollup-testnet-dot-direct-pixel-353917.oa.r.appspot.com`  |
+| Environment                                                                              | URL |
+|------------------------------------------------------------------------------------------|----|
+| [FRONTEND](https://gasp-stash-frontend-dot-direct-pixel-353917.oa.r.appspot.com)    | `https://gasp-stash-frontend-dot-direct-pixel-353917.oa.r.appspot.com` |
+| [HOLESKY](https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com) | `https://gasp-stash-holesky-dot-direct-pixel-353917.oa.r.appspot.com` |
+| [PROD](https://gasp-stash-prod-dot-direct-pixel-353917.oa.r.appspot.com/)    | `https://gasp-stash-prod-dot-direct-pixel-353917.oa.r.appspot.com/` |
 
 ### API documentation
 To access the public API, refer to the ```[HOST]/doc``` endpoint, where you'll find comprehensive documentation for our services.

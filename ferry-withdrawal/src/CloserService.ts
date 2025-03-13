@@ -21,27 +21,35 @@ class CloserService {
 	l2: L2Interface;
 	tokensToClose: [Uint8Array, bigint, bigint][];
 	minBalance: bigint;
-	stash: StashInterface;
+	stash: StashInterface | undefined;
 	lastCheckedWithrdawal: bigint;
 	closableRequests: (Withdrawal | Cancel)[];
 	batchSize: bigint;
+	replicasCount: bigint;
+	replicaId: bigint;
 
 	constructor(
 		l1: L1Interface,
 		l2: L2Interface,
-		stash: StashInterface,
+		stash: StashInterface | undefined,
 		tokensToClose: [Uint8Array, bigint, bigint][],
 		minBalance: bigint,
 		batchSize: bigint = 1000n,
+		replicaId: bigint = 0n,
+		replicasCount: bigint = 0n,
+		minWithdrawalId: bigint = 0n,
 	) {
 		this.l1 = l1;
 		this.l2 = l2;
 		this.stash = stash;
 		this.tokensToClose = tokensToClose;
 		this.minBalance = minBalance;
-		this.lastCheckedWithrdawal = 0n;
+		this.lastCheckedWithrdawal =
+			minWithdrawalId > 0n ? minWithdrawalId - 1n : 0n;
 		this.closableRequests = [];
 		this.batchSize = batchSize;
+		this.replicasCount = replicasCount;
+		this.replicaId = replicaId;
 	}
 
 	async findRequestToClose(delay: bigint = 0n): Promise<void> {
@@ -86,14 +94,19 @@ class CloserService {
 									request.ferryTip >= elem[1]
 								);
 							}) !== undefined;
-
-						const wasInitiatedByFrontend = await this.stash.shouldBeClosed(
-							request.hash,
-						);
+						const isClosedAlready = await this.l1.isClosed(request.hash);
+						const shouldNotBeIgnored =
+							this.replicasCount > 0
+								? request.requestId % this.replicasCount === this.replicaId
+								: true;
 
 						return (
-							(shouldBeClosed || wasInitiatedByFrontend) &&
-							!(await this.l1.isClosed(request.hash))
+							!isClosedAlready &&
+							shouldNotBeIgnored &&
+							(shouldBeClosed ||
+								(this.stash
+									? await this.stash.shouldBeClosed(request.hash)
+									: request.ferryTip > 0n))
 						);
 					} else {
 						logger.error(`ignoring unkonwn request`);
@@ -144,7 +157,13 @@ class CloserService {
 	): Promise<void> {
 		const isClosed = await this.l1.isClosed(withdrawal.hash);
 		const isFerried = await this.l1.isFerried(withdrawal.hash);
+		logger.debug(
+			`${u8aToHex(
+				withdrawal.hash,
+			)} isFerried:${isFerried} isClosed:${isClosed}`,
+		);
 		if (!isClosed && !isFerried) {
+			logger.info(`Closing withdrawal ${toString(withdrawal)}`);
 			const { range, root } = await this.l1.getMerkleRange(
 				withdrawal.requestId,
 			);
@@ -160,7 +179,7 @@ class CloserService {
 				privateKey,
 			);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close withdrawal ${toString(withdrawal)}`,
 				);
 			}
@@ -169,8 +188,8 @@ class CloserService {
 
 	async closeCancel(cancel: Cancel, privateKey: Uint8Array): Promise<void> {
 		const isClosed = await this.l1.isClosed(cancel.hash);
-		const isFerried = await this.l1.isFerried(cancel.hash);
-		if (!isClosed && !isFerried) {
+		if (!isClosed) {
+			logger.info(`Closing cancel resolution ${cancelToString(cancel)}`);
 			const { range, root } = await this.l1.getMerkleRange(cancel.requestId);
 			const proof = await this.l2.getMerkleProof(
 				range[0],
@@ -179,7 +198,7 @@ class CloserService {
 			);
 			const status = await this.l1.closeCancel(cancel, root, proof, privateKey);
 			if (!status) {
-				logger.warning(
+				logger.warn(
 					`${ALERT_WARNING} Failed to close cancel ${cancelToString(cancel)}`,
 				);
 			}

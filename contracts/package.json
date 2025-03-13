@@ -1,19 +1,28 @@
 {
   "name": "gasp-contracts",
   "version": "1.0.0",
-  "description": "Gasp smart contracts for an EVM compatible virtual machine",
+  "description": "GASP contracts for EVM",
   "scripts": {
-    "format": "bun prettier --check '**/*.{json,md,yml}' && forge fmt --check interfaces/IGaspToken.sol src/{GaspToken.sol,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "format:fix": "bun prettier --check '**/*.{json,md,yml}' && forge fmt interfaces/IGaspToken.sol {src/GaspToken.sol,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/rolldownDeployer.t}.sol",
-    "lint": "bun solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "lint:fix": "bun solhint --fix {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,rolldownDeployer.t}.sol",
-    "cover": "forge coverage --report lcov && genhtml lcov.info -o coverage && open coverage/index.html",
-    "analyze": "slitherin . --separated",
-    "analyze:ci": "slitherin --separated . --skip-clean --ignore-compile"
+    "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
+    "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt {src/interfaces/IGaspToken,src/GaspToken,src/IRolldown,src/IRolldownPrimitives,src/LMerkleTree,src/Rolldown,script/RolldownDeployer.s,test/Rolldown.t,test/RolldownDeployer.t}.sol",
+    "lint": "yarn run solhint {script,src,test}/**/{GaspToken,IGaspToken,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol",
+    "lint:fix": "yarn run solhint --fix --noPrompt {script,src,test}/**/{GaspToken,IGaspToken,IRolldown,IRolldownPrimitives,LMerkleTree,Rolldown,RolldownDeployer.s,Rolldown.t,RolldownDeployer.t}.sol && yarn run run format:fix",
+    "compile": "forge compile",
+    "size": "forge compile --sizes",
+    "test": "forge test -vvv --fail-fast --no-match-contract 'Integration'",
+    "test-integration": "forge test -vvv --fail-fast --fork-url=http://localhost:8545 --match-contract 'Integration'",
+    "gas": "forge snapshot --gas-report",
+    "cover": "forge coverage",
+    "cover:lcov": "forge coverage --force --no-match-path '(script|test)' --report lcov && genhtml lcov.info -o coverage --ignore-errors inconsistent && open coverage/src/index.html",
+    "clean": "forge clean && rm -rf coverage .gas-snapshot lcov.info",
+    "analyze": "slitherin .",
+    "analyze:ci": "slitherin . --skip-clean --ignore-compile",
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gasp-xyz/gasp-monorepo/contracts"
+    "url": "git+https://github.com/gasp-xyz/gasp-monorepo",
+    "directory": "contracts"
   },
   "license": "BUSL-1.1",
   "private": true,
@@ -22,7 +31,14 @@
     "Serge <2901744+evercoinx@users.noreply.github.com>"
   ],
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "solhint": "^5.0.3"
-  }
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.5",
+    "prettier": "^3.5.1",
+    "semantic-release": "^24.2.3",
+    "semantic-release-monorepo": "^8.0.2",
+    "solhint": "^5.0.5"
+  },
+  "packageManager": "yarn@4.7.0"
 }

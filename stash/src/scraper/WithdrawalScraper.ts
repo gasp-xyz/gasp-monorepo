@@ -15,6 +15,11 @@ interface Network {
   chainId: string
 }
 
+export enum CreatedBy {
+  Frontend = 'frontend',
+  Other = 'other',
+}
+
 export const processWithdrawalEvents = async (
   api: ApiPromise,
   block: Block
@@ -28,14 +33,50 @@ export const processWithdrawalEvents = async (
     for (const eventGroup of events) {
       for (const event of eventGroup) {
         if (event.method === 'WithdrawalRequestCreated') {
-          const withdrawalData = await startTracingWithdrawal(api, event.data)
-          logger.info('Tracing started for withdrawal', withdrawalData)
+          const existingWithdrawal = await withdrawalRepository
+            .search()
+            .where('txHash')
+            .equals((event.data as any).hash_)
+            .and('type')
+            .equals('withdrawal')
+            .returnFirst()
+
+          if (existingWithdrawal) {
+            await updateWithdrawal(api, existingWithdrawal, event.data)
+          } else {
+            const withdrawalData = await startTracingWithdrawal(api, event.data)
+            logger.info('Tracing started for withdrawal', withdrawalData)
+          }
         } else if (event.method === 'TxBatchCreated') {
           await updateWithdrawalsWhenBatchCreated(api, event.data)
         }
       }
     }
   }
+}
+
+export const updateWithdrawal = async (
+  api: ApiPromise,
+  existingWithdrawal: any,
+  eventData: any
+) => {
+  existingWithdrawal.requestId = Number(
+    eventData.requestId.id.replace(/,/g, '')
+  )
+  existingWithdrawal.updated = Date.parse(new Date().toISOString())
+  existingWithdrawal.status = WITHDRAWAL_PENDING_ON_L2
+  existingWithdrawal.proof = ''
+  const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
+    eventData.chain,
+    eventData.requestId.id.replace(/,/g, '')
+  )
+  existingWithdrawal.calldata = calldata.toHex()
+  existingWithdrawal.closedBy = null
+  await withdrawalRepository.save(existingWithdrawal)
+  logger.info(
+    'Existing withdrawal updated with event WithdrawalRequestCreated',
+    existingWithdrawal
+  )
 }
 
 export const startTracingWithdrawal = async (
@@ -45,7 +86,7 @@ export const startTracingWithdrawal = async (
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
-    eventData.requestId.id
+    eventData.requestId.id.replace(/,/g, '')
   )
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
@@ -53,7 +94,7 @@ export const startTracingWithdrawal = async (
   const chainId = network ? network.chainId : 'unknown'
 
   const withdrawalData = {
-    requestId: Number(eventData.requestId.id),
+    requestId: Number(eventData.requestId.id.replace(/,/g, '')),
     txHash: eventData.hash_,
     address: eventData.recipient,
     created: Date.parse(timestamp),
@@ -66,6 +107,7 @@ export const startTracingWithdrawal = async (
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
+    createdBy: CreatedBy.Other,
     closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)
@@ -76,8 +118,10 @@ export const updateWithdrawalsWhenBatchCreated = async (
   eventData: any
 ): Promise<void> => {
   const updateTimestamp = new Date().toISOString()
-  const firstElement = Number(eventData.range[0])
-  const lastElement = Number(eventData.range[eventData.range.length - 1])
+  const firstElement = Number(eventData.range[0].replace(/,/g, ''))
+  const lastElement = Number(
+    eventData.range[eventData.range.length - 1].replace(/,/g, '')
+  )
   const existingWithdrawal = await withdrawalRepository
     .search()
     .where('requestId')

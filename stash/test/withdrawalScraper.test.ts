@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   processWithdrawalEvents,
   startTracingWithdrawal,
+  updateWithdrawal,
   updateWithdrawalsWhenBatchCreated,
 } from '../src/scraper/WithdrawalScraper.js'
 import { withdrawalRepository } from '../src/repository/TransactionRepository.js'
@@ -41,7 +42,7 @@ describe('processWithdrawalEvents', () => {
     vi.resetAllMocks()
   })
 
-  it('should process WithdrawalRequestCreated event', async () => {
+  it('should process WithdrawalRequestCreated when there is no existing withdrawal', async () => {
     const mockBlock = {
       events: [
         [
@@ -55,7 +56,6 @@ describe('processWithdrawalEvents', () => {
               address: '0xabc',
               created: expect.any(Number),
               updated: expect.any(Number),
-              status: 'PendingOnL2',
               type: 'withdrawal',
               chain: 'testchain',
               amount: '100',
@@ -89,7 +89,12 @@ describe('processWithdrawalEvents', () => {
       JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
     )
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(mockWithdrawalData)
-
+    vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
+      where: vi.fn().mockReturnThis(),
+      equals: vi.fn().mockReturnThis(),
+      and: vi.fn().mockReturnThis(),
+      returnFirst: vi.fn().mockResolvedValue(null),
+    } as any)
     await processWithdrawalEvents(mockApi, mockBlock as any)
 
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
@@ -97,6 +102,85 @@ describe('processWithdrawalEvents', () => {
         status: 'PendingOnL2',
         type: 'withdrawal',
       })
+    )
+  })
+
+  it('should process WithdrawalRequestCreated when there is an existing withdrawal', async () => {
+    const mockBlock = {
+      events: [
+        [
+          0,
+          {
+            section: 'rolldown',
+            method: 'WithdrawalRequestCreated',
+            data: {
+              requestId: { id: 1 },
+              txHash: '0x123',
+              address: '0xabc',
+              created: expect.any(Number),
+              updated: expect.any(Number),
+              type: 'withdrawal',
+              chain: 'testchain',
+              amount: '100',
+              asset_chainId: 'testchain',
+              asset_address: '0xtoken',
+              proof: '',
+              calldata: '0xabcdef',
+            },
+          },
+        ],
+      ],
+    }
+
+    const mockWithdrawalData = {
+      requestId: 1,
+      txHash: '0x123',
+      address: '0xabc',
+      created: expect.any(Number),
+      updated: expect.any(Number),
+      status: 'PendingOnL2',
+      type: 'withdrawal',
+      chain: 'testchain',
+      amount: '100',
+      asset_chainId: 'testchain',
+      asset_address: '0xtoken',
+      proof: '',
+      calldata: '0xabcdef',
+    }
+
+    const existingWithdrawalData = {
+      requestId: null,
+      txHash: '0x123',
+      address: '0xabc',
+      created: expect.any(Number),
+      updated: expect.any(Number),
+      status: 'InitiatedByFrontend',
+      type: 'withdrawal',
+      chain: 'testchain',
+      amount: '100',
+      asset_chainId: 'testchain',
+      asset_address: '0xtoken',
+      proof: '',
+      calldata: '',
+    }
+
+    vi.spyOn(redis.client, 'get').mockResolvedValue(
+        JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+    )
+    vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(mockWithdrawalData)
+    vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
+      where: vi.fn().mockReturnThis(),
+      equals: vi.fn().mockReturnThis(),
+      and: vi.fn().mockReturnThis(),
+      returnFirst: vi.fn().mockResolvedValue(existingWithdrawalData),
+    } as any)
+    await processWithdrawalEvents(mockApi, mockBlock as any)
+
+    expect(withdrawalRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'PendingOnL2',
+          type: 'withdrawal',
+        })
     )
   })
 
@@ -239,6 +323,72 @@ describe('startTracingWithdrawal', () => {
     const result = await startTracingWithdrawal(mockApi, mockEventData)
 
     expect(result.asset_chainId).toBe('unknown')
+  })
+})
+
+describe('updateWithdrawal', () => {
+  let mockApi: ApiPromise
+  let existingWithdrawal: any
+  let eventData: any
+
+  beforeEach(() => {
+    mockApi = {
+      rpc: {
+        rolldown: {
+          get_abi_encoded_l2_request: vi.fn().mockResolvedValue({ toHex: () => '0xabcdef' }),
+        },
+      },
+    } as unknown as ApiPromise
+
+    existingWithdrawal = {
+      requestId: null,
+      txHash: '0x123',
+      address: '0xabc',
+      created: 1629517393690,
+      updated: 1629517393690,
+      status: 'InitiatedByFrontend',
+      type: 'withdrawal',
+      chain: 'testchain',
+      amount: '100',
+      asset_chainId: 'testchain',
+      asset_address: '0xtoken',
+      proof: '',
+      calldata: '',
+      createdBy: 'frontend',
+      closedBy: null,
+    }
+
+    eventData = {
+      requestId: { id: 2 },
+      hash_: '0x123',
+      recipient: '0xabc',
+      amount: '100',
+      tokenAddress: '0xtoken',
+      chain: 'testchain',
+    }
+
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('should update an existing withdrawal with new event data', async () => {
+    vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(existingWithdrawal)
+
+    await updateWithdrawal(mockApi, existingWithdrawal, eventData)
+
+    expect(withdrawalRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestId: 2,
+          updated: expect.any(Number),
+          status: 'PendingOnL2',
+          proof: '',
+          calldata: '0xabcdef',
+          closedBy: null,
+        })
+    )
   })
 })
 

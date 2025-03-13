@@ -1,0 +1,15 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - git
+  - protobuf-compiler
+  - build-essential
+  - unzip
+  - gzip
+  - xz-utils
+  - docker.io
+runcmd:
+  - bash <(curl -fsSL https://moonrepo.dev/install/proto.sh) --yes
+  - proto install moon
+  - usermod -aG docker $USER

@@ -67,6 +67,69 @@ spec:
                   key: {{ $key }}
             {{- end }}
           {{- end }}
+
+# If we have services enabled lets expose their ports
+{{- if .Values.service.enabled }}
+          ports:
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+            # Of course a service can use additional ports if desired
+            {{- if .Values.additionalPorts }}
+{{ toYaml .Values.additionalPorts | indent 12 }}
+            {{- end }}
+{{ end }}
+
+# This is for our liveness probes, which dictate if a pod is healthy or should be replaced
+{{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+{{- if eq .Values.livenessProbe.probeType "httpGet" }}
+            httpGet:
+              scheme: {{ .Values.livenessProbe.scheme }}
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+{{- else if eq .Values.livenessProbe.probeType "tcpSocket" }}
+            tcpSocket:
+              port: {{ .Values.livenessProbe.port }}
+{{- else if eq .Values.livenessProbe.probeType "exec" }}
+            exec:
+              command:
+{{- with .Values.livenessProbe.command }}
+{{ toYaml . | indent 16 }}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+# This is for our readiness probes, which dictate if a pod is ready to receive traffic
+{{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+{{- if eq .Values.readinessProbe.probeType "httpGet" }}
+            httpGet:
+              scheme: {{ .Values.readinessProbe.scheme }}
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.readinessProbe.port }}
+{{- else if eq .Values.readinessProbe.probeType "tcpSocket" }}
+            tcpSocket:
+              port: {{ .Values.readinessProbe.port }}
+{{- else if eq .Values.readinessProbe.probeType "exec" }}
+            exec:
+              command:
+{{- with .Values.readinessProbe.command }}
+{{ toYaml . | indent 16 }}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

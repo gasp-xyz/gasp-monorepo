@@ -103,7 +103,7 @@ app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
   '/tracing/type/:type/tx/:txHashOrEntityId',
-  tracingController.getTransactionStatusByTxHashOrEntityId
+  tracingController.getTransactionByTxHashOrEntityId
 )
 
 app.get(
@@ -114,12 +114,6 @@ app.get(
 app.get(
   '/tracing/type/:type/tx/listByAddress/:address/:status',
   tracingController.getAllTransactionsByAddressAndStatus
-)
-
-app.get(
-  '/tracing/type/:type/tx/findByEntityId/:entityId',
-
-  tracingController.getATransactionByEntityId
 )
 
 //Token prices endpoint

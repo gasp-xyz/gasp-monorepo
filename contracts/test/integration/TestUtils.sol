@@ -12,7 +12,7 @@ contract TestUtils is Script, Test {
         return configData;
     }
     function getRollDownConfigFileEth()  view public returns (string memory){
-        string memory configData = vm.readFile("script/output/31337/ethereum_rolldown_output.json");
+        string memory configData = vm.readFile("script/output/31337/rolldown_output.json");
         return configData;
     }
     function getRollDownConfigFileArb()  view public returns (string memory){

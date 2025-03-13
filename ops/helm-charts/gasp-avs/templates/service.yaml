@@ -1,0 +1,35 @@
+{{- if .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "node.name" . }}
+  labels: {{- include "node.labels" . | nindent 4 }}
+    service: {{ include "node.name" . }}
+  annotations:
+  {{- with .Values.service.annotations }}
+  {{ tpl ( toYaml .) $ | indent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+{{- if default false .Values.service.headless }}
+  clusterIP: None
+{{- end }}
+{{- if eq (default true .Values.service.allocateLoadBalancerNodePorts) false }}
+  allocateLoadBalancerNodePorts: false
+{{- end }}
+{{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+{{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: {{ .Values.service.name }}
+{{- if .Values.service.additionalPorts }}
+{{ toYaml .Values.service.additionalPorts | indent 4 }}
+{{- end }}
+  selector:
+    {{- include "node.selectorLabels" . | nindent 4 }}
+    service: {{ include "node.name" . }}
+
+{{- end }}

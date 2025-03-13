@@ -9,7 +9,7 @@ name = "sequencer"
 [dependencies]
 subxt = "0.38.0"
 subxt-signer = "0.38.0"
-tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread"] }
+tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
 parity-scale-codec = { version = "3.6.1",  features = ["bit-vec", "derive"] }
 scale-info = { version = "2.10.0", features = ["bit-vec", "derive", "serde"] }
 serde = { version = "1.0.197" ,features = ["alloc", "derive"]}
@@ -20,15 +20,19 @@ hex = "0.4.3"
 hex-literal = "0.4.1"
 futures = "0.3.17"
 thiserror = "2.0.3"
-alloy = { git = "https://github.com/alloy-rs/alloy", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
+alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
 tracing = "0.1.40"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing-tree = "0.4.0"
 envconfig = "0.11.0"
+lru = "0.12.5"
+prometheus = "0.13.4"
+lazy_static = "1.4.0"
+warp = "0.3.7"
 
 bindings = { workspace = true }
-
+openssl = { version = "0.10", features = ["vendored"] }
 
 [dev-dependencies]
 mockall = "0.13.0"

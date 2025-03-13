@@ -63,16 +63,14 @@ contract IntegrationEjectorAdminRuleTest is Test {
          console.log("quorumNumbers");
 
          vm.startBroadcast(ejectorAddr);
-         vm.expectRevert("RegistryCoordinator._deregisterOperator: operator is not registered");
          fsm.ejectOperators(operators, quorumNumbers);
          vm.stopBroadcast();
 
    }
-   //https://mangatafinance.atlassian.net/browse/MGX-1315
    function testOwnerCanEject() public {
 
          FinalizerServiceManager fsm  = FinalizerServiceManager(stdJson.readAddress(new TestUtils().getRollDownConfigFileEth(), ".addresses.serviceManager"));
-         address ejectorAddr = fsm.ejector();
+         address ejectorAddr = fsm.owner();
 
          address[] memory operators = new address[](2);
             operators[0] = address(0x1);
@@ -84,7 +82,6 @@ contract IntegrationEjectorAdminRuleTest is Test {
          console.log("quorumNumbers");
 
          vm.startBroadcast(deployer);
-         vm.expectRevert("RegistryCoordinator._deregisterOperator: operator is not registered");
          fsm.ejectOperators(operators, quorumNumbers);
          vm.stopBroadcast();
 
