@@ -71,9 +71,9 @@ type Aggregator struct {
 	// aggregation related fields
 	blsAggregationService    blsagg.BlsAggregationService
 	tasks                    map[sdktypes.TaskId]interface{}
-	tasksMu                  sync.RWMutex
+	tasksMu                  *sync.RWMutex
 	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
-	taskResponsesMu          sync.RWMutex
+	taskResponsesMu          *sync.RWMutex
 	substrateClient          gsrpc.SubstrateAPI
 	taskResponseWindowBlock  uint32
 	asyncOpStateUpdaterError error
@@ -85,6 +85,7 @@ type Aggregator struct {
 
 	kicker         *Kicker
 	opStateUpdater *OpStateUpdater
+	rpcServer		*RpcServer
 
 	enableTraceLogs bool
 }
@@ -159,9 +160,20 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		}
 	}
 
+	tasks := make(map[sdktypes.TaskId]interface{})
+	tasksMu :=  &sync.RWMutex{}
+	taskResponses := make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{})
+	taskResponsesMu := &sync.RWMutex{}
+
 	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow, c.EnableTraceLogs)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
+		return nil, err
+	}
+
+	rpcServer, err := NewRpcServer(logger, tasks, tasksMu, taskResponses, taskResponsesMu, blsAggregationService, c.ServerAddressPort)
+	if err != nil {
+		logger.Error("Cannot create rpcServer", "err", err)
 		return nil, err
 	}
 
@@ -170,14 +182,17 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		serverIpPortAddr:        c.ServerAddressPort,
 		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[sdktypes.TaskId]interface{}),
-		taskResponses:           make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
+		tasks:                   tasks,
+		tasksMu:                 tasksMu,
+		taskResponses:           taskResponses,
+		taskResponsesMu:         taskResponsesMu,
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
 		blockPeriodOpsTask:      uint32(c.BlockPeriodOpsTask),
 		kicker:                  kicker,
 		opStateUpdater:          opStateUpdater,
+		rpcServer:				 rpcServer,
 		expiration:              uint32(c.Expiration),
 		startIdle:			   	 c.AggIdleStart,
 		apiKey:			   	     c.AggRunTriggerApiKey,	
@@ -189,7 +204,7 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("ALERT:INFO Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
 	runTriggerC := make(chan struct{})
-	go agg.startServer(ctx, agg.apiKey, runTriggerC)
+	go agg.rpcServer.startServer(ctx, agg.apiKey, runTriggerC)
 
 	if agg.startIdle {
 		// blocking wait for the run trigger
@@ -205,8 +220,14 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 
 	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
 	asyncOpStateUpdaterErrorC := make(chan error)
-	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
-  recordMetrics(agg.logger, agg.ethRpc)
+
+	// Apparently golang allows calling functions on nil values
+	// And it seems that the function would be run on the struct assuming default values
+	if agg.opStateUpdater != nil {
+		go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
+	}
+
+	recordMetrics(agg.logger, agg.ethRpc)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	const maxRetries = 5

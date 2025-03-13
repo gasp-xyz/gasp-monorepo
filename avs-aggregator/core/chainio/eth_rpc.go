@@ -17,7 +17,7 @@ import (
 )
 
 
-type ethRpcClientsInterface interface {
+type EthRpcClientsInterface interface {
 	BlockNumber(ctx context.Context) (uint64, error)
 	GetOperatorFromId(
 		opts *bind.CallOpts,
@@ -100,13 +100,13 @@ func (c *EthRpcClientsWrapper) AvsRegistryChainSubscriber() (*avsregistry.ChainS
 	return c.Clients.AvsRegistryChainSubscriber
 }
 
-var _ ethRpcClientsInterface = (*EthRpcClientsWrapper)(nil)
+var _ EthRpcClientsInterface = (*EthRpcClientsWrapper)(nil)
 
 type EthRpc struct {
 	AvsReader     AvsReaderer
 	AvsWriter     AvsWriterer
 	AvsSubscriber AvsSubscriberer
-	Clients       ethRpcClientsInterface
+	Clients       EthRpcClientsInterface
 }
 
 func NewEthRpc(
