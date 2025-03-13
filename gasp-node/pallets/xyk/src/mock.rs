@@ -354,7 +354,6 @@ impl pallet_proof_of_stake::Config for Test {
 	type ValuationApi = MockValuationApi;
 	type SchedulesPerBlock = ConstU32<5>;
 	type NontransferableTokens = Nothing;
-	type Xyk = XykStorage;
 }
 
 pub struct TokensActivationPassthrough<T: Config>(PhantomData<T>);

@@ -425,19 +425,19 @@ mod mocks {
 		}
 
 		// This function is not expected to fail unless fee_lock_metadata is uninit
-		fn get_fee_lock_amount(who: AccountId) -> Result<Balance, DispatchError> {
+		fn get_fee_lock_amount(who: &AccountId) -> Result<Balance, DispatchError> {
 			Ok(Default::default())
 		}
 
-		fn process_fee_lock(who: AccountId) -> DispatchResult {
+		fn process_fee_lock(who: &AccountId) -> DispatchResult {
 			Ok(())
 		}
 
-		fn can_unlock_fee(who: AccountId) -> DispatchResult {
+		fn can_unlock_fee(who: &AccountId) -> DispatchResult {
 			Ok(())
 		}
 
-		fn unlock_fee(who: AccountId) -> DispatchResult {
+		fn unlock_fee(who: &AccountId) -> DispatchResult {
 			Ok(())
 		}
 	}
@@ -478,8 +478,6 @@ impl pallet_fee_lock::Config for Test {
 	type ValuateForNative = Market;
 	type NativeTokenId = NativeCurrencyId;
 	type WeightInfo = ();
-	#[cfg(feature = "runtime-benchmarks")]
-	type Xyk = Xyk;
 }
 
 impl market::MarketBenchmarkingConfig for Test {}
