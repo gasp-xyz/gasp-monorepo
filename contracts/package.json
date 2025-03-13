@@ -12,7 +12,7 @@
     "test": "forge test -vvv --fail-fast --no-match-contract 'Integration'",
     "test-integration": "forge test -vvv --fail-fast --fork-url=http://localhost:8545 --match-contract 'Integration'",
     "gas": "forge snapshot --gas-report --no-match-contract 'Integration'",
-    "cover": "forge coverage",
+    "cover": "forge coverage --no-match-contract 'Integration'",
     "cover:lcov": "forge coverage --force --no-match-path '(script|test)' --report lcov && genhtml lcov.info -o coverage --ignore-errors inconsistent && open coverage/src/index.html",
     "clean": "forge clean && rm -rf coverage .gas-snapshot lcov.info",
     "analyze": "slitherin .",
