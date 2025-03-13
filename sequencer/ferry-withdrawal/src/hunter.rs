@@ -11,7 +11,7 @@ use l2api::L2Interface;
 use l1api::types::RequestStatus;
 
 #[derive(thiserror::Error, Debug)]
-pub enum FerryError {
+pub enum HunterError {
     #[error("L1Error `{0}`")]
     L1Error(#[from] l1api::L1Error),
 
@@ -28,10 +28,10 @@ pub enum FerryError {
     WithdrawalIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
 }
 
-pub type FerryResult<T> = Result<T, FerryError>;
+pub type HunterResult<T> = Result<T, HunterError>;
 
 //TODO: rename to Hunter
-pub struct FerryWithdrawal<L1, L2> {
+pub struct FerryHunter<L1, L2> {
     chain: gasp_types::Chain,
     l1: L1,
     l2: L2,
@@ -41,13 +41,13 @@ pub struct FerryWithdrawal<L1, L2> {
     // l2_requests_cache: Mutex<RefCell<BTreeMap<U256, L2Request>>>,
 }
 
-impl<L1, L2> FerryWithdrawal<L1, L2>
+impl<L1, L2> FerryHunter<L1, L2>
 where
     L1: L1Interface,
     L2: L2Interface,
 {
     pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2,sink: mpsc::Sender<Withdrawal>) -> Self {
-        FerryWithdrawal {
+        FerryHunter {
             chain,
             l1,
             l2,
@@ -57,7 +57,7 @@ where
     }
 
     #[tracing::instrument(skip_all, ret)]
-    async fn get_requests_to_ferry(&self, l2_state: H256) -> FerryResult<Option<(u128, u128)>> {
+    async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
         let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
         let latest_request_id_on_l2 = self
             .l2
@@ -82,7 +82,7 @@ where
     // }
 
     #[tracing::instrument(skip_all)]
-    async fn fetch_l2_requests(&self, range: Vec<u128>, at: H256) -> FerryResult<Vec<L2Request>> {
+    async fn fetch_l2_requests(&self, range: Vec<u128>, at: H256) -> HunterResult<Vec<L2Request>> {
         tracing::trace!("fetching l2 requests for range {first:?} .. {last:?}", first = range.first(), last = range.last());
         let chain = self.chain;
         // let futures = {
@@ -97,7 +97,7 @@ where
             .map(|id| {
                 self.l2.get_l2_request(self.chain, id, at).map(move |elem| {
                     elem.map(|elem| {
-                        elem.ok_or(FerryError::RequestIdDoesNotExistsOnL2 {
+                        elem.ok_or(HunterError::RequestIdDoesNotExistsOnL2 {
                             request_id: id.into(),
                             chain,
                         })
@@ -162,7 +162,7 @@ where
     //     // Ok(())
     // }
 
-    pub async fn run(&mut self) -> FerryResult<()> {
+    pub async fn run(&mut self) -> HunterResult<()> {
         let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
         //TODO replace with wait for the next block
         while let Some(elem) = stream.next().await {
@@ -272,7 +272,7 @@ mod test {
             .expect_get_latest_created_request_id()
             .return_once(move |_, _| Ok(l2_req.clone()));
 
-        let ferry = FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, mpsc::channel(10000).0);
+        let ferry = FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, mpsc::channel(10000).0);
 
         assert_eq!(
             ferry.get_requests_to_ferry(H256::default()).await.unwrap(),

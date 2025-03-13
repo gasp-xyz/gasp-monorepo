@@ -1,7 +1,7 @@
 use clap::Parser;
 
 mod cli;
-mod ferry;
+mod hunter;
 mod filter;
 mod executor;
 #[cfg(test)]
@@ -19,7 +19,7 @@ fn init_logger() {
 
 
 #[tokio::main]
-pub async fn main() -> Result<(), ferry::FerryError> {
+pub async fn main() -> Result<(), hunter::HunterError> {
     let args = cli::Cli::parse();
     init_logger();
     Ok(())

@@ -3,7 +3,7 @@ use l2api::mock::MockL2;
 use gasp_types::{H256, L2Request, Withdrawal, RequestId, U256};
 use futures::stream;
 use tokio::sync::mpsc;
-use crate::ferry::FerryWithdrawal;
+use crate::hunter::FerryHunter;
 use mockall::predicate::eq;
 use mockall::predicate::always;
 
@@ -29,7 +29,7 @@ mod test{
 
         let (sender, receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
 
         handle.await.unwrap();
@@ -85,7 +85,7 @@ mod test{
 
         let (sender, mut receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
 
 
@@ -115,7 +115,7 @@ mod test{
 
         let (sender, mut receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
         handle.await.unwrap();
         tracing::info!("ferry finished");
@@ -177,7 +177,7 @@ mod test{
 
         let (sender, receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
 
         handle.await.unwrap();
@@ -232,7 +232,7 @@ mod test{
 
         let (sender, receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
 
 
@@ -282,7 +282,7 @@ mod test{
 
         let (sender, receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryWithdrawal::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
+            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender).run().await.unwrap();
         });
 
 
