@@ -207,7 +207,11 @@ jobs:
       - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
-      # - run: moon setup
+      
+      - name: Set MOON_CACHE=off for release/next branch
+        if: github.ref_name == 'release/next'
+        run: echo "MOON_CACHE=off" >> $GITHUB_ENV
+      
       - name: Run tests
         run: ${{ matrix.command }}
         env:
