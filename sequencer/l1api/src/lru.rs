@@ -129,7 +129,7 @@ where
         };
 
         match cached {
-            Some(cached) => Ok(RequestStatus::Closed),
+            Some(_cached) => Ok(RequestStatus::Closed),
             None => {
                 let status = self.l1.get_status(request_hash).await?;
                 if let RequestStatus::Closed = &status {

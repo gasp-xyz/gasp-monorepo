@@ -1,7 +1,7 @@
 use crate::utils::simulate_send_and_wait_for_result;
 use crate::L1Error;
 use alloy::{
-    network::{Network, NetworkWallet},
+    network::Network,
     providers::{Provider, WalletProvider},
     transports::Transport,
 };

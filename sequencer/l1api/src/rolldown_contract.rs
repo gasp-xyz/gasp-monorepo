@@ -1,18 +1,12 @@
-use super::{types, L1Error, L1Interface};
+use super::{types, L1Error};
 use crate::utils::simulate_send_and_wait_for_result;
 use crate::types::RequestStatus;
-use alloy::contract::{CallBuilder, CallDecoder};
-use contract_bindings::irolldown::IRolldownPrimitives::Withdrawal;
 use lazy_static::lazy_static;
 
-use alloy::network::{EthereumWallet, Network, NetworkWallet};
-use alloy::providers::{Provider, ProviderBuilder, WalletProvider};
-use alloy::signers::local::PrivateKeySigner;
-use alloy::sol_types::SolValue;
-use alloy::transports::{BoxTransport, Transport};
-use hex::encode as hex_encode;
+use alloy::network::Network;
+use alloy::providers::{Provider, WalletProvider};
+use alloy::transports::Transport;
 use primitive_types::H256;
-use sha3::{Digest, Keccak256};
 
 use prometheus::{opts, register_counter_vec, CounterVec};
 
