@@ -5,9 +5,12 @@ enableBaseServices: true
 ##################################
 # contracts && evm-node configs #
 ##################################
-contractsImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+contractsImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 evmNode:
   enabled: true
+  customGenesisUrlEth: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31337.json
+  customGenesisUrlArb: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31338.json
+  customGenesisUrlBase: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31339.json
 #####################
 # collator configs #
 #####################
@@ -23,7 +26,7 @@ collator:
       memory: 12Gi
   image:
     repository: gaspxyz/rollup-node
-    tag: a98a7610b7502704f5cc57fcbc2e611a94abf757-fast
+    tag: e748b143c089828bf7dfe562e55d3f1aaa6f8478-fast
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/7358269f21bf921b541f07db5ab80badb03288b7/rollup-dev-env-chainspecs/rollup-frontend-456a53b-raw.json
   storageClass: node-data-volume-retain
@@ -92,7 +95,7 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 gaspAvsEnabled: true
-gaspAvsImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+gaspAvsImageTag: e748b143c089828bf7dfe562e55d3f1aaa6f8478-fast
 gaspAvsData:
   storageClass: node-data-volume-retain
   mountPath: /data
@@ -116,7 +119,7 @@ gaspAvsEnv:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+updaterImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 updaterEnvSecrets:
   ECDSA_KEY_JSON: '{"address":"a0ee7a142d267c1f36714e4a8f75612f20a79720","crypto":{"cipher":"aes-128-ctr","ciphertext":"b0f6f8e3ba33f0b382b080de6661d827181de480f1a4f94bc20d66cb3d585907","cipherparams":{"iv":"4e3f9a8ca6ef8d1cd408e8aaae3c22d2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"c8f9f8cc03913e09cee7e1fd68732fac327576203ab277d740270f1dea82ee7e"},"mac":"353d65850b20d5fdb90ca2385c52e5b57662cb1d906fd58143f20a7720723cf6"},"id":"d3036cc7-d068-4f2f-9667-60aaca660e61","version":3}'
   ROOT_ECDSA_KEY_JSON: '{"address":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"26e1ebd941909ddb0ebaec8235470c8d"},"ciphertext":"adca2a84713f50c3918235e109a9b4b28ff6c8ea77b87e8aca20dc48a3a93389","kdf":"scrypt","kdfparams":{"dklen":32,"n":8192,"p":1,"r":8,"salt":"b5581b95b5c7f1449cc341db8567d4c92e4fe21bc34052dbe60bd3e2060a74a0"},"mac":"3643a9e1c0381e30ca0e250999810ecb4b213bc93bd19ad673b93870c77f55ec"},"id":"d39afde8-e06c-46d4-a7ed-1af9bb3f55a5","version":3}'
@@ -155,7 +158,7 @@ updaterEnvBase:
 # sequencer configs #
 ############################
 sequencerEnabled: true
-sequencerImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+sequencerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
   MANGATA_NODE_URL: ws://collator-01:9944
@@ -194,8 +197,8 @@ sequencerEnvSecretsBase:
 #########################
 # ferry-deposit configs #
 #########################
-ferryDepositEnabled: true
-ferryDepositImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+ferryDepositEnabled: false
+ferryDepositImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 ferryDepositEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
@@ -232,8 +235,8 @@ ferryDepositEnvSecretsBase:
 ############################
 # ferry-withdrawal configs #
 ############################
-ferryWithdrawalEnabled: true
-ferryWithdrawalImageTag: a98a7610b7502704f5cc57fcbc2e611a94abf757
+ferryWithdrawalEnabled: false
+ferryWithdrawalImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 ferryWithdrawalEnvEth:
   MANGATA_NODE_URL: ws://collator-01:9944
   ETH_CHAIN_URL: ws://evm-node-eth:8546
