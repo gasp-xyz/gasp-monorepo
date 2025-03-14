@@ -3,6 +3,8 @@ name = "l2api"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+
 [dependencies]
 subxt = "0.38.0"
 subxt-signer = "0.38.0"

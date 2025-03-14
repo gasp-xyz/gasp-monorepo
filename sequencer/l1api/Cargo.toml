@@ -5,6 +5,8 @@ authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 
+[lib]
+
 [dependencies]
 subxt = "0.38.0"
 subxt-signer = "0.38.0"

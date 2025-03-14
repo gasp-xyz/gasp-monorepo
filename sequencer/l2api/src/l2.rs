@@ -1,35 +1,25 @@
 use gasp_types::L2Request;
 use std::collections::HashMap;
-use std::pin::Pin;
 
-use futures::future::join_all;
-use futures::Stream;
 use hex::encode as hex_encode;
 
 use crate::types::Finalization;
 use crate::L2Error;
 use futures::StreamExt;
 use primitive_types::H256;
-use subxt::ext::subxt_core;
-use subxt::ext::subxt_core::storage::address::StorageHashers;
-use subxt::storage::StorageKey;
-use subxt::Config;
 use subxt::OnlineClient;
 
 use crate::signer::Keypair;
-use crate::EndDisputePeriod;
 use crate::HashOf;
 use crate::HeaderStream;
 use crate::L2Interface;
-use crate::PendingUpdateWithKeys;
 
 use gasp_bindings::api::runtime_types::frame_system::EventRecord;
 use gasp_bindings::api::runtime_types::rollup_runtime::RuntimeEvent;
-use gasp_bindings::{GaspAddress, GaspConfig, GaspSignature};
+use gasp_bindings::{GaspAddress, GaspConfig};
 
 
 
-// use crate::types::RequestId;
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub struct Gasp {
@@ -37,6 +27,7 @@ pub struct Gasp {
     keypair: Keypair,
 }
 
+#[allow(dead_code)]
 impl Gasp {
     pub async fn new(uri: &str, secret_key: [u8; 32]) -> Result<Self, L2Error> {
         let client = OnlineClient::<GaspConfig>::from_insecure_url(uri).await?;
@@ -207,8 +198,8 @@ impl L2Interface for Gasp {
             .l2_requests(chain, request_id);
 
         Ok(self.client.storage().at(at).fetch(&storage).await?.map(
-            |(request, hash)| match request {
-                SubxtL2Request::FailedDepositResolution(deposit) => {
+            |(request, _hash)| match request {
+                SubxtL2Request::FailedDepositResolution(_deposit) => {
                     todo!()
                 }
                 SubxtL2Request::Withdrawal(withdrawal) => L2Request::Withdrawal(withdrawal.into()),

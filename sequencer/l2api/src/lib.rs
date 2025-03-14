@@ -1,5 +1,4 @@
 use futures::Stream;
-use gasp_bindings::GaspConfig;
 use primitive_types::H256;
 use gasp_types::{Chain, L2Request};
 use std::pin::Pin;
