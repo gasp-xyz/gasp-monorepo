@@ -24,8 +24,8 @@ collator:
       memory: 12Gi
   image:
     repository: gaspxyz/rollup-node
-    # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
-    tag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+    # Tradebility release
+    tag: 44791d8b888a7ded1762a6f9ebe0c31a465946c3
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
   enableServiceMonitorCollectors: true
@@ -143,7 +143,7 @@ aggregatorEnv:
 #####################
 # gaspAvs configs #
 #####################
-gaspAvsImageTag: 80ae4fbab12eb41980d8d38b4f860f0a48ee3af8
+gaspAvsImageTag: 80511d961edf6a98e8435afdceca4fe0938ac85c
 
 gaspAvsEnabled: true
 gaspAvsData:
