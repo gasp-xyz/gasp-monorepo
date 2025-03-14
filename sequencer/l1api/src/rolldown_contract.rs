@@ -8,6 +8,9 @@ use alloy::providers::{Provider, WalletProvider};
 use alloy::transports::Transport;
 use primitive_types::H256;
 
+#[cfg(test)]
+use alloy::network::NetworkWallet;
+
 use prometheus::{opts, register_counter_vec, CounterVec};
 
 lazy_static! {
