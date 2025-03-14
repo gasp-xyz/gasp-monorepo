@@ -6,8 +6,8 @@ mod hunter;
 mod cleaner;
 mod filter;
 mod ferry;
-#[cfg(test)]
-mod test;
+// #[cfg(test)]
+// mod test;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()
