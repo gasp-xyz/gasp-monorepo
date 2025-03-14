@@ -8,9 +8,9 @@ enableBaseServices: true
 contractsImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 evmNode:
   enabled: true
-  customGenesisUrlEth: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31337.json
-  customGenesisUrlArb: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31338.json
-  customGenesisUrlBase: https://raw.githubusercontent.com/gasp-xyz/chainspec/refs/heads/master/reth/31339.json
+  customGenesisUrlEth: https://raw.githubusercontent.com/gasp-xyz/chainspec/cb66d5d2da94945eb90bf90eb1292b87f2518f85/reth/31337.json
+  customGenesisUrlArb: https://raw.githubusercontent.com/gasp-xyz/chainspec/cb66d5d2da94945eb90bf90eb1292b87f2518f85/reth/31338.json
+  customGenesisUrlBase: https://raw.githubusercontent.com/gasp-xyz/chainspec/cb66d5d2da94945eb90bf90eb1292b87f2518f85/reth/31339.json
 #####################
 # collator configs #
 #####################
