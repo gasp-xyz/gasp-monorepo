@@ -19,7 +19,7 @@ ttlSecondsAfterFinished: ""
 
 dataMountPath: /data
 
-evmNodeImage: "gaspxyz/reth:v1.0.7"
+evmNodeImage: "gaspxyz/reth:v1.3.1"
 command: []
 args:
   - node
