@@ -226,7 +226,6 @@ where
 #[cfg(test)]
 mod test{
     use super::*;
-    use async_std::sync;
     use futures::stream;
     use gasp_types::{Origin, RequestId, H256};
     use l1api::mock::MockL1;

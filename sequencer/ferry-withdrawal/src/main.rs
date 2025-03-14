@@ -1,7 +1,9 @@
 use clap::Parser;
+use tokio::sync::mpsc::channel;
 
 mod cli;
 mod hunter;
+mod cleaner;
 mod filter;
 mod ferry;
 #[cfg(test)]
@@ -22,6 +24,12 @@ fn init_logger() {
 pub async fn main() -> Result<(), hunter::HunterError> {
     let args = cli::Cli::parse();
     init_logger();
+
+    // let (hunter_output, filter_input) = channel(usize::MAX);
+    // let (filter_output, hunter_input) = channel(usize::MAX);
+    // let (action_sender, executor) = channel(usize::MAX);
+    //
+
     Ok(())
 }
 

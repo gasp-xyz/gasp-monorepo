@@ -113,16 +113,36 @@ where
             .collect::<Result<Result<Vec<_>, _>, _>>()??)
     }
 
-    pub async fn get_ferried_withdrawal(&self, id: u128, at: H256) -> CleanerResult<Option<Withdrawal>> {
+    pub async fn get_ferried_withdrawal(
+        &self,
+        id: u128,
+        at: H256,
+    ) -> CleanerResult<Option<Withdrawal>> {
         match self.l2.get_l2_request(self.chain, id, at).await? {
             Some(L2Request::Withdrawal(w)) => {
                 match self.l1.get_status(w.withdrawal_hash()).await? {
-                    RequestStatus::Ferried(addr) if addr == self.account => Ok::<_, CleanerError>(Some(w)),
+                    RequestStatus::Ferried(addr) if addr == self.account => {
+                        Ok::<_, CleanerError>(Some(w))
+                    }
                     _ => Ok(None),
                 }
             }
             _ => Ok(None),
         }
+    }
+
+
+    pub fn get_chunks(&self, start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
+        (start..end)
+            .chunks(chunk_size)
+            .into_iter()
+            .map(|elem| {
+                let mut x = elem.into_iter();
+                let first = x.nth(0).expect("at least on element in chunk");
+                let last = x.last().unwrap_or(first);
+                (start, last)
+            })
+            .collect::<Vec<_>>()
     }
 
     pub async fn run(&mut self) -> CleanerResult<()> {
@@ -132,24 +152,28 @@ where
             let (_nr, at) = elem?;
 
             if let Some(range_end) = self.l1.get_latest_finalized_request_id().await? {
-                let range_start = std::cmp::min(self.latest_processed, range_end);
+                let mut latest = self.latest_processed;
+                let range_start = std::cmp::min(latest, range_end);
 
-                let requests = (range_start..range_end)
-                    .take(50)
-                    .map(|id| self.get_ferried_withdrawal(id, at))
-                    .collect::<Vec<_>>();
-
-                for withdrawal in futures::future::try_join_all(requests).await?
-                    .into_iter()
-                    .filter_map(|e| e){
-                    tracing::debug!("found ferried withdrawal ready to be closed ${withdrawal}");
-                    self.sink.send(FerryAction::CloseFerriedWithdrawal { withdrawal }).await?;
-                    self.latest_processed = withdrawal.request_id.id.try_into().unwrap();
+                let chunks =self.get_chunks(range_start, range_end, 50);
+                for (id, range) in chunks.iter().enumerate() {
+                    tracing::info!( "fetching l2 requests for range {range:?} batch {id} / {chunks_count}", id = id + 1, chunks_count = chunks.len());
+                    let queries= (range.0..range.1).map(|elem| self.get_ferried_withdrawal(elem, at)).collect::<Vec<_>>();
+                    for withdrawal in futures::future::try_join_all(queries)
+                        .await?
+                        .into_iter()
+                        .filter_map(|elem| elem)
+                    {
+                        self.sink
+                            .send(FerryAction::CloseFerriedWithdrawal { withdrawal })
+                            .await?;
+                        latest = withdrawal.request_id.id.try_into().unwrap();
+                    }
                 }
+                self.latest_processed = latest;
             }
         }
         tracing::warn!("header stream ended");
         Ok(())
     }
 }
-
