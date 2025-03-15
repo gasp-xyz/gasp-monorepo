@@ -24,8 +24,8 @@ pub struct Cli {
     #[arg(long, env = "CLEANER_BLOCK_OFFSET")]
     pub offset: u64,
 
-    #[arg(long, env = "DRY_RUN")]
-    pub dry_run: bool,
+    #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
+    enabled: Vec<[u8;20]>,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
