@@ -7,6 +7,7 @@ use parity_scale_codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
 use sha3::{Digest, Keccak256};
 use hex_literal::hex;
+use thiserror::Error;
 
 // since its only used in l2api lets just use it instead of defining own types
 pub type PendingUpdateMetadata =
@@ -47,6 +48,25 @@ pub enum Chain {
     Ethereum,
     Arbitrum,
     Base,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ChainParseError {
+    #[error("Unsupported chain id {0}")]
+    UnsupportedChainId(u32)
+}
+
+impl TryFrom<u32> for Chain {
+    type Error = ChainParseError;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            1 | 17000 | 31337 => Ok(Chain::Ethereum),
+            42161 | 421614 | 31338 => Ok(Chain::Arbitrum),
+            8453 | 84532 | 31339 => Ok(Chain::Arbitrum),
+            _ => Err(ChainParseError::UnsupportedChainId(value))
+        }
+    }
 }
 
 impl From<l2types::Chain> for Chain {

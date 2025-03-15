@@ -2176,6 +2176,7 @@ dependencies = [
  "parity-scale-codec",
  "primitive-types 0.13.1",
  "sha3 0.9.1",
+ "thiserror 1.0.66",
 ]
 
 [[package]]

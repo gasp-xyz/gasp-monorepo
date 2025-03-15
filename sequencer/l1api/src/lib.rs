@@ -1,5 +1,5 @@
 use alloy::{
-    network::{EthereumWallet, Network},
+    network::{EthereumWallet, Network, NetworkWallet},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
     signers::local::PrivateKeySigner,
     sol_types::SolValue,
@@ -90,31 +90,22 @@ pub trait L1Interface {
     ) -> Result<H256, L1Error>;
 }
 
-pub struct L1Builder {
-    pub uri: &'static str,
-    pub pkey: [u8; 32],
-    pub rolldown_address: [u8; 20],
-}
-
 pub async fn create_provider(
-    uri: &'static str,
+    uri: impl AsRef<str>,
     pkey: [u8; 32],
-) -> Result<impl Provider + WalletProvider + Clone, TransportError> {
+) -> Result<impl Provider + WalletProvider + Clone, L1Error> {
     let signer: PrivateKeySigner = hex::encode(pkey).parse().expect("valid private key");
     let wallet = EthereumWallet::new(signer);
     Ok(ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
-        .on_builtin(uri)
+        .on_builtin(uri.as_ref())
         .await?)
 }
 
-impl L1Builder {
-    pub async fn build<T, P, N>(self) -> Result<impl L1Interface, L1Error> {
-        let provider = create_provider(self.uri, self.pkey).await?;
-        let rolldown = RolldownContract::new(provider.clone(), self.rolldown_address);
-        Ok(L1::new(rolldown, provider))
-    }
+pub fn address(provider: impl Provider + WalletProvider + Clone)-> [u8;20]
+{
+    provider.wallet().default_signer_address().into()
 }
 
 pub struct L1<T, P, N> {

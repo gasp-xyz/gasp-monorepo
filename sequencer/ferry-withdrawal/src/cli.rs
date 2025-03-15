@@ -16,13 +16,19 @@ pub struct Cli {
     pub private_key: [u8; 32],
 
     #[arg(long, env = "CHAIN")]
-    pub chain_id: u16,
+    pub chain_id: u32,
 
     #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
     #[arg(long, env = "BATCH_SIZE")]
     pub update_size_limit: usize,
+
+    #[arg(long, env = "CLEANER_BLOCK_OFFSET")]
+    pub offset: u64,
+
+    #[arg(long, env = "DRY_RUN")]
+    pub dry_run: bool,
 }
 
 

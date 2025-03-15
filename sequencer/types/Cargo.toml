@@ -13,6 +13,7 @@ primitive-types = "0.13.1"
 hex = "0.4.3"
 hex-literal = "0.4.1"
 sha3 = "0.9.1"
+thiserror = "1.0.24"
 
 alloy = { workspace = true }
 gasp-bindings = { workspace = true }

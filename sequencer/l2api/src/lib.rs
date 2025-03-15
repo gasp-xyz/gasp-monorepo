@@ -15,6 +15,7 @@ pub enum Finalization {
     Best,
     Finalized,
 }
+pub use l2::Gasp;
 
 pub mod types {
     // NOTE: this alias is used in multiple other files to make code more readable
