@@ -214,7 +214,7 @@ where
                         self.closable_withdrawals.push_front(withdrawal);
                     }
                     Err(_elapsed) => {
-                        tracing::info!("no new messages found yet");
+                        tracing::debug!("no new messages found yet");
                         break;
                     }
                     Ok(None) => {

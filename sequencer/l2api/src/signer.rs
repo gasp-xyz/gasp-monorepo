@@ -9,6 +9,7 @@ use gasp_bindings::GaspSignature;
 
 use secp256k1::SECP256K1;
 
+#[derive(Clone)]
 pub struct Keypair(pub secp256k1::Keypair);
 
 impl Keypair {

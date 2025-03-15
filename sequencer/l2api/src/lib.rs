@@ -80,14 +80,12 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<Option<L2Request>, L2Error>;
 
-    //TODO: rename
     async fn get_latest_created_request_id(
         &self,
         chain: Chain,
         at: H256,
     ) -> Result<Option<u128>, L2Error>;
 
-    //TODO: rename
     async fn get_latest_processed_request_id(
         &self,
         chain: Chain,
@@ -101,11 +99,6 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<Option<[u8; 20]>, L2Error>;
     async fn get_cancel_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
-
-    // async fn get_pending_updates(
-    //     &self,
-    //     at: HashOf<GaspConfig>,
-    // ) -> Result<Vec<PendingUpdateWithKeys>, L2Error>;
 
     async fn deserialize_sequencer_update(
         &self,

@@ -48,35 +48,33 @@ pub async fn main() -> Result<(), Error> {
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
     init_logger();
 
-    let (hunter_to_filter, filter_input) = channel(usize::MAX);
-    let (to_executor, executor) = channel(usize::MAX);
+    let (hunter_to_filter, filter_input) = channel(1_000_000);
+    let (to_executor, executor) = channel(1_000_000);
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
     let sender = l1api::address(provider.clone());
     let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
 
+    let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+
     let mut cleaner = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
-        let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
-        cleaner::FerryCleaner::new(chain, l1, l2, sender, to_executor.clone(), args.offset)
+        cleaner::FerryCleaner::new(chain, l1, l2.clone(), sender, to_executor.clone(), args.offset)
     };
 
     let mut hunter = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
-        let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
-        hunter::FerryHunter::new(chain, l1, l2, hunter_to_filter)
+        hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
     };
 
     let mut filter = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
-        let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
-        filter::Filter::new(l1, l2, filter_input, to_executor, vec![])
+        filter::Filter::new(l1, l2.clone(), filter_input, to_executor, vec![])
     };
 
     let mut executor = {
         let l1 = L1::new(rolldown, provider);
-        let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
-        ferry::Ferry::new(l1, l2, sender, chain, executor)
+        ferry::Ferry::new(l1, l2.clone(), sender, chain, executor)
     };
 
     let hunter_handle = tokio::spawn(async move {
@@ -110,16 +108,4 @@ pub async fn main() -> Result<(), Error> {
     cleaner?;
 
     Ok(())
-
-    // Since `tokio::spawn` returns `Result<JoinHandle<Result<(), E>>>`, unwrap the join results
-    // match result {
-    //     Ok((hunter_res, filter_res, executor_res, cleaner_res)) => {
-    //         hunter_res?;
-    //         filter_res;
-    //         executor_res?;
-    //         cleaner_res?;
-    //         Ok(())
-    //     }
-    //     Err(join_err) => Err(join_err.into()), // Convert JoinError if any task panicked
-    // }
 }

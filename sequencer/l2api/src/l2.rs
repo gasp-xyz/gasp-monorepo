@@ -20,6 +20,7 @@ use gasp_bindings::{GaspAddress, GaspConfig};
 
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
+#[derive(Clone)]
 pub struct Gasp {
     client: OnlineClient<GaspConfig>,
     keypair: Keypair,
@@ -177,7 +178,7 @@ impl L2Interface for Gasp {
         self.keypair.address().into_inner()
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_l2_request(
         &self,
         chain: gasp_types::Chain,
@@ -209,7 +210,7 @@ impl L2Interface for Gasp {
         ))
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_latest_processed_request_id(
         &self,
         chain: gasp_types::Chain,
@@ -228,7 +229,7 @@ impl L2Interface for Gasp {
             .unwrap_or_default())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_read_rights(
         &self,
         chain: gasp_types::Chain,
@@ -257,7 +258,7 @@ impl L2Interface for Gasp {
             .ok_or(L2Error::CanNotFetchRights)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_selected_sequencer(
         &self,
         chain: gasp_types::Chain,
@@ -288,7 +289,7 @@ impl L2Interface for Gasp {
         Ok(selected)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_cancel_rights(
         &self,
         chain: gasp_types::Chain,
@@ -317,7 +318,7 @@ impl L2Interface for Gasp {
             .ok_or(L2Error::CanNotFetchRights)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn deserialize_sequencer_update(
         &self,
         payload: Vec<u8>,
@@ -336,7 +337,7 @@ impl L2Interface for Gasp {
         update.ok_or(L2Error::SequencerUpdateConversionError)
     }
 
-    #[tracing::instrument(skip(self, update))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn update_l1_from_l2(
         &self,
         update: gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update,
@@ -361,7 +362,7 @@ impl L2Interface for Gasp {
         self.sign_and_send(call).await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_pending_cancels(
         &self,
         chain: gasp_types::Chain,
@@ -395,7 +396,7 @@ impl L2Interface for Gasp {
         Ok(result)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_merkle_proof(
         &self,
         request_id: u128,
@@ -403,7 +404,6 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Vec<H256>, L2Error> {
-        // let range = types::Range{ start, end };
         let chain: crate::types::subxt::Chain = chain.into();
         let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
             .get_merkle_proof_for_tx(chain, range, request_id);
@@ -445,7 +445,7 @@ impl L2Interface for Gasp {
         Ok(abi_encoded_request)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_l2_request_hash(
         &self,
         request_id: u128,
@@ -494,7 +494,7 @@ impl L2Interface for Gasp {
         .boxed())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_active_sequencers(
         &self,
         chain: gasp_types::Chain,
@@ -522,7 +522,7 @@ impl L2Interface for Gasp {
         Ok(active.into_iter().map(|elem| elem.0).collect())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_dispute_period(
         &self,
         chain: gasp_types::Chain,
@@ -538,7 +538,7 @@ impl L2Interface for Gasp {
         active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level="trace", skip(self), ret)]
     async fn get_latest_created_request_id(
         &self,
         chain: gasp_types::Chain,
@@ -559,10 +559,6 @@ impl L2Interface for Gasp {
                     .collect::<HashMap<_, _>>()
             })
             .unwrap_or_default();
-
-        // tracing::trace!("dispute period: {active:?}");
-        // active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
-        // todo!()
         Ok(latest.get(&chain).cloned())
     }
 }
