@@ -170,7 +170,7 @@ gaspAvsEnv:
   AVS_UPDATE_STAKE_PERIOD: "150"
   OPT_IN_AT_STARTUP: "true"
   LOG_LEVEL: "info"
-  RUST_LOG: gasp_avs=debug,ether=trace
+  RUST_LOG: info,gasp-avs=debug,ether=trace
   TESTNET: "false"
   METRICS_PORT: 8080
   # rollup-node configs
