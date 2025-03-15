@@ -24,8 +24,8 @@ collator:
       memory: 12Gi
   image:
     repository: gaspxyz/rollup-node
-    # Tradebility release
-    tag: 44791d8b888a7ded1762a6f9ebe0c31a465946c3
+    # Cost free council costs
+    tag: 1.2.0-rc.3
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/5b0100d05c4744f31af56105bce3151f8cbc2d15/rollup-dev-env-chainspecs/holesky-62fa181-raw.json
   enableServiceMonitorCollectors: true
@@ -155,8 +155,8 @@ gaspAvsEnvSecrets:
   ECDSA_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerEcdsaKeyPassword
   BLS_KEY_JSON: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyJson
   BLS_KEY_PASSWORD: ref+sops://secrets.enc.yaml#/testnetFinalizerBlsKeyPassword
-  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumHttpsUrl
-  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumWssUrl
+  ETH_RPC_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumAlchemyHttpsUrl
+  ETH_WS_URL: ref+sops://secrets.enc.yaml#/holeskyEthereumAlchemyWssUrl
 gaspAvsEnv:
   CHAIN_ID: "17000"
   AVS_BLOCK_VALIDATION_PERIOD: "100"
