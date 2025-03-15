@@ -156,7 +156,7 @@ where
 
     #[tracing::instrument(skip_all)]
     pub async fn refresh_balances(&mut self) -> Result<(), FerryError> {
-        let tokens = self.balances.iter().map(|(token,amount)| 
+        let tokens = self.balances.iter().map(|(token,_amount)| 
             self.get_balance(*token)
             .map(|result| result.map(|balance| (*token, balance)))
         ).collect::<Vec<_>>();

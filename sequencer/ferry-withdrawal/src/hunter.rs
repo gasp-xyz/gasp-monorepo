@@ -1,4 +1,4 @@
-use futures::{FutureExt, StreamExt};
+use futures::StreamExt;
 use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
 use itertools::Itertools;

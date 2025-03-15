@@ -7,7 +7,6 @@ use parity_scale_codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
 use sha3::{Digest, Keccak256};
 use hex_literal::hex;
-use thiserror::Error;
 
 // since its only used in l2api lets just use it instead of defining own types
 pub type PendingUpdateMetadata =

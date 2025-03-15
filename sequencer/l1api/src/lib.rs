@@ -3,7 +3,7 @@ use alloy::{
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
     signers::local::PrivateKeySigner,
     sol_types::SolValue,
-    transports::{Transport, TransportError},
+    transports::Transport,
 };
 use hex::encode as hex_encode;
 use hex_literal::hex;
