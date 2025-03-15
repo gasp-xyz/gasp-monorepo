@@ -5,6 +5,7 @@ use l2api::L2Interface;
 use std::collections::HashSet;
 use tokio::sync::mpsc;
 
+#[allow(dead_code)]
 pub struct Filter<L1, L2> {
     l1: L1,
     l2: L2,
