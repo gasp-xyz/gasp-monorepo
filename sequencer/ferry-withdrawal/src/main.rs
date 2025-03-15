@@ -83,9 +83,18 @@ pub async fn main() -> Result<(), Error> {
     };
 
     let mut executor = {
-        let l1 = L1::new(rolldown, provider);
+        let l1 = L1::new(rolldown, provider.clone());
         ferry::Ferry::new(l1, l2.clone(), sender, chain, executor)
     };
+
+    if let Some(port) = args.prometheus_port {
+        let _balance = tokio::spawn(async move {
+            common::report_account_balance(provider).await;
+        });
+        let _metrics = tokio::spawn(async move {
+            common::serve_metrics(port).await;
+        });
+    }
 
     let hunter_handle = tokio::spawn(async move {
         hunter.run().await?;

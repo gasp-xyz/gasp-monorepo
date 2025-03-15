@@ -21,6 +21,9 @@ pub struct Cli {
     #[arg(long, default_value_t = 0, env = "OFFSET")]
     pub offset: u32,
 
+    #[arg(long, env = "PROMETHEUS_PORT")]
+    pub prometheus_port: Option<u16>,
+
     #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
     enabled: Vec<[u8; 20]>,
 }

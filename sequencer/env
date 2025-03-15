@@ -4,4 +4,5 @@ export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f
 export CHAIN=1
 export ROLLDOWN_CONTRACT=0x79d968d9017B96f202aD4673A2c1BBbdc905A4ca
 export OFFSET=25000
+export PROMETHEUS_PORT=3030
 export RUST_LOG=info,ferry-withdrawal=trace

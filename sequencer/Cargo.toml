@@ -6,10 +6,11 @@ repository = "https://github.com/gasp-xyz/gasp-monorepo.git"
 [workspace]
 resolver = "2"
 members = [
-	'sequencer',
-	'bindings/contracts', 
-	'bindings/gasp', 
+  'sequencer',
+  'bindings/contracts', 
+  'bindings/gasp', 
   "types",
+  "common",
   "l1api",
   "l2api",
   "closer",
@@ -38,3 +39,4 @@ gasp-bindings = { path = "./bindings/gasp" }
 l1api = { path = "./l1api/" }
 l2api = { path = "./l2api/" }
 gasp-types = { path = "./types/" }
+common = { path = "./common/" }

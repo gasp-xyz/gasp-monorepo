@@ -27,6 +27,7 @@ itertools = "0.14.0"
 l1api = { workspace = true }
 l2api = { workspace = true }
 gasp-types = { workspace = true }
+common = { workspace = true }
 
 
 [dev-dependencies]
