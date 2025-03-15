@@ -1,5 +1,5 @@
 use crate::ferry::FerryAction;
-use gasp_types::{Withdrawal, U256};
+use gasp_types::Withdrawal;
 use l1api::L1Interface;
 use l2api::L2Interface;
 use std::collections::HashSet;

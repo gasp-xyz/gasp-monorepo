@@ -1,13 +1,10 @@
 use futures::{FutureExt, StreamExt};
-use gasp_types::{Chain, L2Request, Origin, RequestId, H256};
+use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
 use itertools::Itertools;
 use l1api::types::RequestStatus;
 use l1api::L1Interface;
 use l2api::L2Interface;
-use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
-use std::sync::Mutex;
 use tokio::sync::mpsc;
 
 use crate::ferry::FerryAction;

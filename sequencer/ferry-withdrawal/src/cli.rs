@@ -1,7 +1,5 @@
 use clap::Parser;
 use clap::arg;
-use hex::FromHex;
-use tracing::level_filters::LevelFilter;
 
 
 #[derive(Parser, Debug)]

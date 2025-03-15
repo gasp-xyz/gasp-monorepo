@@ -1,13 +1,10 @@
-use futures::sink::With;
 use futures::{FutureExt, StreamExt};
-use gasp_types::{Chain, L2Request, Origin, RequestId, H256};
+use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
 use itertools::Itertools;
 use l1api::types::RequestStatus;
 use l1api::L1Interface;
 use l2api::L2Interface;
-use std::collections::{BTreeMap, BTreeSet};
-use std::sync::Mutex;
 use tokio::sync::mpsc;
 
 #[derive(thiserror::Error, Debug)]
@@ -154,9 +151,9 @@ mod test {
     use super::*;
     use futures::stream;
     use gasp_types::Chain;
-    use l1api::L1Error;
-    use l2api::{HeaderStream, L2Error};
-    use mockall::{predicate::{always, eq}, Sequence};
+    
+    use l2api::L2Error;
+    use mockall::predicate::{always, eq};
     use test_case::test_case;
     use tracing_test::traced_test;
 

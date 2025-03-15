@@ -2,8 +2,7 @@ use futures::{FutureExt, StreamExt};
 use gasp_types::{Chain, Withdrawal, U256};
 use l1api::{types::RequestStatus, L1Error, L1Interface};
 use l2api::L2Interface;
-use std::{collections::{BTreeMap, HashMap, VecDeque}};
-use tokio::sync::mpsc::error::TryRecvError;
+use std::collections::{HashMap, VecDeque};
 use tokio::sync::mpsc;
 use tokio::time::timeout;
 
@@ -146,7 +145,7 @@ where
     }
 
     pub async fn get_balance(&self, token_address: [u8;20]) -> Result<U256, FerryError> {
-        let balance = if (token_address == l1api::NATIVE_TOKEN_ADDRESS) {
+        let balance = if token_address == l1api::NATIVE_TOKEN_ADDRESS {
             self.l1.native_balance(self.account).await?
         }else{
             self.l1.erc20_balance(token_address, self.account).await?
@@ -233,7 +232,7 @@ mod test{
     use mockall::{predicate::{always, eq}, Sequence};
     use tracing_test::traced_test;
 
-    use std::{sync::{atomic::AtomicBool, mpsc::channel as sync_channel, Arc}, time::Duration};
+    use std::{sync::{atomic::AtomicBool, Arc}, time::Duration};
 
 
     const ACCOUNT : [u8; 20] = [1;20];
