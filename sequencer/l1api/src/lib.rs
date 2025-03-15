@@ -126,11 +126,13 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+    #[tracing::instrument(skip(self), ret)]
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
         let token = Erc20Token::new(token, self.provider.clone());
         token.balance_of(account).await
     }
 
+    #[tracing::instrument(skip(self), ret)]
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error> {
         let result = self.provider.get_balance(account.into()).await?;
         result.try_into().map_err(|_| L1Error::OverflowError)
@@ -142,17 +144,6 @@ where
             .await
     }
 
-    // async fn deposit_native(&self, request_hash: H256) -> Result<bool, L1Error>{
-    //     todo!()
-    // }
-    //
-    // async fn deposit_erc20(&self, request_hash: H256) -> Result<bool, L1Error>{
-    //     todo!()
-    // }
-    // fn account_address(&self) -> [u8; 20] {
-    //     self.account_address
-    // }
-
     #[tracing::instrument(skip(self))]
     async fn get_merkle_root(
         &self,
@@ -160,7 +151,6 @@ where
     ) -> Result<Option<([u8; 32], (u128, u128))>, L1Error> {
         match self.rolldown_contract.find_l2_batch(request_id).await {
             Ok(merkle_root) => {
-                tracing::info!("merkle root found");
                 let range = self
                     .rolldown_contract
                     .get_request_range_from_merkle_root(merkle_root)
@@ -211,7 +201,6 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self))]
     async fn get_update(&self, start: u128, end: u128) -> Result<types::abi::L1Update, L1Error> {
         let latest = self.get_latest_reqeust_id().await?;
 
@@ -241,7 +230,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self, cancel))]
+    #[tracing::instrument(skip(self), ret)]
     async fn close_cancel(
         &self,
         cancel: gasp_types::Cancel,
@@ -253,7 +242,7 @@ where
             .await
     }
 
-    #[tracing::instrument(skip(self, withdrawal))]
+    #[tracing::instrument(skip(self), ret)]
     async fn close_withdrawal(
         &self,
         withdrawal: gasp_types::Withdrawal,
@@ -265,14 +254,14 @@ where
             .await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), ret)]
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {
         let pending_update = self.get_update(start, end).await?;
         let x: [u8; 32] = Keccak256::digest(&pending_update.abi_encode()[..]).into();
         Ok(x.into())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self), ret)]
     async fn get_status(&self, request_hash: H256) -> Result<types::RequestStatus, L1Error> {
         self.rolldown_contract
             .get_request_status(request_hash)

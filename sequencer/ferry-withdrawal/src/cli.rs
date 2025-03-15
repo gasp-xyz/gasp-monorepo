@@ -18,14 +18,11 @@ pub struct Cli {
     #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
-    #[arg(long, env = "BATCH_SIZE")]
-    pub update_size_limit: usize,
-
     #[arg(long, env = "CLEANER_BLOCK_OFFSET")]
     pub offset: u64,
 
     #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
-    enabled: Vec<[u8;20]>,
+    enabled: Vec<[u8; 20]>,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {

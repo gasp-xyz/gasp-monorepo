@@ -395,60 +395,6 @@ impl L2Interface for Gasp {
         Ok(result)
     }
 
-    // #[tracing::instrument(skip(self))]
-    // async fn get_pending_updates(
-    //     &self,
-    //     at: HashOf<GaspConfig>,
-    // ) -> Result<Vec<PendingUpdateWithKeys>, L2Error> {
-    //     use ::subxt::ext::subxt_core::storage::address::StaticStorageKey;
-    //     use gasp_bindings::api::rolldown::storage::types as gasp_types;
-    //
-    //     let metadata = self.client.metadata();
-    //     let (_pallet, entry) = subxt_core::storage::lookup_storage_entry_details(
-    //         "Rolldown",
-    //         "PendingSequencerUpdates",
-    //         &metadata,
-    //     )?;
-    //
-    //     let hashers = StorageHashers::new(entry.entry_type(), metadata.types())?;
-    //
-    //     let iter = gasp_bindings::api::storage()
-    //         .rolldown()
-    //         .pending_sequencer_updates_iter();
-    //
-    //     let result = self
-    //         .client
-    //         .storage()
-    //         .at(at)
-    //         .iter(iter)
-    //         .await?
-    //         .map(|result| async {
-    //             let storage_kv = result?;
-    //             let update_metadata = storage_kv.value;
-    //
-    //             let keys = <(
-    //                 StaticStorageKey<gasp_types::pending_sequencer_updates::Param0>,
-    //                 StaticStorageKey<gasp_types::pending_sequencer_updates::Param1>,
-    //             )>::decode_storage_key(
-    //                 &mut &storage_kv.key_bytes[32..],
-    //                 &mut hashers.iter(),
-    //                 metadata.types(),
-    //             )?;
-    //             let end_dispute_period = keys.0.decoded()?;
-    //             let chain = keys.1.decoded()?;
-    //             let update_hash = hex_encode(update_metadata.update_hash);
-    //             tracing::debug!("update found chain:{chain:?} end_dispute_period:{end_dispute_period} hash:{update_hash} update_metadata:{update_metadata:?}");
-    //             Ok::<_, L2Error>((keys.0.decoded()?, chain, update_metadata))
-    //         })
-    //         .collect::<Vec<_>>()
-    //         .await;
-    //
-    //     join_all(result)
-    //         .await
-    //         .into_iter()
-    //         .collect::<Result<Vec<_>, _>>()
-    // }
-
     #[tracing::instrument(skip(self))]
     async fn get_merkle_proof(
         &self,
