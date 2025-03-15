@@ -1,8 +1,7 @@
-use clap::Parser;
 use clap::arg;
+use clap::Parser;
 use hex::FromHex;
 use tracing::level_filters::LevelFilter;
-
 
 #[derive(Parser, Debug)]
 pub struct Cli {
@@ -24,7 +23,6 @@ pub struct Cli {
     #[arg(long, env = "BATCH_SIZE")]
     pub update_size_limit: usize,
 }
-
 
 fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
     let mut result = [0u8; 20];

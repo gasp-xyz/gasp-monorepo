@@ -154,5 +154,4 @@ pub mod test_utils {
             token.balance_of(account).await
         }
     }
-
 }

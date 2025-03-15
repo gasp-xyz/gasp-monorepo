@@ -14,8 +14,7 @@ fn init_logger() {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum Error{
-}
+pub enum Error {}
 
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
@@ -23,4 +22,3 @@ pub async fn main() -> Result<(), Error> {
     init_logger();
     Ok(())
 }
-

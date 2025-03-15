@@ -1,6 +1,6 @@
 use futures::Stream;
-use primitive_types::H256;
 use gasp_types::{Chain, L2Request};
+use primitive_types::H256;
 use std::pin::Pin;
 use subxt::Config;
 
@@ -81,7 +81,11 @@ pub trait L2Interface {
     ) -> Result<Option<L2Request>, L2Error>;
 
     //TODO: rename
-    async fn get_latest_created_request_id(&self, chain: Chain, at: H256) -> Result<Option<u128>, L2Error>;
+    async fn get_latest_created_request_id(
+        &self,
+        chain: Chain,
+        at: H256,
+    ) -> Result<Option<u128>, L2Error>;
 
     //TODO: rename
     async fn get_latest_processed_request_id(

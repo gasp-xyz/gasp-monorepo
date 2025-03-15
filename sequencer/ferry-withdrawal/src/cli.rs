@@ -1,6 +1,5 @@
-use clap::Parser;
 use clap::arg;
-
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 pub struct Cli {
@@ -28,7 +27,6 @@ pub struct Cli {
     #[arg(long, env = "DRY_RUN")]
     pub dry_run: bool,
 }
-
 
 fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
     let mut result = [0u8; 20];

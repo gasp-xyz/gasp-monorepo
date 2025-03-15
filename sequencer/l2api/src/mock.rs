@@ -1,8 +1,8 @@
+use crate::types::Chain;
+use crate::types::Finalization;
+use crate::types::L2Request;
 use crate::L2Error;
 use gasp_types::H256;
-use crate::types::Chain;
-use crate::types::L2Request;
-use crate::types::Finalization;
 
 mockall::mock! {
 

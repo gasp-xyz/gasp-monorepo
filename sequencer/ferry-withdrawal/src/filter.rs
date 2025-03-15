@@ -46,7 +46,8 @@ where
                         withdrawal: w,
                         prio: profit,
                     })
-                    .await.expect("infinite");
+                    .await
+                    .expect("infinite");
             }
         }
         tracing::info!("closing filter service");
@@ -79,7 +80,6 @@ mod test {
             output,
             vec![ENABLED_TOKEN1, ENABLED_TOKEN2],
         );
-
 
         let task = tokio::spawn(async move {
             filter.run().await;
@@ -127,7 +127,7 @@ mod test {
         task.await.unwrap();
 
         assert_eq!(
-            FerryAction::Ferry{
+            FerryAction::Ferry {
                 withdrawal: enabled_withdrawal1,
                 prio: 11u128.into(),
             },
@@ -135,16 +135,13 @@ mod test {
         );
 
         assert_eq!(
-            FerryAction::Ferry{
+            FerryAction::Ferry {
                 withdrawal: enabled_withdrawal2,
                 prio: 10u128.into(),
             },
             filter_output.recv().await.unwrap(),
         );
 
-        assert!(
-            filter_output.recv().await.is_none(),
-        );
-
+        assert!(filter_output.recv().await.is_none(),);
     }
 }

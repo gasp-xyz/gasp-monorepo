@@ -18,8 +18,6 @@ use gasp_bindings::api::runtime_types::frame_system::EventRecord;
 use gasp_bindings::api::runtime_types::rollup_runtime::RuntimeEvent;
 use gasp_bindings::{GaspAddress, GaspConfig};
 
-
-
 pub type L2Event = EventRecord<RuntimeEvent, H256>;
 
 pub struct Gasp {
@@ -276,7 +274,7 @@ impl L2Interface for Gasp {
             .await?
             .unwrap_or_default();
 
-        let chain: crate::types::subxt::Chain= chain.into();
+        let chain: crate::types::subxt::Chain = chain.into();
         let selected = selected
             .iter()
             .find(|(c, _)| c == &chain)
@@ -600,17 +598,21 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         at: HashOf<GaspConfig>,
     ) -> Result<Option<u128>, L2Error> {
-
         let storage = gasp_bindings::api::storage()
             .rolldown()
             .l2_origin_request_id();
-        let latest = self.client.storage()
+        let latest = self
+            .client
+            .storage()
             .at(at)
-            .fetch(&storage).await?
-            .map(|elem| elem.into_iter()
-                .map(|(chain, id)| (gasp_types::Chain::from(chain), id))
-                .collect::<HashMap<_, _>>()
-            ).unwrap_or_default();
+            .fetch(&storage)
+            .await?
+            .map(|elem| {
+                elem.into_iter()
+                    .map(|(chain, id)| (gasp_types::Chain::from(chain), id))
+                    .collect::<HashMap<_, _>>()
+            })
+            .unwrap_or_default();
 
         // tracing::trace!("dispute period: {active:?}");
         // active.ok_or(L2Error::UnknownDisputePeriodLength(chain.into()))
@@ -813,7 +815,7 @@ mod test {
                 timeStamp: gasp_types::into_l2_u256(gasp_types::U256::from(0u128)),
                 ferryTip: gasp_types::into_l2_u256(gasp_types::U256::from(0u128)),
             }],
-            pendingCancelResolutions: vec![]
+            pendingCancelResolutions: vec![],
         };
 
         let status = gasp

@@ -40,7 +40,6 @@ pub enum Error {
 
     #[error("L2Error error `{0}`")]
     L2Error(#[from] l2api::L2Error),
-
 }
 
 #[tokio::main]
@@ -104,7 +103,8 @@ pub async fn main() -> Result<(), Error> {
         filter_handle,
         executor_handle,
         cleaner_handle
-    ).expect("can join");
+    )
+    .expect("can join");
     hunter?;
     executor?;
     cleaner?;
@@ -122,5 +122,4 @@ pub async fn main() -> Result<(), Error> {
     //     }
     //     Err(join_err) => Err(join_err.into()), // Convert JoinError if any task panicked
     // }
-
 }

@@ -151,7 +151,7 @@ mod test {
     use super::*;
     use futures::stream;
     use gasp_types::Chain;
-    
+
     use l2api::L2Error;
     use mockall::predicate::{always, eq};
     use test_case::test_case;

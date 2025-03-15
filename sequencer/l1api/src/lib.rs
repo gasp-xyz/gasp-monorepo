@@ -14,16 +14,16 @@ mod lru;
 mod rolldown_contract;
 mod utils;
 use erc20::Erc20Token;
+pub mod mock;
 #[cfg(test)]
 mod test;
-pub mod mock;
 
 pub use lru::CachedL1Interface;
 pub use rolldown_contract::RolldownContract;
 use sha3::{Digest, Keccak256};
 
 pub mod types {
-    pub mod abi{
+    pub mod abi {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
         pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
@@ -56,7 +56,6 @@ pub enum L1Error {
     #[error("Transaction execution failure `{0}`")]
     TxReverted(H256),
 }
-
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
@@ -103,8 +102,7 @@ pub async fn create_provider(
         .await?)
 }
 
-pub fn address(provider: impl Provider + WalletProvider + Clone)-> [u8;20]
-{
+pub fn address(provider: impl Provider + WalletProvider + Clone) -> [u8; 20] {
     provider.wallet().default_signer_address().into()
 }
 

@@ -1,6 +1,6 @@
 use super::{types, L1Error};
-use crate::utils::simulate_send_and_wait_for_result;
 use crate::types::RequestStatus;
+use crate::utils::simulate_send_and_wait_for_result;
 use lazy_static::lazy_static;
 
 use alloy::network::Network;
@@ -115,7 +115,6 @@ where
         root: [u8; 32],
         range: (u128, u128),
     ) -> Result<(), L1Error> where {
-
         let range = contract_bindings::rolldown::IRolldownPrimitives::Range {
             start: gasp_types::into_l1_u256(gasp_types::U256::from(range.0)),
             end: gasp_types::into_l1_u256(gasp_types::U256::from(range.1)),

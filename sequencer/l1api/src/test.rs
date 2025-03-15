@@ -1,6 +1,6 @@
 use super::*;
-use crate::{create_provider, types::RequestStatus};
 use crate::utils::test_utils::DevToken;
+use crate::{create_provider, types::RequestStatus};
 use gasp_types::{Origin, RequestId, U256};
 use hex_literal::hex;
 use serial_test::serial;
@@ -50,7 +50,10 @@ async fn test_withdrawal_hash() {
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: RequestId { id: 123u128.into(), origin: Origin::L2},
+        request_id: RequestId {
+            id: 123u128.into(),
+            origin: Origin::L2,
+        },
         recipient: hex!("ffffffffffffffffffffffffffffffffffffffff"),
         token_address: hex!("1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f"),
         amount: 123456u128.into(),
@@ -73,7 +76,10 @@ async fn test_ferry_withdrawal() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
+        request_id: RequestId {
+            id: 1u128.into(),
+            origin: Origin::L2,
+        },
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
         amount: 100u128.into(),
@@ -104,7 +110,10 @@ async fn test_close_withdrawal() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     let withdrawal = gasp_types::Withdrawal {
-        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
+        request_id: RequestId {
+            id: 1u128.into(),
+            origin: Origin::L2,
+        },
         recipient: hex!("1111111111111111111111111111111111111111"),
         token_address: dev_token.address(),
         amount: 100u128.into(),
@@ -122,7 +131,10 @@ async fn test_close_withdrawal() {
     rolldown
         .submit_merkle_root(
             withdrawal.withdrawal_hash().into(),
-            (withdrawal.request_id.id.try_into().unwrap(), withdrawal.request_id.id.try_into().unwrap()),
+            (
+                withdrawal.request_id.id.try_into().unwrap(),
+                withdrawal.request_id.id.try_into().unwrap(),
+            ),
         )
         .await
         .unwrap();
@@ -147,13 +159,22 @@ async fn test_close_cancel() {
     rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
 
     let cancel = gasp_types::Cancel {
-        request_id: RequestId { id: 1u128.into(), origin: Origin::L2},
+        request_id: RequestId {
+            id: 1u128.into(),
+            origin: Origin::L2,
+        },
         range: (U256::from(1u128), U256::from(1u128)),
         hash: hex!("1111111111111111111111111111111111111111111111111111111111111111"),
     };
 
     rolldown
-        .submit_merkle_root(cancel.cancel_hash().into(), (cancel.request_id.id.try_into().unwrap(), cancel.request_id.id.try_into().unwrap()))
+        .submit_merkle_root(
+            cancel.cancel_hash().into(),
+            (
+                cancel.request_id.id.try_into().unwrap(),
+                cancel.request_id.id.try_into().unwrap(),
+            ),
+        )
         .await
         .unwrap();
 

@@ -128,7 +128,6 @@ where
         }
     }
 
-
     pub fn get_chunks(&self, start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
         (start..end)
             .chunks(chunk_size)
@@ -152,10 +151,16 @@ where
                 let mut latest = self.latest_processed;
                 let range_start = std::cmp::min(latest, range_end);
 
-                let chunks =self.get_chunks(range_start, range_end, 50);
+                let chunks = self.get_chunks(range_start, range_end, 50);
                 for (id, range) in chunks.iter().enumerate() {
-                    tracing::info!( "fetching l2 requests for range {range:?} batch {id} / {chunks_count}", id = id + 1, chunks_count = chunks.len());
-                    let queries= (range.0..range.1).map(|elem| self.get_ferried_withdrawal(elem, at)).collect::<Vec<_>>();
+                    tracing::info!(
+                        "fetching l2 requests for range {range:?} batch {id} / {chunks_count}",
+                        id = id + 1,
+                        chunks_count = chunks.len()
+                    );
+                    let queries = (range.0..range.1)
+                        .map(|elem| self.get_ferried_withdrawal(elem, at))
+                        .collect::<Vec<_>>();
                     for withdrawal in futures::future::try_join_all(queries)
                         .await?
                         .into_iter()
