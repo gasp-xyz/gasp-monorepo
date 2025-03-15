@@ -123,9 +123,8 @@ where
 }
 
 #[cfg(test)]
-mod test{
+mod test {
 
     #[test]
-    fn test_generate_chunks() {
-    }
+    fn test_generate_chunks() {}
 }

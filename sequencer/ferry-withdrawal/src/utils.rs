@@ -14,7 +14,7 @@ pub fn get_chunks(start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
 
     #[test]

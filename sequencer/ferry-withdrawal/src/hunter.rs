@@ -85,7 +85,6 @@ where
         }
     }
 
-
     pub async fn run(&mut self) -> HunterResult<()> {
         let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
         //TODO replace with wait for the next block
@@ -95,12 +94,14 @@ where
 
             let mut latest = self.latest_processed;
             if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-
                 if end <= self.latest_processed {
                     continue;
                 }
-                let chunks =
-                    crate::utils::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
+                let chunks = crate::utils::get_chunks(
+                    std::cmp::max(start, self.latest_processed + 1),
+                    end,
+                    25,
+                );
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
