@@ -1,7 +1,6 @@
 use futures::StreamExt;
 use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
-use itertools::Itertools;
 use l1api::types::RequestStatus;
 use l1api::L1Interface;
 use l2api::L2Interface;
@@ -54,7 +53,6 @@ where
         }
     }
 
-    #[tracing::instrument(skip_all, ret)]
     async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
         let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
         let latest_request_id_on_l2 = self
@@ -70,7 +68,7 @@ where
         })
     }
 
-    #[tracing::instrument(skip_all, ret)]
+    #[tracing::instrument(level = "debug", skip(self, at), ret)]
     pub async fn get_pending_withdrawal(
         &self,
         id: u128,
@@ -87,18 +85,6 @@ where
         }
     }
 
-    pub fn get_chunks(&self, start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
-        (start..=end)
-            .chunks(chunk_size)
-            .into_iter()
-            .map(|elem| {
-                let mut x = elem.into_iter();
-                let first = x.nth(0).expect("at least on element in chunk");
-                let last = x.last().unwrap_or(first);
-                (start, last)
-            })
-            .collect::<Vec<_>>()
-    }
 
     pub async fn run(&mut self) -> HunterResult<()> {
         let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
@@ -109,19 +95,16 @@ where
 
             let mut latest = self.latest_processed;
             if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-                tracing::info!(
-                    "start:{start} end:{end} latest{latest}",
-                    latest = self.latest_processed
-                );
 
                 if end <= self.latest_processed {
                     continue;
                 }
                 let chunks =
-                    self.get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 50);
+                    crate::utils::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
                 for (id, range) in chunks.iter().enumerate() {
+                    tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
-                        "fetching l2 requests for range {range:?} batch {id} / {chunks_count}",
+                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count} (last : {end})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
@@ -150,7 +133,7 @@ mod test {
 
     use super::*;
     use futures::stream;
-    use gasp_types::Chain;
+    use gasp_types::{Chain, RequestId};
 
     use l2api::L2Error;
     use mockall::predicate::{always, eq};

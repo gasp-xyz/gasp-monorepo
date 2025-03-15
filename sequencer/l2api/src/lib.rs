@@ -1,4 +1,4 @@
-use futures::Stream;
+use futures::{Stream, StreamExt};
 use gasp_types::{Chain, L2Request};
 use primitive_types::H256;
 use std::pin::Pin;
@@ -131,6 +131,16 @@ pub trait L2Interface {
 
     async fn header_stream(&self, finalization_type: Finalization)
         -> Result<HeaderStream, L2Error>;
+
+    async fn get_best_block(&self) -> Result<(u32, H256),L2Error>{
+        self.header_stream(Finalization::Best).await?
+        .next().await.expect("infinite stream")
+    }
+
+    async fn get_latest_finalized_block(&self) -> Result<(u32, H256),L2Error>{
+        self.header_stream(Finalization::Best).await?
+        .next().await.expect("infinite stream")
+    }
 
     async fn get_abi_encoded_request(
         &self,

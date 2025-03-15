@@ -18,8 +18,8 @@ pub struct Cli {
     #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
-    #[arg(long, env = "CLEANER_BLOCK_OFFSET")]
-    pub offset: u64,
+    #[arg(long, default_value_t = 0, env = "OFFSET")]
+    pub offset: u32,
 
     #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
     enabled: Vec<[u8; 20]>,

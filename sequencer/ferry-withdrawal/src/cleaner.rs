@@ -1,7 +1,6 @@
-use futures::{FutureExt, StreamExt};
+use futures::StreamExt;
 use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
-use itertools::Itertools;
 use l1api::types::RequestStatus;
 use l1api::L1Interface;
 use l2api::L2Interface;
@@ -65,51 +64,6 @@ where
         }
     }
 
-    #[tracing::instrument(skip_all, ret)]
-    async fn get_requests_to_ferry(&self, l2_state: H256) -> CleanerResult<Option<(u128, u128)>> {
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
-        let latest_request_id_on_l2 = self
-            .l2
-            .get_latest_created_request_id(self.chain, l2_state)
-            .await?;
-        Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
-            (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id + 1, l2_request_id))
-            }
-            (None, Some(l2_request_id)) => Some((1, l2_request_id)),
-            _ => None,
-        })
-    }
-
-    #[tracing::instrument(skip_all)]
-    async fn fetch_l2_requests(&self, range: Vec<u128>, at: H256) -> CleanerResult<Vec<L2Request>> {
-        tracing::trace!(
-            "fetching l2 requests for range {first:?} .. {last:?}",
-            first = range.first(),
-            last = range.last()
-        );
-        let chain = self.chain;
-        let futures = range
-            .into_iter()
-            .filter(|id| *id > self.latest_processed)
-            .map(|id| {
-                self.l2.get_l2_request(self.chain, id, at).map(move |elem| {
-                    elem.map(|elem| {
-                        elem.ok_or(CleanerError::RequestIdDoesNotExistsOnL2 {
-                            request_id: id.into(),
-                            chain,
-                        })
-                    })
-                })
-            })
-            .collect::<Vec<_>>();
-
-        Ok(futures::future::join_all(futures)
-            .await
-            .into_iter()
-            .collect::<Result<Result<Vec<_>, _>, _>>()??)
-    }
-
     pub async fn get_ferried_withdrawal(
         &self,
         id: u128,
@@ -128,22 +82,9 @@ where
         }
     }
 
-    pub fn get_chunks(&self, start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
-        (start..end)
-            .chunks(chunk_size)
-            .into_iter()
-            .map(|elem| {
-                let mut x = elem.into_iter();
-                let first = x.nth(0).expect("at least on element in chunk");
-                let last = x.last().unwrap_or(first);
-                (start, last)
-            })
-            .collect::<Vec<_>>()
-    }
-
     pub async fn run(&mut self) -> CleanerResult<()> {
         let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
-        //TODO: replace with wait for the next block
+
         while let Some(elem) = stream.next().await {
             let (_nr, at) = elem?;
 
@@ -151,10 +92,11 @@ where
                 let mut latest = self.latest_processed;
                 let range_start = std::cmp::min(latest, range_end);
 
-                let chunks = self.get_chunks(range_start, range_end, 50);
+                let chunks = crate::utils::get_chunks(range_start, range_end, 25);
                 for (id, range) in chunks.iter().enumerate() {
+                    tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
-                        "fetching l2 requests for range {range:?} batch {id} / {chunks_count}",
+                        "looking for ferried withdrawals {range:?} batch {id} / {chunks_count} (last : {range_end})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
@@ -177,5 +119,13 @@ where
         }
         tracing::warn!("header stream ended");
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test{
+
+    #[test]
+    fn test_generate_chunks() {
     }
 }

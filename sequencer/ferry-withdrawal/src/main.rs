@@ -10,6 +10,7 @@ mod cli;
 mod ferry;
 mod filter;
 mod hunter;
+mod utils;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()
@@ -48,6 +49,8 @@ pub async fn main() -> Result<(), Error> {
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
     init_logger();
 
+    tracing::info!("{args:?}");
+
     let (hunter_to_filter, filter_input) = channel(1_000_000);
     let (to_executor, executor) = channel(1_000_000);
 
@@ -59,7 +62,14 @@ pub async fn main() -> Result<(), Error> {
 
     let mut cleaner = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
-        cleaner::FerryCleaner::new(chain, l1, l2.clone(), sender, to_executor.clone(), args.offset)
+        cleaner::FerryCleaner::new(
+            chain,
+            l1,
+            l2.clone(),
+            sender,
+            to_executor.clone(),
+            args.offset as u64,
+        )
     };
 
     let mut hunter = {
