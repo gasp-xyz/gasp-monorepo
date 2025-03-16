@@ -192,7 +192,7 @@ mod test {
             .expect_get_latest_created_request_id()
             .return_once(move |_, _| Ok(None));
 
-        let (sender, receiver) = mpsc::channel(100);
+        let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
             FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
                 .run()

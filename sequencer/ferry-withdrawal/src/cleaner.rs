@@ -89,6 +89,9 @@ where
             let (_nr, at) = elem?;
 
             if let Some(range_end) = self.l1.get_latest_finalized_request_id().await? {
+                if range_end <= self.latest_processed {
+                    continue;
+                }
                 let mut latest = self.latest_processed;
                 let range_start = std::cmp::min(latest, range_end);
 

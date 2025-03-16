@@ -267,8 +267,6 @@ mod test {
 
     const ACCOUNT: [u8; 20] = [1; 20];
     const ENABLED_TOKEN1: [u8; 20] = [2; 20];
-    const ENABLED_TOKEN2: [u8; 20] = [3; 20];
-    const DUMMY_TOKEN: [u8; 20] = [4; 20];
     const RECIPIENT: [u8; 20] = [5; 20];
 
     #[traced_test]
