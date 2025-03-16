@@ -197,9 +197,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 38e5b2ed33a4d372ed5934220ab034f2e329df0a
-# Override the image tag provided on deployment from IMAGE_TAG env variable
-# aggregatorImageTag: 5d6f2a4db68e0601f14b3ced43773488efdda164
+aggregatorImageTag: 75bdf1c7b7ce0ec7ebcba63907c48c78d8db9dd8
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-key
