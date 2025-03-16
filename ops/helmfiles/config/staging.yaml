@@ -27,7 +27,7 @@ collator:
   image:
     repository: gaspxyz/rollup-node
     # Cost free council costs
-    tag: 1.2.0-rc.3
+    tag: 1.2.0-rc.3-fast
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/75c3587b3877ff5768845d113cb6cce48606b757/rollup-dev-env-chainspecs/rollup-local-1.2.0-rc.3-raw.json
   storageClass: node-data-volume-retain
