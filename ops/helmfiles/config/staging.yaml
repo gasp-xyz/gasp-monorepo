@@ -29,7 +29,7 @@ collator:
     # Cost free council costs
     tag: 1.2.0-rc.3-fast
   disableChainspecGeneration: true
-  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/75c3587b3877ff5768845d113cb6cce48606b757/rollup-dev-env-chainspecs/rollup-local-1.2.0-rc.3-raw.json
+  customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/72ca3e9e38f08a5a9e7ec14b2088ad57a07e3332/rollup-dev-env-chainspecs/rollup-local-1.2.0-rc.3-fast-raw.json
   storageClass: node-data-volume-retain
   storageSize: 50Gi
   enableServiceMonitorCollectors: true
@@ -115,7 +115,7 @@ gaspAvsEnv:
   TESTNET: "true"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWEPyq7mzPhc4DPdcm8pHvxLeQ1iuDNzhHkRUFRXBKaUa8
-  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/75c3587b3877ff5768845d113cb6cce48606b757/rollup-dev-env-chainspecs/rollup-local-1.2.0-rc.3-raw.json
+  ROLLUP_NODE_CUSTOM_CHAINSPEC_URL: https://raw.githubusercontent.com/gasp-xyz/chainspec/72ca3e9e38f08a5a9e7ec14b2088ad57a07e3332/rollup-dev-env-chainspecs/rollup-local-1.2.0-rc.3-fast-raw.json
 ###########################
 # updater configs #
 ###########################
