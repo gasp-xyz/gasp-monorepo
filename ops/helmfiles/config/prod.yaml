@@ -28,8 +28,8 @@ collator:
       memory: 8Gi
   image:
     repository: mangatasolutions/rollup-node
-    # Ref: https://github.com/gasp-xyz/mangata-node/tree/3722076d06f7c1ff7c727a799260c5df2a5eb62f
-    tag: f26183b4e1055ff700c0b7b4483616473508ddb9
+    # Cost free council costs
+    tag: 1.2.0-rc.3
   disableChainspecGeneration: true
   customChainspecUrl: https://raw.githubusercontent.com/gasp-xyz/chainspec/f9604551934c498a6a814d84f2cd6c01803d24d7/rollup-dev-env-chainspecs/alpha-launch-f26183b-raw.json
   enableServiceMonitorCollectors: true
@@ -197,7 +197,7 @@ collator:
 # aggregator configs #
 ######################
 aggregatorEnabled: true
-aggregatorImageTag: 75bdf1c7b7ce0ec7ebcba63907c48c78d8db9dd8
+aggregatorImageTag: 106a0ba1d93cb119c3cda1805f1a60d31aca48ad
 
 aggregatorEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-aggregator-key
@@ -225,7 +225,7 @@ aggregatorEnv:
 # gaspAvs configs #
 #####################
 # Override the image tag provided on deployment from IMAGE_TAG env variable
-gaspAvsImageTag: 83174d468dca9d6e7fe13d798fb8a373d8fb0f42
+gaspAvsImageTag: 80511d961edf6a98e8435afdceca4fe0938ac85c
 
 gaspAvsEnabled: true
 gaspAvsEnvSecrets:
@@ -273,7 +273,7 @@ gaspAvsEnv2:
 # updater configs #
 ###########################
 updaterEnabled: true
-updaterImageTag: 45539a735c399b1d6b235edb5bb8f09d8bb5fcc2
+updaterImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 updaterEnvSecrets:
   ECDSA_KEY_JSON: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-key
   ECDSA_KEY_PASSWORD: ref+gcpsecrets://direct-pixel-353917/rollup-prod-updater-password
@@ -318,7 +318,7 @@ updaterEnvBase:
 # sequencer configs #
 ############################
 sequencerEnabled: true
-sequencerImageTag: c6cdea833576a31f8343d5ef43babe33cec06819
+sequencerImageTag: 612242d8acb1ebe086c1508d2d015653f7d1fffc
 
 sequencerEnvEth:
   L1_CHAIN: "Ethereum"
