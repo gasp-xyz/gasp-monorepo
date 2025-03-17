@@ -18,6 +18,9 @@ use rollup_runtime::runtime_config::{
 	opaque::Block,
 	types::{AccountId, Balance, Nonce, TokenId},
 };
+use rollup_runtime::{
+	Runtime, RuntimeCall
+};
 
 use metamask_signature_rpc::MetamaskSignatureApiServer;
 use ver_api::VerNonceApi;
@@ -56,6 +59,7 @@ where
 		pallet_rolldown::messages::Chain,
 	>,
 	C::Api: pallet_market::MarketRuntimeApi<Block, Balance, TokenId>,
+	C::Api: pallet_collective_mangata::CouncilRuntimeApi<Block, <Runtime as frame_system::Config>::Hash>,
 	C::Api: BlockBuilder<Block>,
 	C::Api: VerNonceApi<Block, AccountId>,
 	P: TransactionPool + 'static,
@@ -67,6 +71,7 @@ where
 	use rolldown_rpc::{Rolldown, RolldownApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 	use xyk_rpc::{Xyk, XykApiServer};
+	use pallet_collective_mangata_rpc::{Council, CouncilApiServer};
 
 	let mut module = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe } = deps;
@@ -77,7 +82,8 @@ where
 	module.merge(Rolldown::new(client.clone()).into_rpc())?;
 	module.merge(ProofOfStake::new(client.clone()).into_rpc())?;
 	module.merge(MetamaskSignature::new(client.clone()).into_rpc())?;
-	module.merge(Market::new(client).into_rpc())?;
+	module.merge(Market::new(client.clone()).into_rpc())?;
+	module.merge(Council::new(client).into_rpc())?;
 
 	// Extend this RPC with a custom API by using the following syntax.
 	// `YourRpcStruct` should have a reference to a client, which is needed
