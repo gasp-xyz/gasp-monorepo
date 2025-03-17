@@ -14,12 +14,12 @@ use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 
-use rollup_runtime::runtime_config::{
-	opaque::Block,
-	types::{AccountId, Balance, Nonce, TokenId},
-};
 use rollup_runtime::{
-	Runtime, RuntimeCall
+	runtime_config::{
+		opaque::Block,
+		types::{AccountId, Balance, Nonce, TokenId},
+	},
+	Runtime, RuntimeCall,
 };
 
 use metamask_signature_rpc::MetamaskSignatureApiServer;
@@ -59,19 +59,22 @@ where
 		pallet_rolldown::messages::Chain,
 	>,
 	C::Api: pallet_market::MarketRuntimeApi<Block, Balance, TokenId>,
-	C::Api: pallet_collective_mangata::CouncilRuntimeApi<Block, <Runtime as frame_system::Config>::Hash>,
+	C::Api: pallet_collective_mangata::CouncilRuntimeApi<
+		Block,
+		<Runtime as frame_system::Config>::Hash,
+	>,
 	C::Api: BlockBuilder<Block>,
 	C::Api: VerNonceApi<Block, AccountId>,
 	P: TransactionPool + 'static,
 {
 	use market_rpc::{Market, MarketApiServer};
 	use metamask_signature_rpc::MetamaskSignature;
+	use pallet_collective_mangata_rpc::{Council, CouncilApiServer};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use proof_of_stake_rpc::{ProofOfStake, ProofOfStakeApiServer};
 	use rolldown_rpc::{Rolldown, RolldownApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 	use xyk_rpc::{Xyk, XykApiServer};
-	use pallet_collective_mangata_rpc::{Council, CouncilApiServer};
 
 	let mut module = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe } = deps;

@@ -1379,9 +1379,9 @@ impl_runtime_apis! {
 				Council::get_length_and_weight_for_call(call)
 			}
 		}
-	
+
 	impl pallet_collective_mangata::CouncilRuntimeApi<Block, <Runtime as frame_system::Config>::Hash> for Runtime {
-	
+
 			fn get_length_and_weight_for_proposal(
 				proposal_hash: <Runtime as frame_system::Config>::Hash,
 			) -> Option<(u32, Weight)>{
