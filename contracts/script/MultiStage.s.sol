@@ -17,9 +17,9 @@ import {Utils} from "./utils/Utils.sol";
 
 contract MultiStage is Script, Utils {
     function run() external {
-        bytes32 env = keccak256(abi.encodePacked(vm.envString("ENV_SELECTOR")));
+        bytes32 env = _stringToHash(vm.envString("ENV_SELECTOR"));
 
-        if (env == keccak256(abi.encodePacked("ethereum-stub"))) {
+        if (env == _stringToHash("ethereum-stub")) {
             _incrementAccountNonce();
 
             M2Deployer eigenDeployer = new M2Deployer();
@@ -42,32 +42,22 @@ contract MultiStage is Script, Utils {
                 console.log("Deploying finalizer contracts");
                 console.log("################################################################################");
                 finalizerAVSDeployer.run();
-
-                console.log("################################################################################");
-                console.log("Deploying rolldown contracts");
-                console.log("################################################################################");
-                rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
-            } else {
-                console.log("################################################################################");
-                console.log("Deploying rolldown contracts");
-                console.log("################################################################################");
-                rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
             }
 
-            Rolldown rolldown;
-            FinalizerTaskManager taskManager;
-            address avsOwner;
+            console.log("################################################################################");
+            console.log("Deploying rolldown contracts");
+            console.log("################################################################################");
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
 
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            taskManager =
+            FinalizerTaskManager taskManager =
                 FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
             string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
+            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
-            string memory _CONFIG_PATH = "deploy.config";
-            string memory configData = readConfig(_CONFIG_PATH);
-            avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+            string memory configData = readConfig("deploy.config");
+            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
             vm.startBroadcast(avsOwner);
 
@@ -75,26 +65,26 @@ contract MultiStage is Script, Utils {
             rolldown.setUpdater(address(taskManager));
 
             vm.stopBroadcast();
-        } else if (env == keccak256(abi.encodePacked("arbitrum-stub"))) {
+            return;
+        } 
+        
+         if (env == _stringToHash("arbitrum-stub")) {
             _incrementAccountNonce();
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
-        } else if (env == keccak256(abi.encodePacked("base-stub"))) {
+            return;
+        } 
+        
+         if (env == _stringToHash("base-stub")) {
             _incrementAccountNonce();
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
-        } else if (env == keccak256(abi.encodePacked("arbitrum-sepolia"))) {
-            if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
-                revert("Already deployed");
-            }
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
-        } else if (env == keccak256(abi.encodePacked("base-sepolia"))) {
-            if (outputExists("base_rolldown_output") || outputExists("base_gmrs_output")) {
-                revert("Already deployed");
-            }
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
-        } else if (env == keccak256(abi.encodePacked("ethereum-holesky"))) {
+            return;
+        } 
+        
+         if (env == _stringToHash("ethereum-holesky")) {
             console.log("################################################################################");
             console.log("Deploying finalizer contracts");
             console.log("################################################################################");
+
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
             if (outputExists(finalizerAVSDeployer.getOutputPath())) {
                 revert("Already deployed");
@@ -105,22 +95,19 @@ contract MultiStage is Script, Utils {
             console.log("################################################################################");
             console.log("Deploying rolldown contracts");
             console.log("################################################################################");
+
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
 
-            Rolldown rolldown;
-            FinalizerTaskManager taskManager;
-            address avsOwner;
-
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            taskManager =
+            FinalizerTaskManager taskManager =
                 FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
             string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
+            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
             string memory configData = readConfig("deploy.config");
-            avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
             vm.startBroadcast(avsOwner);
 
@@ -128,33 +115,65 @@ contract MultiStage is Script, Utils {
             rolldown.setUpdater(address(taskManager));
 
             vm.stopBroadcast();
-        } else if (env == keccak256(abi.encodePacked("upgrade-rolldown-ethereum-holesky"))) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            // We only want upgrade and not deploy from scratch
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
-        } else if (env == keccak256(abi.encodePacked("upgrade-rolldown-arbitrum-sepolia"))) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            // We only want upgrade and not deploy from scratch
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
-        } else if (env == keccak256(abi.encodePacked("upgrade-rolldown-base-sepolia"))) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            // We only want upgrade and not deploy from scratch
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed");
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
-        } else {
-            revert("Unsupported environment");
+            return;
+        } 
+        
+        if (env == _stringToHash("arbitrum-sepolia")) {
+            if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
+                revert("Already deployed on Arbitrum Sepolia");
+            }
+
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            return;
+        } 
+        
+        
+        if (env == _stringToHash("base-sepolia")) {
+            if (outputExists("base_rolldown_output") || outputExists("base_gmrs_output")) {
+                revert("Already deployed on Base Sepolia");
+            }
+
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            return;
         }
+        
+         if (env == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
+            console.log("################################################################################");
+            console.log("Upgrading rolldown contracts");
+            console.log("################################################################################");
+
+            RolldownDeployer rolldownDeployer = new RolldownDeployer();
+            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Ethereum Holesky");
+
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+            return;
+        } 
+        
+         if (env == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
+            console.log("################################################################################");
+            console.log("Upgrading rolldown contracts");
+            console.log("################################################################################");
+
+            RolldownDeployer rolldownDeployer = new RolldownDeployer();
+            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Arbitrum Sepolia");
+
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
+            return;
+        } 
+        
+        if (env == _stringToHash("upgrade-rolldown-base-sepolia")) {
+            console.log("################################################################################");
+            console.log("Upgrading rolldown contracts");
+            console.log("################################################################################");
+
+            RolldownDeployer rolldownDeployer = new RolldownDeployer();
+            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Base Sepolia");
+
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
+            return;
+        } 
+
+        revert("Unsupported environment");
     }
 
     function _incrementAccountNonce() private {
@@ -164,30 +183,28 @@ contract MultiStage is Script, Utils {
     }
 
     function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
-        Rolldown rolldown;
-        GaspMultiRollupService gmrs;
-        address avsOwner;
-
         console.log("################################################################################");
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
+
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(chain);
 
         string memory configData = readConfig("deploy.config");
-        avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+        address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
         console.log("################################################################################");
         console.log("Deploying gaspMultiRollupService contracts");
         console.log("################################################################################");
+
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
         gaspMultiRollupServiceDeployer.run(chain);
 
         string memory gmrsDeployedContracts = readOutput("gmrs_output");
-        gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
+        GaspMultiRollupService gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
 
         string memory rolldownDeployedContracts = readOutput("rolldown_output");
-        rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
+        Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
         vm.startBroadcast(avsOwner);
 
@@ -195,5 +212,9 @@ contract MultiStage is Script, Utils {
         rolldown.setUpdater(address(gmrs));
 
         vm.stopBroadcast();
+    }
+
+    function _stringToHash(string memory s) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(s));
     }
 }
