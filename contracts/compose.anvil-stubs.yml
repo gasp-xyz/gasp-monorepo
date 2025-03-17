@@ -40,3 +40,17 @@ services:
       interval: 2s
       timeout: 10s
       retries: 3
+
+  monad-stub:
+    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    platform: linux/amd64
+    ports:
+      - 8547:8545
+    entrypoint: anvil
+    command: >
+      --host 0.0.0.0 --balance 1000000000000000000 --chain-id 31339 --port 8545
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
+      interval: 2s
+      timeout: 10s
+      retries: 3

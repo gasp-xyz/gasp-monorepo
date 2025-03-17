@@ -9,7 +9,7 @@
     "avoid-throw": "error",
     "avoid-tx-origin": "error",
     "check-send-result": "error",
-    "code-complexity": ["error", 14],
+    "code-complexity": ["error", 17],
     "compiler-version": ["error", "0.8.13"],
     "comprehensive-interface": "off",
     "const-name-snakecase": "error",

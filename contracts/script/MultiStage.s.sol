@@ -7,9 +7,7 @@ import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {AnvilSetup} from "../script/0_AnvilSetup.s.sol";
 import {FinalizerAVSDeployer, FinalizerTaskManager} from "../script/1_FinalizerAVSDeployer.s.sol";
-import {
-    GaspMultiRollupService, GaspMultiRollupServiceDeployer
-} from "../script/GaspMultiRollupServiceDeployer.s.sol";
+import {GaspMultiRollupService, GaspMultiRollupServiceDeployer} from "../script/GaspMultiRollupServiceDeployer.s.sol";
 import {M2Deployer} from "../script/M2_Deploy_From_Scratch.s.sol";
 import {IRolldownPrimitives, Rolldown, RolldownDeployer} from "../script/RolldownDeployer.s.sol";
 import {IRolldown} from "../src/interfaces/IRolldown.sol";
@@ -66,28 +64,31 @@ contract MultiStage is Script, Utils {
 
             vm.stopBroadcast();
             return;
-        } 
-        
-         if (env == _stringToHash("arbitrum-stub")) {
-            _incrementAccountNonce();
+        }
+
+        if (env == _stringToHash("arbitrum-stub")) {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
-        } 
-        
-         if (env == _stringToHash("base-stub")) {
-            _incrementAccountNonce();
+        }
+
+        if (env == _stringToHash("base-stub")) {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
-        } 
-        
-         if (env == _stringToHash("ethereum-holesky")) {
+        }
+
+        if (env == _stringToHash("monad-stub")) {
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            return;
+        }
+
+        if (env == _stringToHash("ethereum-holesky")) {
             console.log("################################################################################");
             console.log("Deploying finalizer contracts");
             console.log("################################################################################");
 
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
             if (outputExists(finalizerAVSDeployer.getOutputPath())) {
-                revert("Already deployed");
+                revert("Already deployed on Ethereum Holesky");
             }
 
             finalizerAVSDeployer.run();
@@ -116,8 +117,8 @@ contract MultiStage is Script, Utils {
 
             vm.stopBroadcast();
             return;
-        } 
-        
+        }
+
         if (env == _stringToHash("arbitrum-sepolia")) {
             if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
                 revert("Already deployed on Arbitrum Sepolia");
@@ -125,9 +126,8 @@ contract MultiStage is Script, Utils {
 
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
-        } 
-        
-        
+        }
+
         if (env == _stringToHash("base-sepolia")) {
             if (outputExists("base_rolldown_output") || outputExists("base_gmrs_output")) {
                 revert("Already deployed on Base Sepolia");
@@ -136,8 +136,17 @@ contract MultiStage is Script, Utils {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
         }
-        
-         if (env == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
+
+        if (env == _stringToHash("monad-testnet")) {
+            if (outputExists("monad_rolldown_output") || outputExists("monad_gmrs_output")) {
+                revert("Already deployed on Monad Testnet");
+            }
+
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            return;
+        }
+
+        if (env == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
             console.log("################################################################################");
             console.log("Upgrading rolldown contracts");
             console.log("################################################################################");
@@ -147,9 +156,9 @@ contract MultiStage is Script, Utils {
 
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
             return;
-        } 
-        
-         if (env == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
+        }
+
+        if (env == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
             console.log("################################################################################");
             console.log("Upgrading rolldown contracts");
             console.log("################################################################################");
@@ -159,8 +168,8 @@ contract MultiStage is Script, Utils {
 
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
             return;
-        } 
-        
+        }
+
         if (env == _stringToHash("upgrade-rolldown-base-sepolia")) {
             console.log("################################################################################");
             console.log("Upgrading rolldown contracts");
@@ -171,7 +180,7 @@ contract MultiStage is Script, Utils {
 
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
             return;
-        } 
+        }
 
         revert("Unsupported environment");
     }
@@ -183,6 +192,8 @@ contract MultiStage is Script, Utils {
     }
 
     function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
+        _incrementAccountNonce();
+
         console.log("################################################################################");
         console.log("Deploying rolldown contracts");
         console.log("################################################################################");
@@ -201,7 +212,8 @@ contract MultiStage is Script, Utils {
         gaspMultiRollupServiceDeployer.run(chain);
 
         string memory gmrsDeployedContracts = readOutput("gmrs_output");
-        GaspMultiRollupService gmrs = GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
+        GaspMultiRollupService gmrs =
+            GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
 
         string memory rolldownDeployedContracts = readOutput("rolldown_output");
         Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));

@@ -100,3 +100,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  monad-stub:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ghcr.io/paradigmxyz/reth:v1.0.7
+        RUN apt-get update && apt-get install -y wget netcat && rm -rf /var/lib/apt/lists/*
+    ports:
+      - 8547:8545
+    command:
+      - node
+      - "--datadir=/data"
+      - "--http"
+      - "--http.addr=0.0.0.0"
+      - "--http.port=8545"
+      - "--http.api=all"
+      - "--http.corsdomain=*"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.port=8545"
+      - "--ws.api=all"
+      - "--ws.origins=*"
+      - "--auto-mine"
+    volumes:
+      - ./script/output/31337/:/app/script/output/31337
+      - ./script/output/1337/:/app/script/output/1337
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "127.0.0.1", "8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
