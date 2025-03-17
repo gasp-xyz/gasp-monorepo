@@ -170,7 +170,7 @@ gaspAvsEnv:
   AVS_UPDATE_STAKE_PERIOD: "150"
   OPT_IN_AT_STARTUP: "true"
   LOG_LEVEL: "info"
-  RUST_LOG: avs=debug,ether=trace
+  RUST_LOG: gasp_avs=debug,ether=trace
   TESTNET: "false"
   # rollup-node configs
   ROLLUP_NODE_BOOTNODE: /dns/collator-01-p2p/tcp/30333/p2p/12D3KooWPZ4S8zcLcsLBRSeqbbh233tFWgc6hRtXTce9x1EuLuWL

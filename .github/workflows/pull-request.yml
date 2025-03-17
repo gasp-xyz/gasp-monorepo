@@ -19,7 +19,8 @@ concurrency:
 jobs:
   init:
     name: Set global version
-    if: github.event.action != 'unlabeled' && github.event.action != 'closed'
+    # Ignore pull requests from develop, release/next, or main branches
+    if: github.event.action != 'unlabeled' && github.event.action != 'closed' && !contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)
     runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}

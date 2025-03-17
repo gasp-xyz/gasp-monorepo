@@ -20,6 +20,7 @@ fileGroups:
     - 'rollup/**/*'
     - 'rpc/**/*'
     - 'Cargo.toml'
+    - 'Cargo.lock'
   gasp-e2e-sources:
     - 'gasp-e2e/**/*.ts'
 
@@ -47,35 +48,49 @@ tasks:
   buildkit-build-and-push-image-digests-standard-runtime:
     script: |
       set -euo pipefail
+      mkdir -p ./build
       echo "Starting buildkit build for standard runtime..."
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max \
         --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
         --build-arg ENABLE_FAST_RUNTIME=false \
-        --metadata-file gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
+        --metadata-file build/gasp-node-standard-runtime-buildkit-metadata.json -f Dockerfile ./
       
       BUILD_EXIT_CODE=$?
       
       # Validate the metadata file exists and contains the expected digest
-      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f gasp-node-standard-runtime-buildkit-metadata.json ]; then
-        if grep -q "containerimage.digest" gasp-node-standard-runtime-buildkit-metadata.json; then
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f build/gasp-node-standard-runtime-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" build/gasp-node-standard-runtime-buildkit-metadata.json; then
           echo "✅ Build successful and metadata file contains valid digest"
-          cat gasp-node-standard-runtime-buildkit-metadata.json
+          cat build/gasp-node-standard-runtime-buildkit-metadata.json
+
+          IMAGE_DIGEST=$(jq -r '.["containerimage.digest"]' build/gasp-node-standard-runtime-buildkit-metadata.json)
+          CONTAINER_ID=$(docker create ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST})
+          docker cp $CONTAINER_ID:/app/rollup_runtime.compact.compressed.wasm ./build/rollup_runtime_standard.compact.compressed.wasm
+          docker rm $CONTAINER_ID
+          # Verify the file was extracted
+          if [ -f "./build/rollup_runtime_standard.compact.compressed.wasm" ]; then
+            echo "✅ Successfully extracted WASM file"
+            ls -la ./build/rollup_runtime_standard.compact.compressed.wasm
+          else
+            echo "❌ Failed to extract WASM file"
+            exit 1
+          fi
         else
           echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
-          cat gasp-node-standard-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
+          cat build/gasp-node-standard-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
           exit 1
         fi
       else
         echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
-        [ -f gasp-node-standard-runtime-buildkit-metadata.json ] && cat gasp-node-standard-runtime-buildkit-metadata.json
+        [ -f build/gasp-node-standard-runtime-buildkit-metadata.json ] && cat build/gasp-node-standard-runtime-buildkit-metadata.json
         exit $BUILD_EXIT_CODE
       fi
       
       exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-node-standard-runtime-buildkit-metadata.json']
+    outputs: ['build/gasp-node-standard-runtime-buildkit-metadata.json', 'build/rollup_runtime_standard.compact.compressed.wasm']
     options:
       outputStyle: buffer-only-failure
       cache: true
@@ -84,46 +99,60 @@ tasks:
   buildkit-build-and-push-image-digests-fast-runtime:
     script: |
       set -euo pipefail
+      mkdir -p ./build
       echo "Starting buildkit build for fast runtime..."
       docker buildx build --platform linux/amd64,linux/arm64 \
         --cache-from type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime \
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max \
         --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
         --build-arg ENABLE_FAST_RUNTIME=true \
-        --metadata-file gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
+        --metadata-file build/gasp-node-fast-runtime-buildkit-metadata.json -f Dockerfile ./
       
       BUILD_EXIT_CODE=$?
       
       # Validate the metadata file exists and contains the expected digest
-      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f gasp-node-fast-runtime-buildkit-metadata.json ]; then
-        if grep -q "containerimage.digest" gasp-node-fast-runtime-buildkit-metadata.json; then
+      if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f build/gasp-node-fast-runtime-buildkit-metadata.json ]; then
+        if grep -q "containerimage.digest" build/gasp-node-fast-runtime-buildkit-metadata.json; then
           echo "✅ Build successful and metadata file contains valid digest"
-          cat gasp-node-fast-runtime-buildkit-metadata.json
+          cat build/gasp-node-fast-runtime-buildkit-metadata.json
+
+          IMAGE_DIGEST=$(jq -r '.["containerimage.digest"]' build/gasp-node-fast-runtime-buildkit-metadata.json)
+          CONTAINER_ID=$(docker create ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST})
+          mkdir -p ./build
+          docker cp $CONTAINER_ID:/app/rollup_runtime.compact.compressed.wasm ./build/rollup_runtime_fast.compact.compressed.wasm
+          docker rm $CONTAINER_ID
+          # Verify the file was extracted
+          if [ -f "./build/rollup_runtime_fast.compact.compressed.wasm" ]; then
+            echo "✅ Successfully extracted WASM file"
+            ls -la ./build/rollup_runtime_fast.compact.compressed.wasm
+          else
+            echo "❌ Failed to extract WASM file"
+            exit 1
+          fi
         else
           echo "❌ Build appeared successful but metadata file doesn't contain expected digest"
-          cat gasp-node-fast-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
+          cat build/gasp-node-fast-runtime-buildkit-metadata.json || echo "Cannot read metadata file"
           exit 1
         fi
       else
         echo "❌ Build failed with exit code: $BUILD_EXIT_CODE"
-        [ -f gasp-node-fast-runtime-buildkit-metadata.json ] && cat gasp-node-fast-runtime-buildkit-metadata.json
+        [ -f build/gasp-node-fast-runtime-buildkit-metadata.json ] && cat build/gasp-node-fast-runtime-buildkit-metadata.json
         exit $BUILD_EXIT_CODE
       fi
       
       exit $BUILD_EXIT_CODE
     inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['gasp-node-fast-runtime-buildkit-metadata.json']
+    outputs: ['build/gasp-node-fast-runtime-buildkit-metadata.json', 'build/rollup_runtime_fast.compact.compressed.wasm']
     options:
       outputStyle: buffer-only-failure
       cache: true
       internal: true
-      retryCount: 3
       
   build-image-ci:
     script: |
       set -ex
-      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-standard-runtime-buildkit-metadata.json)
-      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-node-fast-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' build/gasp-node-standard-runtime-buildkit-metadata.json)
+      IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' build/gasp-node-fast-runtime-buildkit-metadata.json)
   
       docker buildx imagetools create \
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
@@ -137,7 +166,10 @@ tasks:
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"      
     deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime']
-    inputs: ['gasp-node-standard-runtime-buildkit-metadata.json', 'gasp-node-fast-runtime-buildkit-metadata.json']
+    inputs: 
+      - 'build/gasp-node-standard-runtime-buildkit-metadata.json'
+      - 'build/gasp-node-fast-runtime-buildkit-metadata.json'
+      - 'build/rollup_runtime_standard.compact.compressed.wasm'
     options:
       cache: false
 
@@ -932,7 +964,8 @@ tasks:
       - '/ferry-withdrawal/**/*.ts'
       - '/ferry-withdrawal/package.json'
       - '/ferry-withdrawal/yarn.lock'
-      - "/contracts/lib/**/*.sol"
+      - "/contracts/lib/forge-std/src/**/*.sol"
+      - "/contracts/lib/eigenlayer-middleware/src/**/*.sol"
       - "/contracts/src/**/*.sol"
       - "/contracts/test/**/*.sol"
       - "/contracts/script/**/*.sol"

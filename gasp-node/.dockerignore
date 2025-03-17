@@ -24,9 +24,6 @@ node_modules
 
 target
 target-*
-!**/release/rollup-node
-!**/release/wbuild/rollup-runtime/rollup_runtime.compact.compressed.wasm
-!docker-cargo/release/rollup-node
 
 # dotfiles in the repo root
 /.*
@@ -61,3 +58,6 @@ docker-cargo.sh
 Justfile
 Mangata.md
 README.md
+
+build_rs_cov.profraw
+build
