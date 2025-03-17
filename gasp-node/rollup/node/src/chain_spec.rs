@@ -301,23 +301,25 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 				vec![hex_literal::hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc").into()];
 			let base_sequencers: Vec<AccountId> =
 				vec![hex_literal::hex!("773539d4Ac0e786233D90A233654ccEE26a613D9").into()];
-			let monad_sequencers: Vec<AccountId> =
-				vec![];
-			let megaeth_sequencers: Vec<AccountId> =
-				vec![];
-			let sonic_sequencers: Vec<AccountId> =
-				vec![];
+			let monad_sequencers: Vec<AccountId> = vec![];
+			let megaeth_sequencers: Vec<AccountId> = vec![];
+			let sonic_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![];
 
-			let sequencers_endownment =
-				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone(),
-				monad_sequencers.clone(), megaeth_sequencers.clone(), sonic_sequencers.clone()]
-					.iter()
-					.flatten()
-					.cloned()
-					.map(|account_id| (RX_TOKEN_ID, 1_000_100u128 * currency::DOLLARS, account_id))
-					.collect::<Vec<_>>();
+			let sequencers_endownment = [
+				eth_sequencers.clone(),
+				arb_sequencers.clone(),
+				base_sequencers.clone(),
+				monad_sequencers.clone(),
+				megaeth_sequencers.clone(),
+				sonic_sequencers.clone(),
+			]
+			.iter()
+			.flatten()
+			.cloned()
+			.map(|account_id| (RX_TOKEN_ID, 1_000_100u128 * currency::DOLLARS, account_id))
+			.collect::<Vec<_>>();
 
 			let mut tokens_endowment = sequencers_endownment;
 			tokens_endowment.push((RX_TOKEN_ID, 4_997_700u128 * currency::DOLLARS, sudo.into()));
@@ -509,12 +511,9 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				hex_literal::hex!("6f52f2D60AdFC152ac561287b754A56A7933F1ae").into(),
 				hex_literal::hex!("a7196AF761942A10126165B2c727eFCD46c254e0").into(),
 			];
-			let monad_sequencers: Vec<AccountId> =
-				vec![];
-			let megaeth_sequencers: Vec<AccountId> =
-				vec![];
-			let sonic_sequencers: Vec<AccountId> =
-				vec![];
+			let monad_sequencers: Vec<AccountId> = vec![];
+			let megaeth_sequencers: Vec<AccountId> = vec![];
+			let sonic_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![
 				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
@@ -526,14 +525,19 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
 			];
 
-			let sequencers_endownment =
-				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone(),
-				monad_sequencers.clone(), megaeth_sequencers.clone(), sonic_sequencers.clone()]
-					.iter()
-					.flatten()
-					.cloned()
-					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
-					.collect::<Vec<_>>();
+			let sequencers_endownment = [
+				eth_sequencers.clone(),
+				arb_sequencers.clone(),
+				base_sequencers.clone(),
+				monad_sequencers.clone(),
+				megaeth_sequencers.clone(),
+				sonic_sequencers.clone(),
+			]
+			.iter()
+			.flatten()
+			.cloned()
+			.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
+			.collect::<Vec<_>>();
 
 			let mut tokens_endowment = sequencers_endownment;
 			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
@@ -879,7 +883,11 @@ fn rollup_genesis(
 				megaeth_initial_sequencers
 					.into_iter()
 					.map(|seq| {
-						(seq, pallet_rolldown::messages::Chain::MegaEth, 100u128 * currency::DOLLARS)
+						(
+							seq,
+							pallet_rolldown::messages::Chain::MegaEth,
+							100u128 * currency::DOLLARS,
+						)
 					})
 					.collect::<Vec<_>>(),
 				sonic_initial_sequencers
