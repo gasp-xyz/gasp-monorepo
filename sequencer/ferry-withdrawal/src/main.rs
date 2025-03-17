@@ -84,7 +84,7 @@ pub async fn main() -> Result<(), Error> {
 
     let mut executor = {
         let l1 = L1::new(rolldown, provider.clone());
-        ferry::Ferry::new(l1, l2.clone(), sender, chain, executor)
+        ferry::Ferry::new(l1, l2.clone(), sender, chain, args.tx_cost, executor)
     };
 
     if let Some(port) = args.prometheus_port {

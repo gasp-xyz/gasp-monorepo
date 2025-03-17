@@ -26,6 +26,9 @@ pub struct Cli {
 
     #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
     enabled: Vec<[u8; 20]>,
+
+    #[arg(long, default_value_t = 1_000_000_000_000_000, env = "TX_COST")]
+    pub tx_cost: u128,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {

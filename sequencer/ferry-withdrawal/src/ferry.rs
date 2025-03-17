@@ -33,6 +33,7 @@ pub struct Ferry<L1, L2> {
     closable_withdrawals: VecDeque<Withdrawal>,
     ferryable_withdrawals: HashMap<U256, (U256, Withdrawal)>,
     balances: HashMap<[u8; 20], U256>,
+    tx_cost: U256
 }
 
 impl<L1, L2> Ferry<L1, L2>
@@ -45,6 +46,7 @@ where
         l2: L2,
         account: [u8; 20],
         chain: Chain,
+        tx_cost: u128,
         input: mpsc::Receiver<FerryAction>,
     ) -> Self {
         Self {
@@ -56,6 +58,7 @@ where
             ferryable_withdrawals: Default::default(),
             balances: Default::default(),
             account,
+            tx_cost: tx_cost.into(),
         }
     }
 
@@ -79,8 +82,14 @@ where
             .ferryable_withdrawals
             .iter()
             .filter(|(_, (_, w))| {
-                let required_tokens_amount = w.amount - w.ferry_tip;
-                let balance = balances.get(&w.token_address).cloned().unwrap_or_default();
+                let required_tokens_amount = if w.token_address == l1api::NATIVE_TOKEN_ADDRESS {
+                    w.amount - w.ferry_tip
+                } else {
+                    (w.amount - w.ferry_tip).saturating_add(self.tx_cost)
+                };
+                let balance = balances.get(&w.token_address)
+                    .cloned()
+                    .unwrap_or_default();
                 balance > required_tokens_amount
             })
             .max_by_key(|(_, (prio, _))| prio)
@@ -206,6 +215,7 @@ where
                 .await
                 {
                     Ok(Some(FerryAction::Ferry { withdrawal, prio })) => {
+                        tracing::info!("received fery request");
                         self.track_balance(withdrawal.token_address).await?;
                         self.ferryable_withdrawals
                             .insert(withdrawal.request_id.id, (prio, withdrawal));
@@ -267,6 +277,7 @@ mod test {
 
     const ACCOUNT: [u8; 20] = [1; 20];
     const ENABLED_TOKEN1: [u8; 20] = [2; 20];
+    const NATIVE_TOKEN: [u8; 20] = hex_literal::hex!("0000000000000000000000000000000000000001");
     const RECIPIENT: [u8; 20] = [5; 20];
 
     #[traced_test]
@@ -276,7 +287,7 @@ mod test {
         let l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -316,7 +327,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -325,6 +336,59 @@ mod test {
         drop(input);
         handle.await.unwrap();
     }
+
+    #[traced_test]
+    #[tokio::test]
+    async fn test_ferry_ignores_native_requests_that_can_not_affort() {
+        let mut l1 = MockL1::new();
+        let l2 = MockL2::new();
+
+        let signal = Arc::new(AtomicBool::new(false));
+        let notify = signal.clone();
+        let (input, output) = mpsc::channel(100);
+        l1.expect_native_balance().returning(|_| Ok(500));
+        l1.expect_get_latest_finalized_request_id()
+            .returning(|| Ok(None));
+
+        l1.expect_get_status().returning(|_| {
+            Ok(RequestStatus::Pending)
+            }
+        );
+
+        l1.expect_ferry_withdrawal()
+        .times(0)
+        .return_once(move |_| {
+            notify.store(true, std::sync::atomic::Ordering::Relaxed);
+            Ok(H256::default())
+        });
+
+        input
+            .send(FerryAction::Ferry {
+                withdrawal: Withdrawal {
+                    request_id: RequestId {
+                        id: 1.into(),
+                        origin: Origin::L2,
+                    },
+                    token_address: NATIVE_TOKEN,
+                    amount: 100.into(),
+                    ferry_tip: 10.into(),
+                    recipient: RECIPIENT,
+                },
+                prio: 10.into(),
+            })
+            .await
+            .unwrap();
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+
+        let handle = tokio::spawn(async move {
+            ferry.run().await.unwrap();
+        });
+
+        drop(input);
+        handle.await.unwrap();
+    }
+
 
     #[traced_test]
     #[tokio::test]
@@ -363,7 +427,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -457,7 +521,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
         });
@@ -545,7 +609,7 @@ mod test {
                 Ok(H256::default())
             });
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
         });
