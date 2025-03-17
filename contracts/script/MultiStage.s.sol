@@ -5,26 +5,22 @@ import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {Test} from "forge-std/Test.sol";
-import {AnvilSetup} from "./../script/0_AnvilSetup.s.sol";
-import {FinalizerAVSDeployer, FinalizerTaskManager} from "./../script/1_FinalizerAVSDeployer.s.sol";
+import {AnvilSetup} from "../script/0_AnvilSetup.s.sol";
+import {FinalizerAVSDeployer, FinalizerTaskManager} from "../script/1_FinalizerAVSDeployer.s.sol";
 import {
     GaspMultiRollupService, GaspMultiRollupServiceDeployer
-} from "./../script/GaspMultiRollupServiceDeployer.s.sol";
-import {M2Deployer} from "./../script/M2_Deploy_From_Scratch.s.sol";
-import {IRolldownPrimitives, Rolldown, RolldownDeployer} from "./../script/RolldownDeployer.s.sol";
-import {IRolldown} from "./../src/interfaces/IRolldown.sol";
+} from "../script/GaspMultiRollupServiceDeployer.s.sol";
+import {M2Deployer} from "../script/M2_Deploy_From_Scratch.s.sol";
+import {IRolldownPrimitives, Rolldown, RolldownDeployer} from "../script/RolldownDeployer.s.sol";
+import {IRolldown} from "../src/interfaces/IRolldown.sol";
 import {Utils} from "./utils/Utils.sol";
 
-contract MultiStage is Script, Utils, Test {
+contract MultiStage is Script, Utils {
     function run() external {
         bytes32 env = keccak256(abi.encodePacked(vm.envString("ENV_SELECTOR")));
 
         if (env == keccak256(abi.encodePacked("ethereum-stub"))) {
-            vm.startBroadcast();
-            // added some extra call here so nonce does inc
-            new EmptyContract();
-            vm.stopBroadcast();
+            _incrementAccountNonce();
 
             M2Deployer eigenDeployer = new M2Deployer();
             AnvilSetup anvilDeployer = new AnvilSetup();
@@ -80,29 +76,21 @@ contract MultiStage is Script, Utils, Test {
 
             vm.stopBroadcast();
         } else if (env == keccak256(abi.encodePacked("arbitrum-stub"))) {
-            vm.startBroadcast();
-            // added some extra call here so nonce does inc
-            new EmptyContract();
-            vm.stopBroadcast();
-
-            deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _incrementAccountNonce();
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
         } else if (env == keccak256(abi.encodePacked("base-stub"))) {
-            vm.startBroadcast();
-            // added some extra call here so nonce does inc
-            new EmptyContract();
-            vm.stopBroadcast();
-
-            deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
-        } else if (env == keccak256(abi.encodePacked("base-sepolia"))) {
-            if (outputExists("base_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
-                revert("Already deployed");
-            }
-            deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            _incrementAccountNonce();
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
         } else if (env == keccak256(abi.encodePacked("arbitrum-sepolia"))) {
             if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
                 revert("Already deployed");
             }
-            deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+        } else if (env == keccak256(abi.encodePacked("base-sepolia"))) {
+            if (outputExists("base_rolldown_output") || outputExists("base_gmrs_output")) {
+                revert("Already deployed");
+            }
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
         } else if (env == keccak256(abi.encodePacked("ethereum-holesky"))) {
             console.log("################################################################################");
             console.log("Deploying finalizer contracts");
@@ -169,7 +157,13 @@ contract MultiStage is Script, Utils, Test {
         }
     }
 
-    function deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) internal {
+    function _incrementAccountNonce() private {
+        vm.startBroadcast();
+        new EmptyContract();
+        vm.stopBroadcast();
+    }
+
+    function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
         Rolldown rolldown;
         GaspMultiRollupService gmrs;
         address avsOwner;
