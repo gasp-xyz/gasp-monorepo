@@ -13,6 +13,15 @@ pub type PendingUpdateMetadata =
     gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
 pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
 
+#[derive(Debug)]
+pub struct PendingUpdate {
+    pub chain: Chain,
+    pub update_id: u128,
+    pub range: (u128, u128),
+    pub hash: H256,
+}
+
+
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
     // pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;

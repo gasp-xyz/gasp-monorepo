@@ -1,19 +1,16 @@
 use envconfig::Envconfig;
 use hex::FromHex;
+use l1api::CachedL1Interface;
 use tracing::level_filters::LevelFilter;
 
-mod metrics;
 mod sequencer;
 mod watchdog;
 use tokio::time::Duration;
 use watchdog::Watchdog;
+use gasp_types::Chain;
+use l2api::Gasp;
 
 use sequencer::Sequencer;
-mod l1;
-use l1::{CachedL1Interface, RolldownContract};
-
-mod l2;
-use l2::Gasp;
 
 #[derive(Envconfig, Debug)]
 struct Config {
@@ -50,7 +47,7 @@ pub enum Error {
     #[error("Sequencer error")]
     SequencerError(#[from] sequencer::Error),
     #[error("L1 error")]
-    L1Error(#[from] l1::L1Error),
+    L1Error(#[from] l1api::L1Error),
     #[error("Deserialization error")]
     DeserializationError(#[from] hex::FromHexError),
     #[error("Unsupported chain `{0}`")]
@@ -100,7 +97,7 @@ async fn run(config: Config) -> Result<(), Error> {
     });
 
     let _metrics = tokio::spawn(async move {
-        metrics::serve_metrics(80).await;
+        common::serve_metrics(80).await;
     });
 
     let update_size_limit = config.update_size_limit;
@@ -113,9 +110,9 @@ async fn run(config: Config) -> Result<(), Error> {
     let rolldown_contract_address =
         <[u8; 20]>::from_hex(strip_prefix(&config.rolldown_contract_address))?;
     let chain = match config.chain.to_lowercase().as_ref() {
-        "ethereum" => Ok(l2::types::Chain::Ethereum),
-        "arbitrum" => Ok(l2::types::Chain::Arbitrum),
-        "base" => Ok(l2::types::Chain::Base),
+        "ethereum" => Ok(Chain::Ethereum),
+        "arbitrum" => Ok(Chain::Arbitrum),
+        "base" => Ok(Chain::Base),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 
@@ -125,13 +122,15 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-    let provider = l1::create_provider(config.l1_uri.as_str(), eth_secret_key).await?;
+
+    let provider = l1api::create_provider(config.l1_uri.clone(), eth_secret_key).await?;
+    let rolldown = l1api::RolldownContract::new(provider.clone(), rolldown_contract_address);
     tracing::info!("Connected to {}", config.l1_uri);
 
-    let rolldown = RolldownContract::from_provider(rolldown_contract_address, provider.clone());
+    let rolldown = l1api::L1::new(rolldown, provider.clone());
 
     let _balance_tracker = tokio::spawn(async move {
-        metrics::report_account_balance(provider).await;
+        common::report_account_balance(provider).await;
     });
 
     let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());

@@ -7,6 +7,7 @@ use subxt::Config;
 mod l2;
 pub mod mock;
 mod signer;
+use gasp_types::PendingUpdate;
 pub type HashOf<T> = <T as Config>::Hash;
 pub type EndDisputePeriod = u128;
 pub type PendingUpdateWithKeys = (EndDisputePeriod, Chain, gasp_types::PendingUpdateMetadata);
@@ -159,4 +160,6 @@ pub trait L2Interface {
         -> Result<Vec<[u8; 20]>, L2Error>;
 
     async fn get_dispute_period(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
+
+    async fn get_pending_updates(&self, at: H256) -> Result<Vec<PendingUpdate>, L2Error>;
 }

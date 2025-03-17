@@ -4396,11 +4396,14 @@ name = "sequencer"
 version = "0.1.0"
 dependencies = [
  "alloy",
- "contract-bindings",
+ "common",
  "envconfig",
  "futures",
+ "gasp-types",
  "hex",
  "hex-literal",
+ "l1api",
+ "l2api",
  "lazy_static",
  "lru",
  "mockall",

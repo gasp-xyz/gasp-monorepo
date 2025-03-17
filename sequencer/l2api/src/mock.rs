@@ -37,11 +37,6 @@ impl crate::L2Interface for L2{
     ) -> Result<Option<[u8; 20]>, L2Error>;
     async fn get_cancel_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 
-    // async fn get_pending_updates(
-    //     &self,
-    //     at: HashOf<GaspConfig>,
-    // ) -> Result<Vec<PendingUpdateWithKeys>, L2Error>;
-
     async fn deserialize_sequencer_update(
         &self,
         data: Vec<u8>,
@@ -85,6 +80,8 @@ impl crate::L2Interface for L2{
         -> Result<Vec<[u8; 20]>, L2Error>;
 
     async fn get_dispute_period(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
+
+    async fn get_pending_updates(&self, at: H256) -> Result<Vec<gasp_types::PendingUpdate>, L2Error>;
 }
 
 }
