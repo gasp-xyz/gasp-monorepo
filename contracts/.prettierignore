@@ -5,3 +5,5 @@ lib/
 node_modules/
 out/
 script/
+moon.yml
+contracts-buildkit-metadata.json

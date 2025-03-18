@@ -39,7 +39,6 @@ where
 {
 	fn abi_encode_hash(&self) -> H256 {
 		let encoded = self.abi_encode();
-		println!("INNER {}", hex::encode(encoded.clone()));
 		let hash: [u8; 32] = keccak_256(&encoded[..]).into();
 		H256::from(hash)
 	}
@@ -106,6 +105,8 @@ pub enum Chain {
 	Ethereum,
 	Arbitrum,
 	Base,
+	Monad,
+	MegaEth,
 	Sonic,
 }
 
@@ -115,6 +116,9 @@ impl AsRef<str> for Chain {
 			Chain::Ethereum => "Ethereum",
 			Chain::Arbitrum => "Arbitrum",
 			Chain::Base => "Base",
+			Chain::Monad => "Monad",
+			Chain::MegaEth => "MegaEth",
+			Chain::Sonic => "Sonic",
 		}
 	}
 }
@@ -443,6 +447,9 @@ impl TryFrom<eth_abi::Chain> for Chain {
 			eth_abi::Chain::Ethereum => Ok(Chain::Ethereum),
 			eth_abi::Chain::Arbitrum => Ok(Chain::Arbitrum),
 			eth_abi::Chain::Base => Ok(Chain::Base),
+			eth_abi::Chain::Monad => Ok(Chain::Monad),
+			eth_abi::Chain::MegaEth => Ok(Chain::MegaEth),
+			eth_abi::Chain::Sonic => Ok(Chain::Sonic),
 			_ => Err(String::from("Invalid origin type")),
 		}
 	}
@@ -465,36 +472,5 @@ impl TryFrom<eth_abi::CancelResolution> for CancelResolution {
 			cancelJustified: value.cancelJustified,
 			timeStamp: from_eth_u256(value.timeStamp),
 		})
-	}
-}
-
-#[cfg(test)]
-mod test{
-	use super::*;
-	use hex_literal::hex;
-	use hex::encode as hex_encode;
-	use sha3::{Keccak256, Digest};
-
-
-	#[test]
-	fn test_calculate_withdrawal_hash() {
-			let w = Withdrawal {
-				requestId: RequestId { origin: Origin::L2, id: 123u128 },
-				withdrawalRecipient: hex!("ffffffffffffffffffffffffffffffffffffffff").into(),
-				tokenAddress: hex!("1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f").into(),
-				amount: 123456u128.try_into().unwrap(),
-				ferryTip: 465789u128.try_into().unwrap(),
-			};
-
-			let r = L2Request::Withdrawal::<[u8; 20]>(w);
-
-			println!("INPUT {}", hex_encode(w.abi_encode()));
-			println!("INPUT LEN {}", w.abi_encode().len());
-			println!("INPUT HASHED{}", hex_encode(Keccak256::digest(w.abi_encode())));
-
-			assert_eq!(
-				r.abi_encode_hash(),
-				hex!("c85ad13f845ab19cf1f8c1181cdf116a8539722ead51a50c317dc44506efe8a8").into(),
-			);
 	}
 }

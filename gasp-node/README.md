@@ -53,6 +53,7 @@ cargo tarpaulin --timeout 120 --workspace -e rollup-runtime-integration-test rol
 Because of number of parameters is quite troublesome thats why we came up with dedicated dockerized environment.
 
 Use next commands to operate local dockerized environment using Docker Compose:
+
 ```bash
 # To build Docker image
 docker compose build
@@ -69,6 +70,7 @@ Once started, you can access nodes using port forwards
 - [127.0.0.1:9946](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9946#/explorer) - `node-bob` node
 
 ### Sudo access
+
 `Alice` is set as sudo account for docker setup
 
 ## Mangata node configuration
