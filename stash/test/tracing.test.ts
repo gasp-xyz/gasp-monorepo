@@ -15,6 +15,7 @@ describe('TracingService', () => {
     requestId: null,
     txHash: '0x102',
     address: '0x102',
+    recipient: '0x102',
     created: 1725613967329,
     updated: 1725613967329,
     status: 'PendingOnL1',
@@ -45,6 +46,7 @@ describe('TracingService', () => {
       expect.objectContaining({
         txHash: '0x102',
         address: '0x102',
+        recipient: '0x102',
         status: 'PendingOnL1',
       })
     )
@@ -78,6 +80,7 @@ describe('TracingService', () => {
     expect(result).toEqual({
       txHash: '0x102',
       address: '0x102',
+      recipient: '0x102',
       created: 1725613967329,
       updated: 1725613967329,
       status: 'PendingOnL1',
@@ -90,7 +93,6 @@ describe('TracingService', () => {
     })
   })
 
-
   it('findTransactionsByAddressAndStatus should return transactions for a given address and status', async () => {
     depositRepository.search.mockReturnValue({
       where: vi.fn().mockReturnThis(),
@@ -101,8 +103,8 @@ describe('TracingService', () => {
 
     const result = await findTransactionsByAddressAndStatus(
       '0x102',
-      'PendingOnL1' ,
-        'deposit'
+      'PendingOnL1',
+      'deposit'
     )
 
     expect(depositRepository.search).toHaveBeenCalled()
