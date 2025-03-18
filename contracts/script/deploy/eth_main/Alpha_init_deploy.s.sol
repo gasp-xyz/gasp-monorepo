@@ -1,35 +1,29 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-
-import "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import "@eigenlayer/contracts/core/AVSDirectory.sol";
-import "@eigenlayer/contracts/core/DelegationManager.sol";
-import "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import "@eigenlayer/test/mocks/EmptyContract.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-
-import "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
-import "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import "@eigenlayer-middleware/src/IndexRegistry.sol";
-import "@eigenlayer-middleware/src/StakeRegistry.sol";
-import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-
-import {FinalizerServiceManager, IServiceManager} from "../../../src/FinalizerServiceManager.sol";
-import {FinalizerTaskManager} from "../../../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "../../../src/IFinalizerTaskManager.sol";
-import {OperatorStateRetrieverExtended} from "../../../src/OperatorStateRetrieverExtended.sol";
-import {Rolldown} from "../../../src/Rolldown.sol";
-import {IRolldownPrimitives} from "../../../src/IRolldownPrimitives.sol";
-
-import {Utils} from "../../utils/Utils.sol";
-
-import "forge-std/Test.sol";
-import "forge-std/Script.sol";
-import "forge-std/StdJson.sol";
-import "forge-std/console.sol";
+import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
+import { BLSSignatureChecker } from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {IndexRegistry} from  "@eigenlayer-middleware/src/IndexRegistry.sol";
+import {IStakeRegistry} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
+import {IRegistryCoordinator, IServiceManager, RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
+import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {console} from "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {Test} from "forge-std/Test.sol";
+import { FinalizerServiceManager } from "./../../../src/FinalizerServiceManager.sol";
+import { FinalizerTaskManager } from "./../../../src/FinalizerTaskManager.sol";
+import { IFinalizerTaskManager } from "./../../../src/interfaces/IFinalizerTaskManager.sol";
+import { IRolldownPrimitives } from "./../../../src/interfaces/IRolldownPrimitives.sol";
+import { OperatorStateRetrieverExtended } from "./../../../src/OperatorStateRetrieverExtended.sol";
+import { Rolldown } from "./../../../src/Rolldown.sol";
+import { Utils } from "./../../utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -38,7 +32,7 @@ import "forge-std/console.sol";
 // Deploys finalizer contracts
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
-    string constant _OUTPUT_PATH = "avs_deployment_output";
+    string internal constant _OUTPUT_PATH = "avs_deployment_output";
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -98,7 +92,6 @@ contract Deployer is Script, Utils, Test {
 
         // check that the chainID matches the one in the config
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
-        uint256 currentChainId = block.chainid;
         emit log_named_uint("You are deploying on ChainID", block.chainid);
         require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
@@ -307,7 +300,7 @@ contract Deployer is Script, Utils, Test {
         _writeOutput(churner, ejector, aggregator, unpauseMultisig);
     }
 
-    function _parseStakeRegistryParams(string memory config_data)
+    function _parseStakeRegistryParams(string memory configData)
         internal
         pure
         returns (
@@ -315,10 +308,10 @@ contract Deployer is Script, Utils, Test {
             IStakeRegistry.StrategyParams[][] memory strategyAndWeightingMultipliers
         )
     {
-        bytes memory stakesConfigsRaw = stdJson.parseRaw(config_data, ".minimumStakes");
+        bytes memory stakesConfigsRaw = stdJson.parseRaw(configData, ".minimumStakes");
         minimumStakeForQuorum = abi.decode(stakesConfigsRaw, (uint96[]));
 
-        bytes memory strategyConfigsRaw = stdJson.parseRaw(config_data, ".strategyWeights");
+        bytes memory strategyConfigsRaw = stdJson.parseRaw(configData, ".strategyWeights");
         strategyAndWeightingMultipliers = abi.decode(strategyConfigsRaw, (IStakeRegistry.StrategyParams[][]));
     }
 
