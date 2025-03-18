@@ -64,7 +64,7 @@ services:
       ENV_SELECTOR: base-stub
   monad-contracts-deployment:
     build: .
-    image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localbase}
+    image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localmonad}
     platform: linux/amd64
     depends_on:
       monad-stub:
@@ -73,7 +73,7 @@ services:
       - script
       - script/MultiStage.s.sol
       - --rpc-url
-      - ${BASE_RPC_URL:-http://monad-stub:8545}
+      - ${MONAD_RPC_URL:-http://monad-stub:8545}
       - --private-key
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
@@ -81,3 +81,22 @@ services:
       - ./script/output/31339/:/app/script/output/31339
     environment:
       ENV_SELECTOR: monad-stub
+  megaeth-contracts-deployment:
+    build: .
+    image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localmegaeth}
+    platform: linux/amd64
+    depends_on:
+      monad-stub:
+        condition: service_healthy
+    command:
+      - script
+      - script/MultiStage.s.sol
+      - --rpc-url
+      - ${MEGAETH_RPC_URL:-http://megaeth-stub:8545}
+      - --private-key
+      - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      - --broadcast
+    volumes:
+      - ./script/output/31339/:/app/script/output/31339
+    environment:
+      ENV_SELECTOR: megaeth-stub

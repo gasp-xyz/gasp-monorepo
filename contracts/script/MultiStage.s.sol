@@ -14,10 +14,10 @@ import {IRolldown} from "../src/interfaces/IRolldown.sol";
 import {Utils} from "./utils/Utils.sol";
 
 contract MultiStage is Script, Utils {
-    function run() external {
-        bytes32 env = _stringToHash(vm.envString("ENV_SELECTOR"));
+    bytes32 public envHash = _stringToHash(vm.envString("ENV_SELECTOR"));
 
-        if (env == _stringToHash("ethereum-stub")) {
+    function run() public {
+        if (envHash == _stringToHash("ethereum-stub")) {
             _incrementAccountNonce();
 
             M2Deployer eigenDeployer = new M2Deployer();
@@ -58,22 +58,27 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("arbitrum-stub")) {
+        if (envHash == _stringToHash("arbitrum-stub")) {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
         }
 
-        if (env == _stringToHash("base-stub")) {
+        if (envHash == _stringToHash("base-stub")) {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
         }
 
-        if (env == _stringToHash("monad-stub")) {
+        if (envHash == _stringToHash("monad-stub")) {
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
             return;
         }
 
-        if (env == _stringToHash("ethereum-holesky")) {
+        if (envHash == _stringToHash("megaeth-stub")) {
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Megaeth);
+            return;
+        }
+
+        if (envHash == _stringToHash("ethereum-holesky")) {
             _printMessage("Deploying finalizer contracts");
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
             require(
@@ -105,7 +110,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("arbitrum-sepolia")) {
+        if (envHash == _stringToHash("arbitrum-sepolia")) {
             require(
                 !outputExists("arbitrum_rolldown_output") && !outputExists("arbitrum_gmrs_output"),
                 "Contracts already deployed on Arbitrum Sepolia"
@@ -115,7 +120,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("base-sepolia")) {
+        if (envHash == _stringToHash("base-sepolia")) {
             require(
                 !outputExists("base_rolldown_output") && !outputExists("base_gmrs_output"),
                 "Contracts already deployed on Base Sepolia"
@@ -125,7 +130,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("monad-testnet")) {
+        if (envHash == _stringToHash("monad-testnet")) {
             require(
                 !outputExists("monad_rolldown_output") && !outputExists("monad_gmrs_output"),
                 "Contracts already deployed on Monad Testnet"
@@ -135,7 +140,17 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
+        if (envHash == _stringToHash("megaeth-testnet")) {
+            require(
+                !outputExists("megaeth_rolldown_output") && !outputExists("megaeth_gmrs_output"),
+                "Contracts already deployed on Megaeth Testnet"
+            );
+
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Megaeth);
+            return;
+        }
+
+        if (envHash == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
             _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Ethereum Holesky");
@@ -144,7 +159,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
+        if (envHash == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
             _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Arbitrum Sepolia");
@@ -153,7 +168,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        if (env == _stringToHash("upgrade-rolldown-base-sepolia")) {
+        if (envHash == _stringToHash("upgrade-rolldown-base-sepolia")) {
             _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Base Sepolia");
@@ -162,7 +177,7 @@ contract MultiStage is Script, Utils {
             return;
         }
 
-        revert("Unsupported environment");
+        revert(string.concat("Unsupported environment: ", vm.envString("ENV_SELECTOR")));
     }
 
     function _incrementAccountNonce() private {
