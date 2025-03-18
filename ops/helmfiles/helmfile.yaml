@@ -1,14 +1,16 @@
-bases: ['environments.yaml']
+environments:
+  default:
+    values: 
+      - environmentName: default
+  fungible:
+    values:
+     - environmentName: {{ env "ENVIRONMENT" }}
+       kubeContext: gke_direct-pixel-353917_europe-west1_mangata-dev-alpha
+     - config/fungible.yaml
 ---
 helmDefaults:
   wait: false
   kubeContext: '{{ .Values.kubeContext }}'
-  # diffArgs:
-  #   - "--suppress" 
-  #   - "Job"
-  # # TODO: To remove after updating Helm charts
-  #   - "--suppress-output-line-regex"
-  #   - "(application|component|heritage|service|isP2P|isRpc):.+"
   
 helmfiles:
   - path: sub-helmfiles/blockscout/helmfile.yaml
@@ -22,7 +24,8 @@ releases:
   - name: avs-aggregator
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.aggregatorEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/avs-aggregator
@@ -76,35 +79,12 @@ releases:
           limits:
             cpu: 2
             memory: 12Gi
-  
-  - name: gasp-avs-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.gaspAvsEnabled ( .Values | get "gaspAvsEnabled2" false | toYaml) }}
-    chart: ../helm-charts/gasp-avs
-    values:
-      - image:
-          repository: gaspxyz/gasp-avs
-          tag: '{{ printf "%s%s" (.Values | get "gaspAvsImageTag" (requiredEnv "IMAGE_TAG")) (eq (env "GASP_AVS_FAST_RUNTIME") "true" | ternary "-fast" "") }}'
-        environment: {{ .Values.environmentName }}
-        envSecrets: {{ .Values | getOrNil "gaspAvsEnvSecrets2" | expandSecretRefs | toYaml | nindent 10 }}
-        env: {{ .Values | getOrNil "gaspAvsEnv2" | toYaml | nindent 10 }}
-        data: {{ .Values | getOrNil "gaspAvsData2" | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 1
-            memory: 4Gi
-          limits:
-            cpu: 2
-            memory: 12Gi
 
   - name: updater
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.updaterEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/updater
@@ -125,7 +105,8 @@ releases:
   - name: updater-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.updaterEnabled .Values.enableBaseServices }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/updater
@@ -147,7 +128,8 @@ releases:
   - name: sequencer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.sequencerEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/sequencer
@@ -165,53 +147,12 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
-  - name: sequencer-eth-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth2" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvEth2" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: sequencer-eth-3
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedEth3" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvEth3" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
 
   - name: sequencer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableArbitrumServices }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/sequencer
@@ -229,53 +170,12 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
-  - name: sequencer-arb-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb2" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvArb2" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb2"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: sequencer-arb-3
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedArb3" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvArb3" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsArb3"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
             
   - name: sequencer-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.sequencerEnabled .Values.enableBaseServices }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/sequencer
@@ -293,53 +193,12 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
-  - name: sequencer-base-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase2" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvBase2" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase2"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: sequencer-base-3
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.sequencerEnabled ( .Values | get "sequencerEnalbedBase3" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/sequencer
-          tag: {{ .Values | get "sequencerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-        env: {{ .Values | getOrNil "sequencerEnvBase3" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "sequencerEnvSecretsBase3"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
   
   - name: ferry-deposit-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.ferryDepositEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-deposit
@@ -360,7 +219,8 @@ releases:
   - name: ferry-deposit-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.ferryDepositEnabled .Values.enableArbitrumServices | toYaml   }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-deposit
@@ -381,7 +241,8 @@ releases:
   - name: ferry-deposit-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.ferryDepositEnabled .Values.enableBaseServices | toYaml   }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-deposit
@@ -403,7 +264,8 @@ releases:
   - name: ferry-withdrawal-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.ferryWithdrawalEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
@@ -424,7 +286,8 @@ releases:
   - name: ferry-withdrawal-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableArbitrumServices | toYaml  }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
@@ -445,7 +308,8 @@ releases:
   - name: ferry-withdrawal-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.ferryWithdrawalEnabled .Values.enableBaseServices | toYaml }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
@@ -463,7 +327,8 @@ releases:
   - name: closer-eth
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ .Values.closerEnabled }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
@@ -483,103 +348,12 @@ releases:
           limits:
             cpu: 1
             memory: 1Gi
-  - name: closer-eth-2
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth2" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/ferry-withdrawal
-          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-          # `args` param is used to override the default command in the Dockerfile
-          args: ["node", "build/src/closer.js"]
-        env: {{ .Values | getOrNil "closerEnvEth2" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth2"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: closer-eth-3
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth3" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/ferry-withdrawal
-          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-          # `args` param is used to override the default command in the Dockerfile
-          args: ["node", "build/src/closer.js"]
-        env: {{ .Values | getOrNil "closerEnvEth3" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth3"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: closer-eth-4
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth4" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/ferry-withdrawal
-          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-          # `args` param is used to override the default command in the Dockerfile
-          args: ["node", "build/src/closer.js"]
-        env: {{ .Values | getOrNil "closerEnvEth4" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth4"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
-  - name: closer-eth-5
-    namespace: 'rollup-{{ .Values.environmentName }}'
-    installed: {{ and .Values.closerEnabled ( .Values | get "closerEnabledEth5" false | toYaml) }}
-    chart: ../helm-charts/common-deployment
-    values:
-      - image:
-          repository: gaspxyz/ferry-withdrawal
-          tag: {{ .Values | get "closerImageTag" (requiredEnv "IMAGE_TAG") | quote }}
-          # `args` param is used to override the default command in the Dockerfile
-          args: ["node", "build/src/closer.js"]
-        env: {{ .Values | getOrNil "closerEnvEth5" | toYaml | nindent 10 }}
-        envSecrets: {{ .Values | getOrNil "closerEnvSecretsEth5"| expandSecretRefs | toYaml | nindent 10 }}
-        service:
-          enabled: true
-        serviceMonitor:
-          enabled: true
-        resources:
-          requests:
-            cpu: 100m
-            memory: 500Mi
-          limits:
-            cpu: 1
-            memory: 1Gi
 
   - name: closer-arb
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.closerEnabled .Values.enableArbitrumServices | toYaml }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
@@ -602,7 +376,8 @@ releases:
   - name: closer-base
     namespace: 'rollup-{{ .Values.environmentName }}'
     installed: {{ and .Values.closerEnabled .Values.enableBaseServices | toYaml }}
-    chart: ../helm-charts/common-deployment
+    chart: oci://ghcr.io/gasp-xyz/helm-charts/common-deployment
+    version: 1.0.0
     values:
       - image:
           repository: gaspxyz/ferry-withdrawal
