@@ -177,6 +177,8 @@ tasks:
 
   e2e-test-opt-out:
     script: |
+      set -e  # Exit immediately if a command exits with a non-zero status
+      
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -195,16 +197,21 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
 
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
+      TEST_EXIT_CODE=$?
+      
+      # Always clean up
       cd $workspaceRoot && docker compose down
-    options:
-      cache: true
-      runFromWorkspaceRoot: true
-    inputs: ['@globs(sources)', 'tests/**/*.ts']
-    outputs: ['tests/reports/test-opt-out-report.xml']
-  
+      
+      # Exit with the test exit code
+      exit $TEST_EXIT_CODE
+
   e2e-test-corrupted:
     script: |
+      set -e  # Exit immediately if a command exits with a non-zero status
+      
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -223,8 +230,16 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
   
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
+      TEST_EXIT_CODE=$?
+      
+      # Always clean up
       cd $workspaceRoot && docker compose down
+      
+      # Exit with the test exit code
+      exit $TEST_EXIT_CODE
     options:
       cache: true
       runFromWorkspaceRoot: true
