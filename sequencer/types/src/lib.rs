@@ -21,7 +21,6 @@ pub struct PendingUpdate {
     pub hash: H256,
 }
 
-
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
     // pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;
@@ -103,8 +102,8 @@ impl From<l1types::Chain> for Chain {
 impl Into<l1types::Chain> for Chain {
     fn into(self) -> l1types::Chain {
         match self {
-            Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
             Chain::Arbitrum => l1types::Chain::from(ARBITRUM_CHAIN_ID),
+            Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
             Chain::Base => l1types::Chain::from(BASE_CHAIN_ID),
         }
     }

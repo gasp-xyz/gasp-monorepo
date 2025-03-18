@@ -33,7 +33,7 @@ pub struct Ferry<L1, L2> {
     closable_withdrawals: VecDeque<Withdrawal>,
     ferryable_withdrawals: HashMap<U256, (U256, Withdrawal)>,
     balances: HashMap<[u8; 20], U256>,
-    tx_cost: U256
+    tx_cost: U256,
 }
 
 impl<L1, L2> Ferry<L1, L2>
@@ -87,9 +87,7 @@ where
                 } else {
                     (w.amount - w.ferry_tip).saturating_add(self.tx_cost)
                 };
-                let balance = balances.get(&w.token_address)
-                    .cloned()
-                    .unwrap_or_default();
+                let balance = balances.get(&w.token_address).cloned().unwrap_or_default();
                 balance > required_tokens_amount
             })
             .max_by_key(|(_, (prio, _))| prio)
@@ -350,14 +348,10 @@ mod test {
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
 
-        l1.expect_get_status().returning(|_| {
-            Ok(RequestStatus::Pending)
-            }
-        );
+        l1.expect_get_status()
+            .returning(|_| Ok(RequestStatus::Pending));
 
-        l1.expect_ferry_withdrawal()
-        .times(0)
-        .return_once(move |_| {
+        l1.expect_ferry_withdrawal().times(0).return_once(move |_| {
             notify.store(true, std::sync::atomic::Ordering::Relaxed);
             Ok(H256::default())
         });
@@ -388,7 +382,6 @@ mod test {
         drop(input);
         handle.await.unwrap();
     }
-
 
     #[traced_test]
     #[tokio::test]

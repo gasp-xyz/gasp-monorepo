@@ -1,3 +1,4 @@
+use alloy::{network::NetworkWallet, providers::WalletProvider};
 use envconfig::Envconfig;
 use hex::FromHex;
 use l1api::CachedL1Interface;
@@ -5,10 +6,10 @@ use tracing::level_filters::LevelFilter;
 
 mod sequencer;
 mod watchdog;
-use tokio::time::Duration;
-use watchdog::Watchdog;
 use gasp_types::Chain;
 use l2api::Gasp;
+use tokio::time::Duration;
+use watchdog::Watchdog;
 
 use sequencer::Sequencer;
 
@@ -122,10 +123,14 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-
     let provider = l1api::create_provider(config.l1_uri.clone(), eth_secret_key).await?;
     let rolldown = l1api::RolldownContract::new(provider.clone(), rolldown_contract_address);
     tracing::info!("Connected to {}", config.l1_uri);
+
+    let l1_account_addr = provider.wallet().default_signer_address().0 .0;
+    let l2_account_addr = l2api::signer::Keypair::from_secret_key(gasp_secret_key)
+        .address()
+        .into_inner();
 
     let rolldown = l1api::L1::new(rolldown, provider.clone());
 
@@ -134,7 +139,15 @@ async fn run(config: Config) -> Result<(), Error> {
     });
 
     let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
-    let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
+    let seq = Sequencer::new(
+        lru,
+        gasp,
+        chain,
+        l1_account_addr,
+        l2_account_addr,
+        update_size_limit,
+        config.tx_cost,
+    );
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
     watchdog

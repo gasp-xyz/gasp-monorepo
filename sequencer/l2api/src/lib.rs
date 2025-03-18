@@ -6,7 +6,7 @@ use subxt::Config;
 
 mod l2;
 pub mod mock;
-mod signer;
+pub mod signer;
 use gasp_types::PendingUpdate;
 pub type HashOf<T> = <T as Config>::Hash;
 pub type EndDisputePeriod = u128;

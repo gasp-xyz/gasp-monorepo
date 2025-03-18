@@ -25,6 +25,7 @@ use sha3::{Digest, Keccak256};
 pub mod types {
     pub mod abi {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId;
         pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Range;

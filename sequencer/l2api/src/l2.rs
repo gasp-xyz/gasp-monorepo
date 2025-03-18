@@ -1,9 +1,9 @@
 use futures::future::join_all;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
+use std::collections::HashMap;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
-use std::collections::HashMap;
 
 use hex::encode as hex_encode;
 
@@ -178,7 +178,6 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
-
     fn account_address(&self) -> [u8; 20] {
         self.keypair.address().into_inner()
     }
@@ -572,10 +571,9 @@ impl L2Interface for Gasp {
         &self,
         at: gasp_types::H256,
     ) -> Result<Vec<PendingUpdate>, L2Error> {
-
-        use subxt::storage::StorageKey;
         use ::subxt::ext::subxt_core::storage::address::StaticStorageKey;
         use gasp_bindings::api::rolldown::storage::types as gasp_types;
+        use subxt::storage::StorageKey;
 
         let metadata = self.client.metadata();
         let (_pallet, entry) = subxt_core::storage::lookup_storage_entry_details(
@@ -626,7 +624,6 @@ impl L2Interface for Gasp {
             .await
             .into_iter()
             .collect::<Result<Vec<_>, _>>()
-
     }
 }
 
