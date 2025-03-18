@@ -33,12 +33,3 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
-  deploy-frontend-env:
-    name: Deploy `frontend` environment
-    needs: [init, build-and-test]
-    uses: ./.github/workflows/reusable-deploy.yml
-    secrets: inherit
-    with:
-      env: frontend
-      version: ${{ needs.init.outputs.GLOBAL_VERSION }}
