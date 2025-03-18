@@ -105,6 +105,9 @@ pub enum Chain {
 	Ethereum,
 	Arbitrum,
 	Base,
+	Monad,
+	MegaEth,
+	Sonic,
 }
 
 impl AsRef<str> for Chain {
@@ -113,6 +116,9 @@ impl AsRef<str> for Chain {
 			Chain::Ethereum => "Ethereum",
 			Chain::Arbitrum => "Arbitrum",
 			Chain::Base => "Base",
+			Chain::Monad => "Monad",
+			Chain::MegaEth => "MegaEth",
+			Chain::Sonic => "Sonic",
 		}
 	}
 }
@@ -441,6 +447,9 @@ impl TryFrom<eth_abi::Chain> for Chain {
 			eth_abi::Chain::Ethereum => Ok(Chain::Ethereum),
 			eth_abi::Chain::Arbitrum => Ok(Chain::Arbitrum),
 			eth_abi::Chain::Base => Ok(Chain::Base),
+			eth_abi::Chain::Monad => Ok(Chain::Monad),
+			eth_abi::Chain::MegaEth => Ok(Chain::MegaEth),
+			eth_abi::Chain::Sonic => Ok(Chain::Sonic),
 			_ => Err(String::from("Invalid origin type")),
 		}
 	}
