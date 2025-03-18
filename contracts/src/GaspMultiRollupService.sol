@@ -1,35 +1,29 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.9;
+pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "forge-std/console.sol";
-
+import {IBLSSignatureChecker} from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
 import {BN254} from "@eigenlayer-middleware/src/libraries/BN254.sol";
-import "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
-import "@eigenlayer/contracts/permissions/Pausable.sol";
-import "./GaspMultiRollupServiceStorage.sol";
-import "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
-import "./IFinalizerTaskManager.sol";
-import {IRolldown} from "./IRolldown.sol";
- 
-contract GaspMultiRollupService is
-    Initializable,
-    OwnableUpgradeable,
-    Pausable,
-    GaspMultiRollupServiceStorage
-{
+import {IPauserRegistry, Pausable} from "@eigenlayer/contracts/permissions/Pausable.sol";
+import {OwnableUpgradeable} from "@openzeppelin-upgrades/contracts/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initializable.sol";
+import {GaspMultiRollupServiceStorage} from "./GaspMultiRollupServiceStorage.sol";
+import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
+import {IRolldown} from "./interfaces/IRolldown.sol";
+
+contract GaspMultiRollupService is Initializable, OwnableUpgradeable, Pausable, GaspMultiRollupServiceStorage {
     using BN254 for BN254.G1Point;
 
     uint256 internal constant _THRESHOLD_DENOMINATOR = 100;
-    uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
+    uint256 internal constant _PAIRING_EQUALITY_CHECK_GAS = 120_000;
 
-    function initialize(IPauserRegistry _pauserRegistry, address initialOwner, address _updater, bool _allowNonRootInit, IRolldown _rolldown, IRolldown.ChainId _chainId)
-        public
-        initializer
-    {
+    function initialize(
+        IPauserRegistry _pauserRegistry,
+        address initialOwner,
+        address _updater,
+        bool _allowNonRootInit,
+        IRolldown _rolldown,
+        IRolldown.ChainId _chainId
+    ) external initializer {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
         updater = _updater;
@@ -39,7 +33,6 @@ contract GaspMultiRollupService is
         chainRdBatchNonce = 1;
     }
 
-    /* MODIFIERS */
     modifier onlyUpdater() {
         require(msg.sender == updater, "Updater must be the caller");
         _;
@@ -50,12 +43,19 @@ contract GaspMultiRollupService is
     }
 
     function setRolldown(IRolldown _rolldown) external onlyOwner {
-      rolldown = _rolldown;
-      emit RolldownTargetUpdated(address(_rolldown));
+        rolldown = _rolldown;
+        emit RolldownTargetUpdated(address(_rolldown));
     }
 
-    function processEigenReinit(IFinalizerTaskManager.OpTask calldata task, OperatorStateInfo calldata operatorStateInfo, bytes32[] calldata merkleRoots, IRolldown.Range[] calldata ranges, uint32 _chainRdBatchNonce, uint32 _latestCompletedRdTaskNumber, uint32 _latestCompletedRdTaskCreatedBlock) public onlyOwner{
-
+    function processEigenReinit(
+        IFinalizerTaskManager.OpTask calldata task,
+        OperatorStateInfo calldata operatorStateInfo,
+        bytes32[] calldata merkleRoots,
+        IRolldown.Range[] calldata ranges,
+        uint32 _chainRdBatchNonce,
+        uint32 _latestCompletedRdTaskNumber,
+        uint32 _latestCompletedRdTaskCreatedBlock
+    ) public onlyOwner {
         require(merkleRoots.length == ranges.length, "rdUpdate info length mismatch");
 
         updateOpState(operatorStateInfo);
@@ -76,11 +76,14 @@ contract GaspMultiRollupService is
         latestCompletedRdTaskCreatedBlock = _latestCompletedRdTaskCreatedBlock;
 
         emit EigenReinitProcessed(task.taskNum, task.taskCreatedBlock);
-        
     }
 
-    function processEigenOpUpdate(IFinalizerTaskManager.OpTask calldata task, IFinalizerTaskManager.OpTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature, OperatorStateInfo calldata operatorStateInfo) public whenNotPaused onlyUpdater {
-
+    function processEigenOpUpdate(
+        IFinalizerTaskManager.OpTask calldata task,
+        IFinalizerTaskManager.OpTaskResponse calldata taskResponse,
+        IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature,
+        OperatorStateInfo calldata operatorStateInfo
+    ) public whenNotPaused onlyUpdater {
         uint32 latestCompletedOpTaskCreatedBlockCached = latestCompletedOpTaskCreatedBlock;
         if (!(latestCompletedOpTaskCreatedBlockCached == 0) || allowNonRootInit) {
             require(msg.sender == updater, "Auth0");
@@ -89,14 +92,21 @@ contract GaspMultiRollupService is
         }
 
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
-        require(taskResponse.operatorsStateInfoHash == keccak256(abi.encode(operatorStateInfo)), "operatorStateInfo hash mismatch");
+        require(
+            taskResponse.operatorsStateInfoHash == keccak256(abi.encode(operatorStateInfo)),
+            "operatorStateInfo hash mismatch"
+        );
 
         // Process signatures iff the op state has been init
         if (!(latestCompletedOpTaskCreatedBlockCached == 0)) {
-            require(latestCompletedOpTaskCreatedBlockCached == task.lastCompletedOpTaskCreatedBlock, "reference block mismatch");
-            
+            require(
+                latestCompletedOpTaskCreatedBlockCached == task.lastCompletedOpTaskCreatedBlock,
+                "reference block mismatch"
+            );
+
             // if the this is the first task then don't check sigs
-            IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
+            IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals =
+                checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
 
             uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
             // check that signatories own at least a threshold percentage of each quourm
@@ -123,22 +133,26 @@ contract GaspMultiRollupService is
         quorumThresholdPercentage = task.quorumThresholdPercentage;
 
         emit EigenOpUpdateProcessed(task.taskNum, task.taskCreatedBlock);
-        
     }
 
-    function processEigenRdUpdate(IFinalizerTaskManager.RdTask calldata task, IFinalizerTaskManager.RdTaskResponse calldata taskResponse, IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature) public whenNotPaused onlyUpdater {
-
-        require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch"); 
+    function processEigenRdUpdate(
+        IFinalizerTaskManager.RdTask calldata task,
+        IFinalizerTaskManager.RdTaskResponse calldata taskResponse,
+        IBLSSignatureChecker.NonSignerStakesAndSignature calldata nonSignerStakesAndSignature
+    ) public whenNotPaused onlyUpdater {
+        require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch");
 
         require(chainId == task.chainId, "Wrong chainId");
         require(latestCompletedRdTaskNumber == 0 || latestCompletedRdTaskNumber < task.taskNum, "Stale RdTask");
         require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
-        require(latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch");
+        require(
+            latestCompletedOpTaskCreatedBlock == task.lastCompletedOpTaskCreatedBlock, "reference block hash mismatch"
+        );
         require(taskResponse.referenceTaskHash == keccak256(abi.encode(task)), "referenceTaskHash hash mismatch");
 
-        
         // if the this is the first task then don't check sigs
-        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals = checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
+        IBLSSignatureChecker.QuorumStakeTotals memory quorumStakeTotals =
+            checkSignatures(keccak256(abi.encode(taskResponse)), nonSignerStakesAndSignature);
 
         uint32 QuorumThresholdPercentage = quorumThresholdPercentage;
         // check that signatories own at least a threshold percentage of each quourm
@@ -163,18 +177,12 @@ contract GaspMultiRollupService is
         latestCompletedRdTaskCreatedBlock = task.taskCreatedBlock;
 
         emit EigenRdUpdateProcessed(task.taskNum, task.taskCreatedBlock);
-        
     }
 
-    function checkSignatures(
-        bytes32 msgHash,
-        IBLSSignatureChecker.NonSignerStakesAndSignature memory params
-    )
-        public 
+    function checkSignatures(bytes32 msgHash, IBLSSignatureChecker.NonSignerStakesAndSignature memory params)
+        public
         view
-        returns (
-            IBLSSignatureChecker.QuorumStakeTotals memory
-        )
+        returns (IBLSSignatureChecker.QuorumStakeTotals memory)
     {
         // This method needs to calculate the aggregate pubkey for all signing operators across
         // all signing quorums. To do that, we can query the aggregate pubkey for each quorum
@@ -198,7 +206,6 @@ contract GaspMultiRollupService is
         uint8 quorumNumber;
 
         {
-
             for (uint256 j = 0; j < params.nonSignerPubkeys.length; j++) {
                 // The nonsigner's pubkey hash doubles as their operatorId
                 // The check below validates that these operatorIds are sorted (and therefore
@@ -212,10 +219,7 @@ contract GaspMultiRollupService is
                 }
 
                 apk = apk.plus(
-                    params.nonSignerPubkeys[j]
-                        .scalar_mul_tiny(
-                            operatorIdQuorumCount[nonSignersPubkeyHashes[j]]
-                        )
+                    params.nonSignerPubkeys[j].scalar_mul_tiny(operatorIdQuorumCount[nonSignersPubkeyHashes[j]])
                 );
             }
         }
@@ -232,34 +236,27 @@ contract GaspMultiRollupService is
          * - subtract the stake for each nonsigner to calculate the stake belonging to signers
          */
         {
-            
             for (uint256 i = 0; i < quorumNumbersLength; i++) {
-
                 quorumNumber = uint8(quorumNumbers[i]);
-                
+
                 apk = apk.plus(qourumApk[quorumNumber]);
 
                 // Get the total and starting signed stake for the quorum at referenceBlockNumber
-                stakeTotals.totalStakeForQuorum[i] = 
-                    quorumToStakes[quorumNumber];
+                stakeTotals.totalStakeForQuorum[i] = quorumToStakes[quorumNumber];
                 stakeTotals.signedStakeForQuorum[i] = stakeTotals.totalStakeForQuorum[i];
-                
+
                 // loop through all nonSigners, checking that they are a part of the quorum via their quorumBitmap
                 // if so, load their stake at referenceBlockNumber and subtract it from running stake signed
                 for (uint256 j = 0; j < params.nonSignerPubkeys.length; j++) {
-                        stakeTotals.signedStakeForQuorum[i] -=
-                            operatorAndQuorumToStakes[nonSignersPubkeyHashes[j]][quorumNumber];
+                    stakeTotals.signedStakeForQuorum[i] -=
+                        operatorAndQuorumToStakes[nonSignersPubkeyHashes[j]][quorumNumber];
                 }
             }
         }
         {
             // verify the signature
-            (bool pairingSuccessful, bool signatureIsValid) = trySignatureAndApkVerification(
-                msgHash, 
-                apk, 
-                params.apkG2, 
-                params.sigma
-            );
+            (bool pairingSuccessful, bool signatureIsValid) =
+                trySignatureAndApkVerification(msgHash, apk, params.apkG2, params.sigma);
             require(pairingSuccessful, "BLSSignatureChecker.checkSignatures: pairing precompile call failed");
             require(signatureIsValid, "BLSSignatureChecker.checkSignatures: signature is invalid");
         }
@@ -282,64 +279,74 @@ contract GaspMultiRollupService is
         BN254.G1Point memory apk,
         BN254.G2Point memory apkG2,
         BN254.G1Point memory sigma
-    ) public view returns(bool pairingSuccessful, bool siganatureIsValid) {
+    ) public view returns (bool pairingSuccessful, bool siganatureIsValid) {
         // gamma = keccak256(abi.encodePacked(msgHash, apk, apkG2, sigma))
-        uint256 gamma = uint256(keccak256(abi.encodePacked(msgHash, apk.X, apk.Y, apkG2.X[0], apkG2.X[1], apkG2.Y[0], apkG2.Y[1], sigma.X, sigma.Y))) % BN254.FR_MODULUS;
+        uint256 gamma = uint256(
+            keccak256(
+                abi.encodePacked(
+                    msgHash, apk.X, apk.Y, apkG2.X[0], apkG2.X[1], apkG2.Y[0], apkG2.Y[1], sigma.X, sigma.Y
+                )
+            )
+        ) % BN254.FR_MODULUS;
         // verify the signature
         (pairingSuccessful, siganatureIsValid) = BN254.safePairing(
-                sigma.plus(apk.scalar_mul(gamma)),
-                BN254.negGeneratorG2(),
-                BN254.hashToG1(msgHash).plus(BN254.generatorG1().scalar_mul(gamma)),
-                apkG2,
-                PAIRING_EQUALITY_CHECK_GAS
-            );
+            sigma.plus(apk.scalar_mul(gamma)),
+            BN254.negGeneratorG2(),
+            BN254.hashToG1(msgHash).plus(BN254.generatorG1().scalar_mul(gamma)),
+            apkG2,
+            _PAIRING_EQUALITY_CHECK_GAS
+        );
     }
 
-    function updateOpState(
-        OperatorStateInfo calldata operatorStateInfo
-    ) internal {
+    function updateOpState(OperatorStateInfo calldata operatorStateInfo) internal {
         for (uint256 i = 0; i < operatorStateInfo.quorumsRemoved.length; i++) {
             delete quorumToStakes[operatorStateInfo.quorumsRemoved[i]];
             delete qourumApk[operatorStateInfo.quorumsRemoved[i]];
         }
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsAdded.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumStake;
+            quorumToStakes[operatorStateInfo.quorumsAdded[i].quorumNumber] =
+                operatorStateInfo.quorumsAdded[i].quorumStake;
             qourumApk[operatorStateInfo.quorumsAdded[i].quorumNumber] = operatorStateInfo.quorumsAdded[i].quorumApk;
         }
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsStakeUpdate.length; i++) {
-            quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] = operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
+            quorumToStakes[operatorStateInfo.quorumsStakeUpdate[i].quorumNumber] =
+                operatorStateInfo.quorumsStakeUpdate[i].quorumStake;
         }
 
         for (uint256 i = 0; i < operatorStateInfo.quorumsApkUpdate.length; i++) {
-            qourumApk[operatorStateInfo.quorumsApkUpdate[i].quorumNumber] = operatorStateInfo.quorumsApkUpdate[i].quorumApk;
+            qourumApk[operatorStateInfo.quorumsApkUpdate[i].quorumNumber] =
+                operatorStateInfo.quorumsApkUpdate[i].quorumApk;
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsRemoved.length; i++) {
             for (uint256 j = 0; j < quorumNumbers.length; j++) {
-               delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
+                delete operatorAndQuorumToStakes[operatorStateInfo.operatorsRemoved[i]][uint8(quorumNumbers[j])];
             }
             delete operatorIdQuorumCount[operatorStateInfo.operatorsRemoved[i]];
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsAdded.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] = operatorStateInfo.operatorsAdded[i].quorumCount;
+            operatorIdQuorumCount[operatorStateInfo.operatorsAdded[i].operatorId] =
+                operatorStateInfo.operatorsAdded[i].quorumCount;
 
             for (uint256 j = 0; j < operatorStateInfo.operatorsAdded[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo.operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
+                operatorAndQuorumToStakes[operatorStateInfo.operatorsAdded[i].operatorId][operatorStateInfo
+                    .operatorsAdded[i].quorumForStakes[j]] = operatorStateInfo.operatorsAdded[i].quorumStakes[j];
             }
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsStakeUpdate.length; i++) {
-
             for (uint256 j = 0; j < operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes.length; j++) {
-                operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo.operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
+                operatorAndQuorumToStakes[operatorStateInfo.operatorsStakeUpdate[i].operatorId][operatorStateInfo
+                    .operatorsStakeUpdate[i].quorumForStakes[j]] = operatorStateInfo.operatorsStakeUpdate[i].quorumStakes[j];
             }
         }
 
         for (uint256 i = 0; i < operatorStateInfo.operatorsQuorumCountUpdate.length; i++) {
-            operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] = operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
+            operatorIdQuorumCount[operatorStateInfo.operatorsQuorumCountUpdate[i].operatorId] =
+                operatorStateInfo.operatorsQuorumCountUpdate[i].quorumCount;
         }
     }
 }
