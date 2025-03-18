@@ -1366,6 +1366,9 @@ pub mod config {
 					::pallet_rolldown::messages::Chain::Ethereum => 5 * currency::DOLLARS,
 					::pallet_rolldown::messages::Chain::Arbitrum => 5 * currency::DOLLARS,
 					::pallet_rolldown::messages::Chain::Base => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Monad => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::MegaEth => 5 * currency::DOLLARS,
+					::pallet_rolldown::messages::Chain::Sonic => 5 * currency::DOLLARS,
 				}
 			}
 		}
