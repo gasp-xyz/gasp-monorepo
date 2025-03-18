@@ -207,6 +207,11 @@ tasks:
       
       # Exit with the test exit code
       exit $TEST_EXIT_CODE
+    options:
+      cache: true
+      runFromWorkspaceRoot: true
+    inputs: ['@globs(sources)', 'tests/**/*.ts']
+    outputs: ['tests/reports/test-opt-out-report.xml']
 
   e2e-test-corrupted:
     script: |
