@@ -26,25 +26,17 @@ contract MultiStage is Script, Utils {
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
             if (!rolldownDeployer.isProxyDeployed()) {
-                console.log("################################################################################");
-                console.log("Deploying eigen layer infra");
-                console.log("################################################################################");
+                _printMessage("Deploying eigen layer infra");
                 eigenDeployer.run("M2_deploy_from_scratch.anvil.config.json");
 
-                console.log("################################################################################");
-                console.log("Initializing eigen layer infra");
-                console.log("################################################################################");
+                _printMessage("Initializing eigen layer infra");
                 anvilDeployer.run();
 
-                console.log("################################################################################");
-                console.log("Deploying finalizer contracts");
-                console.log("################################################################################");
+                _printMessage("Deploying finalizer contracts");
                 finalizerAVSDeployer.run();
             }
 
-            console.log("################################################################################");
-            console.log("Deploying rolldown contracts");
-            console.log("################################################################################");
+            _printMessage("Deploying rolldown contracts");
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
 
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
@@ -82,21 +74,15 @@ contract MultiStage is Script, Utils {
         }
 
         if (env == _stringToHash("ethereum-holesky")) {
-            console.log("################################################################################");
-            console.log("Deploying finalizer contracts");
-            console.log("################################################################################");
-
+            _printMessage("Deploying finalizer contracts");
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
-            if (outputExists(finalizerAVSDeployer.getOutputPath())) {
-                revert("Already deployed on Ethereum Holesky");
-            }
+            require(
+                !outputExists(finalizerAVSDeployer.getOutputPath()), "Contracts already deployed on Ethereum Holesky"
+            );
 
             finalizerAVSDeployer.run();
 
-            console.log("################################################################################");
-            console.log("Deploying rolldown contracts");
-            console.log("################################################################################");
-
+            _printMessage("Deploying rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
 
@@ -120,37 +106,37 @@ contract MultiStage is Script, Utils {
         }
 
         if (env == _stringToHash("arbitrum-sepolia")) {
-            if (outputExists("arbitrum_rolldown_output") || outputExists("arbitrum_gmrs_output")) {
-                revert("Already deployed on Arbitrum Sepolia");
-            }
+            require(
+                !outputExists("arbitrum_rolldown_output") && !outputExists("arbitrum_gmrs_output"),
+                "Contracts already deployed on Arbitrum Sepolia"
+            );
 
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
         }
 
         if (env == _stringToHash("base-sepolia")) {
-            if (outputExists("base_rolldown_output") || outputExists("base_gmrs_output")) {
-                revert("Already deployed on Base Sepolia");
-            }
+            require(
+                !outputExists("base_rolldown_output") && !outputExists("base_gmrs_output"),
+                "Contracts already deployed on Base Sepolia"
+            );
 
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
         }
 
         if (env == _stringToHash("monad-testnet")) {
-            if (outputExists("monad_rolldown_output") || outputExists("monad_gmrs_output")) {
-                revert("Already deployed on Monad Testnet");
-            }
+            require(
+                !outputExists("monad_rolldown_output") && !outputExists("monad_gmrs_output"),
+                "Contracts already deployed on Monad Testnet"
+            );
 
             _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
             return;
         }
 
         if (env == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-
+            _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Ethereum Holesky");
 
@@ -159,10 +145,7 @@ contract MultiStage is Script, Utils {
         }
 
         if (env == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-
+            _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Arbitrum Sepolia");
 
@@ -171,10 +154,7 @@ contract MultiStage is Script, Utils {
         }
 
         if (env == _stringToHash("upgrade-rolldown-base-sepolia")) {
-            console.log("################################################################################");
-            console.log("Upgrading rolldown contracts");
-            console.log("################################################################################");
-
+            _printMessage("Upgrading rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Base Sepolia");
 
@@ -194,20 +174,14 @@ contract MultiStage is Script, Utils {
     function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
         _incrementAccountNonce();
 
-        console.log("################################################################################");
-        console.log("Deploying rolldown contracts");
-        console.log("################################################################################");
-
+        _printMessage("Deploying rolldown contracts");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(chain);
 
         string memory configData = readConfig("deploy.config");
         address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
-        console.log("################################################################################");
-        console.log("Deploying gaspMultiRollupService contracts");
-        console.log("################################################################################");
-
+        _printMessage("Deploying gasp multi rollup service contracts");
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
         gaspMultiRollupServiceDeployer.run(chain);
 
@@ -224,6 +198,12 @@ contract MultiStage is Script, Utils {
         rolldown.setUpdater(address(gmrs));
 
         vm.stopBroadcast();
+    }
+
+    function _printMessage(string memory message) private pure {
+        console.log("################################################################################");
+        console.log(message);
+        console.log("################################################################################");
     }
 
     function _stringToHash(string memory s) private pure returns (bytes32) {
