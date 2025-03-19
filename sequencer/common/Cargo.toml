@@ -1,0 +1,17 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[lib]
+
+[dependencies]
+prometheus = "0.13.4"
+lazy_static = "1.4.0"
+warp = "0.3.7"
+tracing = "0.1.40"
+tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
+alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
+

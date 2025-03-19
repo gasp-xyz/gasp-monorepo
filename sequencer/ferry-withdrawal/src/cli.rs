@@ -1,0 +1,56 @@
+use clap::arg;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+pub struct Cli {
+    #[arg(long, env = "L1_URI")]
+    pub l1_uri: String,
+
+    #[arg(long, env = "L2_URI")]
+    pub l2_uri: String,
+
+    #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
+    pub private_key: [u8; 32],
+
+    #[arg(long, env = "CHAIN")]
+    pub chain_id: u32,
+
+    #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
+    pub rolldown_contract_address: [u8; 20],
+
+    #[arg(long, default_value_t = 0, env = "OFFSET")]
+    pub offset: u32,
+
+    #[arg(long, env = "PROMETHEUS_PORT")]
+    pub prometheus_port: Option<u16>,
+
+    #[arg(long, value_parser = parse_addr, env = "ENABLED_TOKENS", num_args(0..))]
+    enabled: Vec<[u8; 20]>,
+
+    #[arg(long, default_value_t = 1_000_000_000_000_000, env = "TX_COST")]
+    pub tx_cost: u128,
+}
+
+fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
+    let mut result = [0u8; 20];
+    let parse_result = match (s.starts_with("0x"), s.len()) {
+        (true, 42) => hex::decode(&s[2..]),
+        (false, 40) => hex::decode(&s[..]),
+        _ => Err(hex::FromHexError::InvalidStringLength),
+    }?;
+
+    result.copy_from_slice(&parse_result.as_ref());
+    Ok(result)
+}
+
+fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
+    let mut result = [0u8; 32];
+    let parse_result = match (s.starts_with("0x"), s.len()) {
+        (true, 66) => hex::decode(&s[2..]),
+        (false, 64) => hex::decode(&s[..]),
+        _ => Err(hex::FromHexError::InvalidStringLength),
+    }?;
+
+    result.copy_from_slice(&parse_result.as_ref());
+    Ok(result)
+}
