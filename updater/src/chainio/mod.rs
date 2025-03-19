@@ -1,6 +1,6 @@
 use ethers::{
     middleware::{NonceManagerMiddleware, SignerMiddleware},
-    providers::{Ws, Provider},
+    providers::{Provider, Ws},
     signers::{LocalWallet, Signer},
 };
 use tracing::{info, instrument};

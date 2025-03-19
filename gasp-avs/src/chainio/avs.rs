@@ -51,7 +51,6 @@ impl AvsContracts {
     const QUORUM: [u8; 1] = [0_u8; 1];
 
     pub async fn build(config: &CliArgs, ws_client: Arc<Client>) -> eyre::Result<Self> {
-
         let registry =
             RegistryCoordinator::new(config.avs_registry_coordinator_addr, ws_client.clone());
 

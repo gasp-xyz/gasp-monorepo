@@ -9,7 +9,7 @@ use bindings::{
 use ethers::{
     contract::{ContractError, EthError},
     middleware::{Middleware, MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
-    providers::{Ws, Provider},
+    providers::{Provider, Ws},
     signers::{LocalWallet, Signer},
     types::{Address, TransactionRequest},
     utils::parse_ether,
