@@ -12,7 +12,7 @@ import {TestUtils} from "./TestUtils.sol";
 // cd contracts ;  pkill anvil ;  clear ; cd ../ ; make deploy-all-contracts-via-multistage-and-resume  ; cd contracts ; forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
 
 contract IntegrationEjectorAdminRuleTest is Test {
-    address deployer = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
+    address internal deployer = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
 
     function testEjectorCanBeResetByDeployer() public {
         address tu = address(deployer);

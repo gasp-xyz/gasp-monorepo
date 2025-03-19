@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {Test} from "forge-std/Test.sol";
 import {Script} from "forge-std/Script.sol";
-import {console} from "forge-std/console.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract TestUtils is Script, Test {
     function getAvsConfigFile() public view returns (string memory) {

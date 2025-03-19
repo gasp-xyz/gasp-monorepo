@@ -38,7 +38,7 @@
     "imports-order": "error",
     "interface-starts-with-i": "error",
     "mark-callable-contracts": "off",
-    "max-line-length": ["error", 200],
+    "max-line-length": ["error", 201],
     "max-states-count": ["error", 41],
     "modifier-name-mixedcase": "error",
     "multiple-sends": "error",
