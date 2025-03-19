@@ -114,6 +114,9 @@ async fn run(config: Config) -> Result<(), Error> {
         "ethereum" => Ok(Chain::Ethereum),
         "arbitrum" => Ok(Chain::Arbitrum),
         "base" => Ok(Chain::Base),
+        "monad" => Ok(Chain::Monad),
+        "megaeth" => Ok(Chain::MegaEth),
+        "sonic" => Ok(Chain::Sonic),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 
