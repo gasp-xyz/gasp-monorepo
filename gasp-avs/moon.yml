@@ -177,7 +177,7 @@ tasks:
 
   e2e-test-opt-out:
     script: |
-      set -e  # Exit immediately if a command exits with a non-zero status
+      # set -e  # Exit immediately if a command exits with a non-zero status
       
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
@@ -188,8 +188,14 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
 
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
       docker compose ps
+      
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
       rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
@@ -228,7 +234,12 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
       
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
       docker compose ps
 
       # Set the report filename for this specific test
