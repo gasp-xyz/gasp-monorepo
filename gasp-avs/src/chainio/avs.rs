@@ -50,23 +50,22 @@ impl Debug for AvsContracts {
 impl AvsContracts {
     const QUORUM: [u8; 1] = [0_u8; 1];
 
-    pub async fn build(config: &CliArgs, client: Arc<Client>) -> eyre::Result<Self> {
-        let ws_client = Arc::new(Provider::connect(config.eth_ws_url.to_owned()).await?);
+    pub async fn build(config: &CliArgs, ws_client: Arc<Client>) -> eyre::Result<Self> {
 
         let registry =
-            RegistryCoordinator::new(config.avs_registry_coordinator_addr, client.clone());
+            RegistryCoordinator::new(config.avs_registry_coordinator_addr, ws_client.clone());
 
         let service_manager_addr = registry.service_manager().await?;
-        let service_manager = FinalizerServiceManager::new(service_manager_addr, client.clone());
+        let service_manager = FinalizerServiceManager::new(service_manager_addr, ws_client.clone());
 
         let task_manager_addr = service_manager.task_manager().await?;
-        let task_manager = FinalizerTaskManager::new(task_manager_addr, client.clone());
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
         let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
         let bls_apk_registry_addr = registry.bls_apk_registry().await?;
-        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, client.clone());
+        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, ws_client.clone());
         let stake_registry_addr = registry.stake_registry().await?;
-        let stake_registry = StakeRegistry::new(stake_registry_addr, client.clone());
+        let stake_registry = StakeRegistry::new(stake_registry_addr, ws_client.clone());
 
         Ok(Self {
             service_manager,

@@ -1,6 +1,6 @@
 use ethers::{
     middleware::{NonceManagerMiddleware, SignerMiddleware},
-    providers::{Http, Provider},
+    providers::{Ws, Provider},
     signers::{LocalWallet, Signer},
 };
 use tracing::{info, instrument};
@@ -10,7 +10,7 @@ use crate::cli::CliArgs;
 pub mod avs;
 pub mod decode;
 
-type MW = Provider<Http>;
+type MW = Provider<Ws>;
 pub type SourceClient = MW;
 pub type TargetClient = SignerMiddleware<NonceManagerMiddleware<MW>, LocalWallet>;
 
@@ -18,9 +18,9 @@ pub type TargetClient = SignerMiddleware<NonceManagerMiddleware<MW>, LocalWallet
 pub(crate) async fn build_clients(
     cfg: &CliArgs,
 ) -> eyre::Result<(SourceClient, TargetClient, Option<TargetClient>)> {
-    let source_client: Provider<Http> = MW::try_from(cfg.source_rpc_url.clone())?;
+    let source_client: Provider<Ws> = MW::connect(cfg.source_ws_url.clone()).await?;
 
-    let provider: Provider<Http> = MW::try_from(cfg.target_rpc_url.clone())?;
+    let provider: Provider<Ws> = MW::connect(cfg.target_ws_url.clone()).await?;
     info!("Eth Wallet decryting...");
     let wallet = cfg.get_ecdsa_keystore()?.into_wallet()?;
     info!("Eth Wallet decrytped with address {:x}", wallet.address());
@@ -30,7 +30,7 @@ pub(crate) async fn build_clients(
             .await?;
 
     let root_target_client = if cfg.reinit || cfg.only_reinit || cfg.only_reinit_eth {
-        let root_provider: Provider<Http> = MW::try_from(cfg.target_rpc_url.clone())?;
+        let root_provider: Provider<Ws> = MW::connect(cfg.target_ws_url.clone()).await?;
         info!("Eth Wallet decryting...");
         let root_wallet = cfg.get_root_ecdsa_keystore()?.into_wallet()?;
         info!(

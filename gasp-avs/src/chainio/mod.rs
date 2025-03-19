@@ -9,7 +9,7 @@ use bindings::{
 use ethers::{
     contract::{ContractError, EthError},
     middleware::{Middleware, MiddlewareBuilder, NonceManagerMiddleware, SignerMiddleware},
-    providers::{Http, Provider},
+    providers::{Ws, Provider},
     signers::{LocalWallet, Signer},
     types::{Address, TransactionRequest},
     utils::parse_ether,
@@ -23,14 +23,14 @@ use crate::cli::CliArgs;
 pub mod avs;
 pub mod eigen;
 
-pub type Client = Provider<Http>;
+pub type Client = Provider<Ws>;
 pub type SignerClient = SignerMiddleware<NonceManagerMiddleware<Client>, LocalWallet>;
 
 #[instrument(skip_all)]
 pub(crate) async fn build_eth_client(
     cfg: &CliArgs,
 ) -> eyre::Result<(Address, Arc<Client>, Option<Arc<SignerClient>>)> {
-    let provider: Provider<Http> = Client::try_from(cfg.eth_rpc_url.clone())?;
+    let provider: Provider<Ws> = Client::connect(cfg.eth_ws_url.clone()).await?;
     match &cfg.ecdsa_key.ecdsa_address {
         Some(address) => Ok((Address::from_str(address)?, Arc::new(provider), None)),
         _ => {
@@ -60,17 +60,18 @@ pub(crate) fn map_revert(e: ContractError<SignerClient>) -> eyre::Report {
 
 #[instrument(skip_all)]
 pub(crate) async fn setup_deposits(
-    eth_rpc_url: String,
+    eth_ws_url: String,
     registry_address: Address,
     stake: u32,
     operator: LocalWallet,
     chain_id: u64,
 ) -> eyre::Result<()> {
     let op_address = operator.address();
-    set_balance(chain_id, eth_rpc_url.clone(), op_address, 100).await?;
+    set_balance(chain_id, eth_ws_url.clone(), op_address, 100).await?;
     debug!("set some ether to operator");
 
-    let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
+    // We make a new client here which is to be dropped when done with
+    let provider: Provider<Ws> = Client::connect(eth_ws_url).await?;
     let client = Arc::new(provider.with_signer(operator));
     let registry = RegistryCoordinator::new(registry_address, client.clone());
     let stake_registry_address = registry.stake_registry().await?;
@@ -105,7 +106,7 @@ pub(crate) async fn setup_deposits(
 
 async fn set_balance(
     chain_id: u64,
-    eth_rpc_url: String,
+    eth_ws_url: String,
     address: Address,
     ether: u128,
 ) -> eyre::Result<()> {
@@ -113,7 +114,8 @@ async fn set_balance(
     let dev_wallet = "dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
         .parse::<LocalWallet>()?
         .with_chain_id(chain_id);
-    let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
+    // We make a new client here which is to be dropped when done with
+    let provider: Provider<Ws> = Client::connect(eth_ws_url).await?;
     let client = provider.with_signer(dev_wallet);
     let tx = TransactionRequest::pay(address, parse_ether(ether).unwrap());
     let _ = client.send_transaction(tx, None).await?.await?;

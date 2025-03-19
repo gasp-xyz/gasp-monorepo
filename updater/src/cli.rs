@@ -16,11 +16,7 @@ pub struct CliArgs {
     pub gasp_service_addr: Address,
 
     #[arg(long, env)]
-    pub source_rpc_url: String,
-    #[arg(long, env)]
     pub source_ws_url: String,
-    #[arg(long, env)]
-    pub target_rpc_url: String,
     #[arg(long, env)]
     pub target_ws_url: String,
 
