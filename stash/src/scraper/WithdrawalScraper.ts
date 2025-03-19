@@ -4,6 +4,8 @@ import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
 import { redis } from '../connector/RedisConnector.js'
 import logger from '../util/Logger.js'
+import { AnyTuple } from '@polkadot/types-codec/types'
+import { GenericExtrinsic } from '@polkadot/types'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const WITHDRAWAL_PENDING_ON_L2 = 'PendingOnL2'
@@ -20,6 +22,26 @@ export enum CreatedBy {
   Other = 'other',
 }
 
+async function extractExtrinsicHashAndAnAddressFromBlock(
+  api: ApiPromise,
+  block: Block
+) {
+  const blockHash = await api.rpc.chain.getBlockHash(block.number)
+  const blockHeader = await api.rpc.chain.getHeader(blockHash)
+  const extinsics: GenericExtrinsic<AnyTuple>[] = (
+    await api.rpc.chain.getBlock(blockHeader.hash)
+  ).block.extrinsics
+  let txs = extinsics.filter(
+    (x: any) =>
+      x.method.method.toString() === 'withdraw' &&
+      x.method.section.toString() === 'rolldown'
+  )
+  const extrinsicHash = txs.map((tx) => tx.hash.toString())
+  const address = txs.map((tx) => tx.method.args[1].toString())
+  console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+  return { extrinsicHash, address }
+}
+
 export const processWithdrawalEvents = async (
   api: ApiPromise,
   block: Block
@@ -33,20 +55,10 @@ export const processWithdrawalEvents = async (
     for (const eventGroup of events) {
       for (const event of eventGroup) {
         if (event.method === 'WithdrawalRequestCreated') {
-          const existingWithdrawal = await withdrawalRepository
-            .search()
-            .where('txHash')
-            .equals((event.data as any).hash_)
-            .and('type')
-            .equals('withdrawal')
-            .returnFirst()
 
-          if (existingWithdrawal) {
-            await updateWithdrawal(api, existingWithdrawal, event.data)
-          } else {
-            const withdrawalData = await startTracingWithdrawal(api, event.data)
+            const withdrawalData = await startTracingWithdrawal(api, event.data, block)
             logger.info('Tracing started for withdrawal', withdrawalData)
-          }
+
         } else if (event.method === 'TxBatchCreated') {
           await updateWithdrawalsWhenBatchCreated(api, event.data)
         }
@@ -82,7 +94,8 @@ export const updateWithdrawal = async (
 
 export const startTracingWithdrawal = async (
   api: ApiPromise,
-  eventData: any
+  eventData: any,
+    block: Block
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
@@ -94,10 +107,16 @@ export const startTracingWithdrawal = async (
   const network = networks.find((net: Network) => net.key === eventData.chain)
   const chainId = network ? network.chainId : 'unknown'
 
+  const { extrinsicHash, address } =
+      await extractExtrinsicHashAndAnAddressFromBlock(api, block)
+  const redisKey = `withdrawal:${extrinsicHash}`
+  const keyExists = await redis.client.exists(redisKey)
+  console.log('Key Exists:', keyExists)
+
   const withdrawalData = {
     requestId: Number(eventData.requestId.id.replace(/,/g, '')),
     txHash: eventData.hash_,
-    address: '', // address (sender) we get from FE when they trigger start tracing, empty when withdrawal is started tracing by other means or until FE updates it
+    address: address,
     recipient: eventData.recipient,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
@@ -109,7 +128,7 @@ export const startTracingWithdrawal = async (
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
-    createdBy: CreatedBy.Other,
+    createdBy: keyExists ? CreatedBy.Frontend : CreatedBy.Other,
     closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)
