@@ -62,6 +62,7 @@ jobs:
       - run: moon ci :contracts-format
       - run: moon ci :contracts-lint
       - run: moon ci :contracts-test
+      - run: moon ci :contracts-test-integration
       - run: moon ci :contracts-gas
       - run: moon ci :contracts-coverage
       
