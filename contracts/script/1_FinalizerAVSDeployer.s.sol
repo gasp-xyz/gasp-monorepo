@@ -90,7 +90,7 @@ contract FinalizerAVSDeployer is Script, Test, Utils {
 
         taskResponseWindowBlocks = uint32(stdJson.readUint(configData, ".taskManagerParams.taskResponseWindowBlocks"));
 
-        allowNonRootTmInit = stdJson.readBool(configData, ".allowNonRootTmInit");
+        allowNonRootTmInit = stdJson.readBool(configData, ".allow_non_root_tm_init");
 
         // START BROADCAST
         vm.startBroadcast();

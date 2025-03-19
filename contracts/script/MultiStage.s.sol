@@ -74,7 +74,7 @@ contract MultiStage is Script, Utils {
         }
 
         if (envHash == _stringToHash("megaeth-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Megaeth);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
             return;
         }
 
@@ -146,7 +146,7 @@ contract MultiStage is Script, Utils {
                 "Contracts already deployed on Megaeth Testnet"
             );
 
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Megaeth);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
             return;
         }
 
