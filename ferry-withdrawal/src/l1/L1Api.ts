@@ -19,11 +19,15 @@ import {
 	holesky,
 	arbitrumSepolia,
 	baseSepolia,
+	monadTestnet,
+	megaethTestnet,
 	localhost,
 	type Chain,
 	arbitrum,
 	base,
 	mainnet,
+	sonic,
+	sonicBlazeTestnet,
 } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
@@ -65,10 +69,10 @@ function cancelToViemFormat(cancel: Cancel): unknown[] {
 	];
 }
 
-function rethChain(chainId: number): Chain {
+function devChain(chainId: number): Chain {
 	return defineChain({
 		id: chainId,
-		name: `Reth-${chainId}`,
+		name: `dev-${chainId}`,
 		nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
 		rpcUrls: {
 			default: {
@@ -81,17 +85,32 @@ function rethChain(chainId: number): Chain {
 }
 
 const CONFIG_TO_CHAIN = new Map<string, Chain>([
-	["anvil-arbitrum", anvil],
-	["anvil-ethereum", anvil],
-	["arbitrum", arbitrum],
-	["arbitrum-sepolia", arbitrumSepolia],
-	["base", base],
-	["base-sepolia", baseSepolia],
+	//anvil
+	["anvil-ethereum", devChain(31337)],
+	["anvil-arbitrum", devChain(31338)],
+	["anvil-base", devChain(31339)],
+	["anvil-monad", devChain(31340)],
+	["anvil-megaeth", devChain(31341)],
+	["anvil-sonic", devChain(31342)],
+	// mainnet
 	["ethereum", mainnet],
+	["arbitrum", arbitrum],
+	["base", base],
+	["sonic", sonic],
+	// testnet
 	["holesky", holesky],
-	["reth-arbitrum", rethChain(31338)],
-	["reth-ethereum", rethChain(31337)],
-	["reth-base", rethChain(31339)],
+	["arbitrum-sepolia", arbitrumSepolia],
+	["base-sepolia", baseSepolia],
+	["sonic-blaze", sonicBlazeTestnet],
+	["monad", monadTestnet],
+	["megaeth", megaethTestnet],
+	//
+	["reth-arbitrum", devChain(31338)],
+	["reth-ethereum", devChain(31337)],
+	["reth-base", devChain(31339)],
+	["reth-monad", devChain(31340)],
+	["reth-megaeth", devChain(31341)],
+	["reth-sonic", devChain(31342)],
 ]);
 
 class L1Api implements L1Interface {

@@ -110,6 +110,18 @@ tasks:
     options:
       outputStyle: stream
 
+  contracts-test-integration:
+    script: |
+      set -e
+      trap 'pkill anvil' EXIT
+
+      ../tests/integration/deploy-all-contracts-via-multistage-and-resume.sh
+      
+      yarn run test-integration
+    inputs: ["@globs(sources)"]
+    options:
+      outputStyle: stream
+
   contracts-size:
     command: yarn run size
     inputs: ["@globs(sources)"]
