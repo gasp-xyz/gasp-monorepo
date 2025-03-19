@@ -245,7 +245,6 @@ tasks:
 
   e2e-test-sudoRemoval:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -260,8 +259,12 @@ tasks:
       yarn test-sudoRemoval --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
-
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+      
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
     options:
@@ -271,7 +274,6 @@ tasks:
 
   e2e-test-bootstrap:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -286,7 +288,11 @@ tasks:
       yarn test-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -297,7 +303,6 @@ tasks:
 
   e2e-test-parallel:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -312,7 +317,11 @@ tasks:
       yarn test-parallel --max-workers=10 --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -323,7 +332,6 @@ tasks:
 
   e2e-test-sequential-no-bootstrap:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -338,7 +346,11 @@ tasks:
       yarn test-sequential-no-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -349,7 +361,6 @@ tasks:
 
   e2e-test-seqgasless:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -364,7 +375,11 @@ tasks:
       yarn test-seqgasless --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -375,7 +390,6 @@ tasks:
 
   e2e-test-maintenance:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -390,7 +404,11 @@ tasks:
       yarn test-maintenance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -401,7 +419,6 @@ tasks:
 
   e2e-test-rollupUpdate:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -416,7 +433,11 @@ tasks:
       yarn test-rollupUpdate --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -427,7 +448,6 @@ tasks:
 
   e2e-test-rewards-bootstrap:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -442,7 +462,11 @@ tasks:
       yarn test-rewards-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -453,7 +477,6 @@ tasks:
 
   e2e-test-parallel-autocompound:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -468,7 +491,11 @@ tasks:
       yarn test-parallel-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -479,7 +506,6 @@ tasks:
 
   e2e-test-sequential-autocompound:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -494,7 +520,11 @@ tasks:
       yarn test-sequential-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -505,7 +535,6 @@ tasks:
 
   e2e-test-poolliquidity:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -520,7 +549,11 @@ tasks:
       yarn test-poolliquidity --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -531,7 +564,6 @@ tasks:
 
   e2e-test-governance:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -546,7 +578,11 @@ tasks:
       yarn test-governance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -557,7 +593,6 @@ tasks:
 
   e2e-test-multiswap:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -572,7 +607,11 @@ tasks:
       yarn test-multiswap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -583,7 +622,6 @@ tasks:
 
   e2e-test-experimentalStaking:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -598,7 +636,11 @@ tasks:
       yarn test-experimentalStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -609,7 +651,6 @@ tasks:
 
   e2e-test-crowdloan:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -624,7 +665,11 @@ tasks:
       yarn test-crowdloan --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -635,7 +680,6 @@ tasks:
 
   e2e-test-sdk:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -650,7 +694,11 @@ tasks:
       yarn test-sdk --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -661,7 +709,6 @@ tasks:
 
   e2e-test-parallel-3rdPartyRewards:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -676,7 +723,11 @@ tasks:
       yarn test-parallel-3rdPartyRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -687,7 +738,6 @@ tasks:
 
   e2e-test-sequencerStaking:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -702,7 +752,11 @@ tasks:
       yarn test-sequencerStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -713,7 +767,6 @@ tasks:
 
   e2e-test-sequencerCancellation:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -728,7 +781,11 @@ tasks:
       yarn test-sequencerCancellation --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -739,7 +796,6 @@ tasks:
 
   e2e-test-rolldown:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -754,7 +810,11 @@ tasks:
       yarn test-rolldown --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -765,7 +825,6 @@ tasks:
 
   e2e-test-rolldownWithdrawal:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -780,7 +839,11 @@ tasks:
       yarn test-rolldownWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -791,7 +854,6 @@ tasks:
 
   e2e-test-rolldownPreOperationWithdrawal:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -806,7 +868,11 @@ tasks:
       yarn test-rolldownPreOperationWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -817,7 +883,6 @@ tasks:
 
   e2e-test-sequencerRewards:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -832,7 +897,11 @@ tasks:
       yarn test-sequencerRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -843,7 +912,6 @@ tasks:
 
   e2e-test-nonTransToken:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -858,7 +926,11 @@ tasks:
       yarn test-nonTransToken --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -869,7 +941,6 @@ tasks:
 
   e2e-test-issuanceConfig:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -884,7 +955,11 @@ tasks:
       yarn test-issuanceConfig --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -895,7 +970,6 @@ tasks:
 
   e2e-test-marketSwap:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -910,7 +984,11 @@ tasks:
       yarn test-marketSwap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -921,7 +999,6 @@ tasks:
 
   e2e-test-rollup:
     script: |
-      set -eo pipefail
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -946,7 +1023,11 @@ tasks:
       cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
