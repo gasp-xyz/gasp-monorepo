@@ -13,17 +13,33 @@ const tokensToTrackSchema = z
 	.array();
 
 const SUPPORTED_CHAINS = new Map<string, string>([
-	["anvil-arbitrum", "arbitrum"],
+	// anvil
 	["anvil-ethereum", "ethereum"],
-	["holesky", "ethereum"],
+	["anvil-arbitrum", "arbitrum"],
+	["anvil-base", "arbitrum"],
+	["anvil-monad", "monad"],
+	["anvil-megaeth", "megaeth"],
+	["anvil-monad", "monad"],
+	["anvil-sonic", "sonic"],
+	// mainnet
 	["ethereum", "ethereum"],
-	["base-sepolia", "base"],
-	["base", "base"],
 	["arbitrum", "arbitrum"],
+	["base", "base"],
+	["sonic", "sonic"],
+	// testnet
+	["holesky", "ethereum"],
 	["arbitrum-sepolia", "arbitrum"],
+	["base-sepolia", "base"],
+	["monad", "monad"],
+	["megaeth", "megaeth"],
+	["sonic-testnet", "sonic"],
+	// reth
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
 	["reth-base", "base"],
+	["reth-monad", "monad"],
+	["reth-megaeth", "megaeth"],
+	["reth-sonic", "sonic"],
 ]);
 
 const cliConfigSchemat = z.object({

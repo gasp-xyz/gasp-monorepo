@@ -124,6 +124,9 @@ mod benchmarks {
 				L1Asset::Ethereum(v) => (crate::messages::Chain::Ethereum, v),
 				L1Asset::Arbitrum(v) => (crate::messages::Chain::Arbitrum, v),
 				L1Asset::Base(v) => (crate::messages::Chain::Base, v),
+				L1Asset::Monad(v) => (crate::messages::Chain::Monad, v),
+				L1Asset::MegaEth(v) => (crate::messages::Chain::MegaEth, v),
+				L1Asset::Sonic(v) => (crate::messages::Chain::Sonic, v),
 			};
 		Rolldown::<T>::withdraw(
 			RawOrigin::Signed(who).into(),
@@ -198,6 +201,9 @@ mod benchmarks {
 				L1Asset::Ethereum(v) => (crate::messages::Chain::Ethereum, v),
 				L1Asset::Arbitrum(v) => (crate::messages::Chain::Arbitrum, v),
 				L1Asset::Base(v) => (crate::messages::Chain::Base, v),
+				L1Asset::Monad(v) => (crate::messages::Chain::Monad, v),
+				L1Asset::MegaEth(v) => (crate::messages::Chain::MegaEth, v),
+				L1Asset::Sonic(v) => (crate::messages::Chain::Sonic, v),
 			};
 		Ok((l1_aset_chain, l1_asset_address))
 	}
