@@ -1033,7 +1033,6 @@ tasks:
       export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
-      export ROLLUP_NODE_PROCESS_ENABLED=false
 
       docker compose down
       if [ "$CI" = "true" ]; then

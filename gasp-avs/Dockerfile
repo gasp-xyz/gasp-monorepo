@@ -85,7 +85,7 @@ COPY <<-EOF /etc/supervisor/conf.d/supervisord.conf
 	priority = 20
 
 	[program:rollup-node]
-	command = bash -c "/app/rollup-node --chain=%(ENV_ROLLUP_NODE_CHAIN)s --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=/data --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
+	command = bash -c "/app/rollup-node --chain=rollup-local-seq --bootnodes=%(ENV_ROLLUP_NODE_BOOTNODE)s --base-path=/data --pruning=archive || kill -s SIGINT `cat supervisord.pid`"
 	autostart = %(ENV_ROLLUP_NODE_PROCESS_ENABLED)s
 	stopasgroup = true
 	autorestart = false
