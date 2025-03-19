@@ -202,11 +202,15 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
       TEST_EXIT_CODE=$?
       
-      # Always clean up
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
-      
-      # Exit with the test exit code
       exit $TEST_EXIT_CODE
+
     options:
       cache: true
       runFromWorkspaceRoot: true
@@ -215,8 +219,6 @@ tasks:
 
   e2e-test-corrupted:
     script: |
-      set -e  # Exit immediately if a command exits with a non-zero status
-      
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -239,11 +241,14 @@ tasks:
       # Run test and capture exit code
       cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
       TEST_EXIT_CODE=$?
-      
-      # Always clean up
+
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
-      
-      # Exit with the test exit code
       exit $TEST_EXIT_CODE
     options:
       cache: true

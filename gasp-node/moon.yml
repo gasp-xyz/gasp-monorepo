@@ -261,11 +261,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
-      
-      cd ../ && docker compose down
+
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -290,11 +290,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -319,11 +319,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -348,11 +348,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -377,11 +377,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -406,11 +406,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -435,11 +435,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -464,11 +464,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -493,11 +493,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -522,11 +522,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -551,11 +551,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -580,11 +580,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -609,11 +609,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -638,11 +638,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -667,11 +667,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -696,11 +696,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -725,11 +725,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -754,11 +754,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -783,11 +783,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -812,11 +812,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -841,11 +841,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -870,11 +870,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -899,11 +899,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -928,11 +928,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -957,11 +957,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -986,11 +986,11 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
-      cd ../ && docker compose down
+      cd $workspaceRoot/gasp-node && docker compose down
       exit $TEST_EXIT_CODE
     options:
       cache: true
@@ -1025,7 +1025,7 @@ tasks:
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         # Also output last 1000 lines of logs to console for CI visibility
-        docker compose logs --tail=1000
+        cd $workspaceRoot && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
