@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use l1api::L1Interface;
 use l2api::L2Interface;
 

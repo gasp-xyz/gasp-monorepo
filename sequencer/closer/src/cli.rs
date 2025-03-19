@@ -1,7 +1,6 @@
 use clap::arg;
 use clap::Parser;
-use hex::FromHex;
-use tracing::level_filters::LevelFilter;
+use hex::FromHexError;
 
 #[derive(Parser, Debug)]
 pub struct Cli {
@@ -24,7 +23,7 @@ pub struct Cli {
     pub update_size_limit: usize,
 }
 
-fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
+fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {
     let mut result = [0u8; 20];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 42) => hex::decode(&s[2..]),
@@ -36,7 +35,7 @@ fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
     Ok(result)
 }
 
-fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
+fn parse_pkey(s: &str) -> Result<[u8; 32], FromHexError> {
     let mut result = [0u8; 32];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 66) => hex::decode(&s[2..]),

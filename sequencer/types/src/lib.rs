@@ -54,6 +54,9 @@ pub enum Chain {
     Ethereum,
     Arbitrum,
     Base,
+    Monad,
+    MegaEth,
+    Sonic,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -81,6 +84,9 @@ impl From<l2types::Chain> for Chain {
             l2types::Chain::Ethereum => Chain::Ethereum,
             l2types::Chain::Arbitrum => Chain::Arbitrum,
             l2types::Chain::Base => Chain::Base,
+            l2types::Chain::Monad => Chain::Monad,
+            l2types::Chain::MegaEth => Chain::MegaEth,
+            l2types::Chain::Sonic => Chain::Sonic,
         }
     }
 }
@@ -88,12 +94,19 @@ impl From<l2types::Chain> for Chain {
 const ETHEREUM_CHAIN_ID: u8 = 0;
 const ARBITRUM_CHAIN_ID: u8 = 1;
 const BASE_CHAIN_ID: u8 = 2;
+const MONAD_CHAIN_ID: u8 = 3;
+const MEGAETH_CHAIN_ID: u8 = 4;
+const SONIC_CHAIN_ID: u8 = 5;
+
 impl From<l1types::Chain> for Chain {
     fn from(value: l1types::Chain) -> Self {
         match value.into() {
             ETHEREUM_CHAIN_ID => Chain::Ethereum,
             ARBITRUM_CHAIN_ID => Chain::Arbitrum,
             BASE_CHAIN_ID => Chain::Base,
+            MONAD_CHAIN_ID => Chain::Monad,
+            MEGAETH_CHAIN_ID => Chain::MegaEth,
+            SONIC_CHAIN_ID => Chain::Sonic,
             _ => panic!("unknown chain"),
         }
     }
@@ -105,6 +118,9 @@ impl Into<l1types::Chain> for Chain {
             Chain::Arbitrum => l1types::Chain::from(ARBITRUM_CHAIN_ID),
             Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
             Chain::Base => l1types::Chain::from(BASE_CHAIN_ID),
+            Chain::Monad => l1types::Chain::from(MONAD_CHAIN_ID),
+            Chain::MegaEth => l1types::Chain::from(MEGAETH_CHAIN_ID),
+            Chain::Sonic => l1types::Chain::from(SONIC_CHAIN_ID),
         }
     }
 }
@@ -115,6 +131,9 @@ impl Into<l2types::Chain> for Chain {
             Chain::Ethereum => l2types::Chain::Ethereum,
             Chain::Arbitrum => l2types::Chain::Arbitrum,
             Chain::Base => l2types::Chain::Base,
+            Chain::Monad => l2types::Chain::Monad,
+            Chain::MegaEth => l2types::Chain::MegaEth,
+            Chain::Sonic => l2types::Chain::Sonic,
         }
     }
 }
