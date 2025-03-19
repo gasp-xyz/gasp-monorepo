@@ -10,5 +10,5 @@
 	url = https://github.com/gasp-xyz/eigensdk-go
 [submodule "gasp-node/gasp-e2e"]
 	path = gasp-node/gasp-e2e
-	branch = feat/remove-package-lock-json-and-update-yarn
+	branch = eth-rollup-develop
 	url = https://github.com/gasp-xyz/gasp-e2e.git
