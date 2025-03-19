@@ -189,7 +189,7 @@ tasks:
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
 
       docker compose down && docker compose up -d
-
+      docker compose ps
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
       rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
@@ -229,6 +229,7 @@ tasks:
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
       
       docker compose down && docker compose up -d
+      docker compose ps
 
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-corrupted-report.xml
