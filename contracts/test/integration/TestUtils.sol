@@ -1,9 +1,7 @@
 pragma solidity =0.8.13;
 
-import "forge-std/Test.sol";
-import "forge-std/Script.sol";
-import "forge-std/StdJson.sol";
-import "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract TestUtils is Script, Test {
     function getAvsConfigFile() public view returns (string memory) {
