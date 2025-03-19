@@ -193,21 +193,9 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       
-      - name: Set MOON_CACHE=off for release/next branch
-        if: github.ref_name == 'release/next'
+      - name: Set MOON_CACHE=off to disable `moon` cache usage
+        if: github.ref_name == 'release/next' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'no-cache'))
         run: echo "MOON_CACHE=off" >> $GITHUB_ENV
-      
-      
-      # Check for no-cache label on PR to disable caching
-      - name: Check for cache disabling label
-        if: github.event_name == 'pull_request'
-        run: |
-          if [[ ${{ contains(github.event.pull_request.labels.*.name, 'no-cache') }} == true ]]; then
-            echo "::warning::Cache disabled via 'no-cache' label on PR #${{ github.event.pull_request.number }}"
-            echo "MOON_CACHE=off" >> $GITHUB_ENV
-          else
-            echo "MOON_CACHE=read-write" >> $GITHUB_ENV
-          fi
 
       - name: Run tests
         run: ${{ matrix.command }}
