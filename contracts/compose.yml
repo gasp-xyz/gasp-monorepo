@@ -78,7 +78,7 @@ services:
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
     volumes:
-      - ./script/output/31339/:/app/script/output/31339
+      - ./script/output/31340/:/app/script/output/31340
     environment:
       ENV_SELECTOR: monad-stub
   megaeth-contracts-deployment:
@@ -86,7 +86,7 @@ services:
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localmegaeth}
     platform: linux/amd64
     depends_on:
-      monad-stub:
+      megaeth-stub:
         condition: service_healthy
     command:
       - script
@@ -97,6 +97,6 @@ services:
       - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       - --broadcast
     volumes:
-      - ./script/output/31339/:/app/script/output/31339
+      - ./script/output/31341/:/app/script/output/31341
     environment:
       ENV_SELECTOR: megaeth-stub
