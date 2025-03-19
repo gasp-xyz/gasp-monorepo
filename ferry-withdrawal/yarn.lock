@@ -4641,8 +4641,8 @@ __metadata:
     axios: "npm:^1.7.9"
     dotenv: "npm:^16.4.5"
     express: "npm:^4.21.2"
-    gasp-sdk: "npm:0.0.2-eth-rollup-develop.67"
-    gasp-types: "npm:0.0.2-eth-rollup-develop.67"
+    gasp-sdk: "npm:0.0.2-feat-council-rpc.0"
+    gasp-types: "npm:0.0.2-feat-council-rpc.1"
     immutable: "npm:^4.3.7"
     json-bigint: "npm:^1.0.0"
     prom-client: "npm:^15.1.3"
@@ -4929,37 +4929,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gasp-sdk@npm:0.0.2-eth-rollup-develop.67":
-  version: 0.0.2-eth-rollup-develop.67
-  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.67"
+"gasp-sdk@npm:0.0.2-feat-council-rpc.0":
+  version: 0.0.2-feat-council-rpc.0
+  resolution: "gasp-sdk@npm:0.0.2-feat-council-rpc.0"
   dependencies:
     big.js: "npm:6.2.1"
-    gasp-type-definitions: "npm:0.0.2-eth-rollup-develop.69"
+    gasp-type-definitions: "npm:0.0.2-feat-council-rpc.0"
     tslib: "npm:^2.3.0"
     tslog: "npm:4.8.2"
     viem: "npm:^2.17.4"
     wagmi: "npm:^2.10.10"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/fdd1cb8e4e70bd264952e9ba89b8e5124ff861ec1f43cf0b993eb6b32891e51f400fe422a96e95e2e9c21b001a43097cfbf9928988af3bd52ef9b3ce87792308
+  checksum: 10c0/202016302466bb4d2a46669d8990affa7d7774d09f5df311c32160a848c95442eeae36f41188ec17e9c67c49448525258e7887dbea44e60aa1eae1caae32435d
   languageName: node
   linkType: hard
 
-"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.69":
-  version: 0.0.2-eth-rollup-develop.69
-  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.69"
+"gasp-type-definitions@npm:0.0.2-feat-council-rpc.0":
+  version: 0.0.2-feat-council-rpc.0
+  resolution: "gasp-type-definitions@npm:0.0.2-feat-council-rpc.0"
   peerDependencies:
     "@polkadot/types": ^11.1.1
-  checksum: 10c0/df9b69cd4308ca3b8d6eceda97813cf03137ca9afdf9d01a30a87fb23bd0cd56c2c80ebda494ffa3dd457839958a05b3fa57848c9ada9503df5cdcf0d9a50f7c
+  checksum: 10c0/c221cba6ed80d486202429120cb0e5554015a76f7001980e86b11dfeed07f86c356e93e2ce56af0b2637ee03f2235be255f327281b61304e695002fc3a48e394
   languageName: node
   linkType: hard
 
-"gasp-types@npm:0.0.2-eth-rollup-develop.67":
-  version: 0.0.2-eth-rollup-develop.67
-  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.67"
+"gasp-types@npm:0.0.2-feat-council-rpc.1":
+  version: 0.0.2-feat-council-rpc.1
+  resolution: "gasp-types@npm:0.0.2-feat-council-rpc.1"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/9f82a2a07a713baa217fabc6c68d287e33d342d36931ce63a669cea9fe1e464137c1337f509c9ca41be279aa1df2a4add024acddaf73b57b10f2a0624920d9cb
+  checksum: 10c0/63dec04fbe330e57e61b15cfba22462d851670b2d3a698dc10c36b86f9f9914e3d176a1e3b2ed60d19dccb0546b4bc7dc91f018591412404e0666009c827efea
   languageName: node
   linkType: hard
 
