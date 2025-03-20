@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: BUSL-1.1
-// ::: How to run:::
-// cd contracts ; pkill anvil ; clear ; cd ../ ; make deploy-all-contracts-via-multistage-and-resume ; cd contracts ; forge test -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
-pragma solidity =0.8.13;
+pragma solidity 0.8.13;
 
 import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import {FinalizerServiceManager} from "./../../src/FinalizerServiceManager.sol";
+import {FinalizerServiceManager} from "../../src/FinalizerServiceManager.sol";
 import {TestUtils} from "./TestUtils.sol";
 
+// ::: How to run:::
+// cd contracts ;  pkill anvil ;  clear ; cd ../ ; make deploy-all-contracts-via-multistage-and-resume  ; cd contracts ; forge test  -vvv --fork-url=http://localhost:8545 --match-contract 'Integration'
+
 contract IntegrationEjectorAdminRuleTest is Test {
-    address private deployer = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
+    address internal deployer = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
 
     function testEjectorCanBeResetByDeployer() public {
         address tu = address(deployer);
@@ -74,7 +75,6 @@ contract IntegrationEjectorAdminRuleTest is Test {
         FinalizerServiceManager fsm = FinalizerServiceManager(
             stdJson.readAddress(new TestUtils().getRollDownConfigFileEth(), ".addresses.serviceManager")
         );
-        // Using owner for broadcasting, don't need to use ejectorAddr variable
 
         address[] memory operators = new address[](2);
         operators[0] = address(0x1);
