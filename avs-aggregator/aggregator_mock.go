@@ -5,15 +5,18 @@ import (
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	
 	mocks "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/mocks"
 	gomock "go.uber.org/mock/gomock"
 )
 
+type MockAggConfigExt struct {
+	taskResponseWindowBlock uint32
+}
+
 // We have to put it here instead of with the mocks because Aggregator fields are private
 // Kicker, Osu and RpcServer will have to be treated the same way
-func NewMockAggregator (ctrl *gomock.Controller, c *Config) (*Aggregator, error) {
+func NewMockAggregator (ctrl *gomock.Controller, c *Config, mce *MockAggConfigExt) (*Aggregator, error) {
 	logger, err := sdklogging.NewZapLogger(c.LogLevel)
 	if err != nil {
 		return nil, err
@@ -22,12 +25,6 @@ func NewMockAggregator (ctrl *gomock.Controller, c *Config) (*Aggregator, error)
 	ethRpc, err := mocks.NewMockEthRpc(ctrl)
 	if err != nil {
 		logger.Error("Failed to create ethRpc", "err", err)
-		return nil, err
-	}
-
-	taskResponseWindowBlock, err := ethRpc.AvsReader.TaskResponseWindowBlock(&bind.CallOpts{})
-	if err != nil {
-		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
 	}
 
@@ -51,7 +48,7 @@ func NewMockAggregator (ctrl *gomock.Controller, c *Config) (*Aggregator, error)
 		tasks:                   make(map[sdktypes.TaskId]interface{}),
 		taskResponses:           make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
 		substrateClient:         *substrateRpc,
-		taskResponseWindowBlock: taskResponseWindowBlock,
+		taskResponseWindowBlock: mce.taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
 		blockPeriodOpsTask:      uint32(c.BlockPeriodOpsTask),
 		kicker:                  nil,

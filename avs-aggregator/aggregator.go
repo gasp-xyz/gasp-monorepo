@@ -390,18 +390,12 @@ func (agg *Aggregator) checkAndProcessPendingTasks() error {
 
 func (agg *Aggregator) getAndProcessPendingOpTask(latestOpTaskNum uint32, lastOpTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastOpTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.FilterNewOpTaskCreated(
+	pendingOpTask, err := agg.ethRpc.AvsReader.GetFirstFilterNewOpTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastOpTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestOpTaskNum},
 	)
 	if err != nil {
-		return fmt.Errorf("Aggregator failed to FilterNewOpTaskCreated: err: %v", err)
+		return fmt.Errorf("Aggregator failed to GetFirstFilterNewOpTaskCreated: err: %v", err)
 	}
-
-	eventIterBool := eventIter.Next()
-	if eventIterBool == false {
-		return fmt.Errorf("Aggregator failed to find the opTask via FilterNewOpTaskCreated: latestOpTaskNum: %v, lastOpTaskCreatedBlock: %v", latestOpTaskNum, lastOpTaskCreatedBlock)
-	}
-	pendingOpTask := eventIter.Event.Task
 
 	pendingOpTaskId := sdktypes.TaskId{
 		TaskType:  sdktypes.TaskType(0),
@@ -433,18 +427,12 @@ func (agg *Aggregator) processPendingOpTask(newTask taskmanager.IFinalizerTaskMa
 
 func (agg *Aggregator) getAndProcessPendingRdTask(latestRdTaskNum uint32, lastRdTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastRdTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.FilterNewRdTaskCreated(
+	pendingRdTask, err := agg.ethRpc.AvsReader.GetFirstFilterNewRdTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastRdTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestRdTaskNum},
 	)
 	if err != nil {
-		return fmt.Errorf("Aggregator failed to FilterNewRdTaskCreated: err: %v", err)
+		return fmt.Errorf("Aggregator failed to GetFirstFilterNewRdTaskCreated: err: %v", err)
 	}
-
-	eventIterBool := eventIter.Next()
-	if eventIterBool == false {
-		return fmt.Errorf("Aggregator failed to find the rdTask via FilterNewRdTaskCreated: latestRdTaskNum: %v, lastRdTaskCreatedBlock: %v", latestRdTaskNum, lastRdTaskCreatedBlock)
-	}
-	pendingRdTask := eventIter.Event.Task
 
 	pendingRdTaskId := sdktypes.TaskId{
 		TaskType:  sdktypes.TaskType(1),
@@ -788,7 +776,7 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 		}
 	}
 	if success != true {
-		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to succesfully complete opTask after 3 attempts", "newTask", newTask)
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to succesfully complete opTask after 3 attempts, newTask: %v", newTask)
 	}
 	return newTask, nil
 

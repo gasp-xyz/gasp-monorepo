@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -51,7 +52,9 @@ type AvsReaderer interface {
 
 	ChainID(ctx context.Context) (*big.Int, error)
 	FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewOpTaskCreatedIterator, error)
+	GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerOpTask, error)
 	FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error)
+	GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerRdTask, error)
 	TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error)
 	ParseOpTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerOpTaskCompleted, error)
 	ParseRdTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskCompleted, error)
@@ -443,12 +446,45 @@ func (r *AvsReader) FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []ui
 	return eventIter, err 
 }
 
+func (r *AvsReader) GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerOpTask, error) {
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
+		opts, taskIndex,
+	)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to FilterNewOpTaskCreated: err: %v", err)
+	}
+
+	eventIterBool := eventIter.Next()
+	if eventIterBool == false {
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to find the opTask via FilterNewOpTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
+	}
+	
+	return eventIter.Event.Task, err 
+}
+
 func (r *AvsReader) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error) {
 
 	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
 		opts, taskIndex,
 	)
 	return eventIter, err 
+}
+
+func (r *AvsReader) GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerRdTask, error) {
+
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
+		opts, taskIndex,
+	)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, fmt.Errorf("Aggregator failed to FilterNewRdTaskCreated: err: %v", err)
+	}
+
+	eventIterBool := eventIter.Next()
+	if eventIterBool == false {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, fmt.Errorf("Aggregator failed to find the rdTask via FilterNewRdTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
+	}
+	
+	return eventIter.Event.Task, err 
 }
 
 func (r *AvsReader) TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {

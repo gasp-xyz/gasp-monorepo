@@ -157,6 +157,36 @@ func (mr *MockAvsReadererMockRecorder) FilterNewRdTaskCreated(opts, taskIndex an
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FilterNewRdTaskCreated", reflect.TypeOf((*MockAvsReaderer)(nil).FilterNewRdTaskCreated), opts, taskIndex)
 }
 
+// GetFirstFilterNewOpTaskCreated mocks base method.
+func (m *MockAvsReaderer) GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (contractFinalizerTaskManager.IFinalizerTaskManagerOpTask, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFirstFilterNewOpTaskCreated", opts, taskIndex)
+	ret0, _ := ret[0].(contractFinalizerTaskManager.IFinalizerTaskManagerOpTask)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFirstFilterNewOpTaskCreated indicates an expected call of GetFirstFilterNewOpTaskCreated.
+func (mr *MockAvsReadererMockRecorder) GetFirstFilterNewOpTaskCreated(opts, taskIndex any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFirstFilterNewOpTaskCreated", reflect.TypeOf((*MockAvsReaderer)(nil).GetFirstFilterNewOpTaskCreated), opts, taskIndex)
+}
+
+// GetFirstFilterNewRdTaskCreated mocks base method.
+func (m *MockAvsReaderer) GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (contractFinalizerTaskManager.IFinalizerTaskManagerRdTask, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFirstFilterNewRdTaskCreated", opts, taskIndex)
+	ret0, _ := ret[0].(contractFinalizerTaskManager.IFinalizerTaskManagerRdTask)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFirstFilterNewRdTaskCreated indicates an expected call of GetFirstFilterNewRdTaskCreated.
+func (mr *MockAvsReadererMockRecorder) GetFirstFilterNewRdTaskCreated(opts, taskIndex any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFirstFilterNewRdTaskCreated", reflect.TypeOf((*MockAvsReaderer)(nil).GetFirstFilterNewRdTaskCreated), opts, taskIndex)
+}
+
 // GetNonSigningOperatorPubKeys mocks base method.
 func (m *MockAvsReaderer) GetNonSigningOperatorPubKeys(event contractFinalizerTaskManager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error) {
 	m.ctrl.T.Helper()

@@ -257,7 +257,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 					}
 					rawLogsC, sub, err := osu.ethRpc.AvsSubscriber.StreamQueryWithHistory(context.Background(), &query)
 					if err != nil {
-						osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToResumeTrackingOpState: err: %v, atBlock+1: %v", err, osu.checkpointedBlock, osu.atBlock+1)
+						osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToResumeTrackingOpState: err: %v, osu.checkpointedBlock: %v, atBlock+1: %v", err, osu.checkpointedBlock, osu.atBlock+1)
 						return
 					}
 					defer sub.Unsubscribe()
@@ -289,7 +289,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 								osu.logger.Debug("Getting states at the checkpoint and at the resume event block", "lastCompletedOpTaskCreatedBlock", lastCompletedOpTaskCreatedBlock, "atBlock", uint32(event.Raw.BlockNumber))
 								lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), uint64(event.Raw.BlockNumber))
 								if err != nil {
-									osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+									osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", err, event.Raw.BlockNumber)
 									return
 								}
 								osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
@@ -434,7 +434,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 										osu.logger.Debugf("OpStateUpdater - Received OpTaskCompleted event has task with higher than expted taskIndex: %v", event)
 										lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), event.Raw.BlockNumber)
 										if err != nil {
-											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", event.Raw.BlockNumber)
+											osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", err, event.Raw.BlockNumber)
 											return
 										}
 										osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
@@ -654,7 +654,7 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 
 						lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), vLog.BlockNumber)
 						if err != nil {
-							osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", vLog.BlockNumber)
+							osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", err, vLog.BlockNumber)
 							return
 						}
 						osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
