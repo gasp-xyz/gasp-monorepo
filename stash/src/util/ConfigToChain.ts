@@ -1,12 +1,15 @@
 import { Chain } from 'viem'
 import {
   anvil,
-  arbitrumSepolia, arbitrum,
-  baseSepolia, base,
-  holesky, mainnet,
+  arbitrumSepolia,
+  arbitrum,
+  baseSepolia,
+  base,
+  holesky,
+  mainnet,
   localhost,
-    monadTestnet,
-    megaethTestnet
+  monadTestnet,
+  megaethTestnet,
 } from 'viem/chains'
 
 export const CONFIG_TO_CHAIN = new Map<string, Chain>([
@@ -17,7 +20,6 @@ export const CONFIG_TO_CHAIN = new Map<string, Chain>([
   ['testnet-arbitrum', arbitrumSepolia],
   ['testnet-base', baseSepolia],
   ['testnet-monad', monadTestnet],
-  ['testnet-megaeth', megaethTestnet],
   ['prod-ethereum', mainnet],
   ['prod-arbitrum', arbitrum],
   ['prod-base', base],
