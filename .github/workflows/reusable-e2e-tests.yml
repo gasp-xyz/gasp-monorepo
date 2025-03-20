@@ -68,6 +68,12 @@ jobs:
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive --depth 1
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: build and copy contracts
+        working-directory: contracts
+        run: forge build
+
       - name: Install proto manually
         run: |
           curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
