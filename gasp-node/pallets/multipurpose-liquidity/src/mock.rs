@@ -230,6 +230,15 @@ impl<T: Config> XykFunctionsTrait<AccountId, Balance, TokenId> for MockXyk<T> {
 	) -> DispatchResult {
 		unimplemented!()
 	}
+
+	fn settle_pool_fees(
+		_who: &AccountId,
+		_pool_id: TokenId,
+		_asset_id: TokenId,
+		_fee: Balance,
+	) -> Result<(), DispatchError> {
+		unimplemented!()
+	}
 }
 
 // This function basically just builds a genesis storage key/value store according to
