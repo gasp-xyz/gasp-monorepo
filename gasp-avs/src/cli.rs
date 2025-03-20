@@ -16,8 +16,6 @@ pub struct CliArgs {
     #[arg(long, env)]
     pub substrate_rpc_url: String,
     #[arg(long, env)]
-    pub eth_rpc_url: String,
-    #[arg(long, env)]
     pub eth_ws_url: String,
     #[arg(long, env)]
     pub avs_rpc_url: String,
