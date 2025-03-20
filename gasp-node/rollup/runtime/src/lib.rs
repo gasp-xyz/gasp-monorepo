@@ -1372,6 +1372,23 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_collective_mangata::CouncilCallRuntimeApi<Block, RuntimeCall> for Runtime {
+			fn get_length_and_weight_for_call(
+				call: RuntimeCall
+			) -> Option<(u32, Weight)> {
+				Council::get_length_and_weight_for_call(call)
+			}
+		}
+
+	impl pallet_collective_mangata::CouncilRuntimeApi<Block, <Runtime as frame_system::Config>::Hash> for Runtime {
+
+			fn get_length_and_weight_for_proposal(
+				proposal_hash: <Runtime as frame_system::Config>::Hash,
+			) -> Option<(u32, Weight)>{
+				Council::get_length_and_weight_for_proposal(proposal_hash)
+			}
+	}
+
 	impl pallet_market::MarketRuntimeApi<Block, Balance, TokenId> for Runtime {
 		fn calculate_sell_price(pool_id: TokenId, sell_asset_id: TokenId, sell_amount: Balance) -> Option<Balance> {
 			Market::calculate_sell_price(pool_id, sell_asset_id, sell_amount)
