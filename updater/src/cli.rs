@@ -127,11 +127,17 @@ pub struct RootEcdsaKey {
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
+        let testnet_chains = [
+            Chain::AnvilHardhat as u64,
+            31338,
+            31339,
+            31340,
+            31341,
+            Chain::Dev as u64,
+        ];
         // Only if both source and target are testnet then it is testnet
-        if !([Chain::AnvilHardhat as u64, 31338, 31339, Chain::Dev as u64]
-            .contains(&args.source_chain_id)
-            && [Chain::AnvilHardhat as u64, 31338, 31339, Chain::Dev as u64]
-                .contains(&args.target_chain_id))
+        if !(testnet_chains.contains(&args.source_chain_id)
+            && testnet_chains.contains(&args.target_chain_id))
         {
             let mut cmd = CliArgs::command();
             if args.testnet {

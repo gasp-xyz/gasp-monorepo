@@ -7,12 +7,11 @@ import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts
 import { console } from "forge-std/console.sol";
 import { Script } from "forge-std/Script.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { Test } from "forge-std/Test.sol";
 import { GaspMultiRollupService } from "./../src/GaspMultiRollupService.sol";
 import { IRolldownPrimitives } from "./../src/interfaces/IRolldownPrimitives.sol";
 import { Utils } from "./utils/Utils.sol";
 
-contract GaspMultiRollupServiceDeployer is Script, Test, Utils {
+contract GaspMultiRollupServiceDeployer is Script, Utils {
     string internal constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
     string internal constant _CONFIG_PATH = "deploy.config";
     string internal constant _OUTPUT_PATH = "gmrs_output";
