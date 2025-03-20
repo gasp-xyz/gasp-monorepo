@@ -24,6 +24,7 @@ export enum CreatedBy {
 
 async function extractExtrinsicHashAndAnAddressFromBlock(
   api: ApiPromise,
+  phaseApplyExtrinsic: number,
   block: Block
 ) {
   const blockHash = await api.rpc.chain.getBlockHash(block.number)
@@ -31,14 +32,19 @@ async function extractExtrinsicHashAndAnAddressFromBlock(
   const extinsics: GenericExtrinsic<AnyTuple>[] = (
     await api.rpc.chain.getBlock(blockHeader.hash)
   ).block.extrinsics
-  let txs = extinsics.filter(
-    (x: any) =>
-      x.method.method.toString() === 'withdraw' &&
-      x.method.section.toString() === 'rolldown'
-  )
-  const extrinsicHash = txs.map((tx) => tx.hash.toString())
-  const address = txs.map((tx) => tx.method.args[1].toString())
-  console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+  let extrinsic = extinsics[phaseApplyExtrinsic]
+  // console.log('Extrinsic:', extrinsic)
+  let extrinsicHash, address
+  try {
+    extrinsicHash = extrinsic.hash.toString()
+    address = extrinsic.method.args[1].toString()
+    console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+  } catch (error) {
+    logger.error('Error extracting extrinsic hash and address:', error)
+    extrinsicHash = extrinsic.hash.toString()
+    address = extrinsic.signer.toString()
+    console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+  }
   return { extrinsicHash, address }
 }
 
@@ -49,18 +55,28 @@ export const processWithdrawalEvents = async (
   const events = _.chain(block.events)
     .filter((ev) => filterEvents(ev[1]))
     .groupBy(([idx, _]) => idx)
-    .map((evs, _) => evs.map(([_, ev]) => ev))
+    .map((evs, idx) =>
+      evs.map(([phaseApplyExtrinsic, ev]) => ({ phaseApplyExtrinsic, ev }))
+    )
     .value()
   if (events.length > 0) {
     for (const eventGroup of events) {
       for (const event of eventGroup) {
-        if (event.method === 'WithdrawalRequestCreated') {
-
-            const withdrawalData = await startTracingWithdrawal(api, event.data, block)
+        console.log('Event final:', event)
+        if (event.ev.method === 'WithdrawalRequestCreated') {
+          try {
+            const withdrawalData = await startTracingWithdrawal(
+              api,
+              event.ev.data,
+              event.phaseApplyExtrinsic,
+              block
+            )
             logger.info('Tracing started for withdrawal', withdrawalData)
-
-        } else if (event.method === 'TxBatchCreated') {
-          await updateWithdrawalsWhenBatchCreated(api, event.data)
+          } catch (error) {
+            logger.error('Error tracing withdrawal:', error)
+          }
+        } else if (event.ev.method === 'TxBatchCreated') {
+          await updateWithdrawalsWhenBatchCreated(api, event.ev.data)
         }
       }
     }
@@ -95,7 +111,8 @@ export const updateWithdrawal = async (
 export const startTracingWithdrawal = async (
   api: ApiPromise,
   eventData: any,
-    block: Block
+  phaseApplyExtrinsic: number,
+  block: Block
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
@@ -108,7 +125,11 @@ export const startTracingWithdrawal = async (
   const chainId = network ? network.chainId : 'unknown'
 
   const { extrinsicHash, address } =
-      await extractExtrinsicHashAndAnAddressFromBlock(api, block)
+    await extractExtrinsicHashAndAnAddressFromBlock(
+      api,
+      phaseApplyExtrinsic,
+      block
+    )
   const redisKey = `withdrawal:${extrinsicHash}`
   const keyExists = await redis.client.exists(redisKey)
   console.log('Key Exists:', keyExists)
