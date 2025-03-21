@@ -29,6 +29,10 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
+    async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
+        self.l1.get_deposit(request_id).await
+    }
+
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
         self.l1.erc20_balance(token, account).await
     }

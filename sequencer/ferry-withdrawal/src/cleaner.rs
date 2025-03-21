@@ -95,7 +95,7 @@ where
                 let mut latest = self.latest_processed;
                 let range_start = std::cmp::min(latest, range_end);
 
-                let chunks = crate::utils::get_chunks(range_start, range_end, 25);
+                let chunks = common::get_chunks(range_start, range_end, 25);
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(

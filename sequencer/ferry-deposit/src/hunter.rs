@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use gasp_types::{Chain, L2Request, H256};
 use gasp_types::{Withdrawal, U256};
-use l1api::types::RequestStatus;
+use l1api::types::{RequestStatus, Deposit};
 use l1api::L1Interface;
 use l2api::L2Interface;
 use tokio::sync::mpsc;
@@ -14,17 +14,8 @@ pub enum HunterError {
     #[error("L2Error `{0}`")]
     L2Error(#[from] l2api::L2Error),
 
-    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
-    RequestIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
-
-    #[error("Unknown merkle root for finalized request id `{0}`")]
-    UnknownMerkleRootForFinalizedRequestId(U256),
-
-    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
-    WithdrawalIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
-
     #[error("Sink send error")]
-    SinkSendError(#[from] tokio::sync::mpsc::error::SendError<Withdrawal>),
+    SinkSendError(#[from] tokio::sync::mpsc::error::SendError<Deposit>),
 }
 
 pub type HunterResult<T> = Result<T, HunterError>;
@@ -34,7 +25,7 @@ pub struct FerryHunter<L1, L2> {
     chain: gasp_types::Chain,
     l1: L1,
     l2: L2,
-    sink: mpsc::Sender<Withdrawal>,
+    sink: mpsc::Sender<Deposit>,
     latest_processed: u128,
 }
 
@@ -43,7 +34,7 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2, sink: mpsc::Sender<Withdrawal>) -> Self {
+    pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2, sink: mpsc::Sender<Deposit>) -> Self {
         FerryHunter {
             chain,
             l1,
@@ -54,35 +45,23 @@ where
     }
 
     async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
-        let latest_request_id_on_l2 = self
-            .l2
-            .get_latest_created_request_id(self.chain, l2_state)
-            .await?;
-        Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
-            (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id + 1, l2_request_id))
+        let latest_available_request = self.l1.get_latest_reqeust_id().await?;
+        let latest_processed= self.l2.get_latest_processed_request_id(self.chain, l2_state).await?;
+
+        Ok(match (latest_available_request) {
+            Some(latest_avilable) if latest_avilable > latest_processed => {
+                Some((latest_processed + 1, latest_avilable))
             }
-            (None, Some(l2_request_id)) => Some((1, l2_request_id)),
             _ => None,
         })
     }
 
-    #[tracing::instrument(level = "debug", skip(self, at), ret)]
-    pub async fn get_pending_withdrawal(
+    #[tracing::instrument(level = "debug", skip(self), ret)]
+    pub async fn get_deposit(
         &self,
         id: u128,
-        at: H256,
-    ) -> HunterResult<Option<Withdrawal>> {
-        match self.l2.get_l2_request(self.chain, id, at).await? {
-            Some(L2Request::Withdrawal(w)) => {
-                match self.l1.get_status(w.withdrawal_hash()).await? {
-                    RequestStatus::Pending => Ok::<_, HunterError>(Some(w)),
-                    _ => Ok(None),
-                }
-            }
-            _ => Ok(None),
-        }
+    ) -> HunterResult<Option<Deposit>> {
+        Ok(self.l1.get_deposit(id).await?)
     }
 
     pub async fn run(&mut self) -> HunterResult<()> {
@@ -110,8 +89,9 @@ where
                         chunks_count = chunks.len()
                     );
                     let queries = (range.0..=range.1)
-                        .map(|elem| self.get_pending_withdrawal(elem, at))
+                        .map(|elem| self.get_deposit(elem))
                         .collect::<Vec<_>>();
+
                     for w in futures::future::try_join_all(queries)
                         .await?
                         .into_iter()
@@ -137,31 +117,32 @@ mod test {
     use gasp_types::{Chain, RequestId};
 
     use l2api::L2Error;
-    use mockall::predicate::{always, eq};
+    use l1api::L1Error;
+    use mockall::{predicate::{always, eq}, Sequence};
     use test_case::test_case;
     use tracing_test::traced_test;
 
-    #[test_case(Some(100u128), None, None; "no l2 requests yet")]
-    #[test_case(Some(100u128), Some(100u128), None; "everything already processed")]
-    #[test_case(Some(110u128), Some(100u128), None; "invalid state")]
-    #[test_case(Some(100u128), Some(101u128), Some((101u128, 101u128)); "single request available")]
-    #[test_case(Some(100u128), Some(110u128), Some((101u128, 110u128)); "multiple request available")]
-    #[test_case(None, Some(110u128), Some((1u128, 110u128)); "no finalized requests yet")]
+    #[test_case(100u128, None, None; "no l2 requests yet")]
+    #[test_case(100u128, Some(100u128), None; "everything already processed")]
+    #[test_case(110u128, Some(100u128), None; "invalid state")]
+    #[test_case(100u128, Some(101u128), Some((101u128, 101u128)); "single request available")]
+    #[test_case(100u128, Some(110u128), Some((101u128, 110u128)); "multiple request available")]
+    #[test_case(0u128, Some(110u128), Some((1u128, 110u128)); "no finalized requests yet")]
     #[tokio::test]
     async fn test_get_requests_to_ferry(
-        l1_req: Option<u128>,
-        l2_req: Option<u128>,
+        latest_processeed: u128,
+        latest_available: Option<u128>,
         range: Option<(u128, u128)>,
     ) {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
         l1mock
-            .expect_get_latest_finalized_request_id()
-            .return_once(move || Ok(l1_req.clone()));
+            .expect_get_latest_reqeust_id()
+            .return_once(move || Ok(latest_available.clone()));
         l2mock
-            .expect_get_latest_created_request_id()
-            .return_once(move |_, _| Ok(l2_req.clone()));
+            .expect_get_latest_processed_request_id()
+            .return_once(move |_, _| Ok(latest_processeed.clone()));
 
         let ferry = FerryHunter::new(
             gasp_types::Chain::Ethereum,
@@ -186,11 +167,11 @@ mod test {
             .return_once(|_| Ok(Box::pin(stream::iter(vec![Ok((1u32, [0u8; 32].into()))]))));
 
         l1mock
-            .expect_get_latest_finalized_request_id()
+            .expect_get_latest_reqeust_id()
             .return_once(move || Ok(None));
         l2mock
-            .expect_get_latest_created_request_id()
-            .return_once(move |_, _| Ok(None));
+            .expect_get_latest_processed_request_id()
+            .return_once(move |_, _| Ok(0u128));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -203,8 +184,8 @@ mod test {
         handle.await.unwrap();
     }
 
-    fn withdrawal_stream() -> impl Iterator<Item = Withdrawal> {
-        std::iter::repeat(()).enumerate().map(|(id, _)| Withdrawal {
+    fn deposit_stream() -> impl Iterator<Item = Deposit> {
+        std::iter::repeat(()).enumerate().map(|(id, _)| Deposit {
             request_id: RequestId {
                 origin: gasp_types::Origin::L2,
                 id: (id + 1).into(),
@@ -216,16 +197,14 @@ mod test {
         })
     }
 
-    fn nth_withdrawal(id: usize) -> Withdrawal {
-        withdrawal_stream().nth(id - 1).unwrap()
+    fn nth_deposit(id: usize) -> Deposit {
+        deposit_stream().nth(id - 1).unwrap()
     }
 
-    fn ret_nth_withdrawal(
-        _chain: Chain,
+    fn ret_nth_deposit(
         id: u128,
-        _at: H256,
-    ) -> Result<Option<L2Request>, L2Error> {
-        Ok(Some(nth_withdrawal(id as usize).into()))
+    ) -> Result<Option<Deposit>, L1Error> {
+        Ok(Some(nth_deposit(id as usize).into()))
     }
 
     fn block_hash(id: usize) -> H256 {
@@ -249,15 +228,15 @@ mod test {
             .expect_header_stream()
             .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(1)))));
         l1mock
-            .expect_get_latest_finalized_request_id()
-            .returning(|| Ok(None));
+            .expect_get_latest_reqeust_id()
+            .returning(|| Ok(Some(1u128)));
         l2mock
-            .expect_get_latest_created_request_id()
-            .returning(|_, _| Ok(Some(1u128)));
-        l2mock
-            .expect_get_l2_request()
-            .with(always(), eq(1u128), always())
-            .returning(ret_nth_withdrawal);
+            .expect_get_latest_processed_request_id()
+            .returning(|_, _| Ok(0u128));
+        l1mock
+            .expect_get_deposit()
+            .with(eq(1u128))
+            .returning(ret_nth_deposit);
         l1mock
             .expect_get_status()
             .returning(|_| Ok(l1api::types::RequestStatus::Pending));
@@ -286,37 +265,32 @@ mod test {
             .expect_header_stream()
             .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(3)))));
 
+        l2mock
+            .expect_get_latest_processed_request_id()
+            .returning(|_, _| Ok(0u128));
+
+        let mut seq = Sequence::new();
         l1mock
-            .expect_get_latest_finalized_request_id()
-            .returning(|| Ok(None));
-
-        l2mock
-            .expect_get_latest_created_request_id()
-            .with(always(), eq(block_hash(1)))
-            .return_once(|_, _| Ok(Some(1u128)));
-        l2mock
-            .expect_get_latest_created_request_id()
-            .with(always(), eq(block_hash(2)))
-            .return_once(|_, _| Ok(Some(2u128)));
-        l2mock
-            .expect_get_latest_created_request_id()
-            .with(always(), eq(block_hash(3)))
-            .return_once(|_, _| Ok(Some(2u128)));
-
-        l2mock
-            .expect_get_l2_request()
+            .expect_get_latest_reqeust_id()
             .times(1)
-            .with(always(), eq(1u128), always())
-            .returning(ret_nth_withdrawal);
-        l2mock
-            .expect_get_l2_request()
-            .times(1)
-            .with(always(), eq(2u128), always())
-            .returning(ret_nth_withdrawal);
+            .in_sequence(&mut seq)
+            .return_once(|| Ok(Some(1u128)));
 
         l1mock
-            .expect_get_status()
-            .returning(|_| Ok(l1api::types::RequestStatus::Pending));
+            .expect_get_latest_reqeust_id()
+            .times(2)
+            .in_sequence(&mut seq)
+            .returning(|| Ok(Some(2u128)));
+
+        l1mock
+            .expect_get_deposit()
+            .with(eq(1u128))
+            .returning(ret_nth_deposit);
+        l1mock
+            .expect_get_deposit()
+            .with(eq(2u128))
+            .returning(ret_nth_deposit);
+
         let (sender, mut receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
             FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
@@ -326,8 +300,8 @@ mod test {
         });
         handle.await.unwrap();
         tracing::info!("ferry finished");
-        assert_eq!(receiver.recv().await.unwrap(), nth_withdrawal(1));
-        assert_eq!(receiver.recv().await.unwrap(), nth_withdrawal(2));
+        assert_eq!(receiver.recv().await.unwrap(), nth_deposit(1));
+        assert_eq!(receiver.recv().await.unwrap(), nth_deposit(2));
         assert!(receiver.recv().await.is_none());
     }
 }

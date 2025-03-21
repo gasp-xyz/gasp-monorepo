@@ -40,6 +40,7 @@ pub mod types {
         Closed,
     }
     pub use gasp_types::Withdrawal;
+    pub use gasp_types::Deposit;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -67,6 +68,7 @@ pub trait L1Interface {
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
     async fn get_status(&self, request_hash: H256) -> Result<types::RequestStatus, L1Error>;
     async fn get_update(&self, start: u128, end: u128) -> Result<types::abi::L1Update, L1Error>;
+    async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error>;
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error>;
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
     async fn get_merkle_root(
@@ -127,6 +129,11 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+    #[tracing::instrument(skip(self), ret)]
+    async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error>{
+        unimplemented!()
+    }
+
     #[tracing::instrument(skip(self), ret)]
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
         let token = Erc20Token::new(token, self.provider.clone());

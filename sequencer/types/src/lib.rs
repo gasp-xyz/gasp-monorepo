@@ -246,6 +246,15 @@ pub struct Withdrawal {
     pub ferry_tip: U256,
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Deposit {
+    pub request_id: RequestId,
+    pub recipient: [u8; 20],
+    pub token_address: [u8; 20],
+    pub amount: U256,
+    pub ferry_tip: U256,
+}
+
 impl Display for Withdrawal {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(

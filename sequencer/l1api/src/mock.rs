@@ -5,6 +5,7 @@ mockall::mock! {
     pub L1 {}
 
     impl crate::L1Interface for L1{
+        async fn get_deposit(&self, request_id: u128) -> Result<Option<crate::types::Deposit>, L1Error>;
         async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
         async fn ferry_withdrawal(&self, withdrawal: crate::types::Withdrawal) -> Result<H256, L1Error>;
         async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;

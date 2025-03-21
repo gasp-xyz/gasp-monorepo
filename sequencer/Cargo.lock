@@ -1421,6 +1421,7 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "itertools 0.14.0",
  "lazy_static",
  "prometheus",
  "tokio",
@@ -1906,6 +1907,37 @@ dependencies = [
  "arrayvec 0.7.6",
  "auto_impl",
  "bytes",
+]
+
+[[package]]
+name = "ferry-deposit"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "common",
+ "futures",
+ "gasp-types",
+ "hex",
+ "hex-literal",
+ "itertools 0.14.0",
+ "l1api",
+ "l2api",
+ "lazy_static",
+ "lru",
+ "mockall",
+ "prometheus",
+ "serde",
+ "serial_test",
+ "sha3 0.10.8",
+ "test-case",
+ "thiserror 2.0.3",
+ "tokio",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
+ "tracing-test",
+ "tracing-tree",
+ "warp",
 ]
 
 [[package]]
