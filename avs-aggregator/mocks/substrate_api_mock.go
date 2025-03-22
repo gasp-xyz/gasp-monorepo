@@ -26,6 +26,8 @@ import (
 	gsrpcrpc "github.com/centrifuge/go-substrate-rpc-client/v4/rpc"
 	gsrpcclientmocks "github.com/centrifuge/go-substrate-rpc-client/v4/client/mocks"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
+	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	gsrpctypescodec "github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 )
 
 // func NewEthRpcFromParts(
@@ -41,6 +43,13 @@ import (
 // 		Clients:       clients,
 // 	}, nil
 // }
+
+func GetFakeSubstrateMetadata() (gsrpctypes.Metadata, error) {
+	// Decode the metadata
+	var metadata gsrpctypes.Metadata
+	err := gsrpctypescodec.DecodeFromHex(GaspMetadata, &metadata)
+	return metadata, err
+}
 
 func NewMockSubstrateAPI() (*gsrpc.SubstrateAPI, error) {
 	return &gsrpc.SubstrateAPI{

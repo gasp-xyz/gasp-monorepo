@@ -1,7 +1,8 @@
 package aggregator
 
 import (
-
+	"sync"
+	
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -40,13 +41,20 @@ func NewMockAggregator (ctrl *gomock.Controller, c *Config, mce *MockAggConfigEx
 		return nil, err
 	}
 
+	tasks := make(map[sdktypes.TaskId]interface{})
+	tasksMu :=  &sync.RWMutex{}
+	taskResponses := make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{})
+	taskResponsesMu := &sync.RWMutex{}
+
 	return &Aggregator{
 		logger:                  logger,
 		serverIpPortAddr:        c.ServerAddressPort,
 		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[sdktypes.TaskId]interface{}),
-		taskResponses:           make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
+		tasks:                   tasks,
+		tasksMu:                 tasksMu,
+		taskResponses:           taskResponses,
+		taskResponsesMu:         taskResponsesMu,
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: mce.taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
