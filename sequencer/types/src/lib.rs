@@ -206,7 +206,7 @@ impl Into<l2types::RequestId> for RequestId {
     fn into(self) -> l2types::RequestId {
         l2types::RequestId {
             origin: self.origin.into(),
-            id: U256::from(self.id).try_into().unwrap(),
+            id: self.id.try_into().unwrap(),
         }
     }
 }
@@ -371,8 +371,8 @@ impl Into<l2types::Withdrawal> for Withdrawal {
     fn into(self) -> l2types::Withdrawal {
         l2types::Withdrawal {
             requestId: self.request_id.into(),
-            withdrawalRecipient: self.recipient.into(),
-            tokenAddress: self.token_address.into(),
+            withdrawalRecipient: self.recipient,
+            tokenAddress: self.token_address,
             amount: into_l2_u256(self.amount),
             ferryTip: into_l2_u256(self.ferry_tip),
         }
