@@ -183,11 +183,7 @@ where
         }
 
         let dispute_period = self.l2.get_dispute_period(self.chain, at).await?;
-        let sequencers_count = self
-            .l2
-            .get_active_sequencers(self.chain, at)
-            .await?
-            .len();
+        let sequencers_count = self.l2.get_active_sequencers(self.chain, at).await?.len();
         let latest_update_block_time = self.find_latest_correct_update_block_submission(at).await?;
 
         let should_send_update = self
@@ -396,11 +392,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn is_selected_sequencer(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        match self
-            .l2
-            .get_selected_sequencer(self.chain, at)
-            .await?
-        {
+        match self.l2.get_selected_sequencer(self.chain, at).await? {
             Some(selected) if selected == self.l2_account_address => {
                 tracing::debug!("i am selected");
                 Ok(true)
@@ -431,10 +423,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn is_active_sequencer(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let active = self
-            .l2
-            .get_active_sequencers(self.chain, at)
-            .await?;
+        let active = self.l2.get_active_sequencers(self.chain, at).await?;
 
         Ok(active.iter().any(|e| e == &(self.l2_account_address)))
     }
@@ -540,13 +529,12 @@ where
 pub(crate) mod test {
     use super::*;
     use hex_literal::hex;
-    
 
     use gasp_types::{Chain, PendingUpdate};
     use l1api::mock::MockL1;
     use l2api::mock::MockL2;
     use mockall::predicate::eq;
-    
+
     use primitive_types::H256;
 
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");

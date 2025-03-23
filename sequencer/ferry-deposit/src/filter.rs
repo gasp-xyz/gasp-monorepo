@@ -15,7 +15,7 @@ pub async fn filter_deposits(
                     .await
                     .expect("infinite");
             }
-        } 
+        }
     }
     tracing::info!("closing filter service");
 }

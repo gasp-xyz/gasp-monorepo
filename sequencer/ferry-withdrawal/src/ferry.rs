@@ -173,7 +173,9 @@ where
     #[tracing::instrument(skip_all)]
     pub async fn refresh_balances(&mut self) -> Result<(), FerryError> {
         let tokens = self
-            .balances.keys().map(|token| {
+            .balances
+            .keys()
+            .map(|token| {
                 self.get_balance(*token)
                     .map(|result| result.map(|balance| (*token, balance)))
             })
@@ -399,8 +401,7 @@ mod test {
             recipient: RECIPIENT,
         };
 
-        l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128));
+        l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
         l1.expect_get_status()
@@ -471,8 +472,7 @@ mod test {
         };
 
         tracing::info!("hello world");
-        l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128));
+        l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
         l1.expect_get_status()
@@ -564,8 +564,7 @@ mod test {
             .await
             .unwrap();
 
-        l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128));
+        l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(Some(1)));
 

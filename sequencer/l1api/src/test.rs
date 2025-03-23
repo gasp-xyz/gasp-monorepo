@@ -238,7 +238,11 @@ async fn test_get_merkle_root() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap();
-    assert!(l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap().is_none());
+    assert!(l1
+        .get_merkle_root(DUMMY_MERKLE_RANGE.0)
+        .await
+        .unwrap()
+        .is_none());
     rolldown
         .submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE)
         .await
