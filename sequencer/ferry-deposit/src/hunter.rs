@@ -135,10 +135,10 @@ mod test {
 
         l1mock
             .expect_get_latest_reqeust_id()
-            .return_once(move || Ok(latest_available.clone()));
+            .return_once(move || Ok(latest_available));
         l2mock
             .expect_get_latest_processed_request_id()
-            .return_once(move |_, _| Ok(latest_processeed.clone()));
+            .return_once(move |_, _| Ok(latest_processeed));
 
         let ferry = FerryHunter::new(
             gasp_types::Chain::Ethereum,
@@ -199,7 +199,7 @@ mod test {
     }
 
     fn ret_nth_deposit(id: u128) -> Result<Option<Deposit>, L1Error> {
-        Ok(Some(nth_deposit(id as usize).into()))
+        Ok(Some(nth_deposit(id as usize)))
     }
 
     fn block_hash(id: usize) -> H256 {

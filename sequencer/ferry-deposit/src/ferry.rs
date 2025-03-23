@@ -233,8 +233,7 @@ mod test {
             timestamp: 0.into(),
         };
 
-        l2.expect_get_balance()
-            .returning(|_, _, _, _| Ok(90u128.into()));
+        l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
         l2.expect_get_best_block()
@@ -290,8 +289,7 @@ mod test {
             timestamp: 0.into(),
         };
 
-        l2.expect_get_balance()
-            .returning(|_, _, _, _| Ok(100u128.into()));
+        l2.expect_get_balance().returning(|_, _, _, _| Ok(100u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
         l2.expect_get_best_block()
@@ -351,7 +349,7 @@ mod test {
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
-            .returning(|_, _, _, _| Ok(90u128.into()));
+            .returning(|_, _, _, _| Ok(90u128));
 
         let non_affordable_deposit = Deposit {
             request_id: RequestId {
@@ -366,7 +364,7 @@ mod test {
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN2), always(), always())
-            .returning(|_, _, _, _| Ok(89u128.into()));
+            .returning(|_, _, _, _| Ok(89u128));
 
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -419,7 +417,7 @@ mod test {
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
-            .returning(|_, _, _, _| Ok(90u128.into()));
+            .returning(|_, _, _, _| Ok(90u128));
 
         let tx_cost = 1u128;
         let non_affordable_deposit = Deposit {
@@ -435,7 +433,7 @@ mod test {
         };
         l2.expect_get_balance()
             .with(always(), eq(NATIVE_TOKEN), always(), always())
-            .returning(|_, _, _, _| Ok(90u128.into()));
+            .returning(|_, _, _, _| Ok(90u128));
 
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));

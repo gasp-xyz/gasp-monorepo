@@ -195,8 +195,8 @@ impl L2Interface for Gasp {
         let call = gasp_bindings::api::tx().rolldown().ferry_deposit(
             chain.into(),
             deposit.request_id.into(),
-            deposit.recipient.into(),
-            deposit.token_address.into(),
+            deposit.recipient,
+            deposit.token_address,
             deposit.amount.try_into().unwrap(),
             deposit.timestamp.try_into().unwrap(),
             deposit.ferry_tip.try_into().unwrap(),
