@@ -193,6 +193,7 @@ where
         Ok(())
     }
 
+    #[allow(clippy::map_entry)]
     pub async fn track_balance(&mut self, token_address: [u8; 20]) -> Result<(), FerryError> {
         if !self.balances.contains_key(&token_address) {
             let balance = self.get_balance(token_address).await?;

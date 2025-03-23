@@ -152,6 +152,7 @@ where
             .await
     }
 
+    #[allow(clippy::type_complexity)]
     #[tracing::instrument(skip(self))]
     async fn get_merkle_root(
         &self,

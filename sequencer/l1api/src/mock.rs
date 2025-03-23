@@ -1,9 +1,11 @@
 use crate::L1Error;
 use gasp_types::H256;
+
 mockall::mock! {
 
     pub L1 {}
 
+    #[allow(clippy::type_complexity)]
     impl crate::L1Interface for L1{
         async fn get_deposit(&self, request_id: u128) -> Result<Option<crate::types::Deposit>, L1Error>;
         async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
