@@ -42,6 +42,7 @@ mod l1types {
     pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
     pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -267,13 +268,24 @@ pub struct Deposit {
     pub ferry_tip: U256,
 }
 
+impl Into<l1types::Deposit> for Deposit {
+    fn into(self) -> l1types::Deposit {
+        l1types::Deposit {
+            requestId: self.request_id.into(),
+            depositRecipient: self.recipient.into(),
+            tokenAddress: self.token_address.into(),
+            timeStamp: into_l1_u256(self.timestamp),
+            amount: into_l1_u256(self.amount),
+            ferryTip: into_l1_u256(self.ferry_tip),
+        }
+    }
+}
+
 impl Deposit {
     pub fn deposit_hash(&self) -> H256 {
-        // let encoded = Into::<l1types::Withdrawal>::into(*self).abi_encode();
-        // let data = [0u8; 32].into_iter().chain(encoded);
-        // let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
-        // hash.into()
-        todo!()
+        let encoded = Into::<l1types::Deposit>::into(*self).abi_encode();
+        let hash: [u8; 32] = Keccak256::digest(encoded.as_ref()).into();
+        hash.into()
     }
 }
 
