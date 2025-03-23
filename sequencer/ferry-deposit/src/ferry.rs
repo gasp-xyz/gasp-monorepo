@@ -211,7 +211,7 @@ mod test {
         let l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
-        let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -255,7 +255,7 @@ mod test {
         input.send((10.into(), deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -325,7 +325,7 @@ mod test {
             .unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -391,7 +391,7 @@ mod test {
         input.send((10.into(), affordable_deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -458,7 +458,7 @@ mod test {
         input.send((10.into(), affordable_deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, tx_cost, output);
+            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, tx_cost, output);
             ferry.run().await.unwrap();
         });
         is_ferried
