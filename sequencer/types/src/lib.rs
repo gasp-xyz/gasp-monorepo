@@ -265,6 +265,16 @@ pub struct Deposit {
     pub ferry_tip: U256,
 }
 
+impl Deposit {
+    pub fn deposit_hash(&self) -> H256 {
+        // let encoded = Into::<l1types::Withdrawal>::into(*self).abi_encode();
+        // let data = [0u8; 32].into_iter().chain(encoded);
+        // let hash: [u8; 32] = Keccak256::digest(&data.collect::<Vec<_>>()).into();
+        // hash.into()
+        todo!()
+    }
+}
+
 impl Display for Deposit {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(

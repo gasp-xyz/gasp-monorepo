@@ -178,12 +178,28 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
     async fn ferry_deposit(
         &self,
-        chain: gasp_types::Chain,
-        deposit: gasp_types::Deposit,
+        _chain: gasp_types::Chain,
+        _deposit: gasp_types::Deposit,
     ) -> Result<H256, L2Error> {
-        Ok(Default::default())
+
+        // let chain: jk l2types::ferry_deposit::Chain = chain.into();
+        // let request_id: types::ferry_deposit::RequestId,
+        // let deposit_recipient: types::ferry_deposit::DepositRecipient,
+        // let token_address: types::ferry_deposit::TokenAddress,
+        // let amount: types::ferry_deposit::Amount,
+        // let timestamp: types::ferry_deposit::Timestamp,
+        // let ferry_tip: types::ferry_deposit::FerryTip,
+        // let deposit_hash: types::ferry_deposit::DepositHash,
+        //
+        // let call = gasp_bindings::api::tx()
+        //     .rolldown()
+        //     .ferry_deposit(deposit, deposit.deposit_hash());
+        // self.sign_and_send(call).await
+        todo!()
     }
 
     fn account_address(&self) -> [u8; 20] {
