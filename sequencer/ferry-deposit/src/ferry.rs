@@ -126,13 +126,13 @@ where
     }
 
     pub async fn track_balance(&mut self, token_address: [u8; 20]) -> Result<(), FerryError> {
-        if !self.balances.contains_key(&token_address) {
+        if let std::collections::hash_map::Entry::Vacant(e) = self.balances.entry(token_address) {
             let (_, at) = self.l2.get_best_block().await?;
             let balance = self
                 .l2
                 .get_balance(self.chain, token_address, self.account, at)
                 .await?;
-            self.balances.insert(token_address, balance.into());
+            e.insert(balance.into());
         }
         Ok(())
     }
