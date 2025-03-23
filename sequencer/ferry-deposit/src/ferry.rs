@@ -126,7 +126,7 @@ where
     }
 
     pub async fn track_balance(&mut self, token_address: [u8; 20]) -> Result<(), FerryError> {
-        if self.balances.get(&token_address).is_none() {
+        if !self.balances.contains_key(&token_address) {
             let (_, at) = self.l2.get_best_block().await?;
             let balance = self
                 .l2
