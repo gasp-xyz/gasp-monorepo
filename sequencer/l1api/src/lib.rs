@@ -258,7 +258,7 @@ where
         proof: Vec<H256>,
     ) -> Result<H256, L1Error> {
         self.rolldown_contract
-            .send_close_withdrawal_tx(withdrawal.into(), merkle_root, proof)
+            .send_close_withdrawal_tx(withdrawal, merkle_root, proof)
             .await
     }
 

@@ -27,11 +27,11 @@ fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {
     let mut result = [0u8; 20];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 42) => hex::decode(&s[2..]),
-        (false, 40) => hex::decode(&s[..]),
+        (false, 40) => hex::decode(s),
         _ => Err(hex::FromHexError::InvalidStringLength),
     }?;
 
-    result.copy_from_slice(&parse_result.as_ref());
+    result.copy_from_slice(parse_result.as_ref());
     Ok(result)
 }
 
@@ -39,10 +39,10 @@ fn parse_pkey(s: &str) -> Result<[u8; 32], FromHexError> {
     let mut result = [0u8; 32];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 66) => hex::decode(&s[2..]),
-        (false, 64) => hex::decode(&s[..]),
+        (false, 64) => hex::decode(s),
         _ => Err(hex::FromHexError::InvalidStringLength),
     }?;
 
-    result.copy_from_slice(&parse_result.as_ref());
+    result.copy_from_slice(parse_result.as_ref());
     Ok(result)
 }

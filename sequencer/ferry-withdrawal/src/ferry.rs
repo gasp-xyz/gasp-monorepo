@@ -91,13 +91,12 @@ where
                 balance >= required_tokens_amount
             })
             .max_by_key(|(_, (prio, _))| prio)
-            .clone()
             .map(|(_, (_, w))| *w);
 
         if let Some(w) = req_to_ferrry {
             if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
                 tracing::trace!("tracing withdrawal {w}");
-                let status = self.l1.ferry_withdrawal(w.clone()).await;
+                let status = self.l1.ferry_withdrawal(w).await;
                 match status {
                     Ok(hash) => {
                         tracing::info!("withdrawal ferried successfully {hash}");
@@ -174,9 +173,7 @@ where
     #[tracing::instrument(skip_all)]
     pub async fn refresh_balances(&mut self) -> Result<(), FerryError> {
         let tokens = self
-            .balances
-            .iter()
-            .map(|(token, _amount)| {
+            .balances.keys().map(|token| {
                 self.get_balance(*token)
                     .map(|result| result.map(|balance| (*token, balance)))
             })
@@ -195,9 +192,9 @@ where
     }
 
     pub async fn track_balance(&mut self, token_address: [u8; 20]) -> Result<(), FerryError> {
-        if let None = self.balances.get(&token_address) {
+        if self.balances.get(&token_address).is_none() {
             let balance = self.get_balance(token_address).await?;
-            self.balances.insert(token_address, balance.into());
+            self.balances.insert(token_address, balance);
         }
         Ok(())
     }
@@ -232,7 +229,7 @@ where
                 }
             }
 
-            if self.closable_withdrawals.len() > 0 {
+            if !self.closable_withdrawals.is_empty() {
                 tracing::info!(
                     "found {n} closable withdrawals",
                     n = self.closable_withdrawals.len()
@@ -242,7 +239,7 @@ where
                 continue;
             }
 
-            if self.ferryable_withdrawals.len() > 0 {
+            if !self.ferryable_withdrawals.is_empty() {
                 tracing::info!(
                     "found {n} withdrawals ready to ferry",
                     n = self.ferryable_withdrawals.len()
@@ -403,7 +400,7 @@ mod test {
         };
 
         l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128.into()));
+            .returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
         l1.expect_get_status()
@@ -434,13 +431,13 @@ mod test {
 
     pub async fn wait_for(mtx: Arc<AtomicBool>, duration: Duration) -> bool {
         let now = tokio::time::Instant::now();
-        while mtx.load(std::sync::atomic::Ordering::Relaxed) == false {
+        while !mtx.load(std::sync::atomic::Ordering::Relaxed) {
             if now.elapsed() > duration {
                 return false;
             }
             tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
-        return true;
+        true
     }
 
     #[traced_test]
@@ -475,7 +472,7 @@ mod test {
 
         tracing::info!("hello world");
         l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128.into()));
+            .returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
         l1.expect_get_status()
@@ -568,7 +565,7 @@ mod test {
             .unwrap();
 
         l1.expect_erc20_balance()
-            .returning(|_, _| Ok(100u128.into()));
+            .returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(Some(1)));
 

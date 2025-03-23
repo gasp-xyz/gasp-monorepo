@@ -107,7 +107,7 @@ pub mod test_utils {
         }
 
         pub fn address(&self) -> [u8; 20] {
-            let addr = self.contract_handle.address().clone();
+            let addr = *self.contract_handle.address();
             addr.0.into()
         }
 

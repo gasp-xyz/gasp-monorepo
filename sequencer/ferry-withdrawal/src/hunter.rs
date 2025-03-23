@@ -112,7 +112,7 @@ where
                     for w in futures::future::try_join_all(queries)
                         .await?
                         .into_iter()
-                        .filter_map(|elem| elem)
+                        .flatten()
                     {
                         self.sink.send(w).await?;
                         latest = w.request_id.id.try_into().unwrap();
@@ -155,10 +155,10 @@ mod test {
 
         l1mock
             .expect_get_latest_finalized_request_id()
-            .return_once(move || Ok(l1_req.clone()));
+            .return_once(move || Ok(l1_req));
         l2mock
             .expect_get_latest_created_request_id()
-            .return_once(move |_, _| Ok(l2_req.clone()));
+            .return_once(move |_, _| Ok(l2_req));
 
         let ferry = FerryHunter::new(
             gasp_types::Chain::Ethereum,

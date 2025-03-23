@@ -109,7 +109,7 @@ where
                     for withdrawal in futures::future::try_join_all(queries)
                         .await?
                         .into_iter()
-                        .filter_map(|elem| elem)
+                        .flatten()
                     {
                         self.sink
                             .send(FerryAction::CloseFerriedWithdrawal { withdrawal })

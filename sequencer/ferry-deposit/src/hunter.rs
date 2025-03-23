@@ -91,7 +91,7 @@ where
                     for w in futures::future::try_join_all(queries)
                         .await?
                         .into_iter()
-                        .filter_map(|elem| elem)
+                        .flatten()
                     {
                         self.sink.send(w).await?;
                         latest = w.request_id.id.try_into().unwrap();

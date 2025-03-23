@@ -87,7 +87,6 @@ where
                 balance >= required_tokens_amount
             })
             .max_by_key(|(_, (prio, _))| prio)
-            .clone()
             .map(|(_, (_, w))| *w);
 
         if let Some(deposit) = req_to_ferrry {
@@ -127,7 +126,7 @@ where
     }
 
     pub async fn track_balance(&mut self, token_address: [u8; 20]) -> Result<(), FerryError> {
-        if let None = self.balances.get(&token_address) {
+        if self.balances.get(&token_address).is_none() {
             let (_, at) = self.l2.get_best_block().await?;
             let balance = self
                 .l2
@@ -165,7 +164,7 @@ where
                 }
             }
 
-            if self.ferryable_deposits.len() > 0 {
+            if !self.ferryable_deposits.is_empty() {
                 tracing::info!(
                     "found {n} withdrawals ready to ferry",
                     n = self.ferryable_deposits.len()

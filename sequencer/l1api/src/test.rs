@@ -5,7 +5,6 @@ use gasp_types::{Origin, RequestId, U256};
 use hex_literal::hex;
 use serial_test::serial;
 use tracing_test::traced_test;
-use warp::filters::sse::keep_alive;
 
 const URI: &str = "http://localhost:8545";
 const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
@@ -61,7 +60,7 @@ async fn test_withdrawal_hash() {
     };
 
     let withdrawal_hash = withdrawal.withdrawal_hash();
-    let contract_calculated_hash = rolldown.hash(withdrawal.clone()).await.unwrap();
+    let contract_calculated_hash = rolldown.hash(withdrawal).await.unwrap();
 
     assert_eq!(withdrawal_hash, contract_calculated_hash);
 }
@@ -96,7 +95,7 @@ async fn test_ferry_withdrawal() {
     l1.ferry_withdrawal(withdrawal).await.unwrap();
 
     assert_eq!(
-        l1.get_status(withdrawal_hash.into()).await.unwrap(),
+        l1.get_status(withdrawal_hash).await.unwrap(),
         RequestStatus::Ferried(ALICE_ADDRESS)
     );
 }
@@ -239,10 +238,7 @@ async fn test_get_merkle_root() {
     let l1 = L1::new(rolldown.clone(), provider);
 
     l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap();
-    assert!(matches!(
-        l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap(),
-        None
-    ));
+    assert!(l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap().is_none());
     rolldown
         .submit_merkle_root(DUMMY_MERKLE_ROOT, DUMMY_MERKLE_RANGE)
         .await

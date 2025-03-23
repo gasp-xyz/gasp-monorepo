@@ -43,7 +43,7 @@ where
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
-        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
@@ -58,7 +58,7 @@ where
         withdrawal: gasp_types::Withdrawal,
     ) -> Result<H256, L1Error> {
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
-        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
@@ -73,7 +73,7 @@ where
         let call =
             self.contract_handle
                 .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
-        Ok(simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?)
+        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
     }
 
     #[cfg(test)]
@@ -85,7 +85,7 @@ where
                 .await?;
         tracing::info!("contract deployed");
 
-        let call = (&contract_handle).initialize(sender, 0, sender);
+        let call = contract_handle.initialize(sender, 0, sender);
         simulate_send_and_wait_for_result(contract_handle.provider(), call).await?;
         tracing::info!("contract initialized");
 
@@ -134,7 +134,7 @@ where
     N: Network,
 {
     pub fn address(&self) -> [u8; 20] {
-        self.contract_handle.address().clone().into()
+        (*self.contract_handle.address()).into()
     }
 
     pub async fn is_admin(&self, address: [u8; 20]) -> Result<bool, L1Error> {

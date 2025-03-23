@@ -182,10 +182,10 @@ where
             return Ok(ActionStatus::Skipped);
         }
 
-        let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+        let dispute_period = self.l2.get_dispute_period(self.chain, at).await?;
         let sequencers_count = self
             .l2
-            .get_active_sequencers(self.chain.clone(), at)
+            .get_active_sequencers(self.chain, at)
             .await?
             .len();
         let latest_update_block_time = self.find_latest_correct_update_block_submission(at).await?;
@@ -287,7 +287,7 @@ where
     }
 
     pub async fn close_cancel(&self, request_id: u128, at: H256) -> Result<(), Error> {
-        let chain = self.chain.clone();
+        let chain = self.chain;
         let (merkle_root, range) = self
             .l1
             .get_merkle_root(request_id)
@@ -295,12 +295,12 @@ where
             .ok_or(Error::UnknownMerkleRoot)?;
         let proof = self
             .l2
-            .get_merkle_proof(request_id, range, self.chain.clone(), at)
+            .get_merkle_proof(request_id, range, self.chain, at)
             .await?;
 
         let cancel = self
             .l2
-            .get_l2_request(self.chain.clone(), request_id, at)
+            .get_l2_request(self.chain, request_id, at)
             .await?
             .and_then(|elem| match elem {
                 gasp_types::L2Request::Cancel(cancel) => Some(cancel),
@@ -356,7 +356,7 @@ where
         at: H256,
     ) -> Result<Option<u128>, Error> {
         let updates = self.get_pending_updates(at).await?;
-        let dispute_period_length = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+        let dispute_period_length = self.l2.get_dispute_period(self.chain, at).await?;
         let l1handle = &self.l1;
 
         let mut verified = futures::stream::iter(updates.into_iter().rev()).map(|update| async {
@@ -381,14 +381,14 @@ where
     pub async fn cancel_update(&self, update_id: u128) -> Result<bool, Error> {
         Ok(self
             .l2
-            .cancel_pending_request(update_id, self.chain.clone())
+            .cancel_pending_request(update_id, self.chain)
             .await?)
     }
 
     #[tracing::instrument(skip(self))]
     pub async fn has_read_rights_available(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let read_rights = self.l2.get_read_rights(self.chain.clone(), at).await?;
+        let read_rights = self.l2.get_read_rights(self.chain, at).await?;
         tracing::trace!("read rights: {}", read_rights);
         Ok(read_rights > 0)
     }
@@ -398,7 +398,7 @@ where
         let at = self.get_latest_block_hash().await?;
         match self
             .l2
-            .get_selected_sequencer(self.chain.clone(), at)
+            .get_selected_sequencer(self.chain, at)
             .await?
         {
             Some(selected) if selected == self.l2_account_address => {
@@ -423,7 +423,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn has_cancel_rights_available(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let cancel_rights = self.l2.get_cancel_rights(self.chain.clone(), at).await?;
+        let cancel_rights = self.l2.get_cancel_rights(self.chain, at).await?;
         tracing::trace!("cancel rights: {}", cancel_rights);
         Ok(cancel_rights > 0)
     }
@@ -433,7 +433,7 @@ where
         let at = self.get_latest_block_hash().await?;
         let active = self
             .l2
-            .get_active_sequencers(self.chain.clone(), at)
+            .get_active_sequencers(self.chain, at)
             .await?;
 
         Ok(active.iter().any(|e| e == &(self.l2_account_address)))
@@ -457,7 +457,7 @@ where
     ) -> Result<Option<(H256, gasp_types::L1Update)>, Error> {
         let latest_processed_on_l2 = self
             .l2
-            .get_latest_processed_request_id(self.chain.clone(), at)
+            .get_latest_processed_request_id(self.chain, at)
             .await?;
         let latest_request_l1 = self.l1.get_latest_reqeust_id().await?;
 
@@ -497,7 +497,7 @@ where
         if let Some(latest_closable_request_id) = latest_closable_request_id {
             let cancels = self
                 .l2
-                .get_pending_cancels(self.chain.clone(), at)
+                .get_pending_cancels(self.chain, at)
                 .await?
                 .into_iter()
                 .filter(|&cancel_request_id| cancel_request_id <= latest_closable_request_id)
@@ -507,7 +507,7 @@ where
                 .map(|cancel_request_id: u128| async move {
                     let hash = self
                         .l2
-                        .get_l2_request_hash(cancel_request_id, self.chain.clone(), at)
+                        .get_l2_request_hash(cancel_request_id, self.chain, at)
                         .await?
                         .ok_or(Error::L2RequestDoesNotExists(cancel_request_id))?;
                     let status = self.l1.get_status(hash).map(|e| {
@@ -540,13 +540,13 @@ where
 pub(crate) mod test {
     use super::*;
     use hex_literal::hex;
-    use l2api::{HeaderStream, PendingUpdateWithKeys};
+    
 
     use gasp_types::{Chain, PendingUpdate};
     use l1api::mock::MockL1;
     use l2api::mock::MockL2;
     use mockall::predicate::eq;
-    use parity_scale_codec::Decode;
+    
     use primitive_types::H256;
 
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");

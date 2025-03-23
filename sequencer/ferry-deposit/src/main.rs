@@ -82,7 +82,7 @@ pub async fn main() -> Result<(), Error> {
             to_executor,
             args.enabled
                 .into_iter()
-                .map(|elem| (elem, 1_000_000u128.into()))
+                .map(|elem| (elem, 1_000_000u128))
                 .collect(),
         )
         .await
