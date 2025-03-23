@@ -182,7 +182,7 @@ where
 mod test {
     use super::*;
     use common::TryReceiveAsync;
-    use futures::stream;
+    
     use gasp_types::{Origin, RequestId, H256};
     use l1api::mock::MockL1;
     use l2api::mock::MockL2;
@@ -192,10 +192,7 @@ mod test {
     };
     use tracing_test::traced_test;
 
-    use std::{
-        sync::{atomic::AtomicBool, Arc},
-        time::{Duration, Instant},
-    };
+    use std::time::Duration;
 
     const ACCOUNT: [u8; 20] = [1; 20];
     const ENABLED_TOKEN1: [u8; 20] = [2; 20];

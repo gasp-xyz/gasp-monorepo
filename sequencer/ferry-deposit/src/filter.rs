@@ -24,7 +24,7 @@ pub async fn filter_deposits(
 mod test {
     use super::*;
     use gasp_types::{Origin, RequestId};
-    use l1api::mock::MockL1;
+    
     use l2api::mock::MockL2;
     use tokio::sync::mpsc;
 
