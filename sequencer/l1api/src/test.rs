@@ -7,12 +7,9 @@ use serial_test::serial;
 use tracing_test::traced_test;
 
 const URI: &str = "http://localhost:8545";
-const ROLLDOWN_ADDRESS: [u8; 20] = hex!("1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f");
 const ALICE_PKEY: [u8; 32] =
     hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
 const ALICE_ADDRESS: [u8; 20] = hex!("23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f");
-const ANVIL_TEST_ACCOUNT: [u8; 32] =
-    hex!("7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6");
 
 #[serial]
 #[tokio::test]

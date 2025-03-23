@@ -538,80 +538,8 @@ pub(crate) mod test {
     use primitive_types::H256;
 
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");
-    #[allow(dead_code)]
     const ETHEREUM: Chain = Chain::Ethereum;
     const ARBITRUM: Chain = Chain::Arbitrum;
-    const BASE: Chain = Chain::Base;
-
-    // #[allow(dead_code)]
-    // pub enum Request {
-    //     Deposit(gasp_types::Deposit),
-    //     Cancel(gasp_types::CancelResolution),
-    // }
-    //
-    // impl From<l2types::Deposit> for Request {
-    //     fn from(d: l2types::Deposit) -> Self {
-    //         Self::Deposit(d)
-    //     }
-    // }
-
-    // pub struct UpdateBuilder(Vec<Request>);
-    //
-    // pub fn to_u256(value: u128) -> l2types::bindings::runtime_types::primitive_types::U256 {
-    //     let x = primitive_types::U256::from(value);
-    //     let data = x.to_big_endian();
-    //     l2types::bindings::runtime_types::primitive_types::U256::decode(&mut &data[..]).unwrap()
-    // }
-    //
-    // #[allow(dead_code)]
-    // impl UpdateBuilder {
-    //     pub fn new() -> Self {
-    //         Self(vec![])
-    //     }
-    //
-    //     pub fn with_dummy_deposit(self, rid: u128) -> Self {
-    //         self.with_request(
-    //             l2types::Deposit {
-    //                 requestId: l2types::RequestId {
-    //                     origin: l2types::Origin::L1,
-    //                     id: rid,
-    //                 },
-    //                 depositRecipient: DUMMY_ADDRESS,
-    //                 tokenAddress: DUMMY_ADDRESS,
-    //                 amount: to_u256(100u128),
-    //                 timeStamp: to_u256(0u128),
-    //                 ferryTip: to_u256(0u128),
-    //             }
-    //             .into(),
-    //         )
-    //     }
-    //
-    //     pub fn with_request(mut self, r: Request) -> Self {
-    //         self.0.push(r);
-    //         self
-    //     }
-    //
-    //     pub fn build(self, chain: l2types::Chain) -> l2types::L1Update {
-    //         let mut result = l2types::L1Update {
-    //             chain,
-    //             pendingDeposits: vec![],
-    //             pendingCancelResolutions: vec![],
-    //         };
-    //
-    //         for elem in self.0.into_iter() {
-    //             match elem {
-    //                 Request::Deposit(d) => {
-    //                     result.pendingDeposits.push(d);
-    //                 }
-    //                 Request::Cancel(c) => {
-    //                     result.pendingCancelResolutions.push(c);
-    //                 }
-    //             }
-    //         }
-    //
-    //         result
-    //     }
-    // }
 
     #[tokio::test]
     async fn test_find_malicious_update_ignores_valid_updates() {

@@ -86,6 +86,7 @@ pub mod test_utils {
         contract_handle: GaspTestTokenInstance<T, P, N>,
     }
 
+    #[allow(dead_code)]
     impl<T, P, N> DevToken<T, P, N>
     where
         T: Transport + Clone,
@@ -93,7 +94,6 @@ pub mod test_utils {
         N: Network,
     {
         pub(crate) async fn deploy(provider: P) -> Result<Self, L1Error> {
-            let sender = provider.wallet().default_signer_address();
             let contract_handle = GaspTestTokenInstance::<T, P, N>::deploy(provider).await?;
             tracing::info!("contract deployed");
 

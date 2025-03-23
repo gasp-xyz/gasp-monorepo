@@ -24,8 +24,6 @@ pub async fn filter_deposits(
 mod test {
     use super::*;
     use gasp_types::{Origin, RequestId};
-    
-    use l2api::mock::MockL2;
     use tokio::sync::mpsc;
 
     const ENABLED_TOKEN1: [u8; 20] = [1; 20];
@@ -34,8 +32,6 @@ mod test {
 
     #[tokio::test]
     async fn test_picks_only_enabled_tokens() {
-        let l2mock = MockL2::new();
-
         let (filter_input, input) = mpsc::channel(10);
         let (output, mut filter_output) = mpsc::channel(10);
 

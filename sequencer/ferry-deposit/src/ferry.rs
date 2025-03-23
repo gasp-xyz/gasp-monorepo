@@ -182,9 +182,8 @@ where
 mod test {
     use super::*;
     use common::TryReceiveAsync;
-    
+
     use gasp_types::{Origin, RequestId, H256};
-    use l1api::mock::MockL1;
     use l2api::mock::MockL2;
     use mockall::{
         predicate::{always, eq},
@@ -192,19 +191,15 @@ mod test {
     };
     use tracing_test::traced_test;
 
-    use std::time::Duration;
-
     const ACCOUNT: [u8; 20] = [1; 20];
     const ENABLED_TOKEN1: [u8; 20] = [2; 20];
     const ENABLED_TOKEN2: [u8; 20] = [3; 20];
     const NATIVE_TOKEN: [u8; 20] = hex_literal::hex!("0000000000000000000000000000000000000001");
     const RECIPIENT: [u8; 20] = [5; 20];
-    const MS_500: Duration = Duration::from_millis(1000);
 
     #[traced_test]
     #[tokio::test]
     async fn works_fine_when_there_is_nothing_to_process() {
-        let l1 = MockL1::new();
         let l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
