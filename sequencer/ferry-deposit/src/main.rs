@@ -77,7 +77,15 @@ pub async fn main() -> Result<(), Error> {
     });
 
     let filter_handle = tokio::spawn(async move {
-        filter::filter_deposits(filter_input, to_executor, args.enabled.into_iter().map(|elem | ( elem, 1_000_000u128.into())).collect()).await
+        filter::filter_deposits(
+            filter_input,
+            to_executor,
+            args.enabled
+                .into_iter()
+                .map(|elem| (elem, 1_000_000u128.into()))
+                .collect(),
+        )
+        .await
     });
 
     let executor_handle = tokio::spawn(async move {
@@ -85,12 +93,8 @@ pub async fn main() -> Result<(), Error> {
         Ok::<_, FerryError>(())
     });
 
-    let (hunter, _filter, executor) = tokio::try_join!(
-        hunter_handle,
-        filter_handle,
-        executor_handle,
-    )
-    .expect("can join");
+    let (hunter, _filter, executor) =
+        tokio::try_join!(hunter_handle, filter_handle, executor_handle,).expect("can join");
     hunter?;
     executor?;
 

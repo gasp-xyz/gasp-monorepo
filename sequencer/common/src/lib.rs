@@ -67,7 +67,6 @@ impl TryReceiveAsync for oneshot::Receiver<()> {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;

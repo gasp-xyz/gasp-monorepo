@@ -114,10 +114,7 @@ mod test {
 
     use l1api::L1Error;
     use l2api::L2Error;
-    use mockall::{
-        predicate::eq,
-        Sequence,
-    };
+    use mockall::{predicate::eq, Sequence};
     use test_case::test_case;
     use tracing_test::traced_test;
 
