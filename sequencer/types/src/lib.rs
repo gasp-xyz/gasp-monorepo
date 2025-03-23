@@ -262,6 +262,7 @@ pub struct Deposit {
     pub recipient: [u8; 20],
     pub token_address: [u8; 20],
     pub amount: U256,
+    pub timestamp: U256,
     pub ferry_tip: U256,
 }
 

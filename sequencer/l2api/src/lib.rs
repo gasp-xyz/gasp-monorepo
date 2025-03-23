@@ -179,5 +179,5 @@ pub trait L2Interface {
         &self,
         chain: Chain,
         deposit: gasp_types::Deposit,
-    ) -> Result<H256, L2Error>;
+    ) -> Result<bool, L2Error>;
 }

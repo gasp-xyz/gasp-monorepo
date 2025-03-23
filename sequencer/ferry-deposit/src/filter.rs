@@ -34,7 +34,6 @@ mod test {
 
     #[tokio::test]
     async fn test_picks_only_enabled_tokens() {
-        let l1mock = MockL1::new();
         let l2mock = MockL2::new();
 
         let (filter_input, input) = mpsc::channel(10);
@@ -60,6 +59,7 @@ mod test {
             token_address: ENABLED_TOKEN1,
             amount: 100u128.into(),
             ferry_tip: 11u128.into(),
+            timestamp: 0u128.into(),
         };
 
         let enabled_deposit2 = Deposit {
@@ -71,6 +71,7 @@ mod test {
             token_address: ENABLED_TOKEN2,
             amount: 100u128.into(),
             ferry_tip: 10u128.into(),
+            timestamp: 0u128.into(),
         };
 
         let disabled_deposit = Deposit {
@@ -82,6 +83,7 @@ mod test {
             token_address: DISABLED_TOKEN,
             amount: 100u128.into(),
             ferry_tip: 10u128.into(),
+            timestamp: 0u128.into(),
         };
 
         filter_input.send(disabled_deposit).await.unwrap();

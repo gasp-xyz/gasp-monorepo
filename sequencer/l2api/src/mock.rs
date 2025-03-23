@@ -17,7 +17,7 @@ impl crate::L2Interface for L2{
 
     async fn get_balance(&self, chain: gasp_types::Chain, token: [u8; 20], account: [u8; 20], at: H256) -> Result<u128, L2Error>;
 
-    async fn ferry_deposit(&self, chain: Chain, deposit: gasp_types::Deposit) -> Result<H256, L2Error>;
+    async fn ferry_deposit(&self, chain: Chain, deposit: gasp_types::Deposit) -> Result<bool, L2Error>;
 
     fn account_address(&self) -> [u8; 20];
 

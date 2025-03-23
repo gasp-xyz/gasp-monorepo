@@ -238,6 +238,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
 
         l2.expect_get_balance()
@@ -249,7 +250,7 @@ mod test {
 
         l2.expect_ferry_deposit().times(1).return_once(move |_, _| {
             signal.send(()).unwrap();
-            Ok(H256::default())
+            Ok(true)
         });
 
         input.send((10.into(), deposit)).await.unwrap();
@@ -282,6 +283,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
 
         let high_prio_withdrawal = Deposit {
@@ -293,6 +295,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 50.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
 
         l2.expect_get_balance()
@@ -307,7 +310,7 @@ mod test {
             .times(1)
             .in_sequence(&mut seq)
             .with(always(), eq(high_prio_withdrawal))
-            .returning(|_, _| Ok(H256::default()));
+            .returning(|_, _| Ok(true));
 
         l2.expect_ferry_deposit()
             .times(1)
@@ -315,7 +318,7 @@ mod test {
             .with(always(), eq(low_prio_withdrawal))
             .return_once(move |_, _| {
                 signal.send(()).unwrap();
-                Ok(H256::default())
+                Ok(true)
             });
 
         input.send((10.into(), low_prio_withdrawal)).await.unwrap();
@@ -352,6 +355,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
@@ -366,6 +370,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN2), always(), always())
@@ -381,7 +386,7 @@ mod test {
             .with(always(), eq(affordable_deposit))
             .return_once(move |_, _| {
                 signal.send(()).unwrap();
-                Ok(H256::default())
+                Ok(true)
             });
 
         input
@@ -418,6 +423,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
@@ -433,6 +439,7 @@ mod test {
             amount: 100.into(),
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
+            timestamp: 0.into(),
         };
         l2.expect_get_balance()
             .with(always(), eq(NATIVE_TOKEN), always(), always())
@@ -448,7 +455,7 @@ mod test {
             .with(always(), eq(affordable_deposit))
             .return_once(move |_, _| {
                 signal.send(()).unwrap();
-                Ok(H256::default())
+                Ok(true)
             });
 
         input

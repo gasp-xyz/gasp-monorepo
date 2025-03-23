@@ -190,6 +190,7 @@ mod test {
             token_address: [0u8; 20],
             amount: 100u128.into(),
             ferry_tip: 1u128.into(),
+            timestamp: 0u128.into(),
         })
     }
 
