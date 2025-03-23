@@ -1,3 +1,4 @@
+#![allow(clippy::from_over_into)]
 use core::fmt;
 use std::fmt::{Display, Formatter};
 
