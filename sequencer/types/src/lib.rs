@@ -38,11 +38,11 @@ mod l1types {
     pub use alloy::primitives::U256;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
     pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId as Chain;
+    pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
     pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]

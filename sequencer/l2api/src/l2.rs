@@ -697,7 +697,7 @@ impl L2Interface for Gasp {
 #[cfg(test)]
 mod test {
     use super::*;
-    use gasp_types::L1Update;
+    use gasp_types::{Deposit, L1Update, Origin, RequestId};
     use hex_literal::hex;
     use serial_test::serial;
     use tracing_test::traced_test;
@@ -736,6 +736,33 @@ mod test {
         gasp.withdraw(ETHEREUM, DUMMY_ADDR, TEST_TOKEN, 100, None)
             .await
             .expect("can submit withdrawal");
+    }
+
+    #[serial]
+    #[tokio::test]
+    #[traced_test]
+    async fn test_can_ferry_deposit() {
+        let gasp = Gasp::new(URI, BALTATHAR_PKEY)
+            .await
+            .expect("can connect to gasp");
+
+        let deposit = Deposit {
+            request_id: RequestId {
+                id: 2.into(),
+                origin: Origin::L2,
+            },
+            //TODO: token address should be fetched dynamically from the node
+            token_address: hex_literal::hex!("c351628eb244ec633d5f21fbd6621e1a683b1181"),
+            amount: 100.into(),
+            ferry_tip: 10.into(),
+            recipient: [0u8; 20],
+            timestamp: 0.into(),
+        };
+
+        assert!(gasp
+            .ferry_deposit(ETHEREUM, deposit)
+            .await
+            .expect("can submit withdrawal"));
     }
 
     #[serial]
