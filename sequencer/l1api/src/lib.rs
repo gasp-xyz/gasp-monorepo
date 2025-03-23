@@ -39,8 +39,8 @@ pub mod types {
         Ferried([u8; 20]),
         Closed,
     }
-    pub use gasp_types::Withdrawal;
     pub use gasp_types::Deposit;
+    pub use gasp_types::Withdrawal;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -130,7 +130,7 @@ where
     N: Network,
 {
     #[tracing::instrument(skip(self), ret)]
-    async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error>{
+    async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         unimplemented!()
     }
 

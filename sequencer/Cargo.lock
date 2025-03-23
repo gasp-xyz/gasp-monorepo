@@ -1421,8 +1421,11 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "hex",
+ "hex-literal",
  "itertools 0.14.0",
  "lazy_static",
+ "oneshot",
  "prometheus",
  "tokio",
  "tracing",
@@ -1925,6 +1928,7 @@ dependencies = [
  "lazy_static",
  "lru",
  "mockall",
+ "oneshot",
  "prometheus",
  "serde",
  "serial_test",
@@ -3292,6 +3296,12 @@ name = "once_cell"
 version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
+
+[[package]]
+name = "oneshot"
+version = "0.1.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4ce411919553d3f9fa53a0880544cda985a112117a0444d5ff1e870a893d6ea"
 
 [[package]]
 name = "opaque-debug"

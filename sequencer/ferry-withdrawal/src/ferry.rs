@@ -88,7 +88,7 @@ where
                     (w.amount - w.ferry_tip).saturating_add(self.tx_cost)
                 };
                 let balance = balances.get(&w.token_address).cloned().unwrap_or_default();
-                balance > required_tokens_amount
+                balance >= required_tokens_amount
             })
             .max_by_key(|(_, (prio, _))| prio)
             .clone()
@@ -351,7 +351,7 @@ mod test {
         l1.expect_get_status()
             .returning(|_| Ok(RequestStatus::Pending));
 
-        l1.expect_ferry_withdrawal().times(0).return_once(move |_| {
+        l1.expect_ferry_withdrawal().times(1).return_once(move |_| {
             notify.store(true, std::sync::atomic::Ordering::Relaxed);
             Ok(H256::default())
         });

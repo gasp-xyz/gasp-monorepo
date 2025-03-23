@@ -1,7 +1,6 @@
 use futures::StreamExt;
-use gasp_types::{Chain, L2Request, H256};
-use gasp_types::{Withdrawal, U256};
-use l1api::types::{RequestStatus, Deposit};
+use gasp_types::H256;
+use l1api::types::Deposit;
 use l1api::L1Interface;
 use l2api::L2Interface;
 use tokio::sync::mpsc;
@@ -46,9 +45,12 @@ where
 
     async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
         let latest_available_request = self.l1.get_latest_reqeust_id().await?;
-        let latest_processed= self.l2.get_latest_processed_request_id(self.chain, l2_state).await?;
+        let latest_processed = self
+            .l2
+            .get_latest_processed_request_id(self.chain, l2_state)
+            .await?;
 
-        Ok(match (latest_available_request) {
+        Ok(match latest_available_request {
             Some(latest_avilable) if latest_avilable > latest_processed => {
                 Some((latest_processed + 1, latest_avilable))
             }
@@ -57,10 +59,7 @@ where
     }
 
     #[tracing::instrument(level = "debug", skip(self), ret)]
-    pub async fn get_deposit(
-        &self,
-        id: u128,
-    ) -> HunterResult<Option<Deposit>> {
+    pub async fn get_deposit(&self, id: u128) -> HunterResult<Option<Deposit>> {
         Ok(self.l1.get_deposit(id).await?)
     }
 
@@ -76,11 +75,8 @@ where
                 if end <= self.latest_processed {
                     continue;
                 }
-                let chunks = common::get_chunks(
-                    std::cmp::max(start, self.latest_processed + 1),
-                    end,
-                    25,
-                );
+                let chunks =
+                    common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
@@ -114,11 +110,14 @@ mod test {
 
     use super::*;
     use futures::stream;
-    use gasp_types::{Chain, RequestId};
+    use gasp_types::{RequestId, U256};
 
-    use l2api::L2Error;
     use l1api::L1Error;
-    use mockall::{predicate::{always, eq}, Sequence};
+    use l2api::L2Error;
+    use mockall::{
+        predicate::eq,
+        Sequence,
+    };
     use test_case::test_case;
     use tracing_test::traced_test;
 
@@ -201,9 +200,7 @@ mod test {
         deposit_stream().nth(id - 1).unwrap()
     }
 
-    fn ret_nth_deposit(
-        id: u128,
-    ) -> Result<Option<Deposit>, L1Error> {
+    fn ret_nth_deposit(id: u128) -> Result<Option<Deposit>, L1Error> {
         Ok(Some(nth_deposit(id as usize).into()))
     }
 

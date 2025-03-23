@@ -178,6 +178,14 @@ impl Gasp {
 }
 
 impl L2Interface for Gasp {
+    async fn ferry_deposit(
+        &self,
+        chain: gasp_types::Chain,
+        deposit: gasp_types::Deposit,
+    ) -> Result<H256, L2Error> {
+        Ok(Default::default())
+    }
+
     fn account_address(&self) -> [u8; 20] {
         self.keypair.address().into_inner()
     }
@@ -624,6 +632,46 @@ impl L2Interface for Gasp {
             .await
             .into_iter()
             .collect::<Result<Vec<_>, _>>()
+    }
+
+    async fn get_balance(
+        &self,
+        chain: gasp_types::Chain,
+        token: [u8; 20],
+        account: [u8; 20],
+        at: H256,
+    ) -> Result<u128, L2Error> {
+        use gasp_bindings::api::runtime_types::mangata_types::assets::L1Asset;
+        use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
+
+        let asset = match chain {
+            gasp_types::Chain::Ethereum => L1Asset::Ethereum(token),
+            gasp_types::Chain::Arbitrum => L1Asset::Arbitrum(token),
+            gasp_types::Chain::Base => L1Asset::Base(token),
+            gasp_types::Chain::Monad => L1Asset::Monad(token),
+            gasp_types::Chain::MegaEth => L1Asset::MegaEth(token),
+            gasp_types::Chain::Sonic => L1Asset::Sonic(token),
+        };
+
+        let storage = gasp_bindings::api::storage()
+            .asset_registry()
+            .l1_asset_to_id(asset);
+        if let Some(token_id) = self.client.storage().at(at).fetch(&storage).await? {
+            let storage = gasp_bindings::api::storage()
+                .tokens()
+                .accounts(AccountId20(account), token_id);
+
+            Ok(self
+                .client
+                .storage()
+                .at(at)
+                .fetch(&storage)
+                .await?
+                .map(|account| account.free)
+                .unwrap_or_default())
+        } else {
+            Ok(0u128)
+        }
     }
 }
 

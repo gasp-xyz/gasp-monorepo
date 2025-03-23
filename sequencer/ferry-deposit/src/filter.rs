@@ -1,23 +1,17 @@
-use crate::ferry::FerryAction;
-use gasp_types::Withdrawal;
-use l1api::L1Interface;
-use l2api::L2Interface;
-use std::collections::{HashMap, HashSet};
+use gasp_types::{Deposit, U256};
+use std::collections::HashMap;
 use tokio::sync::mpsc;
 
 pub async fn filter_deposits(
-    mut input: mpsc::Receiver<Withdrawal>,
-    output: mpsc::Sender<FerryAction>,
+    mut input: mpsc::Receiver<Deposit>,
+    output: mpsc::Sender<(U256, Deposit)>,
     enabled: HashMap<[u8; 20], u128>,
 ) {
-    while let Some(w) = input.recv().await {
-        if let Some(min_profit) = enabled.get(&w.token_address) {
-            if w.ferry_tip > (*min_profit).into() {
+    while let Some(deposit) = input.recv().await {
+        if let Some(min_profit) = enabled.get(&deposit.token_address) {
+            if deposit.ferry_tip > (*min_profit).into() {
                 output
-                    .send(FerryAction::Ferry {
-                        withdrawal: w,
-                        prio: w.ferry_tip,
-                    })
+                    .send((deposit.ferry_tip, deposit))
                     .await
                     .expect("infinite");
             }
@@ -58,7 +52,7 @@ mod test {
             .await;
         });
 
-        let enabled_withdrawal1 = Withdrawal {
+        let enabled_deposit1 = Deposit {
             request_id: RequestId {
                 id: 123u128.into(),
                 origin: Origin::L2,
@@ -69,7 +63,7 @@ mod test {
             ferry_tip: 11u128.into(),
         };
 
-        let enabled_withdrawal2 = Withdrawal {
+        let enabled_deposit2 = Deposit {
             request_id: RequestId {
                 id: 123u128.into(),
                 origin: Origin::L2,
@@ -80,7 +74,7 @@ mod test {
             ferry_tip: 10u128.into(),
         };
 
-        let disabled_withdrawal = Withdrawal {
+        let disabled_deposit = Deposit {
             request_id: RequestId {
                 id: 123u128.into(),
                 origin: Origin::L2,
@@ -91,27 +85,21 @@ mod test {
             ferry_tip: 10u128.into(),
         };
 
-        filter_input.send(disabled_withdrawal).await.unwrap();
-        filter_input.send(enabled_withdrawal1).await.unwrap();
-        filter_input.send(enabled_withdrawal2).await.unwrap();
-        filter_input.send(disabled_withdrawal).await.unwrap();
+        filter_input.send(disabled_deposit).await.unwrap();
+        filter_input.send(enabled_deposit1).await.unwrap();
+        filter_input.send(enabled_deposit2).await.unwrap();
+        filter_input.send(disabled_deposit).await.unwrap();
 
         drop(filter_input);
         task.await.unwrap();
 
         assert_eq!(
-            FerryAction::Ferry {
-                withdrawal: enabled_withdrawal1,
-                prio: 11u128.into(),
-            },
+            (11u128.into(), enabled_deposit1),
             filter_output.recv().await.unwrap(),
         );
 
         assert_eq!(
-            FerryAction::Ferry {
-                withdrawal: enabled_withdrawal2,
-                prio: 10u128.into(),
-            },
+            (10u128.into(), enabled_deposit2),
             filter_output.recv().await.unwrap(),
         );
 

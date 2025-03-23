@@ -35,4 +35,5 @@ mockall = "0.13.0"
 serial_test = "3.2.0"
 tracing-test = "0.2.5"
 test-case = "3.3.1"
+oneshot = "0.1.11"
 

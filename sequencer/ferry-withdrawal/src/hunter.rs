@@ -97,11 +97,8 @@ where
                 if end <= self.latest_processed {
                     continue;
                 }
-                let chunks = common::get_chunks(
-                    std::cmp::max(start, self.latest_processed + 1),
-                    end,
-                    25,
-                );
+                let chunks =
+                    common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(

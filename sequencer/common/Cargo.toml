@@ -15,3 +15,6 @@ tracing = "0.1.40"
 tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
 alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
 itertools = "0.14.0"
+hex = "0.4.3"
+hex-literal = "0.4.1"
+oneshot = "0.1.11"
