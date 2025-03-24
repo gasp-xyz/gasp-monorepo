@@ -204,8 +204,13 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("ALERT:INFO Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
 	runTriggerC := make(chan struct{})
-	go agg.rpcServer.startServer(ctx, agg.apiKey, runTriggerC)
 
+	// Apparently golang allows calling functions on nil values
+	// And it seems that the function would be run on the struct assuming default values
+	if agg.rpcServer != nil {
+		go agg.rpcServer.startServer(ctx, agg.apiKey, runTriggerC)
+	}
+	
 	if agg.startIdle {
 		// blocking wait for the run trigger
 		agg.logger.Infof("ALERT:INFO Aggregator awaiting run trigger.")
