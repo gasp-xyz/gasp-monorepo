@@ -177,6 +177,8 @@ tasks:
 
   e2e-test-opt-out:
     script: |
+      # set -e  # Exit immediately if a command exits with a non-zero status
+      
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
@@ -186,8 +188,14 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
 
-      docker compose down && docker compose up -d
-
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
+      
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
       rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
@@ -195,14 +203,26 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
 
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
+      TEST_EXIT_CODE=$?
+      
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
+      exit $TEST_EXIT_CODE
+
     options:
       cache: true
       runFromWorkspaceRoot: true
     inputs: ['@globs(sources)', 'tests/**/*.ts']
     outputs: ['tests/reports/test-opt-out-report.xml']
-  
+
   e2e-test-corrupted:
     script: |
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
@@ -214,7 +234,13 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
       export UPDATER_VERSION=${IMAGE_TAG:-ci}
       
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
 
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-corrupted-report.xml
@@ -223,8 +249,19 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
   
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
+      TEST_EXIT_CODE=$?
+
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
       runFromWorkspaceRoot: true

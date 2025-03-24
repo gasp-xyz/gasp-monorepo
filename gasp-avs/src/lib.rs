@@ -24,7 +24,7 @@ pub async fn start() -> eyre::Result<()> {
     let client = operator.client();
 
     let _http_server = tokio::spawn(async move {
-        metrics::serve_metrics(80).await;
+        metrics::serve_metrics(cli.metrics_port).await;
     });
 
     let _monitor_balance = tokio::spawn(async move {
