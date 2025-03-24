@@ -197,7 +197,15 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
 
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
+      TEST_EXIT_CODE=$?
+      
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       cd $workspaceRoot && docker compose down
     options:
       cache: true
@@ -225,7 +233,15 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn install
   
       echo "Sleeping for 60 seconds to ensure the environment is up and running\n" && sleep 60
-      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted || (cd $workspaceRoot && docker compose down)
+      
+      # Run test and capture exit code
+      cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
+      TEST_EXIT_CODE=$?
+
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       cd $workspaceRoot && docker compose down
     options:
       cache: true

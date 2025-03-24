@@ -257,7 +257,13 @@ tasks:
       yarn test-sudoRemoval --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -282,7 +288,13 @@ tasks:
       yarn test-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -307,7 +319,13 @@ tasks:
       yarn test-parallel --max-workers=10 --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -332,7 +350,13 @@ tasks:
       yarn test-sequential-no-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -357,7 +381,13 @@ tasks:
       yarn test-seqgasless --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -382,7 +412,13 @@ tasks:
       yarn test-maintenance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -407,7 +443,13 @@ tasks:
       yarn test-rollupUpdate --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -432,7 +474,13 @@ tasks:
       yarn test-rewards-bootstrap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -457,7 +505,13 @@ tasks:
       yarn test-parallel-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -482,7 +536,13 @@ tasks:
       yarn test-sequential-autocompound --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -507,7 +567,13 @@ tasks:
       yarn test-poolliquidity --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -532,7 +598,13 @@ tasks:
       yarn test-governance --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -557,7 +629,13 @@ tasks:
       yarn test-multiswap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -582,7 +660,13 @@ tasks:
       yarn test-experimentalStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -607,7 +691,13 @@ tasks:
       yarn test-crowdloan --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -632,7 +722,13 @@ tasks:
       yarn test-sdk --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -657,7 +753,13 @@ tasks:
       yarn test-parallel-3rdPartyRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -682,7 +784,13 @@ tasks:
       yarn test-sequencerStaking --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -707,7 +815,13 @@ tasks:
       yarn test-sequencerCancellation --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -732,7 +846,13 @@ tasks:
       yarn test-rolldown --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -757,7 +877,13 @@ tasks:
       yarn test-rolldownWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -782,7 +908,13 @@ tasks:
       yarn test-rolldownPreOperationWithdrawal --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -807,7 +939,13 @@ tasks:
       yarn test-sequencerRewards --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -832,7 +970,13 @@ tasks:
       yarn test-nonTransToken --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -857,7 +1001,13 @@ tasks:
       yarn test-issuanceConfig --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -882,7 +1032,13 @@ tasks:
       yarn test-marketSwap --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd ../ && docker compose down
       exit $TEST_EXIT_CODE
@@ -917,7 +1073,13 @@ tasks:
       cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup --ci --testFailureExitCode=1 --bail=3 --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
-      [ $TEST_EXIT_CODE -eq 0 ] && grep -q 'failures="[1-9]' $workspaceRoot/gasp-node/gasp-e2e/reports/*.xml 2>/dev/null && TEST_EXIT_CODE=1
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
+      if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
+        TEST_EXIT_CODE=1
+      fi
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
