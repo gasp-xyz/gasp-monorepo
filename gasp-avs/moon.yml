@@ -208,11 +208,9 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
       TEST_EXIT_CODE=$?
       
-      if [ $TEST_EXIT_CODE -ne 0 ]; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot && docker compose logs --tail=1000
-        TEST_EXIT_CODE=1
-      fi
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
@@ -254,11 +252,9 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
       TEST_EXIT_CODE=$?
 
-      if [ $TEST_EXIT_CODE -ne 0 ]; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot && docker compose logs --tail=1000
-        TEST_EXIT_CODE=1
-      fi
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
