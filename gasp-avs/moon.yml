@@ -132,32 +132,10 @@ tasks:
       set -ex
       IMAGE_DIGEST_STANDARD_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-standard-runtime-buildkit-metadata.json)
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-fast-runtime-buildkit-metadata.json)
-      
-      CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-      # Handle detached HEAD state (common in CI)
-      if [ "$CURRENT_BRANCH" = "HEAD" ]; then
-        # Try to get branch from GitHub env vars first
-        if [ -n "$GITHUB_HEAD_REF" ]; then
-          # We're in a PR
-          CURRENT_BRANCH=$GITHUB_HEAD_REF
-        elif [ -n "$GITHUB_REF" ] && [[ $GITHUB_REF == refs/heads/* ]]; then
-          # We're on a branch
-          CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
-        elif [ -n "$GITHUB_REF" ] && [[ $GITHUB_REF == refs/tags/* ]]; then
-          # We're on a tag
-          CURRENT_BRANCH="tag-${GITHUB_REF#refs/tags/}"
-        else
-          # Fallback - get commit hash
-          CURRENT_BRANCH=$(git rev-parse --short HEAD)
-        fi
-      fi
-      echo "Current branch: $CURRENT_BRANCH"
 
       docker buildx imagetools create \
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} \
         --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG} \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${CURRENT_BRANCH} \
-        --tag ${DOCKERHUB_REPOSITORY}:${CURRENT_BRANCH} \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} from existing digests"
@@ -165,8 +143,6 @@ tasks:
       docker buildx imagetools create \
         --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast \
         --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG}-fast \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${CURRENT_BRANCH}-fast \
-        --tag ${DOCKERHUB_REPOSITORY}:${CURRENT_BRANCH}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast from existing digests"
