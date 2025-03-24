@@ -22,7 +22,7 @@ export enum CreatedBy {
   Other = 'other',
 }
 
-async function extractExtrinsicHashAndAnAddressFromBlock(
+export async function extractExtrinsicHashAndAnAddressFromBlock(
   api: ApiPromise,
   phaseApplyExtrinsic: number,
   block: Block
@@ -65,7 +65,7 @@ export const processWithdrawalEvents = async (
               .search()
               .where('requestId')
               .equals(
-                Number((event.ev.data as any).requestId.id.replace(/,/g, ''))
+                Number(String((event.ev.data as any).requestId.id).replace(/,/g, ''))
               )
               .and('chain')
               .equals((event.ev.data as any).chain)
@@ -97,31 +97,6 @@ export const processWithdrawalEvents = async (
   }
 }
 
-export const updateWithdrawal = async (
-  api: ApiPromise,
-  existingWithdrawal: any,
-  eventData: any
-) => {
-  existingWithdrawal.requestId = Number(
-    String(eventData.requestId.id).replace(/,/g, '')
-  )
-  existingWithdrawal.updated = Date.parse(new Date().toISOString())
-  existingWithdrawal.status = WITHDRAWAL_PENDING_ON_L2
-  existingWithdrawal.recipient = eventData.recipient
-  existingWithdrawal.proof = ''
-  const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
-    eventData.chain,
-    eventData.requestId.id.replace(/,/g, '')
-  )
-  existingWithdrawal.calldata = calldata.toHex()
-  existingWithdrawal.closedBy = null
-  await withdrawalRepository.save(existingWithdrawal)
-  logger.info(
-    'Existing withdrawal updated with event WithdrawalRequestCreated',
-    existingWithdrawal
-  )
-}
-
 export const startTracingWithdrawal = async (
   api: ApiPromise,
   eventData: any,
@@ -149,7 +124,7 @@ export const startTracingWithdrawal = async (
   console.log('Key Exists:', keyExists)
 
   const withdrawalData = {
-    requestId: Number(eventData.requestId.id.replace(/,/g, '')),
+    requestId: Number(String(eventData.requestId.id).replace(/,/g, '')),
     txHash: eventData.hash_,
     address: address,
     recipient: eventData.recipient,
@@ -158,7 +133,7 @@ export const startTracingWithdrawal = async (
     status: WITHDRAWAL_PENDING_ON_L2,
     type: type,
     chain: eventData.chain,
-    amount: eventData.amount.replace(/,/g, ''),
+    amount: String(eventData.amount).replace(/,/g, ''),
     asset_chainId: chainId,
     asset_address: eventData.tokenAddress,
     proof: '',
