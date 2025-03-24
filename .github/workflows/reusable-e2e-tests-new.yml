@@ -203,11 +203,13 @@ jobs:
           NODE_OPTIONS: --max_old_space_size=12288
 
       - name: Show Docker Compose logs in case of failure
-        if: failure()
+        # TODO: uncomment this before merging the PR
+        # if: failure()
         run: cat $GITHUB_WORKSPACE/tmp/logs/*.txt
 
       - name: Upload logs as an artifact on failure
-        if: failure()
+        # TODO: uncomment this before merging the PR
+        # if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}-logs
