@@ -27,25 +27,22 @@ async function extractExtrinsicHashAndAnAddressFromBlock(
   phaseApplyExtrinsic: number,
   block: Block
 ) {
-  const blockHash = await api.rpc.chain.getBlockHash(block.number)
-  const blockHeader = await api.rpc.chain.getHeader(blockHash)
-  const extinsics: GenericExtrinsic<AnyTuple>[] = (
-    await api.rpc.chain.getBlock(blockHeader.hash)
-  ).block.extrinsics
-  let extrinsic = extinsics[phaseApplyExtrinsic]
-  // console.log('Extrinsic:', extrinsic)
   let extrinsicHash, address
   try {
-    extrinsicHash = extrinsic.hash.toString()
-    address = extrinsic.method.args[1].toString()
-    console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
-  } catch (error) {
-    logger.error('Error extracting extrinsic hash and address:', error)
+    const blockHash = await api.rpc.chain.getBlockHash(block.number)
+    const blockHeader = await api.rpc.chain.getHeader(blockHash)
+    const extinsics: GenericExtrinsic<AnyTuple>[] = (
+      await api.rpc.chain.getBlock(blockHeader.hash)
+    ).block.extrinsics
+    let extrinsic = extinsics[phaseApplyExtrinsic]
     extrinsicHash = extrinsic.hash.toString()
     address = extrinsic.signer.toString()
     console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+    return { extrinsicHash, address }
+  } catch (error) {
+    logger.error('Error extracting extrinsic hash and address:', error)
+    return { extrinsicHash: '', address: '' }
   }
-  return { extrinsicHash, address }
 }
 
 export const processWithdrawalEvents = async (
@@ -62,9 +59,26 @@ export const processWithdrawalEvents = async (
   if (events.length > 0) {
     for (const eventGroup of events) {
       for (const event of eventGroup) {
-        console.log('Event final:', event)
         if (event.ev.method === 'WithdrawalRequestCreated') {
           try {
+            const existingWithdrawal = await withdrawalRepository
+              .search()
+              .where('requestId')
+              .equals(
+                Number((event.ev.data as any).requestId.id.replace(/,/g, ''))
+              )
+              .and('chain')
+              .equals((event.ev.data as any).chain)
+              .and('txHash')
+              .equals((event.ev.data as any).hash_)
+              .returnFirst()
+            if (existingWithdrawal) {
+              logger.info(
+                'Existing withdrawal found, skipping the WithdrawalRequestCreated data: ',
+                existingWithdrawal
+              )
+              continue
+            }
             const withdrawalData = await startTracingWithdrawal(
               api,
               event.ev.data,
