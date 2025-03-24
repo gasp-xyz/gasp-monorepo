@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - main
-      - release
+      - release/next
+      - develop
       - '(avs-aggregator-)+([0-9])?(.{+([0-9]),x}).x'
       - '(gasp-avs-)+([0-9])?(.{+([0-9]),x}).x'
       - '(stash-)+([0-9])?(.{+([0-9]),x}).x'
       - '(updater-)+([0-9])?(.{+([0-9]),x}).x'
-      - '(contracts-)+([0-9])?(.{+([0-9]),x}).x'
+      - '(gasp-contracts-)+([0-9])?(.{+([0-9]),x}).x'
       - '(gasp-node-)+([0-9])?(.{+([0-9]),x}).x'
       - '(sequencer-)+([0-9])?(.{+([0-9]),x}).x'
       - '(ferry-deposit-)+([0-9])?(.{+([0-9]),x}).x'
@@ -96,18 +97,9 @@ jobs:
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
 
-  # TODO: To be reviewed and reenabled when smart contracts automated deployment is fixed
-  # deploy-dev:
-  #   name: Deploy `dev` environment
-  #   needs: [init, build-and-test, build-and-test-gasp-node, gasp-node-unit-tests-and-coverage]
-  #   uses: ./.github/workflows/reusable-deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     env: dev
-  #     version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
   release:
     name: Release
+    if: github.ref_name != 'develop'
     needs: [init, build-and-test, run-e2e-test, run-e2e-test-gasp-node]
     runs-on: ubuntu-24.04
     env:
@@ -115,7 +107,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 0
       
       - uses: arduino/setup-protoc@v3
@@ -176,7 +168,15 @@ jobs:
                 - limits.cpu=14
                 - limits.memory=14Gi
 
+      - name: Download gasp-node wasm artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gasp-node-wasm-${{ needs.init.outputs.GLOBAL_VERSION }}
+          path: gasp-node/build
+
       - name: Run release command
         run: moon :release --concurrency 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.init.outputs.GLOBAL_VERSION }}
+

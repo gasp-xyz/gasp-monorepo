@@ -248,6 +248,9 @@ impl Operator {
             0 => String::from("Ethereum"),
             1 => String::from("Arbitrum"),
             2 => String::from("Base"),
+            3 => String::from("Monad"),
+            4 => String::from("MegaEth"),
+            5 => String::from("Sonic"),
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));

@@ -20,6 +20,15 @@ pub struct Cli {
 	#[arg(long, value_parser, value_delimiter = ',', global = true)]
 	pub override_base_sequencers: Vec<String>,
 
+	#[arg(long, value_parser, value_delimiter = ',', global = true)]
+	pub override_monad_sequencers: Vec<String>,
+
+	#[arg(long, value_parser, value_delimiter = ',', global = true)]
+	pub override_megaeth_sequencers: Vec<String>,
+
+	#[arg(long, value_parser, value_delimiter = ',', global = true)]
+	pub override_sonic_sequencers: Vec<String>,
+
 	#[clap(flatten)]
 	pub run: RunCmd,
 }

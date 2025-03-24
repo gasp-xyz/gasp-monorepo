@@ -20,7 +20,7 @@ git config --global diff.sopsdiffer.textconv "sops -d --config /dev/null"
 sops secrets.enc.yaml
 ```
 
-4. Configure connectin to cluster
+4. Configure connection to cluster
 
 ```bash
 gcloud container clusters get-credentials mangata-dev-alpha --region europe-west1
@@ -39,8 +39,8 @@ helmfile sync -e holesky
 Aggregator will be available by this URL: <https://rollup-aggregator-holesky.gasp.xyz/>
 You can find all of the deployed resources in `rollup-holesky` namespace of GKE cluster.
 
-
 ## How to expand storage size on collator node (example)
+
 ```bash
 export SERVICE='collator-01'
 kubectl -n rollup-holesky patch pvc chain-data-${SERVICE}-0 -p '{"spec":{"resources":{"requests":{"storage":"100Gi"}}}}'

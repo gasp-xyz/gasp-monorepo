@@ -48,6 +48,9 @@ pub struct CliArgs {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stake: Option<u32>,
 
+    #[arg(long, env, default_value_t = 80u16)]
+    pub metrics_port: u16,
+
     #[command(subcommand)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub command: Option<Commands>,
@@ -94,7 +97,16 @@ pub enum Commands {
 impl CliArgs {
     pub fn build() -> Self {
         let args = CliArgs::parse();
-        if ![Chain::AnvilHardhat as u64, 31338, 31339, Chain::Dev as u64].contains(&args.chain_id) {
+        if ![
+            Chain::AnvilHardhat as u64,
+            31338,
+            31339,
+            31340,
+            31341,
+            Chain::Dev as u64,
+        ]
+        .contains(&args.chain_id)
+        {
             let mut cmd = CliArgs::command();
             if args.testnet {
                 cmd.error(

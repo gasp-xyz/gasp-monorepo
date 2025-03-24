@@ -1,6 +1,6 @@
 [package]
 name = "rollup-node"
-version = "1.0.6"
+version = "1.0.7"
 description = "Mangata rollup node"
 authors = ["Mangata Team"]
 edition.workspace = true
@@ -48,6 +48,8 @@ frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
+pallet-collective-mangata-rpc = { workspace = true }
+pallet-collective-mangata = { workspace = true }
 sc-basic-authorship-ver = { workspace = true }
 sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
