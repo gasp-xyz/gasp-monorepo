@@ -43,7 +43,7 @@ tasks:
     outputs: ['target/release/main']
 
   build-image-local:
-    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t gaspxyz/gasp-avs:local --load .'
+    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t ${DOCKERHUB_REPOSITORY}:local --load .'
     options:
       envFile: '/.env'
     deps: ['gasp-node:build-image-local']
@@ -58,7 +58,7 @@ tasks:
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-standard-runtime,mode=max \
         --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
         --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
-        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci} \
+        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG} \
         --metadata-file gasp-avs-standard-runtime-buildkit-metadata.json -f Dockerfile ./
       
       BUILD_EXIT_CODE=$?
@@ -97,7 +97,7 @@ tasks:
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache-fast-runtime,mode=max \
         --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
         --build-arg ROLLUP_NODE_REPOSITORY=${IMAGE_BUILD_ROLLUP_NODE_REPOSITORY} \
-        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast \
+        --build-arg ROLLUP_NODE_VERSION=${IMAGE_TAG}-fast \
         --metadata-file gasp-avs-fast-runtime-buildkit-metadata.json -f Dockerfile ./
       
       BUILD_EXIT_CODE=$?
@@ -134,18 +134,18 @@ tasks:
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' gasp-avs-fast-runtime-buildkit-metadata.json)
 
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG} \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
 
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} from existing digests"
 
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
 
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast from existing digests"
     deps: 
       # - gasp-node:build-image-ci
       - buildkit-build-and-push-image-digests-standard-runtime
@@ -177,19 +177,25 @@ tasks:
 
   e2e-test-opt-out:
     script: |
-      set -e  # Exit immediately if a command exits with a non-zero status
+      # set -e  # Exit immediately if a command exits with a non-zero status
       
-      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
-      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
-      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
-      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-local}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
+      export UPDATER_VERSION=${IMAGE_TAG:-local}
 
-      docker compose down && docker compose up -d
-
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
+      
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
       rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
@@ -202,11 +208,15 @@ tasks:
       cd $workspaceRoot/gasp-avs/tests && yarn test-opt-out
       TEST_EXIT_CODE=$?
       
-      # Always clean up
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
-      
-      # Exit with the test exit code
       exit $TEST_EXIT_CODE
+
     options:
       cache: true
       runFromWorkspaceRoot: true
@@ -215,18 +225,22 @@ tasks:
 
   e2e-test-corrupted:
     script: |
-      set -e  # Exit immediately if a command exits with a non-zero status
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-local}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
+      export UPDATER_VERSION=${IMAGE_TAG:-local}
       
-      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
-      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
-      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
-      export UPDATER_VERSION=${IMAGE_TAG:-ci}
-      
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
 
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-corrupted-report.xml
@@ -239,11 +253,14 @@ tasks:
       # Run test and capture exit code
       cd $workspaceRoot/gasp-avs/tests && yarn test-corrupted
       TEST_EXIT_CODE=$?
-      
-      # Always clean up
+
+      if [ $TEST_EXIT_CODE -ne 0 ]; then
+        # Also output last 1000 lines of logs to console for CI visibility
+        cd $workspaceRoot && docker compose logs --tail=1000
+        TEST_EXIT_CODE=1
+      fi
+
       cd $workspaceRoot && docker compose down
-      
-      # Exit with the test exit code
       exit $TEST_EXIT_CODE
     options:
       cache: true
