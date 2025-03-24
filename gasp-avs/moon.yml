@@ -210,7 +210,7 @@ tasks:
       
       # Also store last 1000 lines of logs to file for debugging
       mkdir -p $workspaceRoot/tmp/logs
-      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$datetime-compose-logs.txt 2>&1
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
@@ -254,7 +254,7 @@ tasks:
 
       # Also store last 1000 lines of logs to file for debugging
       mkdir -p $workspaceRoot/tmp/logs
-      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$datetime-compose-logs.txt 2>&1
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
       exit $TEST_EXIT_CODE
