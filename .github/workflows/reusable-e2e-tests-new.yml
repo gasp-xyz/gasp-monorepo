@@ -200,7 +200,11 @@ jobs:
       - name: Run tests
         run: ${{ matrix.command }}
         env:
+          IMAGE_TAG: ${{ inputs.globalVersion }}
           NODE_OPTIONS: --max_old_space_size=12288
+          MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+          NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+          API_URL: "ws://127.0.0.1:9946"
 
       - name: Test Report
         uses: dorny/test-reporter@v1.9.1
