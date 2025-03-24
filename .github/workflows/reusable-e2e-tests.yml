@@ -108,7 +108,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.test.name }}-logs
-          path: $GITHUB_WORKSPACE/tmp/logs/*.txt
+          path: tmp/logs/
 
       - uses: appthrust/moon-ci-retrospect@v1
         if: success() || failure()
