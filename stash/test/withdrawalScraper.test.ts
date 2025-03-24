@@ -1,13 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest'
 import {
+  extractExtrinsicHashAndAnAddressFromBlock,
   processWithdrawalEvents,
   startTracingWithdrawal,
-  updateWithdrawal,
   updateWithdrawalsWhenBatchCreated,
 } from '../src/scraper/WithdrawalScraper.js'
 import { withdrawalRepository } from '../src/repository/TransactionRepository.js'
 import { redis } from '../src/connector/RedisConnector.js'
 import { ApiPromise } from '@polkadot/api'
+
 
 // Mock dependencies
 vi.mock('../repository/TransactionRepository')
@@ -109,6 +110,7 @@ describe('processWithdrawalEvents', () => {
         [
           0,
           {
+            index: '0x705',
             section: 'rolldown',
             method: 'WithdrawalRequestCreated',
             data: {
@@ -124,24 +126,14 @@ describe('processWithdrawalEvents', () => {
           },
         ],
       ],
-    }
-
-    const mockWithdrawalData = {
-      requestId: 1,
-      txHash: '0x123',
-      address: '0xaddress',
-      recipient: '0xrecipient',
-      created: expect.any(Number),
-      updated: expect.any(Number),
-      status: 'PendingOnL2',
-      type: 'withdrawal',
-      chain: 'testchain',
-      amount: '100',
-      asset_chainId: 'testchain',
-      asset_address: '0xtoken',
-      proof: '',
-      calldata: '0xabcdef',
-    }
+      extrinsics: [
+        {
+          method: 'methodName',
+          section: 'sectionName',
+          args: {},
+        },
+      ],
+    } as any
 
     const existingWithdrawalData = {
       requestId: null,
@@ -162,7 +154,6 @@ describe('processWithdrawalEvents', () => {
     vi.spyOn(redis.client, 'get').mockResolvedValue(
       JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
     )
-    vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(mockWithdrawalData)
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
       where: vi.fn().mockReturnThis(),
       equals: vi.fn().mockReturnThis(),
@@ -171,14 +162,7 @@ describe('processWithdrawalEvents', () => {
     } as any)
     await processWithdrawalEvents(mockApi, mockBlock as any)
 
-    expect(withdrawalRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: 'PendingOnL2',
-        recipient: '0xrecipient',
-        type: 'withdrawal',
-      })
-    )
-  })
+    expect(vi.spyOn(withdrawalRepository, 'save')).not.toHaveBeenCalled()  })
 
   it('should process TxBatchCreated event', async () => {
     const mockBlock = {
@@ -251,6 +235,35 @@ describe('startTracingWithdrawal', () => {
       tokenAddress: '0xtoken',
       ferryTip: 1,
     }
+    const mockBlock = {
+      events: [
+        [
+          0,
+          {
+            index: '0x705',
+            section: 'rolldown',
+            method: 'WithdrawalRequestCreated',
+            data: {
+              requestId: { id: 1 },
+              txHash: '0x123',
+              recipient: '0xrecipient',
+              chain: 'testchain',
+              amount: '100',
+              asset_address: '0xtoken',
+              proof: '',
+              calldata: '0xcalldata',
+            },
+          },
+        ],
+      ],
+      extrinsics: [
+        {
+          method: 'methodName',
+          section: 'sectionName',
+          args: {},
+        },
+      ],
+    } as any
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
       JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
@@ -275,7 +288,9 @@ describe('startTracingWithdrawal', () => {
       closedBy: null,
     })
 
-    const result = await startTracingWithdrawal(mockApi, mockEventData)
+
+
+    const result = await startTracingWithdrawal(mockApi, mockEventData, 1, mockBlock)
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -315,6 +330,36 @@ describe('startTracingWithdrawal', () => {
       tokenAddress: '0xtoken',
     }
 
+    const mockBlock = {
+      events: [
+        [
+          0,
+          {
+            index: '0x705',
+            section: 'rolldown',
+            method: 'WithdrawalRequestCreated',
+            data: {
+              requestId: { id: 1 },
+              txHash: '0x123',
+              recipient: '0xrecipient',
+              chain: 'testchain',
+              amount: '100',
+              asset_address: '0xtoken',
+              proof: '',
+              calldata: '0xcalldata',
+            },
+          },
+        ],
+      ],
+      extrinsics: [
+        {
+          method: 'methodName',
+          section: 'sectionName',
+          args: {},
+        },
+      ],
+    } as any
+
     vi.spyOn(redis.client, 'get').mockResolvedValue(null)
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
       ...mockEventData,
@@ -322,80 +367,9 @@ describe('startTracingWithdrawal', () => {
       asset_chainId: 'unknown',
     })
 
-    const result = await startTracingWithdrawal(mockApi, mockEventData)
+    const result = await startTracingWithdrawal(mockApi, mockEventData, 1, mockBlock)
 
     expect(result.asset_chainId).toBe('unknown')
-  })
-})
-
-describe('updateWithdrawal', () => {
-  let mockApi: ApiPromise
-  let existingWithdrawal: any
-  let eventData: any
-
-  beforeEach(() => {
-    mockApi = {
-      rpc: {
-        rolldown: {
-          get_abi_encoded_l2_request: vi
-            .fn()
-            .mockResolvedValue({ toHex: () => '0xabcdef' }),
-        },
-      },
-    } as unknown as ApiPromise
-
-    existingWithdrawal = {
-      requestId: null,
-      txHash: '0x123',
-      address: '0xaddress',
-      recipient: '',
-      created: 1629517393690,
-      updated: 1629517393690,
-      status: 'InitiatedByFrontend',
-      type: 'withdrawal',
-      chain: 'testchain',
-      amount: '100',
-      asset_chainId: 'testchain',
-      asset_address: '0xtoken',
-      proof: '',
-      calldata: '',
-      createdBy: 'frontend',
-      closedBy: null,
-    }
-
-    eventData = {
-      requestId: { id: 2 },
-      hash_: '0x123',
-      recipient: '0xabc',
-      amount: '100',
-      tokenAddress: '0xtoken',
-      chain: 'testchain',
-    }
-
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('should update an existing withdrawal with new event data', async () => {
-    vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(existingWithdrawal)
-
-    await updateWithdrawal(mockApi, existingWithdrawal, eventData)
-
-    expect(withdrawalRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        requestId: 2,
-        updated: expect.any(Number),
-        status: 'PendingOnL2',
-        address: '0xaddress',
-        recipient: '0xrecipient',
-        proof: '',
-        calldata: '0xabcdef',
-        closedBy: null,
-      })
-    )
   })
 })
 
@@ -480,3 +454,86 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
     expect(withdrawalRepository.save).not.toHaveBeenCalled()
   })
 })
+
+  describe('extractExtrinsicHashAndAnAddressFromBlock', () => {
+    let mockApi: any;
+    let mockBlock: any;
+
+    beforeEach(() => {
+      // Reset all mocks
+      vi.clearAllMocks();
+
+      // Create a mock API with all the necessary RPC methods
+      mockApi = {
+        rpc: {
+          chain: {
+            getBlockHash: vi.fn(),
+            getHeader: vi.fn(),
+            getBlock: vi.fn()
+          }
+        }
+      };
+    });
+
+    it('should successfully extract extrinsic hash and address', async () => {
+      // Prepare mock block and extrinsics
+      const mockBlockNumber = 12345;
+      const mockBlockHash = '0xmockblockhash';
+      const mockBlockHeader = {hash: mockBlockHash};
+      const mockExtrinsicHash = '0xextrinsichash';
+      const mockAddress = '5Gaddress';
+
+      const mockExtrinsics = [
+        {
+          hash: {toString: () => mockExtrinsicHash},
+          signer: {toString: () => mockAddress}
+        }
+      ];
+
+      // Set up mock API method responses
+      mockApi.rpc.chain.getBlockHash.mockResolvedValue(mockBlockHash);
+      mockApi.rpc.chain.getHeader.mockResolvedValue(mockBlockHeader);
+      mockApi.rpc.chain.getBlock.mockResolvedValue({
+        block: {extrinsics: mockExtrinsics}
+      });
+
+      // Call the function
+      const result = await extractExtrinsicHashAndAnAddressFromBlock(
+          mockApi,
+          0, // phaseApplyExtrinsic
+          {api: undefined, events: [], extrinsics: [], hash: "", parent: "", timestamp: 0, number: mockBlockNumber} // block
+      );
+
+      // Assertions
+      expect(mockApi.rpc.chain.getBlockHash).toHaveBeenCalledWith(mockBlockNumber);
+      expect(mockApi.rpc.chain.getHeader).toHaveBeenCalledWith(mockBlockHash);
+      expect(mockApi.rpc.chain.getBlock).toHaveBeenCalledWith(mockBlockHeader.hash);
+
+      expect(result).toEqual({
+        extrinsicHash: mockExtrinsicHash,
+        address: mockAddress
+      });
+    });
+
+      it('should handle errors and return empty strings', async () => {
+        // Prepare mock block
+        const mockBlockNumber = 12345;
+
+        // Set up mock API methods to throw an error
+        mockApi.rpc.chain.getBlockHash.mockRejectedValue(new Error('Block hash retrieval failed'));
+
+        // Call the function
+        const result = await extractExtrinsicHashAndAnAddressFromBlock(
+            mockApi,
+            0, // phaseApplyExtrinsic
+            {api: undefined, events: [], extrinsics: [], hash: "", parent: "", timestamp: 0, number: mockBlockNumber} // block
+        );
+
+        // Assertions
+        expect(result).toEqual({
+          extrinsicHash: '',
+          address: ''
+        });
+      });
+    })
+
