@@ -42,7 +42,7 @@ tasks:
       SCCACHE_GCS_KEY_PREFIX: gasp-node-release
 
   build-image-local:
-    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local --load .'
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t ${DOCKERHUB_REPOSITORY}:local --load .'
     inputs: ['@globs(sources)', 'Dockerfile']
 
   buildkit-build-and-push-image-digests-standard-runtime:
@@ -155,16 +155,16 @@ tasks:
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' build/gasp-node-fast-runtime-buildkit-metadata.json)
   
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG} \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} from existing digests"
 
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"      
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast from existing digests"      
     deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime']
     inputs: 
       - 'build/gasp-node-standard-runtime-buildkit-metadata.json'
@@ -243,8 +243,7 @@ tasks:
 
   e2e-test-sudoRemoval:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -269,8 +268,7 @@ tasks:
 
   e2e-test-bootstrap:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -295,8 +293,7 @@ tasks:
 
   e2e-test-parallel:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -321,8 +318,7 @@ tasks:
 
   e2e-test-sequential-no-bootstrap:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -347,8 +343,7 @@ tasks:
 
   e2e-test-seqgasless:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -373,8 +368,7 @@ tasks:
 
   e2e-test-maintenance:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -399,8 +393,7 @@ tasks:
 
   e2e-test-rollupUpdate:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -425,8 +418,7 @@ tasks:
 
   e2e-test-rewards-bootstrap:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -451,8 +443,7 @@ tasks:
 
   e2e-test-parallel-autocompound:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -477,8 +468,7 @@ tasks:
 
   e2e-test-sequential-autocompound:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -503,8 +493,7 @@ tasks:
 
   e2e-test-poolliquidity:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -529,8 +518,7 @@ tasks:
 
   e2e-test-governance:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -555,8 +543,7 @@ tasks:
 
   e2e-test-multiswap:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -581,8 +568,7 @@ tasks:
 
   e2e-test-experimentalStaking:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -607,8 +593,7 @@ tasks:
 
   e2e-test-crowdloan:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -633,8 +618,7 @@ tasks:
 
   e2e-test-sdk:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -659,8 +643,7 @@ tasks:
 
   e2e-test-parallel-3rdPartyRewards:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -685,8 +668,7 @@ tasks:
 
   e2e-test-sequencerStaking:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -711,8 +693,7 @@ tasks:
 
   e2e-test-sequencerCancellation:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -737,8 +718,7 @@ tasks:
 
   e2e-test-rolldown:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -763,8 +743,7 @@ tasks:
 
   e2e-test-rolldownWithdrawal:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -789,8 +768,7 @@ tasks:
 
   e2e-test-rolldownPreOperationWithdrawal:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -815,8 +793,7 @@ tasks:
 
   e2e-test-sequencerRewards:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -841,8 +818,7 @@ tasks:
 
   e2e-test-nonTransToken:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -867,8 +843,7 @@ tasks:
 
   e2e-test-issuanceConfig:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -893,8 +868,7 @@ tasks:
 
   e2e-test-marketSwap:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -919,15 +893,14 @@ tasks:
 
   e2e-test-rollup:
     script: |
-      set -eo pipefail
-      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
-      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
-      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
-      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-local}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
+      export UPDATER_VERSION=${IMAGE_TAG:-local}
 
       docker compose down
       if [ "$CI" = "true" ]; then
