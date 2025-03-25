@@ -27,6 +27,58 @@ jobs:
       GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
       GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
+      - name: Test PR title for conventional commit format
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pullRequestTitle = context.payload.pull_request.title;
+            console.log(`Pull request title: ${pullRequestTitle}`);
+            
+            // Conventional commit patterns
+            const typePattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)/;
+            const fullPattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?: .{1,50}$/;
+            
+            if (fullPattern.test(pullRequestTitle)) {
+              console.log("✅ Title matches conventional commit format");
+              return;
+            }
+            
+            // Determine specific error for helpful feedback
+            let errorMessage = "";
+            if (!typePattern.test(pullRequestTitle)) {
+              errorMessage = "must start with a valid type (feat, fix, docs, etc.)";
+            } else if (!pullRequestTitle.includes(":")) {
+              errorMessage = "missing colon after type/scope";
+            } else {
+              errorMessage = "should follow format: type(optional-scope): description (1-50 chars)";
+            }
+            
+            const message = [
+              "### ❌ Invalid PR Title Format",
+              "",
+              `**Current title:** \`${pullRequestTitle}\``,
+              `**Issue:** ${errorMessage}`,
+              "",
+              "Please edit your PR title to follow the [Conventional Commits](https://www.conventionalcommits.org/) format:",
+              "```",
+              "<type>(<optional-scope>): <description>",
+              "```",
+              "",
+              "**Examples:**",
+              "- `feat: add user authentication`",
+              "- `fix(api): correct status code`",
+              "- `docs(readme): update installation steps`"
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+            
+            core.setFailed("PR title doesn't match conventional commit format");
+            
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
