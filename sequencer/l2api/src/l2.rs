@@ -637,12 +637,7 @@ impl L2Interface for Gasp {
                 let chain = keys.1.decoded()?;
                 let update_hash = hex_encode(update_metadata.update_hash);
                 tracing::debug!("update found chain:{chain:?} end_dispute_period:{end_dispute_period} hash:{update_hash} update_metadata:{update_metadata:?}");
-                Ok::<_, L2Error>(PendingUpdate { 
-                    chain: chain.into(), 
-                    update_id: end_dispute_period,
-                    range: (update_metadata.min_id, update_metadata.max_id),
-                    hash: update_metadata.update_hash,
-                })
+                Ok::<_, L2Error>(PendingUpdate { chain: chain.into(), update_id: end_dispute_period, range: (update_metadata.min_id, update_metadata.max_id), hash: update_metadata.update_hash, })
             })
             .collect::<Vec<_>>()
             .await;
