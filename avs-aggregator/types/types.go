@@ -27,6 +27,9 @@ var QUORUM_NUMBER = sdktypes.QuorumNum(0)
 
 const TASK_STATUS_NOT_INITIALIZED = uint8(0)
 const TASK_STATUS_INITIALIZED = uint8(1)
+const TASK_STATUS_CANCELLED = uint8(2)
+const TASK_STATUS_RESPONDED = uint8(3)
+const TASK_STATUS_COMPLETED = uint8(4)
 
 // type BlockNumber = uint32
 type TaskIndex = uint32

@@ -63,8 +63,6 @@ type AvsReaderer interface {
 	DelegationManagerAddress() common.Address	
 	RegistryCoordinatorAddress() common.Address	
 	ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error)	
-	ParseResumeTrackingOpState(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, error)	
-	ParsePauseTrackingOpState(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerPauseTrackingOpState, error)	
 	ParseOperatorSharesIncreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesIncreased, error)	
 	ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesDecreased, error)	
 	ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error)	
@@ -527,16 +525,6 @@ func (r *AvsReader) RegistryCoordinatorAddress() common.Address {
 func (r *AvsReader) ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error) {
 	
 	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseOperatorStakeUpdate(log)
-	return event, err
-}
-
-func (r *AvsReader) ParseResumeTrackingOpState(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState, error) {
-	event, err := r.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseResumeTrackingOpState(log)
-	return event, err
-}
-
-func (r *AvsReader) ParsePauseTrackingOpState(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerPauseTrackingOpState, error) {
-	event, err := r.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParsePauseTrackingOpState(log)
 	return event, err
 }
 
