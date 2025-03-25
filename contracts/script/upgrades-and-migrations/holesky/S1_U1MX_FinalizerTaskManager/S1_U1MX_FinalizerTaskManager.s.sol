@@ -19,20 +19,14 @@ import {FinalizerTaskManager} from "../../../../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "../../../../src/interfaces/IFinalizerTaskManager.sol";
 import {Utils} from "../../../utils/Utils.sol";
 
-// To deploy and verify contract
-// forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY --resume
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Deploys finalizer contracts
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// To deploy and verify FinalizerTaskManager implementation
+// forge script script/S1_U1MX_FinalizerTaskManager.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY --resume
 contract Deployer is Script, Utils, Test {
     string internal constant _OUTPUT_PATH =
         "./script/upgrades-and-migrations/holesky/S1_U1MX_FinalizerTaskManager/upgrade_output.json";
 
     ProxyAdmin public avsProxyAdmin;
-    // Upgradeable contract proxies
     FinalizerTaskManager public taskManager;
-    // Upgradeable contract implementations
     FinalizerTaskManager public taskManagerImplementation;
 
     function run() external {
@@ -50,10 +44,10 @@ contract Deployer is Script, Utils, Test {
     function verify() external {
         _loadData();
 
-        string memory path = string.concat(vm.projectRoot(), "./upgrade_output.json");
-        string memory upgradeData = vm.readFile(path);
+        string memory upgradeOutputPath = string.concat(vm.projectRoot(), "./upgrade_output.json");
+        string memory upgradeData = vm.readFile(upgradeOutputPath);
         taskManagerImplementation =
-            FinalizerTaskManager(stdJson.readAddress(upgradeData, ".addresses.serviceManagerImplementation"));
+            FinalizerTaskManager(stdJson.readAddress(upgradeData, ".addresses.taskManagerImplementation"));
 
         require(
             avsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(taskManager))))
@@ -62,45 +56,36 @@ contract Deployer is Script, Utils, Test {
         );
     }
 
-    function getOutputPath() public pure returns (string memory) {
-        return _OUTPUT_PATH;
-    }
-
     function _loadData() internal {
-        // Eigenlayer contracts
-        string memory path = string.concat(vm.projectRoot(), "/script/config/holesky-stub.json");
-        string memory configData = vm.readFile(path);
+        string memory configPath = string.concat(vm.projectRoot(), "/script/config/17000/deploy.config.json");
+        string memory configData = vm.readFile(configPath);
 
-        path = string.concat(vm.projectRoot(), "/script/output/17000/avs_deployment_output.json");
-        string memory avsDeploymentData = vm.readFile(path);
+        string memory avsDeploymentOutputPath = string.concat(vm.projectRoot(), "/script/output/17000/avs_deployment_output.json");
+        string memory avsDeploymentData = vm.readFile(avsDeploymentOutputPath);
 
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         require(configChainId == block.chainid, "You are on the wrong chain for this config");
         taskManager = FinalizerTaskManager(stdJson.readAddress(avsDeploymentData, ".addresses.taskManager"));
 
-        emit log_named_uint("You are deploying on ChainID", block.chainid);
+        emit log_named_uint("You are deploying on chain id", block.chainid);
     }
 
     function _writeOutput() internal {
         string memory parentObject = "parent object";
 
         string memory deployedAddresses = "addresses";
-        vm.serializeAddress(deployedAddresses, "serviceManager", address(taskManager));
-        string memory deployedAddressesOutput = vm.serializeAddress(
-            deployedAddresses, "taskManagerImplementation", address(taskManagerImplementation)
-        );
+        vm.serializeAddress(deployedAddresses, "taskManager", address(taskManager));
+        string memory deployedAddressesOutput =
+            vm.serializeAddress(deployedAddresses, "taskManagerImplementation", address(taskManagerImplementation));
 
         string memory chainInfo = "chainInfo";
         vm.serializeUint(chainInfo, "lastUpgradeImplDeployBlock", block.number);
+
         string memory chainInfoOutput = vm.serializeUint(chainInfo, "chainId", block.chainid);
-
         vm.serializeString(parentObject, chainInfo, chainInfoOutput);
-        string memory finalJson = vm.serializeString(parentObject, deployedAddresses, deployedAddressesOutput);
-        console.logString(finalJson);
-        _writeOutputLocal(finalJson);
-    }
 
-    function _writeOutputLocal(string memory outputJson) internal {
-        vm.writeJson(outputJson, getOutputPath());
+        string memory finalJson = vm.serializeString(parentObject, deployedAddresses, deployedAddressesOutput);
+        vm.writeJson(finalJson, _OUTPUT_PATH);
+        console.logString(finalJson);
     }
 }

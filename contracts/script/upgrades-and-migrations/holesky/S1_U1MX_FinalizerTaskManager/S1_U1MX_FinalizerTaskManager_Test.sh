@@ -8,7 +8,7 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # At this point we are in tests/integration
 cd "$parent_path"
 
-anvil --chain-id 1 &
+anvil --chain-id 17000 &
 
 echo "executing script"
 
