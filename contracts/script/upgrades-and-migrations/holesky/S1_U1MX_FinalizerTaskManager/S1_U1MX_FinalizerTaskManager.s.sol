@@ -6,22 +6,17 @@ pragma solidity 0.8.13;
 // S1_U1MX - 1st Script - Contract Upgrade 1 / No Migration
 // Contract to upgrade: FinalizerTaskManager
 
-import {RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import {StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
-import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
-import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
 import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
 import {FinalizerTaskManager} from "../../../../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "../../../../src/interfaces/IFinalizerTaskManager.sol";
 import {Utils} from "../../../utils/Utils.sol";
 
 // To deploy and verify FinalizerTaskManager implementation
 // forge script script/S1_U1MX_FinalizerTaskManager.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY --resume
-contract Deployer is Script, Utils, Test {
+contract Deployer is Script, Test, Utils {
     string internal constant _OUTPUT_PATH =
         "./script/upgrades-and-migrations/holesky/S1_U1MX_FinalizerTaskManager/upgrade_output.json";
 
