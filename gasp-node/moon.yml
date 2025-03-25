@@ -44,7 +44,7 @@ tasks:
       SCCACHE_GCS_KEY_PREFIX: gasp-node-release
 
   build-image-local:
-    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t gaspxyz/rollup-node:local --load .'
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t ${DOCKERHUB_REPOSITORY}:local --load .'
     inputs: ['@globs(sources)', 'Dockerfile']
 
   buildkit-build-and-push-image-digests-standard-runtime:
@@ -157,16 +157,16 @@ tasks:
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' build/gasp-node-fast-runtime-buildkit-metadata.json)
   
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG} \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} from existing digests"
 
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"      
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast from existing digests"      
     deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime']
     inputs: 
       - 'build/gasp-node-standard-runtime-buildkit-metadata.json'
@@ -245,7 +245,7 @@ tasks:
 
   e2e-test-sudoRemoval:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -260,9 +260,11 @@ tasks:
       yarn test-sudoRemoval --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -275,7 +277,7 @@ tasks:
 
   e2e-test-bootstrap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -290,9 +292,11 @@ tasks:
       yarn test-bootstrap --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -305,7 +309,7 @@ tasks:
 
   e2e-test-parallel:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -320,9 +324,11 @@ tasks:
       yarn test-parallel --max-workers=10 --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -335,7 +341,7 @@ tasks:
 
   e2e-test-sequential-no-bootstrap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -350,9 +356,11 @@ tasks:
       yarn test-sequential-no-bootstrap --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -365,7 +373,7 @@ tasks:
 
   e2e-test-seqgasless:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -380,9 +388,11 @@ tasks:
       yarn test-seqgasless --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -395,7 +405,7 @@ tasks:
 
   e2e-test-maintenance:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -410,9 +420,11 @@ tasks:
       yarn test-maintenance --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -425,7 +437,7 @@ tasks:
 
   e2e-test-rollupUpdate:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -440,9 +452,11 @@ tasks:
       yarn test-rollupUpdate --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -455,7 +469,7 @@ tasks:
 
   e2e-test-rewards-bootstrap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -470,9 +484,11 @@ tasks:
       yarn test-rewards-bootstrap --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -485,7 +501,7 @@ tasks:
 
   e2e-test-parallel-autocompound:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -500,9 +516,11 @@ tasks:
       yarn test-parallel-autocompound --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -515,7 +533,7 @@ tasks:
 
   e2e-test-sequential-autocompound:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -530,9 +548,11 @@ tasks:
       yarn test-sequential-autocompound --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -545,7 +565,7 @@ tasks:
 
   e2e-test-poolliquidity:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -560,9 +580,11 @@ tasks:
       yarn test-poolliquidity --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -575,7 +597,7 @@ tasks:
 
   e2e-test-governance:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -590,9 +612,11 @@ tasks:
       yarn test-governance --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -605,7 +629,7 @@ tasks:
 
   e2e-test-multiswap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci} 
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local} 
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -620,9 +644,11 @@ tasks:
       yarn test-multiswap --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -635,7 +661,7 @@ tasks:
 
   e2e-test-experimentalStaking:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -650,9 +676,11 @@ tasks:
       yarn test-experimentalStaking --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -665,7 +693,7 @@ tasks:
 
   e2e-test-crowdloan:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -680,9 +708,11 @@ tasks:
       yarn test-crowdloan --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -695,7 +725,7 @@ tasks:
 
   e2e-test-sdk:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -710,9 +740,11 @@ tasks:
       yarn test-sdk --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -725,7 +757,7 @@ tasks:
 
   e2e-test-parallel-3rdPartyRewards:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -740,9 +772,11 @@ tasks:
       yarn test-parallel-3rdPartyRewards --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -755,7 +789,7 @@ tasks:
 
   e2e-test-sequencerStaking:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -770,9 +804,11 @@ tasks:
       yarn test-sequencerStaking --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -785,7 +821,7 @@ tasks:
 
   e2e-test-sequencerCancellation:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -800,9 +836,11 @@ tasks:
       yarn test-sequencerCancellation --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -815,7 +853,7 @@ tasks:
 
   e2e-test-rolldown:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -830,9 +868,11 @@ tasks:
       yarn test-rolldown --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -845,7 +885,7 @@ tasks:
 
   e2e-test-rolldownWithdrawal:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -860,9 +900,11 @@ tasks:
       yarn test-rolldownWithdrawal --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -875,7 +917,7 @@ tasks:
 
   e2e-test-rolldownPreOperationWithdrawal:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -890,9 +932,11 @@ tasks:
       yarn test-rolldownPreOperationWithdrawal --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -905,7 +949,7 @@ tasks:
 
   e2e-test-sequencerRewards:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -920,9 +964,11 @@ tasks:
       yarn test-sequencerRewards --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -935,7 +981,7 @@ tasks:
 
   e2e-test-nonTransToken:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -950,9 +996,11 @@ tasks:
       yarn test-nonTransToken --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -965,7 +1013,7 @@ tasks:
 
   e2e-test-issuanceConfig:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}-fast
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -980,9 +1028,11 @@ tasks:
       yarn test-issuanceConfig --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -995,7 +1045,7 @@ tasks:
 
   e2e-test-marketSwap:
     script: |
-      export ROLLUP_NODE_VERSION=${ROLLUP_NODE_VERSION:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}
       docker compose down
       if [ "$CI" = "true" ]; then
         docker compose up -d --no-build
@@ -1010,9 +1060,11 @@ tasks:
       yarn test-marketSwap --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot/gasp-node && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 
@@ -1025,14 +1077,14 @@ tasks:
 
   e2e-test-rollup:
     script: |
-      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-ci}-fast
-      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-ci}
-      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-ci}
-      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-ci}
-      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-ci}
-      export UPDATER_VERSION=${IMAGE_TAG:-ci}
+      export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
+      export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
+      export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}
+      export FERRY_DEPOSIT_VERSION=${IMAGE_TAG:-local}
+      export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
+      export UPDATER_VERSION=${IMAGE_TAG:-local}
 
       docker compose down
       if [ "$CI" = "true" ]; then
@@ -1050,9 +1102,11 @@ tasks:
       cd $workspaceRoot/gasp-node/gasp-e2e && yarn test-rollup --ci --testFailureExitCode=1  --cacheDirectory=./node_modules/.cache/jest
       TEST_EXIT_CODE=$?
 
+      # Also store last 1000 lines of logs to file for debugging
+      mkdir -p $workspaceRoot/tmp/logs
+      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
-        # Also output last 1000 lines of logs to console for CI visibility
-        cd $workspaceRoot && docker compose logs --tail=1000
         TEST_EXIT_CODE=1
       fi
 

@@ -71,9 +71,9 @@ type Aggregator struct {
 	// aggregation related fields
 	blsAggregationService    blsagg.BlsAggregationService
 	tasks                    map[sdktypes.TaskId]interface{}
-	tasksMu                  sync.RWMutex
+	tasksMu                  *sync.RWMutex
 	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
-	taskResponsesMu          sync.RWMutex
+	taskResponsesMu          *sync.RWMutex
 	substrateClient          gsrpc.SubstrateAPI
 	taskResponseWindowBlock  uint32
 	asyncOpStateUpdaterError error
@@ -85,6 +85,7 @@ type Aggregator struct {
 
 	kicker         *Kicker
 	opStateUpdater *OpStateUpdater
+	rpcServer		*RpcServer
 
 	enableTraceLogs bool
 }
@@ -116,7 +117,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, err
 	}
 
-	chainId, err := ethRpc.AvsReader.AvsServiceBindings.EthClient.ChainID(context.Background())
+	chainId, err := ethRpc.AvsReader.ChainID(context.Background())
 	if err != nil {
 		logger.Error("Cannot get chainId", "err", err)
 		return nil, err
@@ -126,7 +127,7 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		return nil, errors.New("config.chainId & ethRpcClient.chainId mismatch")
 	}
 
-	taskResponseWindowBlock, err := ethRpc.AvsWriter.AvsContractBindings.TaskManager.TaskResponseWindowBlock(&bind.CallOpts{})
+	taskResponseWindowBlock, err := ethRpc.AvsReader.TaskResponseWindowBlock(&bind.CallOpts{})
 	if err != nil {
 		logger.Error("Cannot get taskChallengeWindowBlock from TaskManager contract", "err", err)
 		return nil, err
@@ -134,13 +135,13 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 
 	operatorPubkeysService := oprsinfoserv.NewOperatorsInfoServiceInMemory(
 		context.Background(),
-		ethRpc.Clients.AvsRegistryChainSubscriber,
-		ethRpc.Clients.AvsRegistryChainReader,
+		ethRpc.Clients.AvsRegistryChainSubscriber(),
+		ethRpc.Clients.AvsRegistryChainReader(),
 		nil,
 		oprsinfoserv.Opts{StartBlock: big.NewInt(int64(c.AvsDeploymentBlock))},
 		logger,
 	)
-	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader, operatorPubkeysService, logger)
+	avsRegistryService := avsregistry.NewAvsRegistryServiceChainCaller(ethRpc.Clients.AvsRegistryChainReader(), operatorPubkeysService, logger)
 	blsAggregationService := blsagg.NewBlsAggregatorService(avsRegistryService, c.DebounceRpc, logger)
 
 	substrateRpc, err := gsrpc.NewSubstrateAPI(c.SubstrateWsRpcUrl)
@@ -159,9 +160,20 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		}
 	}
 
+	tasks := make(map[sdktypes.TaskId]interface{})
+	tasksMu :=  &sync.RWMutex{}
+	taskResponses := make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{})
+	taskResponsesMu := &sync.RWMutex{}
+
 	opStateUpdater, err := NewOpStateUpdater(logger, ethRpc, c.MinOpUpdateInterval, c.ReinitOpStateAtInit, c.CheckTriggerOpStateUpdate, c.CheckTriggerOpStateUpdateWindow, c.EnableTraceLogs)
 	if err != nil {
 		logger.Error("Cannot create operator stakes updateer", "err", err)
+		return nil, err
+	}
+
+	rpcServer, err := NewRpcServer(logger, tasks, tasksMu, taskResponses, taskResponsesMu, blsAggregationService, c.ServerAddressPort)
+	if err != nil {
+		logger.Error("Cannot create rpcServer", "err", err)
 		return nil, err
 	}
 
@@ -170,14 +182,17 @@ func NewAggregator(c *Config) (*Aggregator, error) {
 		serverIpPortAddr:        c.ServerAddressPort,
 		ethRpc:                  ethRpc,
 		blsAggregationService:   blsAggregationService,
-		tasks:                   make(map[sdktypes.TaskId]interface{}),
-		taskResponses:           make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}),
+		tasks:                   tasks,
+		tasksMu:                 tasksMu,
+		taskResponses:           taskResponses,
+		taskResponsesMu:         taskResponsesMu,
 		substrateClient:         *substrateRpc,
 		taskResponseWindowBlock: taskResponseWindowBlock,
 		blockPeriod:             uint32(c.BlockPeriod),
 		blockPeriodOpsTask:      uint32(c.BlockPeriodOpsTask),
 		kicker:                  kicker,
 		opStateUpdater:          opStateUpdater,
+		rpcServer:				 rpcServer,
 		expiration:              uint32(c.Expiration),
 		startIdle:			   	 c.AggIdleStart,
 		apiKey:			   	     c.AggRunTriggerApiKey,	
@@ -189,8 +204,13 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	agg.logger.Infof("ALERT:INFO Starting aggregator.")
 	agg.logger.Infof("Starting aggregator rpc server.")
 	runTriggerC := make(chan struct{})
-	go agg.startServer(ctx, agg.apiKey, runTriggerC)
 
+	// Apparently golang allows calling functions on nil values
+	// And it seems that the function would be run on the struct assuming default values
+	if agg.rpcServer != nil {
+		go agg.rpcServer.startServer(ctx, agg.apiKey, runTriggerC)
+	}
+	
 	if agg.startIdle {
 		// blocking wait for the run trigger
 		agg.logger.Infof("ALERT:INFO Aggregator awaiting run trigger.")
@@ -205,8 +225,14 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 
 	sendNewOpTaskC := make(chan types.SendNewOpTaskType)
 	asyncOpStateUpdaterErrorC := make(chan error)
-	go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
-  recordMetrics(agg.logger, agg.ethRpc)
+
+	// Apparently golang allows calling functions on nil values
+	// And it seems that the function would be run on the struct assuming default values
+	if agg.opStateUpdater != nil {
+		go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
+	}
+
+	recordMetrics(agg.logger, agg.ethRpc)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	const maxRetries = 5
@@ -369,18 +395,12 @@ func (agg *Aggregator) checkAndProcessPendingTasks() error {
 
 func (agg *Aggregator) getAndProcessPendingOpTask(latestOpTaskNum uint32, lastOpTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastOpTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
+	pendingOpTask, err := agg.ethRpc.AvsReader.GetFirstFilterNewOpTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastOpTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestOpTaskNum},
 	)
 	if err != nil {
-		return fmt.Errorf("Aggregator failed to FilterNewOpTaskCreated: err: %v", err)
+		return fmt.Errorf("Aggregator failed to GetFirstFilterNewOpTaskCreated: err: %v", err)
 	}
-
-	eventIterBool := eventIter.Next()
-	if eventIterBool == false {
-		return fmt.Errorf("Aggregator failed to find the opTask via FilterNewOpTaskCreated: latestOpTaskNum: %v, lastOpTaskCreatedBlock: %v", latestOpTaskNum, lastOpTaskCreatedBlock)
-	}
-	pendingOpTask := eventIter.Event.Task
 
 	pendingOpTaskId := sdktypes.TaskId{
 		TaskType:  sdktypes.TaskType(0),
@@ -412,18 +432,12 @@ func (agg *Aggregator) processPendingOpTask(newTask taskmanager.IFinalizerTaskMa
 
 func (agg *Aggregator) getAndProcessPendingRdTask(latestRdTaskNum uint32, lastRdTaskCreatedBlock uint32) error {
 	EndBlock := uint64(lastRdTaskCreatedBlock)
-	eventIter, err := agg.ethRpc.AvsReader.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
+	pendingRdTask, err := agg.ethRpc.AvsReader.GetFirstFilterNewRdTaskCreated(
 		&bind.FilterOpts{Start: uint64(lastRdTaskCreatedBlock), End: &EndBlock, Context: context.Background()}, []uint32{latestRdTaskNum},
 	)
 	if err != nil {
-		return fmt.Errorf("Aggregator failed to FilterNewRdTaskCreated: err: %v", err)
+		return fmt.Errorf("Aggregator failed to GetFirstFilterNewRdTaskCreated: err: %v", err)
 	}
-
-	eventIterBool := eventIter.Next()
-	if eventIterBool == false {
-		return fmt.Errorf("Aggregator failed to find the rdTask via FilterNewRdTaskCreated: latestRdTaskNum: %v, lastRdTaskCreatedBlock: %v", latestRdTaskNum, lastRdTaskCreatedBlock)
-	}
-	pendingRdTask := eventIter.Event.Task
 
 	pendingRdTaskId := sdktypes.TaskId{
 		TaskType:  sdktypes.TaskType(1),
@@ -523,7 +537,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		}
 		var success bool
 		for _, log := range r.Logs {
-			_, err := agg.ethRpc.AvsWriter.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(*log)
+			_, err := agg.ethRpc.AvsReader.ParseOpTaskCompleted(*log)
 			if err == nil {
 				success = true
 			}
@@ -553,7 +567,7 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		}
 		var success bool
 		for _, log := range r.Logs {
-			_, err := agg.ethRpc.AvsWriter.AvsContractBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseRdTaskCompleted(*log)
+			_, err := agg.ethRpc.AvsReader.ParseRdTaskCompleted(*log)
 			if err == nil {
 				success = true
 			}
@@ -767,7 +781,7 @@ func (agg *Aggregator) createAndProcessOpTask(maxAttempts uint8) (taskmanager.IF
 		}
 	}
 	if success != true {
-		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to succesfully complete opTask after 3 attempts", "newTask", newTask)
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to succesfully complete opTask after 3 attempts, newTask: %v", newTask)
 	}
 	return newTask, nil
 
@@ -903,8 +917,14 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage staus is NOK")
 	}
 
+	// TODO - now
+	// Check if substrateL2RequestsBatch range start and end are the same as in rdTaskResponse
+
 	merkleRoot := ""
 	chain := ""
+	
+	// Tag
+	// EthChainIdType
 	if rdTaskResponse.ChainId == 0 {
 		chain = "Ethereum"
 	} else if rdTaskResponse.ChainId == 1 {
