@@ -5,15 +5,11 @@ import (
 	"errors"
 	"math/big"
 	"testing"
-	// "time"
 	"reflect"
 	"encoding/hex"
 	"github.com/saman-org/go-saman/common/bytesutil"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	// "github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-	// "github.com/ethereum/go-ethereum/common"
-	// gethcore "github.com/ethereum/go-ethereum/core"
 	testifymock "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -27,16 +23,9 @@ import (
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 
-	// gsrpcrpcauthormocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author/mocks"
-	// gsrpcrpcbeefymocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/beefy/mocks"
 	gsrpcrpcchainmocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain/mocks"
-	// gsrpcrpcmmrmocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/mmr/mocks"
-	// gsrpcrpcoffchainmocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/offchain/mocks"
 	gsrpcrpcstatemocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/state/mocks"
-	// gsrpcrpcsystemmocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/system/mocks"
-	// gsrpcrpc "github.com/centrifuge/go-substrate-rpc-client/v4/rpc"
 	gsrpcclientmocks "github.com/centrifuge/go-substrate-rpc-client/v4/client/mocks"
-	// gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 

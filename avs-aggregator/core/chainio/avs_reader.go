@@ -19,8 +19,6 @@ import (
 	delegationManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/DelegationManager"
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
-	// blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
-	// opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
