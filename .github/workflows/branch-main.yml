@@ -25,9 +25,9 @@ permissions:
   issues: write
   pull-requests: write
 
-# The following concurrency group queus in-progress jobs
+# The following concurrency group ensures workflows on different branches run independently
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
