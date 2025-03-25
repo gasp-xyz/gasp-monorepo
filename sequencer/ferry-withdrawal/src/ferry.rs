@@ -258,6 +258,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use common::TryReceiveAsync;
     use futures::stream;
     use gasp_types::{Origin, RequestId, H256};
     use l1api::mock::MockL1;
@@ -341,43 +342,62 @@ mod test {
         let mut l1 = MockL1::new();
         let l2 = MockL2::new();
 
-        let signal = Arc::new(AtomicBool::new(false));
-        let notify = signal.clone();
+        let (signal, notify) = oneshot::channel();
         let (input, output) = mpsc::channel(100);
-        l1.expect_native_balance().returning(|_| Ok(500));
+        l1.expect_native_balance().returning(|_| Ok(90));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
 
         l1.expect_get_status()
             .returning(|_| Ok(RequestStatus::Pending));
 
+        let high_prio_non_affordable = FerryAction::Ferry {
+            withdrawal: Withdrawal {
+                request_id: RequestId {
+                    id: 1.into(),
+                    origin: Origin::L2,
+                },
+                token_address: NATIVE_TOKEN,
+                amount: 100.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+            },
+            prio: 100.into(),
+        };
+
+        let low_prio_affordable = FerryAction::Ferry {
+            withdrawal: Withdrawal {
+                request_id: RequestId {
+                    id: 1.into(),
+                    origin: Origin::L2,
+                },
+                token_address: NATIVE_TOKEN,
+                amount: 99.into(),
+                ferry_tip: 10.into(),
+                recipient: RECIPIENT,
+            },
+            prio: 100.into(),
+        };
+
+        input.send(high_prio_non_affordable).await.unwrap();
+
+        input.send(low_prio_affordable).await.unwrap();
+
         l1.expect_ferry_withdrawal().times(1).return_once(move |_| {
-            notify.store(true, std::sync::atomic::Ordering::Relaxed);
+            signal.send(()).unwrap();
             Ok(H256::default())
         });
 
-        input
-            .send(FerryAction::Ferry {
-                withdrawal: Withdrawal {
-                    request_id: RequestId {
-                        id: 1.into(),
-                        origin: Origin::L2,
-                    },
-                    token_address: NATIVE_TOKEN,
-                    amount: 100.into(),
-                    ferry_tip: 10.into(),
-                    recipient: RECIPIENT,
-                },
-                prio: 10.into(),
-            })
-            .await
-            .unwrap();
-
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 1u128, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
         });
+
+        notify
+            .recv_timeout_async(Duration::from_secs_f64(5.0))
+            .await
+            .unwrap();
 
         drop(input);
         handle.await.unwrap();
