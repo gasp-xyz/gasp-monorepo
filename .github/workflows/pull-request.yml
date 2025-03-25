@@ -38,7 +38,7 @@ jobs:
             
             // Conventional commit patterns
             const typePattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)/;
-            const fullPattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?: .{1,50}$/;
+            const fullPattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?: .+/;
             
             if (fullPattern.test(pullRequestTitle)) {
               console.log("✅ Title matches conventional commit format");
@@ -52,7 +52,7 @@ jobs:
             } else if (!pullRequestTitle.includes(":")) {
               errorMessage = "missing colon after type/scope";
             } else {
-              errorMessage = "should follow format: type(optional-scope): description (1-50 chars)";
+              errorMessage = "should follow format: type(optional-scope): description";
             }
             
             const message = [
