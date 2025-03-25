@@ -40,13 +40,6 @@ export const startTracingTransaction = async (
       logger.error(`Error in startTracingDeposit: ${error.message}`)
       throw error
     }
-  } else if (type === 'withdrawal') {
-    try {
-      return await processWithdrawalRequest(traceRequest)
-    } catch (error) {
-      logger.error(`Error in processWithdrawalRequest: ${error.message}`)
-      throw error
-    }
   } else {
     status = 'UNKNOWN'
   }
@@ -118,82 +111,13 @@ async function startTracingDeposit({
   }
 }
 
-async function processWithdrawalRequest({
-  txHash,
-  address,
-  type,
-  chain,
-  amount,
-  asset_chainId,
-  asset_address,
-}: TraceTransactionRequest) {
-  //check if it already exists
-  const existingWithdrawal = await withdrawalRepository
-    .search()
-    .where('txHash')
-    .equals(txHash)
-    .and('type')
-    .equals(type)
-    .returnFirst()
-  if (existingWithdrawal) {
-    existingWithdrawal.createdBy = CreatedBy.Frontend
-    existingWithdrawal.address = address
-    const timestamp = new Date().toISOString()
-    existingWithdrawal.updated = Date.parse(timestamp)
-    await withdrawalRepository.save(existingWithdrawal)
-    logger.info({
-      message: 'Withdrawal updated with createdBy and an address (sender):',
-      transaction: existingWithdrawal,
-    })
-    return {
-      ...existingWithdrawal,
-    }
-  } else {
-    //create a new one
-    const timestamp = new Date().toISOString()
-    const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
-    const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
-    const network = networks.find((net: Network) => net.key === chain)
-    const chainId = network ? network.chainId : 'unknown'
-
-    const withdrawalData = {
-      requestId: null,
-      txHash: txHash,
-      address: address,
-      recipient: '', //recipient we get from WithdrawalRequestCreated, empty when we FE starts tracing
-      created: Date.parse(timestamp),
-      updated: Date.parse(timestamp),
-      status: WITHDRAWAL_INITIATED_BY_FE,
-      type: type,
-      chain: chain,
-      amount: amount.replace(/,/g, ''),
-      asset_chainId: chainId,
-      asset_address: asset_address,
-      proof: '',
-      calldata: '',
-      createdBy: CreatedBy.Frontend,
-      closedBy: null,
-    }
-    const withdrawal = await withdrawalRepository.save(withdrawalData)
-    const symbols = Object.getOwnPropertySymbols(withdrawal)
-    const entityIdSymbol = symbols.find(
-      (symbol) => symbol.toString() === 'Symbol(entityId)'
-    )
-    const value = withdrawal[entityIdSymbol as any]
-    return {
-      ...withdrawal,
-      entityId: value,
-    }
-  }
-}
-
 export const getTransactionsByAddress = async (
   address: string,
   type: string
 ): Promise<object[]> => {
   const repository =
     type === 'deposit' ? depositRepository : withdrawalRepository
-  return await repository.search().where('address').equals(address).return.all()
+  return await repository.search().where('address').equals(address).and('createdBy').equals(CreatedBy.Frontend).all()
 }
 
 export const getByTxHashOrEntityId = async (
