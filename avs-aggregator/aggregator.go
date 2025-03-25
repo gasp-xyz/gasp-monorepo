@@ -894,6 +894,8 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 		}
 	}
 
+	agg.logger.Debug("Aggregator in maybeSendNewRdTask after substrateL2RequestsBatchLast loop", "isUpdate", isUpdate, "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
+
 	return isUpdate, chainToUpdate, chainBatchIdToUpdate, nil
 }
 
