@@ -319,6 +319,60 @@ func TestCheckAndProcessPendingTasks_RdPendingTasks_NoSuccess_Fails(t *testing.T
 	assert.NotNil(t, err)
 }
 
+func TestCheckAndProcessPendingTasks_RdPendingTasks_Reattempt_ChainIdBatchNonceMismatch_Fails(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	var DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_CHANNEL_LARGE_BUFFER = make(chan blsagg.BlsAggregationServiceResponse, 10)
+
+	config, mockAggConfigExt := getDefaultAggConfig()
+
+	var err error
+	agg, err := NewMockAggregator(mockCtrl, &config, &mockAggConfigExt)
+	assert.Nil(t, err)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IsTaskPending(gomock.Any()).Return(true, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().LatestOpTaskNum(gomock.Any()).Return(DUMMY_LATEST_OP_TASK_NUM + 1, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().LatestRdTaskNum(gomock.Any()).Return(DUMMY_LATEST_RD_TASK_NUM + 1, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Eq(sdktypes.TaskType(0)), gomock.Any()).Return(types.TASK_STATUS_NOT_INITIALIZED, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Eq(sdktypes.TaskType(1)), gomock.Any()).Return(types.TASK_STATUS_INITIALIZED, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().LastRdTaskCreatedBlock(gomock.Any()).Return(DUMMY_LAST_RD_TASK_CREATED_BLOCK, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().GetFirstFilterNewRdTaskCreated(gomock.Any(), gomock.Any()).Return(DUMMY_RD_TASK, nil)
+	agg.blsAggregationService.(*mocks.MockBlsAggregationService).EXPECT().InitializeNewTask(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	for i := 0; i < DEFAULT_RETRIES; i++{ 
+		DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_CHANNEL_LARGE_BUFFER <- DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK 
+	} 
+	agg.taskResponses[DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskId] = make(map[sdktypes.TaskResponseDigest]interface{})
+	agg.taskResponses[DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskId][DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskResponseDigest] = DUMMY_RD_TASK_RESPONSE
+	agg.blsAggregationService.(*mocks.MockBlsAggregationService).EXPECT().GetResponseChannel().Return(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_CHANNEL_LARGE_BUFFER)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_INITIALIZED, nil)
+	agg.ethRpc.AvsWriter.(*mocks.MockAvsWriterer).EXPECT().SendAggregatedRdTaskResponse(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&DUMMY_RECEIPT, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().ParseRdTaskCompleted(gomock.Any()).Return(nil, errors.New("Failed to ParseRdTaskCompleted"))
+	
+	metadata, err := mocks.GetFakeSubstrateMetadata()
+	assert.EqualValues(t, metadata.Version, 14)
+	assert.NoError(t, err)
+
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetMetadataLatest", testifymock.Anything).Return(&metadata, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorageRawLatest", testifymock.Anything).Return(&gsrpctypes.StorageDataRaw{}, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorageLatest", testifymock.Anything, testifymock.Anything).Return(true, nil).Run(func(args testifymock.Arguments) {
+		val := reflect.ValueOf(args.Get(1))
+		elem := val.Elem()
+		elem.Set(reflect.ValueOf(DUMMY_SUBSTRATE_L2_REQUESTS_BATCH))
+	})
+	agg.substrateClient.Client.(*gsrpcclientmocks.Client).On("Call", testifymock.Anything, testifymock.Anything, testifymock.Anything, testifymock.Anything).Return(nil).Run(func(args testifymock.Arguments) {
+		val := reflect.ValueOf(args.Get(0))
+		elem := val.Elem()
+		elem.SetString(DUMMY_MERKLE_ROOT)
+	})
+	
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IsTaskPending(gomock.Any()).Return(false, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().ChainRdBatchNonce(gomock.Any(), gomock.Any()).Return(DUMMY_BATCH_ID + 100, nil)
+
+	err = agg.checkAndProcessPendingTasks()
+	assert.NotNil(t, err)
+}
+
 func TestCheckAndProcessPendingTasks_OpPendingTasks_WorksFully(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -401,7 +455,7 @@ func TestSendAggregatedResponseToContract_BadRootRdTask_Fails(t *testing.T) {
 	assert.Nil(t, err)
 
 	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_INITIALIZED, nil)
-	
+
 	DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_CHANNEL <- DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK
 	agg.taskResponses[DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskId] = make(map[sdktypes.TaskResponseDigest]interface{})
 	agg.taskResponses[DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskId][DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK.TaskResponseDigest] = DUMMY_RD_TASK_RESPONSE
@@ -425,6 +479,54 @@ func TestSendAggregatedResponseToContract_BadRootRdTask_Fails(t *testing.T) {
 	
 	success, err := agg.sendAggregatedResponseToContract(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK, DUMMY_RD_TASK_ID)
 	assert.NotNil(t, err)
+	assert.Equal(t, success, false)
+}
+
+func TestSendAggregatedResponseToContract_TaskStatusCompleted_Fails(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	
+	config, mockAggConfigExt := getDefaultAggConfig()
+
+	var err error
+	agg, err := NewMockAggregator(mockCtrl, &config, &mockAggConfigExt)
+	assert.Nil(t, err)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_COMPLETED, nil)
+	
+	success, err := agg.sendAggregatedResponseToContract(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK, DUMMY_RD_TASK_ID)
+	assert.Nil(t, err)
+	assert.Equal(t, success, true)
+}
+
+func TestSendAggregatedResponseToContract_NoTaskStatusRespondedOrCancelledOrNotInitialized_Fails(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	
+	config, mockAggConfigExt := getDefaultAggConfig()
+
+	var err error
+	agg, err := NewMockAggregator(mockCtrl, &config, &mockAggConfigExt)
+	assert.Nil(t, err)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_RESPONDED, nil)
+	
+	success, err := agg.sendAggregatedResponseToContract(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK, DUMMY_RD_TASK_ID)
+	assert.Nil(t, err)
+	assert.Equal(t, success, false)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_CANCELLED, nil)
+	
+	success, err = agg.sendAggregatedResponseToContract(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK, DUMMY_RD_TASK_ID)
+	assert.Nil(t, err)
+	assert.Equal(t, success, false)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IdToTaskStatus(gomock.Any(), gomock.Any(), gomock.Any()).Return(types.TASK_STATUS_NOT_INITIALIZED, nil)
+	
+	success, err = agg.sendAggregatedResponseToContract(DUMMY_BLS_AGGREGATION_SERVICE_RESPONSE_RD_TASK, DUMMY_RD_TASK_ID)
+	assert.Nil(t, err)
 	assert.Equal(t, success, false)
 }
 
@@ -491,6 +593,60 @@ func TestMaybeSendNewRdTask_WorksFully(t *testing.T) {
 	
 	err = agg.maybeSendNewRdTask(uint32(0))
 	assert.Nil(t, err)
+}
+
+func TestMaybeSendNewRdTask_ChainIdBatchNonceMismatch_Fails(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	
+	var err error
+	metadata, err := mocks.GetFakeSubstrateMetadata()
+	assert.EqualValues(t, metadata.Version, 14)
+	assert.NoError(t, err)
+
+	config, mockAggConfigExt := getDefaultAggConfig()
+
+	agg, err := NewMockAggregator(mockCtrl, &config, &mockAggConfigExt)
+	assert.Nil(t, err)
+
+	agg.substrateClient.RPC.Chain.(*gsrpcrpcchainmocks.Chain).On("GetHeaderLatest").Return(&gsrpctypes.Header{}, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().LastCompletedOpTaskCreatedBlock(gomock.Any()).Return(uint32(DUMMY_LAST_COMPLETED_OP_TASK_CREATED_BLOCK), nil)
+	agg.substrateClient.RPC.Chain.(*gsrpcrpcchainmocks.Chain).On("GetBlockHash", testifymock.Anything).Return(gsrpctypes.Hash{}, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetMetadata", testifymock.Anything).Return(&metadata, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorageRaw", testifymock.Anything, testifymock.Anything).Return(&gsrpctypes.StorageDataRaw{}, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorage", testifymock.Anything, testifymock.Anything, testifymock.Anything).Return(true, nil).Run(func(args testifymock.Arguments) {
+		val := reflect.ValueOf(args.Get(1))
+		elem := val.Elem()
+		elem.Set(reflect.ValueOf(DUMMY_SUBSTRATE_L2_REQUESTS_BATCH_LAST))
+	})
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().ChainRdBatchNonce(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, chainIndex uint8) (uint32, error) {
+        if chainIndex == 1 {
+            return 400, nil
+        } else if chainIndex == DUMMY_CHAIN_ID {
+            return DUMMY_BATCH_ID, nil
+        }
+        return 0, errors.New("unexpected input")
+    }).Times(2)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IsTaskPending(gomock.Any()).Return(false, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().ChainRdBatchNonce(gomock.Any(), gomock.Any()).Return(DUMMY_BATCH_ID + 100, nil)
+	
+
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetMetadataLatest", testifymock.Anything).Return(&metadata, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorageRawLatest", testifymock.Anything).Return(&gsrpctypes.StorageDataRaw{}, nil)
+	agg.substrateClient.RPC.State.(*gsrpcrpcstatemocks.State).On("GetStorageLatest", testifymock.Anything, testifymock.Anything).Return(true, nil).Run(func(args testifymock.Arguments) {
+		val := reflect.ValueOf(args.Get(1))
+		elem := val.Elem()
+		elem.Set(reflect.ValueOf(DUMMY_SUBSTRATE_L2_REQUESTS_BATCH))
+	})
+	agg.substrateClient.Client.(*gsrpcclientmocks.Client).On("Call", testifymock.Anything, testifymock.Anything, testifymock.Anything, testifymock.Anything).Return(nil).Run(func(args testifymock.Arguments) {
+		val := reflect.ValueOf(args.Get(0))
+		elem := val.Elem()
+		elem.SetString(DUMMY_MERKLE_ROOT)
+	})
+	
+	err = agg.maybeSendNewRdTask(uint32(0))
+	assert.NotNil(t, err)
 }
 
 func TestMaybeSendNewRdTask_NoSuccess_Fails(t *testing.T) {
@@ -697,6 +853,23 @@ func TestCreateRdTask_IsTaskPending_Fails(t *testing.T) {
 	assert.Nil(t, err)
 
 	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IsTaskPending(gomock.Any()).Return(true, nil)
+	
+	task, _, err := agg.createRdTask(DUMMY_CHAIN_ID, DUMMY_BATCH_ID)
+	assert.NotNil(t, err)
+	assert.Equal(t, task, taskmanager.IFinalizerTaskManagerRdTask{})
+}
+
+func TestCreateRdTask_ChainIdBatchNonceMismatch_Fails(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	config, mockAggConfigExt := getDefaultAggConfig()
+
+	agg, err := NewMockAggregator(mockCtrl, &config, &mockAggConfigExt)
+	assert.Nil(t, err)
+
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().IsTaskPending(gomock.Any()).Return(false, nil)
+	agg.ethRpc.AvsReader.(*mocks.MockAvsReaderer).EXPECT().ChainRdBatchNonce(gomock.Any(), gomock.Any()).Return(DUMMY_BATCH_ID + 100, nil)
 	
 	task, _, err := agg.createRdTask(DUMMY_CHAIN_ID, DUMMY_BATCH_ID)
 	assert.NotNil(t, err)
