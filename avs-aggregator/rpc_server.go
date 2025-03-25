@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 
@@ -15,6 +16,7 @@ import (
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
 
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	"github.com/Layr-Labs/eigensdk-go/types"
@@ -32,8 +34,37 @@ var (
 	CallToGetCheckSignaturesIndicesFailed500 = errors.New("500. Failed to get check signatures indices")
 )
 
-func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigger chan struct{}) error {
-	http.HandleFunc("/", agg.handler)
+type RpcServer struct {
+	logger      logging.Logger
+	tasks                    map[sdktypes.TaskId]interface{}
+	tasksMu                  *sync.RWMutex
+	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
+	taskResponsesMu          *sync.RWMutex
+	blsAggregationService    blsagg.BlsAggregationService
+	serverIpPortAddr   string
+}
+
+func NewRpcServer(
+	logger      logging.Logger,
+	tasks                    map[sdktypes.TaskId]interface{},
+	tasksMu                  *sync.RWMutex,
+	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{},
+	taskResponsesMu          *sync.RWMutex,
+	blsAggregationService    blsagg.BlsAggregationService,
+	serverIpPortAddr   string,) (*RpcServer, error) {
+	return &RpcServer{
+		logger      :logger,
+		tasks                    :tasks,
+		tasksMu                  :tasksMu,
+		taskResponses            :taskResponses,
+		taskResponsesMu          :taskResponsesMu,
+		blsAggregationService    :blsAggregationService,
+		serverIpPortAddr		 :serverIpPortAddr,
+	}, nil
+}
+
+func (rs *RpcServer) startServer(ctx context.Context, apiKey string, runTrigger chan struct{}) error {
+	http.HandleFunc("/", rs.handler)
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/isAwaitingRunTrigger", func(w http.ResponseWriter, r *http.Request) {
 		var isAwaitingRunTrigger bool
@@ -67,7 +98,7 @@ func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigge
 		key := r.URL.Query().Get("SECRET_API_KEY")
 
 		if key != apiKey {
-			agg.logger.Error("Api key no match", "Received", key)
+			rs.logger.Error("Api key no match", "Received", key)
 			http.Error(w, "Api key no match", http.StatusBadRequest)
 			return
 		}
@@ -83,15 +114,15 @@ func (agg *Aggregator) startServer(ctx context.Context, apiKey string, runTrigge
 		runTrigger <- struct{}{}
 		close(runTrigger)
 	})
-	err := http.ListenAndServe(agg.serverIpPortAddr, nil)
+	err := http.ListenAndServe(rs.serverIpPortAddr, nil)
 	if err != nil {
-		agg.logger.Fatal("ListenAndServe", "err", err)
+		rs.logger.Fatal("ListenAndServe", "err", err)
 	}
 
 	return nil
 }
 
-func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
+func (rs *RpcServer) handler(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case http.MethodConnect:
 		http.Error(w, "Operator not supported, please upgrade to latest", http.StatusUpgradeRequired)
@@ -109,7 +140,7 @@ func (agg *Aggregator) handler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := agg.ProcessSignedTaskResponse(&response, nil); err != nil {
+	if err := rs.ProcessSignedTaskResponse(&response, nil); err != nil {
 		var status int
 		switch err {
 		case TaskResponseDigestNotFoundError500, CallToGetCheckSignaturesIndicesFailed500:
@@ -137,35 +168,35 @@ type SignedTaskResponse struct {
 // rpc endpoint which is called by operator
 // reply doesn't need to be checked. If there are no errors, the task response is accepted
 // rpc framework forces a reply type to exist, so we put bool as a placeholder
-func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
-	agg.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
+func (rs *RpcServer) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskResponse, reply *bool) error {
+	rs.logger.Info("Received signed task response", "response", signedTaskResponse, "operatorId", signedTaskResponse.OperatorId.LogValue())
 
 	if len(signedTaskResponse.OpTaskResponse) < 2 ||
 		len(signedTaskResponse.RdTaskResponse) < 2 ||
 		signedTaskResponse.BlsSignature.G1Point == nil {
-		agg.logger.Error("Invalid task response")
+		rs.logger.Error("Invalid task response")
 		return BadTaskResponseError500
 	}
 
 	op_task_response_bytes, err := hex.DecodeString(signedTaskResponse.OpTaskResponse[2:])
 	if err != nil {
-		agg.logger.Error("Failed to get op_task_response_bytes", "err", err)
+		rs.logger.Error("Failed to get op_task_response_bytes", "err", err)
 		return BadTaskResponseError500
 	}
 
 	rd_task_response_bytes, err := hex.DecodeString(signedTaskResponse.RdTaskResponse[2:])
 	if err != nil {
-		agg.logger.Error("Failed to get rd_task_response_bytes", "err", err)
+		rs.logger.Error("Failed to get rd_task_response_bytes", "err", err)
 		return BadTaskResponseError500
 	}
 
 	if len(op_task_response_bytes) != 0 && len(rd_task_response_bytes) != 0 {
-		agg.logger.Error("Both op and rd task response are popoulated")
+		rs.logger.Error("Both op and rd task response are popoulated")
 		return BadTaskResponseError500
 	}
 
 	if len(op_task_response_bytes) == 0 && len(rd_task_response_bytes) == 0 {
-		agg.logger.Error("Neither op nor rd task response are popoulated")
+		rs.logger.Error("Neither op nor rd task response are popoulated")
 		return BadTaskResponseError500
 	}
 
@@ -186,13 +217,13 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		args := inputParameters[1:2]
 		unpacked, err := args.Unpack(op_task_response_bytes)
 		if err != nil {
-			agg.logger.Error("Failed to get task response", "err", err)
+			rs.logger.Error("Failed to get task response", "err", err)
 			return TaskResponseDigestNotFoundError500
 		}
 		x := abi.ConvertType(unpacked[0], taskResponse)
 		cx, ok := x.(taskmanager.IFinalizerTaskManagerOpTaskResponse)
 		if !ok {
-			agg.logger.Error("Failed to get task response cx", "cx", cx)
+			rs.logger.Error("Failed to get task response cx", "cx", cx)
 			return TaskResponseDigestNotFoundError500
 		}
 
@@ -204,7 +235,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		}
 		taskResponseDigest, err = core.GetOpTaskResponseDigest(&taskResponse)
 		if err != nil {
-			agg.logger.Error("Failed to get task response digest", "err", err)
+			rs.logger.Error("Failed to get task response digest", "err", err)
 			return TaskResponseDigestNotFoundError500
 		}
 		genericTaskResponse = taskResponse
@@ -219,13 +250,13 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		args := inputParameters[1:2]
 		unpacked, err := args.Unpack(rd_task_response_bytes)
 		if err != nil {
-			agg.logger.Error("Failed to get task response", "err", err)
+			rs.logger.Error("Failed to get task response", "err", err)
 			return TaskResponseDigestNotFoundError500
 		}
 		x := abi.ConvertType(unpacked[0], taskResponse)
 		cx, ok := x.(taskmanager.IFinalizerTaskManagerRdTaskResponse)
 		if !ok {
-			agg.logger.Error("Failed to get task response cx", "cx", cx)
+			rs.logger.Error("Failed to get task response cx", "cx", cx)
 			return TaskResponseDigestNotFoundError500
 		}
 
@@ -237,7 +268,7 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 		}
 		taskResponseDigest, err = core.GetRdTaskResponseDigest(&taskResponse)
 		if err != nil {
-			agg.logger.Error("Failed to get task response digest", "err", err)
+			rs.logger.Error("Failed to get task response digest", "err", err)
 			return TaskResponseDigestNotFoundError500
 		}
 		genericTaskResponse = taskResponse
@@ -245,19 +276,30 @@ func (agg *Aggregator) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskR
 	}
 
 	if signedTaskResponse.OperatorId == [32]byte{} {
-		agg.logger.Error("Operator not registered", "err", err)
+		rs.logger.Error("Operator not registered", "err", err)
 		return OperatorNotRegistered400
 	}
-	agg.taskResponsesMu.Lock()
-	if _, ok := agg.taskResponses[taskId]; !ok {
-		agg.taskResponses[taskId] = make(map[sdktypes.TaskResponseDigest]interface{})
-	}
-	if _, ok := agg.taskResponses[taskId][taskResponseDigest]; !ok {
-		agg.taskResponses[taskId][taskResponseDigest] = genericTaskResponse
-	}
-	agg.taskResponsesMu.Unlock()
 
-	err = agg.blsAggregationService.ProcessNewSignature(
+	var isTaskInitialized bool
+	rs.tasksMu.RLock()
+	if _, ok := rs.tasks[taskId]; ok {
+		isTaskInitialized = true
+	}
+	rs.tasksMu.RUnlock()
+	if !isTaskInitialized{
+		return blsagg.TaskNotFoundErrorFn()
+	}
+
+	rs.taskResponsesMu.Lock()
+	if _, ok := rs.taskResponses[taskId]; !ok {
+		rs.taskResponses[taskId] = make(map[sdktypes.TaskResponseDigest]interface{})
+	}
+	if _, ok := rs.taskResponses[taskId][taskResponseDigest]; !ok {
+		rs.taskResponses[taskId][taskResponseDigest] = genericTaskResponse
+	}
+	rs.taskResponsesMu.Unlock()
+
+	err = rs.blsAggregationService.ProcessNewSignature(
 		context.Background(), taskId, taskResponseDigest,
 		&signedTaskResponse.BlsSignature, signedTaskResponse.OperatorId,
 	)
