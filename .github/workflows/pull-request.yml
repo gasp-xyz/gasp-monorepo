@@ -9,6 +9,8 @@ permissions:
   deployments: write
   checks: write
   security-events: write
+  issues: write
+  pull-requests: write
 
 # The following concurrency group cancels in-progress jobs or runs on pull_request events only
 # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-using-a-fallback-value
@@ -18,7 +20,7 @@ concurrency:
 
 jobs:
   init:
-    name: Set global version
+    name: Set global version and check PR title format
     # Ignore pull requests from develop, release/next, or main branches
     if: github.event.action != 'unlabeled' && github.event.action != 'closed' && !contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)
     runs-on: ubuntu-24.04
