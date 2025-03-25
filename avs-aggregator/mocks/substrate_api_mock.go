@@ -1,21 +1,6 @@
 package mocks
 
 import (
-	// "context"
-	// "fmt"
-
-	// "github.com/Layr-Labs/eigensdk-go/chainio/clients/avsregistry"
-	// "github.com/Layr-Labs/eigensdk-go/chainio/clients"
-	// sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
-	// "github.com/Layr-Labs/eigensdk-go/signerv2"
-
-	// "github.com/ethereum/go-ethereum/common"
-	// "github.com/ethereum/go-ethereum/ethclient"
-	// "github.com/ethereum/go-ethereum/core/types"
-	// sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	// "github.com/ethereum/go-ethereum/accounts/abi/bind"
-	
-	// "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
 	gsrpcrpcauthormocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/author/mocks"
 	gsrpcrpcbeefymocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/beefy/mocks"
 	gsrpcrpcchainmocks "github.com/centrifuge/go-substrate-rpc-client/v4/rpc/chain/mocks"
@@ -29,20 +14,6 @@ import (
 	gsrpctypes "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	gsrpctypescodec "github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 )
-
-// func NewEthRpcFromParts(
-// 	avsReader     AvsReaderer,
-// 	avsWriter     AvsWriterer,
-// 	avsSubscriber AvsSubscriberer,
-// 	clients       EthRpcClientsInterface,
-// ) (*EthRpc, error) {
-// 	return &EthRpc{
-// 		AvsReader:     avsReader,
-// 		AvsWriter:     avsWriter,
-// 		AvsSubscriber: avsSubscriber,
-// 		Clients:       clients,
-// 	}, nil
-// }
 
 func GetFakeSubstrateMetadata() (gsrpctypes.Metadata, error) {
 	// Decode the metadata
