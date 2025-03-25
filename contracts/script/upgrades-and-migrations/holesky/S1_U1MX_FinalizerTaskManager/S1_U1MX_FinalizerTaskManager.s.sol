@@ -14,7 +14,7 @@ import {Test} from "forge-std/Test.sol";
 import {FinalizerTaskManager} from "../../../../src/FinalizerTaskManager.sol";
 import {Utils} from "../../../utils/Utils.sol";
 
-// To deploy and verify FinalizerTaskManager implementation
+// To upgrade and verify FinalizerTaskManager
 // forge script script/S1_U1MX_FinalizerTaskManager.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY --resume
 contract Deployer is Script, Test, Utils {
     string internal constant _OUTPUT_PATH =
@@ -31,6 +31,7 @@ contract Deployer is Script, Test, Utils {
         vm.startBroadcast();
 
         taskManagerImplementation = new FinalizerTaskManager();
+        avsProxyAdmin.upgrade(TransparentUpgradeableProxy(payable(address(taskManager))), address(taskManagerImplementation));
 
         vm.stopBroadcast();
         _writeOutput();
@@ -54,12 +55,12 @@ contract Deployer is Script, Test, Utils {
     function _loadData() internal {
         string memory configPath = string.concat(vm.projectRoot(), "/script/config/17000/deploy.config.json");
         string memory configData = vm.readFile(configPath);
+        uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
+        require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
         string memory avsDeploymentOutputPath = string.concat(vm.projectRoot(), "/script/output/17000/avs_deployment_output.json");
         string memory avsDeploymentData = vm.readFile(avsDeploymentOutputPath);
-
-        uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
-        require(configChainId == block.chainid, "You are on the wrong chain for this config");
+        avsProxyAdmin = ProxyAdmin(stdJson.readAddress(avsDeploymentData, ".addresses.avsProxyAdmin"));
         taskManager = FinalizerTaskManager(stdJson.readAddress(avsDeploymentData, ".addresses.taskManager"));
 
         emit log_named_uint("You are deploying on chain id", block.chainid);

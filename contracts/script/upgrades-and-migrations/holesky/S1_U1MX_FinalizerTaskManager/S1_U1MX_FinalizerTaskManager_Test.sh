@@ -12,6 +12,6 @@ anvil --chain-id 17000 &
 
 echo "executing script"
 
-forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvvvvv
+forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvvv
 
 pkill anvil

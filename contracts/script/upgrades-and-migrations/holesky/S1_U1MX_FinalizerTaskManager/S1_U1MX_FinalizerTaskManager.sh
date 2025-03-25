@@ -27,7 +27,6 @@ echo "executing script"
 # ADD --broadcast to actually execute the script (if using without broadcast use ANVIL_DEFAULT_ACCOUNT instead of WALLET_NAME)
 # !!!!!!!!!!
 # Add --resume when re-running after it has failed
-forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --account $WALLET_NAME --broadcast -vvvvvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY
+forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --account $WALLET_NAME --broadcast -vvvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
-# Run verify after the proxy has been pointed to the new implementation via proxyAdmin by the council 
-# forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "verify()" --rpc-url $RPC_URL --account $WALLET_NAME -vvvvvvv
+forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "verify()" --rpc-url $RPC_URL --account $WALLET_NAME -vvvvv
