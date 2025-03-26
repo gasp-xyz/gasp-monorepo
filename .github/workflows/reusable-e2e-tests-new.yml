@@ -7,12 +7,22 @@ on:
         description: "Set global version for all tests."
         type: string
         required: true
+      cacheEnabled:
+        description: "Enable caching for all tests."
+        type: boolean
+        required: false
+        default: true
   workflow_call:
     inputs:
       globalVersion:
         description: "Set global version for all tests."
         type: string
         required: true
+      cacheEnabled:
+        description: "Enable caching for all tests."
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: read
@@ -20,6 +30,7 @@ permissions:
   checks: write
 
 env:
+  MOON_CACHE: "${{ inputs.cacheEnabled && 'read-write' || 'off' }}"
   MOON_COLOR: 2
   CACHE_VERSION: 2
 
@@ -138,7 +149,9 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
+      
       - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
         uses: actions/cache@v4
         id: cache
         with:
@@ -158,7 +171,7 @@ jobs:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: true
+          cache: ${{ inputs.cacheEnabled }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -181,6 +194,7 @@ jobs:
           fi
           echo "dir=$CACHE_DIR" >> $GITHUB_OUTPUT
       - uses: actions/cache@v4
+        if: inputs.cacheEnabled == true
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-${{ hashFiles('gasp-node/gasp-e2e/yarn.lock') }}
@@ -189,14 +203,11 @@ jobs:
 
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
 
-      - uses: moonrepo/setup-toolchain@v0.4.0
+      - uses: moonrepo/setup-toolchain@v0.4.1
         with:
           cache-version: ${{ env.CACHE_VERSION }}
-      
-      - name: Set MOON_CACHE=off to disable `moon` cache usage
-        if: github.ref_name == 'release/next' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'no-cache'))
-        run: echo "MOON_CACHE=off" >> $GITHUB_ENV
-
+          cache: ${{ inputs.cacheEnabled }}
+          
       - name: Run tests
         run: ${{ matrix.command }}
         env:
