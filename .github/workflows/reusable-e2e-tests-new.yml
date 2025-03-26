@@ -222,9 +222,9 @@ jobs:
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version-file: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/.nvmrc' || '.nvmrc' }}
+          node-version-file: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/.nvmrc' || './gasp-node/gasp-e2e/.nvmrc' }}
           cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
-
+          cache-dependency-path: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/tests/yarn.lock' || './gasp-node/gasp-e2e/yarn.lock' }}
       - name: Get Yarn cache directory and version
         id: yarn-cache
         run: |
@@ -249,8 +249,8 @@ jobs:
 
       - uses: moonrepo/setup-toolchain@v0.4.1
         with:
-          cache-version: ${{ env.CACHE_VERSION }}
           cache: ${{ inputs.cacheEnabled }}
+          cache-version: ${{ env.CACHE_VERSION }}
           
       - name: Run tests
         run: ${{ matrix.command }}
