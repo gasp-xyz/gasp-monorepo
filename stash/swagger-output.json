@@ -1014,8 +1014,8 @@
         "tags": [
           "Tracing"
         ],
-        "summary": "Get all transactions by address.",
-        "description": "Get all transactions by providing a specific address and type of a transaction.",
+        "summary": "Get all frontend created transactions by address.",
+        "description": "Get all frontend created transactions by providing a specific address and type of a transaction.",
         "parameters": [
           {
             "name": "type",
@@ -1307,6 +1307,33 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/key-value/store": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "example": "any"
+                },
+                "value": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

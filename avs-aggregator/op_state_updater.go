@@ -244,70 +244,9 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 			case osu.paused == true:
 				{
 					osu.logger.Info("OpStateUpdater is paused", "pauseReasonV", osu.pauseReasonV)
-					osu.logger.Info("OpStateUpdater waiting for resume event")
-
-					query := ethereum.FilterQuery{
-						Addresses: []common.Address{taskManagerContractAddress},
-						Topics: [][]common.Hash{
-							[]common.Hash{
-								getEventID(taskmanagerAbi, "ResumeTrackingOpState"),
-							},
-						},
-						FromBlock: big.NewInt(int64(osu.atBlock+1)),
-					}
-					rawLogsC, sub, err := osu.ethRpc.AvsSubscriber.StreamQueryWithHistory(context.Background(), &query)
-					if err != nil {
-						osu.errorC <- fmt.Errorf("OpStateUpdater failed to SubscribeToResumeTrackingOpState: err: %v, osu.checkpointedBlock: %v, atBlock+1: %v", err, osu.checkpointedBlock, osu.atBlock+1)
-						return
-					}
-					defer sub.Unsubscribe()
-					ticker := time.NewTicker(time.Minute)
-					defer ticker.Stop()
-				watchForResumeLoop:
-					for {
-						select {
-						case <-ticker.C:
-							osu.logger.Infof("The OpStateUpdater is paused due to: %v", osu.pauseReasonV)
-						case <-ctx.Done():
-							osu.errorC <- ctx.Err()
-							return
-						case err := <-sub.Err():
-							osu.errorC <- fmt.Errorf("OpStateUpdater encountered subscription error in watchForResumeLoop: err: %v", err)
-							return
-						case vLog := <-rawLogsC:
-							event, err := osu.ethRpc.AvsReader.ParseResumeTrackingOpState(vLog)
-							if err != nil {
-								osu.errorC <- fmt.Errorf("Failed to ParseResumeTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
-								return
-							}
-							osu.logger.Infof("Received resume event: %v", event)
-							if event.ResetTrackedQuorums {
-								osu.logger.Debug("OpStateUpdater received resume event with resetTrackedQuorums = true")
-								osu.resetTrackedQuorums = true
-								osu.triggerOpStateUpdate = true
-							} else {
-								osu.logger.Debug("Getting states at the checkpoint and at the resume event block", "lastCompletedOpTaskCreatedBlock", lastCompletedOpTaskCreatedBlock, "atBlock", uint32(event.Raw.BlockNumber))
-								lastCompletedOpTaskCreatedBlock, err := osu.ethRpc.AvsReader.LastCompletedOpTaskCreatedBlockAtBlock(context.Background(), uint64(event.Raw.BlockNumber))
-								if err != nil {
-									osu.errorC <- fmt.Errorf("OpStateUpdater failed to LastCompletedOpTaskCreatedBlock: err: %v, atBlock: %v", err, event.Raw.BlockNumber)
-									return
-								}
-								osu.checkpointedBlock = lastCompletedOpTaskCreatedBlock
-								osu.atBlock = uint32(event.Raw.BlockNumber)
-
-								err = osu.updateOpStates()
-								if err != nil {
-									osu.errorC <- fmt.Errorf("OpStateUpdater failed to updateOpStates: err: %v, checkpointedBlock: %v, atBlock: %v", err, osu.checkpointedBlock, osu.atBlock)
-									return
-								}
-
-							}
-							osu.paused = false
-							break watchForResumeLoop
-						}
-					}
-					osu.logger.Info("OpStateUpdater received resume event")
-					sub.Unsubscribe()
+					osu.logger.Info("Please restart the aggregator as directed")
+					osu.errorC <- fmt.Errorf("OpStateUpdater is paused, reason: %v. Please restart the aggregator as directed", osu.pauseReasonV)
+					return
 				}
 			case osu.triggerOpStateUpdate:
 				{
@@ -622,21 +561,6 @@ func (osu *OpStateUpdater) startAsyncOpStateUpdater(ctx context.Context, sendNew
 						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractStakeRegistryMinimumStakeForQuorumUpdated)
 						osu.paused = true
 						osu.pauseReasonV = fmt.Sprintf("Pausing trackingOpState upon event trigger: %v. Please restart aggregator with reinitOpStateAtInit flag to continue.", ContractStakeRegistryMinimumStakeForQuorumUpdated)
-						break watchForTriggersLoop
-					}
-				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "PauseTrackingOpState"):
-					{
-						osu.logger.Debugf("Event %s from contract %s\n", "PauseTrackingOpState", vLog.Address.Hex())
-						osu.atBlock = uint32(vLog.BlockNumber)
-						// Process the log here based on event signature and ABI
-						ContractFinalizerTaskManagerPauseTrackingOpState, err := osu.ethRpc.AvsReader.ParsePauseTrackingOpState(vLog)
-						if err != nil {
-							osu.errorC <- fmt.Errorf("Failed to ParsePauseTrackingOpState: err: %v, atBlock: %v", err, vLog.BlockNumber)
-							return
-						}
-						osu.logger.Info("Pausing trackingOpState upon event trigger", "trigger", ContractFinalizerTaskManagerPauseTrackingOpState)
-						osu.paused = true
-						osu.pauseReasonV = fmt.Sprintf("Pausing trackingOpState upon event trigger: %v. Please restart aggregator with reinitOpStateAtInit flag to continue.", ContractFinalizerTaskManagerPauseTrackingOpState)
 						break watchForTriggersLoop
 					}
 				case vLog.Address == taskManagerContractAddress && vLog.Topics[0] == getEventID(taskmanagerAbi, "OpTaskCompleted"):
