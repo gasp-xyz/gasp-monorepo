@@ -70,7 +70,7 @@ contract FinalizerTaskManager is
 
     bool public isTaskPending;
 
-    mapping(IRolldown.ChainId => uint32) public chainRdBatchNonce;
+    mapping(uint8 => uint32) public chainRdBatchNonce;
 
     // TODO
     // Maybe skip storing this
@@ -291,8 +291,8 @@ contract FinalizerTaskManager is
         // TODO
         // Maybe this belongs in createNewRdTask
         require(
-            chainRdBatchNonce[taskResponse.chainId] == 0
-                || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId],
+            chainRdBatchNonce[uint8(taskResponse.chainId)] == 0
+                || taskResponse.batchId == chainRdBatchNonce[uint8(taskResponse.chainId)],
             "chainRdBatchNonce mismatch"
         );
 
@@ -336,7 +336,7 @@ contract FinalizerTaskManager is
             range.end = taskResponse.rangeEnd;
             rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
         }
-        chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
+        chainRdBatchNonce[uint8(taskResponse.chainId)] = taskResponse.batchId + 1;
 
         lastCompletedRdTaskNum = task.taskNum;
         lastCompletedRdTaskCreatedBlock = task.taskCreatedBlock;

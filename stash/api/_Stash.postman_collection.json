@@ -553,12 +553,12 @@
 			"response": []
 		},
 		{
-			"name": "Tx Status by txHash or Entity ID",
+			"name": "Find transaction by txHash or Entity ID",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/01J826JEJD3T2QB3DBV27XQ59C",
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/01JHMP5QT1YCEFJD3D7P38HJKD",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -567,7 +567,7 @@
 						"type",
 						"{{type}}",
 						"tx",
-						"01J826JEJD3T2QB3DBV27XQ59C"
+						"01JHMP5QT1YCEFJD3D7P38HJKD"
 					]
 				}
 			},
@@ -601,7 +601,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/listByAddress/0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed/PROCESSED",
+					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/listByAddress/0x928f1040adb982d3ab32a62dc8eda57e9b81b4dd/PendingOnL2",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -611,37 +611,8 @@
 						"{{type}}",
 						"tx",
 						"listByAddress",
-						"0xf525b86742d20ca26069d39c0c5cbc7fcd6148ed",
-						"PROCESSED"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tx by Entity ID",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseUrl}}/tracing/type/{{type}}/tx/findByEntityId/01J826JEJD3T2QB3DBV27XQ59C",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"tracing",
-						"type",
-						"{{type}}",
-						"tx",
-						"findByEntityId",
-						"01J826JEJD3T2QB3DBV27XQ59C"
-					],
-					"query": [
-						{
-							"key": "",
-							"value": null,
-							"disabled": true
-						}
+						"0x928f1040adb982d3ab32a62dc8eda57e9b81b4dd",
+						"PendingOnL2"
 					]
 				}
 			},
@@ -661,6 +632,44 @@
 						"account",
 						"{{wallet}}",
 						"dashboard"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token price",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Store key value",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"key\": \"withdrawal\",\n  \"value\": \"0x2dfcf2fbb42084d0eb9b9e75f333ae900192ba941a898e9634dd93cdca76843e\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/key-value/store",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"key-value",
+						"store"
 					]
 				}
 			},
