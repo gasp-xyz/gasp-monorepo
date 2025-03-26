@@ -68,7 +68,7 @@ Gasp is a Layer 2 solution utilizing Eigen Layer for security and consensus:
 
    ```bash
    # Proto will automatically install dependencies and set up Husky
-   proto install
+   yarn run postinstall
    ```
 
    Our repository uses:
