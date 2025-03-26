@@ -6,7 +6,7 @@
 # Once sure - run with `--broadcast`
 
 # To upgrade the proxy via L1 council
-# Use forge cast calldata and target to the proxyAdmin address 
+# Use forge cast calldata and target to the proxyAdmin address
 
 ANVIL_DEFAULT_ACCOUNT=anvil-default-0 # cast wallet import anvil-default-0 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 WALLET_NAME=mainnet-actual-0
@@ -29,4 +29,4 @@ echo "executing script"
 # Add --resume when re-running after it has failed
 forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --account $WALLET_NAME --broadcast -vvvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
-forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "verify()" --rpc-url $RPC_URL --account $WALLET_NAME -vvvvv
+# forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "verify()" --rpc-url $RPC_URL --account $WALLET_NAME -vvvvv

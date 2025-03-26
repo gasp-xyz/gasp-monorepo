@@ -112,7 +112,7 @@ contract MultiStage is Script, Utils {
 
         if (envHash == _stringToHash("arbitrum-sepolia")) {
             require(
-                !outputExists("arbitrum_rolldown_output") && !outputExists("arbitrum_gmrs_output"),
+                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
                 "Contracts already deployed on Arbitrum Sepolia"
             );
 
@@ -122,7 +122,7 @@ contract MultiStage is Script, Utils {
 
         if (envHash == _stringToHash("base-sepolia")) {
             require(
-                !outputExists("base_rolldown_output") && !outputExists("base_gmrs_output"),
+                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
                 "Contracts already deployed on Base Sepolia"
             );
 
@@ -142,7 +142,7 @@ contract MultiStage is Script, Utils {
 
         if (envHash == _stringToHash("megaeth-testnet")) {
             require(
-                !outputExists("megaeth_rolldown_output") && !outputExists("megaeth_gmrs_output"),
+                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
                 "Contracts already deployed on Megaeth Testnet"
             );
 
