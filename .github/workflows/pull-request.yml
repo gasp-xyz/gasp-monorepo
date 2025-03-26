@@ -48,7 +48,7 @@ jobs:
       security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: "${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && 'false' || 'true' }}"
+      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
     needs: [init, build-and-test]
@@ -69,7 +69,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: "${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && 'false' || 'true' }}"
+      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
   
   run-e2e-test-gasp-node:
     name: '[e2e] Run gasp-node and global e2e tests'
@@ -82,7 +82,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: "${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && 'false' || 'true' }}"
+      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
 
   # deploy-fungible:
   #   name: Deploy fungible environment
