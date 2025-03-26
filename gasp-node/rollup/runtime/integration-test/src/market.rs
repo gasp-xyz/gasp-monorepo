@@ -298,6 +298,7 @@ fn multiswap_should_work_xyk() {
 
 		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
+			total_amount_in: UNIT,
 			swaps: vec![
 				AtomicSwap {
 					pool_id: POOL_ID_1,
@@ -368,6 +369,7 @@ fn multiswap_should_work_stable_swap_with_bnb() {
 		// println!("{:#?}", events());
 		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
+			total_amount_in: UNIT,
 			swaps: vec![
 				AtomicSwap {
 					pool_id: POOL_ID_1,
@@ -418,6 +420,7 @@ fn multiswap_should_work_mixed() {
 
 		assert_last_event(RuntimeEvent::Market(Event::AssetsSwapped {
 			who: AccountId::from(ALICE),
+			total_amount_in: UNIT,
 			swaps: vec![
 				AtomicSwap {
 					pool_id: POOL_ID_1,

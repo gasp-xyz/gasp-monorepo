@@ -105,6 +105,8 @@ std = [
 	"market-rpc/std",
 	"pallet-market/std",
 	"rolldown-rpc/std",
+	"pallet-collective-mangata/std",
+	"pallet-collective-mangata-rpc/std",
 ]
 # Dependencies that are only required if runtime benchmarking should be build.
 runtime-benchmarks = [
