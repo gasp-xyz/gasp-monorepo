@@ -29,6 +29,10 @@ jobs:
       GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
       GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
       - name: Test PR title for conventional commit format
         uses: actions/github-script@v7
         with:
