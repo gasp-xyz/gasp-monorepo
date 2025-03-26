@@ -840,7 +840,13 @@ pub mod pallet {
 
 			let swap_result: Result<(), DispatchError> =
 				frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
-					let (multiswap_sell_info, (pools, path)) = Self::get_multiswap_sell_info(swap_pool_list, asset_id_in, asset_amount_in, asset_id_out, min_amount_out)?;
+					let (multiswap_sell_info, (pools, path)) = Self::get_multiswap_sell_info(
+						swap_pool_list,
+						asset_id_in,
+						asset_amount_in,
+						asset_id_out,
+						min_amount_out,
+					)?;
 					let total_amount_in = multiswap_sell_info.total_amount_in;
 					let amount_in = multiswap_sell_info.swap_amount_in;
 					let amount_out = multiswap_sell_info.amount_out;
@@ -852,7 +858,11 @@ pub mod pallet {
 					let swaps =
 						Self::do_swaps(&sender, pools, path.clone(), amount_in, min_amount_out)?;
 
-					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), total_amount_in: total_amount_in, swaps });
+					Self::deposit_event(Event::AssetsSwapped {
+						who: sender.clone(),
+						total_amount_in,
+						swaps,
+					});
 
 					let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(
 						&sender,
@@ -1029,7 +1039,13 @@ pub mod pallet {
 
 			let swap_result: Result<(), DispatchError> =
 				frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
-					let (multiswap_buy_info, (pools, path)) = Self::get_multiswap_buy_info(swap_pool_list, asset_id_out, asset_amount_out, asset_id_in, max_amount_in)?;
+					let (multiswap_buy_info, (pools, path)) = Self::get_multiswap_buy_info(
+						swap_pool_list,
+						asset_id_out,
+						asset_amount_out,
+						asset_id_in,
+						max_amount_in,
+					)?;
 					let total_amount_in = multiswap_buy_info.total_amount_in;
 					let amount_in = multiswap_buy_info.swap_amount_in;
 					fees = Some(multiswap_buy_info.fees);
@@ -1044,7 +1060,11 @@ pub mod pallet {
 					let swaps =
 						Self::do_swaps(&sender, pools, path.clone(), amount_in, asset_amount_out)?;
 
-					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), total_amount_in: total_amount_in, swaps });
+					Self::deposit_event(Event::AssetsSwapped {
+						who: sender.clone(),
+						total_amount_in,
+						swaps,
+					});
 
 					let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(
 						&sender,
@@ -1161,15 +1181,16 @@ pub mod pallet {
 	}
 
 	impl<T: Config> Pallet<T> {
-
 		pub fn get_multiswap_sell_info(
 			swap_pool_list: Vec<PoolIdOf<T>>,
 			asset_id_in: T::CurrencyId,
 			asset_amount_in: T::Balance,
 			asset_id_out: T::CurrencyId,
 			min_amount_out: T::Balance,
-		) -> Result<(MultiswapSellInfo<T::Balance>,(Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>)), DispatchError> {
-
+		) -> Result<
+			(MultiswapSellInfo<T::Balance>, (Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>)),
+			DispatchError,
+		> {
 			let function_error_id = 6u8;
 
 			let mut is_lockless: Option<bool> = None;
@@ -1177,12 +1198,9 @@ pub mod pallet {
 			let fees = Self::calc_fees_pre(asset_amount_in)?;
 
 			let amount_in = asset_amount_in
-				.checked_sub(
-					&fees,
-				)
+				.checked_sub(&fees)
 				.ok_or(Error::<T>::MathOverflow { id: function_error_id })?;
-			let (pools, path) =
-				Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
+			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
 
 			if swap_pool_list.len() > 1 {
 				if !T::FeeLock::is_whitelisted(asset_id_in) {
@@ -1195,8 +1213,7 @@ pub mod pallet {
 
 			is_lockless = match is_lockless {
 				Some(b) => Some(b),
-				None => T::FeeLock::is_swap_tokens_lockless(asset_id_in, amount_in)
-					.then_some(true),
+				None => T::FeeLock::is_swap_tokens_lockless(asset_id_in, amount_in).then_some(true),
 			};
 
 			// calc output amounts for fee lock detemination
@@ -1209,8 +1226,7 @@ pub mod pallet {
 				// qualify for lockless. Input already checked
 				is_lockless = match is_lockless {
 					Some(b) => Some(b),
-					None =>
-						T::FeeLock::is_swap_tokens_lockless(id, amount_out).then_some(true),
+					None => T::FeeLock::is_swap_tokens_lockless(id, amount_out).then_some(true),
 				};
 			}
 
@@ -1219,30 +1235,33 @@ pub mod pallet {
 				is_lockless = Some(false)
 			};
 
-			Ok((MultiswapSellInfo{
-				total_amount_in: asset_amount_in,
-				swap_amount_in: amount_in,
-				amount_out: amount_out,
-				fees: fees,
-				is_lockless: is_lockless.unwrap_or_default(),
-			}, (pools, path)))
+			Ok((
+				MultiswapSellInfo {
+					total_amount_in: asset_amount_in,
+					swap_amount_in: amount_in,
+					amount_out,
+					fees,
+					is_lockless: is_lockless.unwrap_or_default(),
+				},
+				(pools, path),
+			))
 		}
 
-		
 		pub fn get_multiswap_buy_info(
 			swap_pool_list: Vec<PoolIdOf<T>>,
 			asset_id_out: T::CurrencyId,
 			asset_amount_out: T::Balance,
 			asset_id_in: T::CurrencyId,
 			max_amount_in: T::Balance,
-		) -> Result<(MultiswapBuyInfo<T::Balance>, (Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>)), DispatchError> {
-
+		) -> Result<
+			(MultiswapBuyInfo<T::Balance>, (Vec<PoolInfoOf<T>>, Vec<AssetPairOf<T>>)),
+			DispatchError,
+		> {
 			let function_error_id = 7u8;
 
 			let mut is_lockless: Option<bool> = None;
 
-			let (pools, path) =
-				Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
+			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
 
 			if swap_pool_list.len() > 1 {
 				if !T::FeeLock::is_whitelisted(asset_id_in) {
@@ -1268,8 +1287,7 @@ pub mod pallet {
 				// qualify for lockless. output already checked
 				is_lockless = match is_lockless {
 					Some(b) => Some(b),
-					None =>
-						T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true),
+					None => T::FeeLock::is_swap_tokens_lockless(id, amount_in).then_some(true),
 				};
 			}
 
@@ -1284,15 +1302,18 @@ pub mod pallet {
 			// In the limiting case this calc_fees_post(amount_in) should be the same as calc_fees_pre(max_amount_in)
 			let fees = Self::calc_fees_post(amount_in)?;
 
-			Ok((MultiswapBuyInfo{
-				total_amount_in: amount_in.saturating_add(fees),
-				swap_amount_in: amount_in,
-				amount_out: asset_amount_out,
-				fees: fees,
-				is_lockless: is_lockless.unwrap_or_default(),
-			}, (pools, path)))
+			Ok((
+				MultiswapBuyInfo {
+					total_amount_in: amount_in.saturating_add(fees),
+					swap_amount_in: amount_in,
+					amount_out: asset_amount_out,
+					fees,
+					is_lockless: is_lockless.unwrap_or_default(),
+				},
+				(pools, path),
+			))
 		}
-		
+
 		pub fn calc_fees_pre(amount: T::Balance) -> Result<T::Balance, DispatchError> {
 			let function_error_id = 2u8;
 			let total_fee_perc = T::PoolFeePercentage::get()
