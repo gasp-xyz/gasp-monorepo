@@ -159,6 +159,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: true
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
