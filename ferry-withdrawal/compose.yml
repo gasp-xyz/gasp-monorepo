@@ -49,6 +49,58 @@ services:
       LOG: ${ETH_CLOSER_LOG}
       DELAY: ${ETH_CLOSER_DELAY}
 
+  closer-monad:
+    build: .
+    image: gaspxyz/ferry-withdrawal:${FERRY_WITHDRAWAL_VERSION:-localcloser}
+    restart: unless-stopped
+    command: ["node", "build/src/closer.js"]
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+      stash-mock:
+        condition: service_started
+    environment:
+      MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
+      ETH_CHAIN_URL: http://monad-stub:8545
+      STASH_URL: http://stash-mock:8080
+      MANGATA_CONTRACT_ADDRESS: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+      PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
+      TOKENS_TO_TRACK: ${ETH_CLOSER_TOKENS_TO_TRACK}
+      L1_CHAIN: anvil-monad
+      TX_COST: ${ETH_CLOSER_TX_COST}
+      LOG: ${ETH_CLOSER_LOG}
+      DELAY: ${ETH_CLOSER_DELAY}
+
+  closer-megaeth:
+    build: .
+    image: gaspxyz/ferry-withdrawal:${FERRY_WITHDRAWAL_VERSION:-localcloser}
+    restart: unless-stopped
+    command: ["node", "build/src/closer.js"]
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+      stash-mock:
+        condition: service_started
+    environment:
+      MANGATA_NODE_URL: ${ETH_CLOSER_MANGATA_NODE_URL}
+      ETH_CHAIN_URL: http://megaeth-stub:8545
+      STASH_URL: http://stash-mock:8080
+      MANGATA_CONTRACT_ADDRESS: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+      PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
+      TOKENS_TO_TRACK: ${ETH_CLOSER_TOKENS_TO_TRACK}
+      L1_CHAIN: anvil-megaeth
+      TX_COST: ${ETH_CLOSER_TX_COST}
+      LOG: ${ETH_CLOSER_LOG}
+      DELAY: ${ETH_CLOSER_DELAY}
+
   stash-mock:
     image: wiremock/wiremock
     ports:

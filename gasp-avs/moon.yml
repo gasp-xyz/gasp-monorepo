@@ -188,8 +188,14 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
       export UPDATER_VERSION=${IMAGE_TAG:-local}
 
-      docker compose down && docker compose up -d
-
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
+      
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-opt-out-report.xml
       rm -rf $workspaceRoot/gasp-avs/tests/reports/test-opt-out-report.xml || true
@@ -207,12 +213,14 @@ tasks:
       cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
+      exit $TEST_EXIT_CODE
+
     options:
       cache: true
       runFromWorkspaceRoot: true
     inputs: ['@globs(sources)', 'tests/**/*.ts']
     outputs: ['tests/reports/test-opt-out-report.xml']
-  
+
   e2e-test-corrupted:
     script: |
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
@@ -224,7 +232,13 @@ tasks:
       export ROLLUP_SEQUENCER_VERSION=${IMAGE_TAG:-local}
       export UPDATER_VERSION=${IMAGE_TAG:-local}
       
-      docker compose down && docker compose up -d
+      docker compose down
+      if [ "$CI" = "true" ]; then
+        docker compose up -d --no-build
+      else
+        docker compose up -d
+      fi
+      docker compose ps
 
       # Set the report filename for this specific test
       export JEST_JUNIT_OUTPUT_NAME=test-corrupted-report.xml
@@ -243,6 +257,7 @@ tasks:
       cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       cd $workspaceRoot && docker compose down
+      exit $TEST_EXIT_CODE
     options:
       cache: true
       runFromWorkspaceRoot: true

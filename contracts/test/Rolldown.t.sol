@@ -6,7 +6,7 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Test} from "forge-std/Test.sol";
-import {IRolldownPrimitives} from "../src/IRolldownPrimitives.sol";
+import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {MyERC20} from "./utils/Utilities.sol";
 

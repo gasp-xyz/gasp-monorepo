@@ -1,13 +1,9 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.13;
 
-import "@eigenlayer-middleware/src/libraries/BN254.sol";
-import "./IGaspMultiRollupServicePrimitives.sol";
 import {IRolldown} from "./IRolldown.sol";
 
 interface IFinalizerTaskManager {
-    // EVENTS
-
     event PauseTrackingOpState();
     event ResumeTrackingOpState(bool resetTrackedQuorums);
 
@@ -18,42 +14,34 @@ interface IFinalizerTaskManager {
     event NewOpTaskForceCreated();
 
     // When we have some response from OPs
-    // note we want to keep track of responded tasks that did not meet the completion criteria 
+    // note we want to keep track of responded tasks that did not meet the completion criteria
     event OpTaskResponded(
-        uint32 indexed taskIndex,
-        OpTaskResponse taskResponse,
-        TaskResponseMetadata taskResponseMetadata
+        uint32 indexed taskIndex, OpTaskResponse taskResponse, TaskResponseMetadata taskResponseMetadata
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
-    event OpTaskCompleted(uint32 indexed taskIndex,
-        OpTaskResponse taskResponse);
+    event OpTaskCompleted(uint32 indexed taskIndex, OpTaskResponse taskResponse);
 
-    event OpTaskForceCompleted(uint32 indexed taskIndex,
-        OpTaskResponse taskResponse);
+    event OpTaskForceCompleted(uint32 indexed taskIndex, OpTaskResponse taskResponse);
 
     event RdTaskCancelled(uint32 indexed taskIndex);
     event NewRdTaskCreated(uint32 indexed taskIndex, RdTask task);
 
     // When we have some response from OPs
-    // note we want to keep track of responded tasks that did not meet the completion criteria 
+    // note we want to keep track of responded tasks that did not meet the completion criteria
     event RdTaskResponded(
-        uint32 indexed taskIndex,
-        RdTaskResponse taskResponse,
-        TaskResponseMetadata taskResponseMetadata
+        uint32 indexed taskIndex, RdTaskResponse taskResponse, TaskResponseMetadata taskResponseMetadata
     );
 
     // When aggregated stake for OP's responses exceeds the required threshold
-    event RdTaskCompleted(uint32 indexed taskIndex,
-        RdTaskResponse taskResponse);
+    event RdTaskCompleted(uint32 indexed taskIndex, RdTaskResponse taskResponse);
 
     event RolldownTargetUpdated(address rolldownAddress);
     event AggregatorUpdated(address aggregatorAddress);
     event GeneratorUpdated(address generatorAddress);
 
     // DATA STRUCTURES
-    enum TaskStatus
-    {
+    enum TaskStatus {
         // default is NOT_INITIALIZED
         NOT_INITIALIZED,
         INITIALIZED,
@@ -61,13 +49,12 @@ interface IFinalizerTaskManager {
         RESPONDED,
         COMPLETED
     }
-    enum TaskType
-    {
+    enum TaskType {
         // default is OpTask
         OP_TASK,
         RD_TASK
     }
-    
+
     struct OpTask {
         // the task number
         uint32 taskNum;
@@ -96,7 +83,6 @@ interface IFinalizerTaskManager {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
-
         bytes32 operatorsStateInfoHash;
     }
 
@@ -122,7 +108,6 @@ interface IFinalizerTaskManager {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
-
         IRolldown.ChainId chainId;
         uint32 batchId;
         bytes32 rdUpdate;
@@ -130,7 +115,6 @@ interface IFinalizerTaskManager {
         uint256 rangeEnd;
         address updater;
     }
-
 
     // Extra information related to taskResponse, which is filled inside the contract.
     // It thus cannot be signed by operators, so we keep it in a separate struct than TaskResponse
@@ -145,5 +129,4 @@ interface IFinalizerTaskManager {
     }
 
     // FUNCTIONS
-
 }
