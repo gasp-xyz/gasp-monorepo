@@ -294,8 +294,129 @@ jobs:
             --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
             --results $GITHUB_WORKSPACE/gasp-node/gasp-e2e/reports/*.xml
 
+  ferry-withdrawal-test:
+    name: '[ferry-withdrawal] e2e tests'
+    runs-on: ubuntu-24.04
+    env:
+      AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
+      UPDATER_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
+      GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+      GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
+      FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
+      FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+      IMAGE_TAG: ${{ inputs.globalVersion }}
+    defaults:
+      run:
+        working-directory: ferry-withdrawal
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
+  
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ./ferry-withdrawal/.nvmrc
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
+          cache-dependency-path: "./ferry-withdrawal/yarn.lock"
+  
+      - run: yarn install --immutable
+      - run: yarn run build
+  
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait ferry-withdrawal-eth
+  
+      - name: Test L1 interface
+        run: yarn run test-l1
+  
+      - name: Test L2 interface
+        run: yarn run test-l2
+  
+      - name: Test ferry
+        run: yarn run test-ferry
+  
+      - name: Test closer service
+        run: yarn run test-closer
+  
+  ferry-deposit-test:
+    name: '[ferry-deposit] e2e tests'
+    runs-on: ubuntu-24.04
+    env:
+      AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
+      UPDATER_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
+      GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+      GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
+      FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
+      FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+      IMAGE_TAG: ${{ inputs.globalVersion }}
+    defaults:
+      run:
+        working-directory: ferry-deposit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+      - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            .git/modules
+          key: submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-${{ github.sha }}
+          restore-keys: |
+            submodules-${{ env.CACHE_VERSION }}-${{ hashFiles('.gitmodules') }}-
+            submodules-${{ env.CACHE_VERSION }}-
+      - run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive --depth 1
+  
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ./ferry-deposit/.nvmrc
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
+          cache-dependency-path: "./ferry-deposit/yarn.lock"
+  
+      - run: yarn install --immutable
+      - run: yarn run build
+  
+      - name: Build
+        working-directory: .
+        run: docker compose up --wait ferry-deposit-eth
+  
+      - name: Test L1 interface
+        run: yarn run test-l1
+  
+      - name: Test L2 interface
+        run: yarn run test-l2
+  
+      - name: Test ferry
+        run: yarn run test-ferry
+
   test-complete:
-    needs: [setup-report, e2e-test-matrix]
+    needs: [setup-report, e2e-test-matrix, ferry-withdrawal-test, ferry-deposit-test]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -313,7 +434,7 @@ jobs:
         continue-on-error: true
 
   slack-notify-nook:
-    needs: [e2e-test-matrix]
+    needs: [test-complete]
     if: failure()
     runs-on: ubuntu-24.04
     steps:
