@@ -128,8 +128,8 @@ export const getAllTransactionsByAddress = async (
 ): Promise<void> => {
   /*
    #swagger.tags = ['Tracing']
-   #swagger.summary = 'Get all transactions by address.'
-   #swagger.description = "Get all transactions by providing a specific address and type of a transaction."
+   #swagger.summary = 'Get all frontend created transactions by address.'
+   #swagger.description = "Get all frontend created transactions by providing a specific address and type of a transaction."
    #swagger.parameters['address'] = {
      in: 'path',
      description: 'Address to get transactions for',

@@ -166,7 +166,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	//   `spec_version`, and `authoring_version` are the same between Wasm and native.
 	// This value is set to 100 to notify Polkadot-JS App (https://polkadot.js.org/apps) to use
 	//   the compatible custom types.
-	spec_version: 107,
+	spec_version: 108,
 	impl_version: 3,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 3,
@@ -1153,6 +1153,23 @@ impl_runtime_apis! {
 
 			System::enqueued_txs_count(&acc) as u64
 		}
+	}
+
+	impl pallet_collective_mangata::CouncilCallRuntimeApi<Block, RuntimeCall> for Runtime {
+			fn get_length_and_weight_for_call(
+				call: RuntimeCall
+			) -> Option<(u32, Weight)> {
+				Council::get_length_and_weight_for_call(call)
+			}
+		}
+
+	impl pallet_collective_mangata::CouncilRuntimeApi<Block, <Runtime as frame_system::Config>::Hash> for Runtime {
+
+			fn get_length_and_weight_for_proposal(
+				proposal_hash: <Runtime as frame_system::Config>::Hash,
+			) -> Option<(u32, Weight)>{
+				Council::get_length_and_weight_for_proposal(proposal_hash)
+			}
 	}
 
 	impl pallet_market::MarketRuntimeApi<Block, Balance, TokenId> for Runtime {
