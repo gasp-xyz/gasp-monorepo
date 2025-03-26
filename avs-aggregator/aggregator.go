@@ -483,6 +483,22 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 	if blsAggServiceResp.Err != nil && blsAggServiceResp.Err != blsagg.TaskExpiredError {
 		return false, fmt.Errorf("ALERT:WARNING bls aggregation error, err: %v", blsAggServiceResp.Err)
 	}
+
+	// We can hard expect that here we will get only what we expect
+	// since the signedTaskResponseC is deleted before another response can be accepted via select
+	if blsAggServiceResp.TaskId != expectedTaskId {
+		// This is not the task we were expecting so don't even send it
+		return false, fmt.Errorf("ALERT:ERROR: blsAggServiceResp.TaskId != expectedTaskId,blsAggServiceResp.TaskId: %v, expectedTaskId: %v", blsAggServiceResp.TaskId, expectedTaskId)
+	}
+
+	taskStatus, err := agg.ethRpc.AvsReader.IdToTaskStatus(context.Background(), expectedTaskId.TaskType, expectedTaskId.TaskIndex)
+	if err != nil {
+		return false, fmt.Errorf("Aggregator in sendAggregatedResponseToContract failed to IdToTaskStatus: err: %v", err)
+	}
+	if taskStatus != types.TASK_STATUS_INITIALIZED {
+		return taskStatus == types.TASK_STATUS_COMPLETED, nil
+	}
+
 	nonSignerPubkeys := []taskmanager.BN254G1Point{}
 	log := []string{}
 	for _, nonSignerPubkey := range blsAggServiceResp.NonSignersPubkeysG1 {
@@ -504,13 +520,6 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 		QuorumApkIndices:             blsAggServiceResp.QuorumApkIndices,
 		TotalStakeIndices:            blsAggServiceResp.TotalStakeIndices,
 		NonSignerStakeIndices:        blsAggServiceResp.NonSignerStakeIndices,
-	}
-
-	// We can hard expect that here we will get only what we expect
-	// since the signedTaskResponseC is deleted before another response can be accepted via select
-	if blsAggServiceResp.TaskId != expectedTaskId {
-		// This is not the task we were expecting so don't even send it
-		return false, fmt.Errorf("ALERT:ERROR: blsAggServiceResp.TaskId != expectedTaskId,blsAggServiceResp.TaskId: %v, expectedTaskId: %v", blsAggServiceResp.TaskId, expectedTaskId)
 	}
 
 	agg.logger.Info("ALERT:INFO sending aggregated response onchain.", "TaskId", blsAggServiceResp.TaskId)
@@ -647,6 +656,14 @@ func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate ui
 	}
 	if isTaskPending {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, sdktypes.TaskId{}, fmt.Errorf("Aggregator in createRdTask with isTaskPending true!!!")
+	}
+
+	chainRdBatchNonce, err := agg.ethRpc.AvsReader.ChainRdBatchNonce(context.Background(), chainToUpdate)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, sdktypes.TaskId{}, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
+	}
+	if ((chainRdBatchNonce != 0) && (chainRdBatchNonce != chainBatchIdToUpdate)){
+		return taskmanager.IFinalizerTaskManagerRdTask{}, sdktypes.TaskId{}, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ((chainRdBatchNonce != 0) && (chainRdBatchNonce != chainBatchIdToUpdate)): chainRdBatchNonce: %v, chainBatchIdToUpdate: %v", chainRdBatchNonce, chainBatchIdToUpdate)
 	}
 
 	agg.logger.Info("ALERT:INFO Aggregator sending new RdTask", "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
@@ -877,6 +894,8 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 		}
 	}
 
+	agg.logger.Debug("Aggregator in maybeSendNewRdTask after substrateL2RequestsBatchLast loop", "isUpdate", isUpdate, "chainToUpdate", chainToUpdate, "chainBatchIdToUpdate", chainBatchIdToUpdate)
+
 	return isUpdate, chainToUpdate, chainBatchIdToUpdate, nil
 }
 
@@ -917,8 +936,10 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 GetStorage staus is NOK")
 	}
 
-	// TODO - now
 	// Check if substrateL2RequestsBatch range start and end are the same as in rdTaskResponse
+	if ((rdTaskResponse.RangeStart.Cmp(substrateL2RequestsBatch.BatchRange.Start.Int) !=0 ) || (rdTaskResponse.RangeEnd.Cmp(substrateL2RequestsBatch.BatchRange.End.Int) !=0 )) {
+		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 substrateL2RequestsBatch and rdTaskResponse range do not match: substrateL2RequestsBatch: %v, rdTaskResponse: %v", substrateL2RequestsBatch, rdTaskResponse)
+	}
 
 	merkleRoot := ""
 	chain := ""
