@@ -78,6 +78,11 @@ contract MultiStage is Script, Utils {
             return;
         }
 
+        if (envHash == _stringToHash("sonic")) {
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Sonic);
+            return;
+        }
+
         if (envHash == _stringToHash("ethereum-holesky")) {
             _printMessage("Deploying finalizer contracts");
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
