@@ -222,7 +222,7 @@ jobs:
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/.nvmrc' || '.nvmrc' }}
+          node-version-file: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/.nvmrc' || '.nvmrc' }}
           cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
 
       - name: Get Yarn cache directory and version
