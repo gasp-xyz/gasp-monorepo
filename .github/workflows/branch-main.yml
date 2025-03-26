@@ -72,24 +72,11 @@ jobs:
       # branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
       branch: eth-rollup-develop
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
-  # run-e2e-test:
-  #   name: '[e2e] Run gasp-avs and ferries e2e tests'
-  #   needs: [init, build-and-test]
-  #   uses: ./.github/workflows/reusable-e2e-tests.yml
-  #   secrets: inherit
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     checks: write
-  #   with:
-  #     globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  #     cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
   
-  run-e2e-test-gasp-node:
+  run-e2e-tests:
     name: '[e2e] Run gasp-node and global e2e tests'
     needs: [init, build-and-test, gasp-node-generate-types]
-    uses: ./.github/workflows/reusable-e2e-tests-new.yml
+    uses: ./.github/workflows/reusable-e2e-tests.yml
     secrets: inherit
     permissions:
       contents: read
@@ -102,7 +89,7 @@ jobs:
   release:
     name: Release
     if: github.ref_name != 'develop'
-    needs: [init, build-and-test, run-e2e-test-gasp-node]
+    needs: [init, build-and-test, run-e2e-tests]
     runs-on: ubuntu-24.04
     env:
       MOON_COLOR: 2
