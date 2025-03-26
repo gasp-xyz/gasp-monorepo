@@ -81,7 +81,6 @@ pub use orml_tokens::Call as TokensCall;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use runtime_config::*;
 use static_assertions::const_assert;
-use xyk_runtime_api::RpcAssetMetadata;
 
 pub use orml_tokens::{self, MultiTokenCurrencyExtended};
 pub use orml_traits::{
@@ -1156,174 +1155,6 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl xyk_runtime_api::XykRuntimeApi<Block, Balance, TokenId, AccountId> for Runtime {
-		fn calculate_sell_price(
-			input_reserve: Balance,
-			output_reserve: Balance,
-			sell_amount: Balance
-		) -> Balance {
-			Xyk::calculate_sell_price(input_reserve, output_reserve, sell_amount)
-				.map_err(|e|
-						 {
-							 log::warn!(target:"xyk", "rpc 'XYK::calculate_sell_price' error: '{:?}', returning default value instead", e);
-							 e
-						 }
-						).unwrap_or_default()
-		}
-
-		fn calculate_buy_price(
-			input_reserve: Balance,
-			output_reserve: Balance,
-			buy_amount: Balance
-		) -> Balance {
-				Xyk::calculate_buy_price(input_reserve, output_reserve, buy_amount)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_buy_price' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-
-		}
-
-		fn calculate_sell_price_id(
-			sold_token_id: TokenId,
-			bought_token_id: TokenId,
-			sell_amount: Balance
-		) -> Balance {
-				 Xyk::calculate_sell_price_id(sold_token_id, bought_token_id, sell_amount)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_sell_price_id' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-		}
-
-		fn calculate_buy_price_id(
-			sold_token_id: TokenId,
-			bought_token_id: TokenId,
-			buy_amount: Balance
-		) -> Balance {
-				Xyk::calculate_buy_price_id(sold_token_id, bought_token_id, buy_amount)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_buy_price_id' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-		}
-
-		fn get_burn_amount(
-			first_asset_id: TokenId,
-			second_asset_id: TokenId,
-			liquidity_asset_amount: Balance
-		) -> (Balance, Balance) {
-			Xyk::get_burn_amount(first_asset_id, second_asset_id, liquidity_asset_amount)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_buy_price_id' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-		}
-
-		fn get_max_instant_burn_amount(
-			user: AccountId,
-			liquidity_asset_id: TokenId,
-		) -> Balance {
-			Xyk::get_max_instant_burn_amount(&user, liquidity_asset_id)
-		}
-
-		fn get_max_instant_unreserve_amount(
-			user: AccountId,
-			liquidity_asset_id: TokenId,
-		) -> Balance {
-			 Xyk::get_max_instant_unreserve_amount(&user, liquidity_asset_id)
-		}
-
-		fn calculate_rewards_amount(
-			user: AccountId,
-			liquidity_asset_id: TokenId,
-		) -> Balance {
-			ProofOfStake::calculate_rewards_amount(user, liquidity_asset_id)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_buy_price_id' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-		}
-
-		fn calculate_balanced_sell_amount(
-			total_amount: Balance,
-			reserve_amount: Balance,
-		) -> Balance {
-				 Xyk::calculate_balanced_sell_amount(total_amount, reserve_amount)
-					.map_err(|e|
-						{
-							log::warn!(target:"xyk", "rpc 'XYK::calculate_balanced_sell_amount' error: '{:?}', returning default value instead", e);
-							e
-						}
-					).unwrap_or_default()
-		}
-
-		fn get_liq_tokens_for_trading() -> Vec<TokenId> {
-			Xyk::get_liq_tokens_for_trading()
-				.map_err(|e|
-					{
-						log::warn!(target:"xyk", "rpc 'XYK::get_liq_tokens_for_trading' error: '{:?}', returning default value instead", e);
-						e
-					}
-				).unwrap_or_default()
-		}
-
-		// TODO
-		// We do not need these rpc functions remove them later
-		// once we are sure that we don't need them
-		fn is_sell_asset_lock_free(
-			path: Vec<TokenId>,
-			input_amount: Balance,
-			) -> Option<bool>{
-			None
-		}
-
-		// TODO
-		// We do not need these rpc functions remove them later
-		// once we are sure that we don't need them
-		fn is_buy_asset_lock_free(
-			path: Vec<TokenId>,
-			input_amount: Balance,
-			) -> Option<bool>{
-			None
-		}
-
-		fn get_tradeable_tokens() -> Vec<RpcAssetMetadata<TokenId>> {
-			orml_asset_registry::Metadata::<Runtime>::iter()
-			.filter_map(|(token_id, metadata)| {
-				if !metadata.name.is_empty()
-					&& !metadata.symbol.is_empty()
-					&& metadata.additional.xyk.as_ref().map_or(true, |xyk| !xyk.operations_disabled)
-				{
-					let rpc_metadata = RpcAssetMetadata {
-						token_id: token_id,
-						decimals: metadata.decimals,
-						name: metadata.name.to_vec(),
-						symbol: metadata.symbol.to_vec(),
-					};
-					Some(rpc_metadata)
-				} else {
-					None
-				}
-			})
-			.collect::<Vec<_>>()
-		}
-
-		fn get_total_number_of_swaps() -> u128 {
-			Xyk::get_total_number_of_swaps()
-		}
-	}
-
 	impl pallet_market::MarketRuntimeApi<Block, Balance, TokenId> for Runtime {
 		fn calculate_sell_price(pool_id: TokenId, sell_asset_id: TokenId, sell_amount: Balance) -> Option<Balance> {
 			Market::calculate_sell_price(pool_id, sell_asset_id, sell_amount)
@@ -1415,6 +1246,10 @@ impl_runtime_apis! {
 			max_amount_in: Balance,
 		) -> Result<pallet_market::MultiswapBuyInfo<Balance>, DispatchError> {
 			Market::get_multiswap_buy_info(swap_pool_list,	asset_id_out, asset_amount_out,	asset_id_in, max_amount_in).map(|v| v.0)
+		}
+
+		fn get_total_number_of_swaps() -> u128 {
+			Xyk::get_total_number_of_swaps() // .saturating_add(StableSwap::get_total_number_of_swaps())
 		}
 	}
 

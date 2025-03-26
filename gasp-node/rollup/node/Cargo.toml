@@ -31,8 +31,6 @@ color-print = "0.3.4"
 
 # Local
 rollup-runtime = { path = "../runtime/" }
-xyk-rpc = { path = "../../pallets/xyk/rpc" }
-xyk-runtime-api = { path = "../../pallets/xyk/runtime-api" }
 rolldown-rpc = { path = "../../pallets/rolldown/rpc" }
 rolldown-runtime-api = { path = "../../pallets/rolldown/runtime-api" }
 proof-of-stake-runtime-api = { path = '../../pallets/proof-of-stake/runtime-api' }
@@ -102,7 +100,6 @@ default = ["std"]
 fast-runtime = []
 std = [
 	"rollup-runtime/std",
-	"xyk-rpc/std",
 	"market-rpc/std",
 	"pallet-market/std",
 	"rolldown-rpc/std",

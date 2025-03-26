@@ -7706,8 +7706,6 @@ dependencies = [
  "tempfile",
  "try-runtime-cli",
  "ver-api",
- "xyk-rpc",
- "xyk-runtime-api",
 ]
 
 [[package]]
@@ -7786,7 +7784,6 @@ dependencies = [
  "static_assertions",
  "substrate-wasm-builder",
  "ver-api",
- "xyk-runtime-api",
 ]
 
 [[package]]
@@ -7829,7 +7826,6 @@ dependencies = [
  "sp-runtime",
  "sp-storage",
  "test-case",
- "xyk-runtime-api",
 ]
 
 [[package]]
@@ -12316,38 +12312,6 @@ dependencies = [
  "rusticata-macros",
  "thiserror",
  "time",
-]
-
-[[package]]
-name = "xyk-rpc"
-version = "2.0.0"
-dependencies = [
- "jsonrpsee",
- "parity-scale-codec",
- "serde",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-rpc",
- "sp-runtime",
- "sp-std",
- "xyk-runtime-api",
-]
-
-[[package]]
-name = "xyk-runtime-api"
-version = "2.0.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "serde_json",
- "sp-api",
- "sp-core",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]

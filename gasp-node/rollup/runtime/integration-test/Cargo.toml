@@ -46,7 +46,6 @@ pallet-stable-swap = { path = "../../../pallets/stable-swap" }
 parachain-staking = { path = "../../../pallets/parachain-staking" }
 rolldown-runtime-api = { path = "../../../pallets/rolldown/runtime-api" }
 rollup-runtime = { path = "../" }
-xyk-runtime-api = { path = "../../../pallets/xyk/runtime-api" }
 
 [features]
 default = []

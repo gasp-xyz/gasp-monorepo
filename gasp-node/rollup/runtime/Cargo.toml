@@ -36,7 +36,6 @@ pallet-stable-swap = { path = "../../pallets/stable-swap", default-features = fa
 pallet-sudo-origin = { path = "../../pallets/sudo-origin", default-features = false }
 pallet-xyk = { path = "../../pallets/xyk", default-features = false, version = "0.1.0" }
 parachain-staking = { path = "../../pallets/parachain-staking", default-features = false }
-xyk-runtime-api = { path = "../../pallets/xyk/runtime-api", default-features = false, version = "2.0.0" }
 rolldown-runtime-api = { path = "../../pallets/rolldown/runtime-api", default-features = false, version = "2.0.0" }
 proof-of-stake-runtime-api = { path = '../../pallets/proof-of-stake/runtime-api', default-features = false }
 pallet-rolldown = { path = "../../pallets/rolldown", default-features = false }
@@ -168,7 +167,6 @@ std = [
 	"sp-version/std",
 	"sp-weights/std",
 	"ver-api/std",
-	"xyk-runtime-api/std",
 ]
 
 try-runtime = [

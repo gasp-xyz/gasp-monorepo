@@ -1991,5 +1991,7 @@ sp_api::decl_runtime_apis! {
 			asset_id_in: AssetId,
 			max_amount_in: Balance,
 		) -> Result<MultiswapBuyInfo<Balance>, DispatchError>;
+
+		fn get_total_number_of_swaps() -> u128;
 	}
 }
