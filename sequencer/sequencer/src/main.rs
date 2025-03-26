@@ -43,7 +43,7 @@ struct Config {
 
     #[envconfig(from = "TX_COST")]
     pub tx_cost: Option<u128>,
-    
+
     #[envconfig(from = "PORT", default = "8080")]
     pub metrics_port: u16,
 }
