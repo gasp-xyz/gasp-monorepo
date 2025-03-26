@@ -29,7 +29,7 @@ tasks:
     outputs: ['build']
   
   build-image-local:
-    command: 'docker buildx build -t gaspxyz/ferry-withdrawal:local -t gaspxyz/ferry-withdrawal:local -f Dockerfile --load .'
+    command: 'docker buildx build -t ${DOCKERHUB_REPOSITORY}:local -t ${DOCKERHUB_REPOSITORY}:localcloser -f Dockerfile --load .'
     inputs: ['@group(sources)', '@group(dockerBuildInputs)']
 
   buildkit-build-and-push-image-digests:
