@@ -109,21 +109,25 @@ pub struct AtomicSwap<CurrencyId, Balance> {
 }
 
 #[derive(Encode, Decode, Eq, PartialEq, Debug, Clone, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
 pub struct MultiswapSellInfo<Balance> {
-	total_amount_in: Balance,
-	swap_amount_in: Balance,
-	amount_out: Balance,
-	fees: Balance,
-	is_lockless: bool,
+	pub total_amount_in: Balance,
+	pub swap_amount_in: Balance,
+	pub amount_out: Balance,
+	pub fees: Balance,
+	pub is_lockless: bool,
 }
 
 #[derive(Encode, Decode, Eq, PartialEq, Debug, Clone, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
 pub struct MultiswapBuyInfo<Balance> {
-	total_amount_in: Balance,
-	swap_amount_in: Balance,
-	amount_out: Balance,
-	fees: Balance,
-	is_lockless: bool,
+	pub total_amount_in: Balance,
+	pub swap_amount_in: Balance,
+	pub amount_out: Balance,
+	pub fees: Balance,
+	pub is_lockless: bool,
 }
 
 // use LP token as pool id, extra type for readability
@@ -279,6 +283,8 @@ pub mod pallet {
 		AssetsSwapped {
 			/// The account that initiated the swap
 			who: T::AccountId,
+			/// The total amount in
+			total_amount_in: T::Balance,
 			/// List of the atomic asset swaps
 			swaps: Vec<AtomicSwapOf<T>>,
 		},
@@ -835,6 +841,7 @@ pub mod pallet {
 			let swap_result: Result<(), DispatchError> =
 				frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
 					let (multiswap_sell_info, (pools, path)) = Self::get_multiswap_sell_info(swap_pool_list, asset_id_in, asset_amount_in, asset_id_out, min_amount_out)?;
+					let total_amount_in = multiswap_sell_info.total_amount_in;
 					let amount_in = multiswap_sell_info.swap_amount_in;
 					let amount_out = multiswap_sell_info.amount_out;
 					fees = Some(multiswap_sell_info.fees);
@@ -845,7 +852,7 @@ pub mod pallet {
 					let swaps =
 						Self::do_swaps(&sender, pools, path.clone(), amount_in, min_amount_out)?;
 
-					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
+					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), total_amount_in: total_amount_in, swaps });
 
 					let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(
 						&sender,
@@ -1023,6 +1030,7 @@ pub mod pallet {
 			let swap_result: Result<(), DispatchError> =
 				frame_support::storage::with_storage_layer(|| -> Result<(), DispatchError> {
 					let (multiswap_buy_info, (pools, path)) = Self::get_multiswap_buy_info(swap_pool_list, asset_id_out, asset_amount_out, asset_id_in, max_amount_in)?;
+					let total_amount_in = multiswap_buy_info.total_amount_in;
 					let amount_in = multiswap_buy_info.swap_amount_in;
 					fees = Some(multiswap_buy_info.fees);
 					is_lockless = Some(multiswap_buy_info.is_lockless);
@@ -1036,7 +1044,7 @@ pub mod pallet {
 					let swaps =
 						Self::do_swaps(&sender, pools, path.clone(), amount_in, asset_amount_out)?;
 
-					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), swaps });
+					Self::deposit_event(Event::AssetsSwapped { who: sender.clone(), total_amount_in: total_amount_in, swaps });
 
 					let (_pool_fees, trsy_amt, burn_amt) = Self::charge_fees(
 						&sender,
@@ -1962,42 +1970,26 @@ sp_api::decl_runtime_apis! {
 			amounts: (Balance, Balance),
 		) -> Option<Balance>;
 
-// 		fn get_max_instant_burn_amount(
-// 			user: AccountId,
-// 			liquidity_asset_id: AssetId,
-// 		) -> Balance;
-
-// 		fn get_max_instant_unreserve_amount(
-// 			user: AccountId,
-// 			liquidity_asset_id: AssetId,
-// 		) -> Balance;
-
-// 		fn calculate_rewards_amount(
-// 			user: AccountId,
-// 			liquidity_asset_id: AssetId,
-// 		) -> Balance;
-
-// 		fn calculate_balanced_sell_amount(
-// 			total_amount: Balance,
-// 			reserve_amount: Balance,
-// 		) -> Balance;
-
-// 		fn is_buy_asset_lock_free(
-// 			path: sp_std::vec::Vec<AssetId>,
-// 			input_amount: Balance,
-// 		) -> Option<bool>;
-
-// 		fn is_sell_asset_lock_free(
-// 			path: sp_std::vec::Vec<AssetId>,
-// 			input_amount: Balance,
-// 		) -> Option<bool>;
-
 		fn get_tradeable_tokens() -> Vec<RpcAssetMetadata<AssetId>>;
 
 		fn get_pools_for_trading() -> Vec<AssetId>;
 
 		fn get_pools(pool_id: Option<AssetId>) -> Vec<RpcPoolInfo<AssetId, Balance>>;
 
-// 		fn get_total_number_of_swaps() -> u128;
+		fn get_multiswap_sell_info(
+			swap_pool_list: Vec<AssetId>,
+			asset_id_in: AssetId,
+			asset_amount_in: Balance,
+			asset_id_out: AssetId,
+			min_amount_out: Balance,
+		) -> Result<MultiswapSellInfo<Balance>, DispatchError>;
+
+		fn get_multiswap_buy_info(
+			swap_pool_list: Vec<AssetId>,
+			asset_id_out: AssetId,
+			asset_amount_out: Balance,
+			asset_id_in: AssetId,
+			max_amount_in: Balance,
+		) -> Result<MultiswapBuyInfo<Balance>, DispatchError>;
 	}
 }

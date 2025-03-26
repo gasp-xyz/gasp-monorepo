@@ -1396,6 +1396,26 @@ impl_runtime_apis! {
 				})
 				.collect()
 		}
+
+		fn get_multiswap_sell_info(
+			swap_pool_list: Vec<TokenId>,
+			asset_id_in: TokenId,
+			asset_amount_in: Balance,
+			asset_id_out: TokenId,
+			min_amount_out: Balance,
+		) -> Result<pallet_market::MultiswapSellInfo<Balance>, DispatchError> {
+			Market::get_multiswap_sell_info(swap_pool_list, asset_id_in, asset_amount_in, asset_id_out, min_amount_out).map(|v| v.0)
+		}
+
+		fn get_multiswap_buy_info(
+			swap_pool_list: Vec<TokenId>,
+			asset_id_out: TokenId,
+			asset_amount_out: Balance,
+			asset_id_in: TokenId,
+			max_amount_in: Balance,
+		) -> Result<pallet_market::MultiswapBuyInfo<Balance>, DispatchError> {
+			Market::get_multiswap_buy_info(swap_pool_list,	asset_id_out, asset_amount_out,	asset_id_in, max_amount_in).map(|v| v.0)
+		}
 	}
 
 	impl sp_api::Core<Block> for Runtime {
