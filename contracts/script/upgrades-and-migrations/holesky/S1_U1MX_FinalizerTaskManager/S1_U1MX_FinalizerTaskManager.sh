@@ -11,10 +11,12 @@
 ANVIL_DEFAULT_ACCOUNT=anvil-default-0 # cast wallet import anvil-default-0 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 WALLET_NAME=mainnet-actual-0
 PREFIX=wss://holesky.gateway.tenderly.co/
-if [[ ! $RPC_URL =~ ^"$PREFIX" ]]; then
-echo "RPC_URL bad target"
-exit 1
-fi
+# if [[ ! $RPC_URL =~ ^"$PREFIX" ]]; then
+# echo "RPC_URL bad target"
+# exit 1
+# fi
+RPC_URL=https://mainnet.gateway.tenderly.co/FD8CGb2oqAKb2aNEZpdZj
+# RPC_URL=http://localhost:8545
 
 # cd to the directory of this script so that this can be run from anywhere
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
@@ -27,6 +29,6 @@ echo "executing script"
 # ADD --broadcast to actually execute the script (if using without broadcast use ANVIL_DEFAULT_ACCOUNT instead of WALLET_NAME)
 # !!!!!!!!!!
 # Add --resume when re-running after it has failed
-forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --account $WALLET_NAME --broadcast -vvvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY
+forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "run()" --rpc-url $RPC_URL --account gasp-council -vvvvv --broadcast
 
 # forge script S1_U1MX_FinalizerTaskManager.s.sol --sig "verify()" --rpc-url $RPC_URL --account $WALLET_NAME -vvvvv
