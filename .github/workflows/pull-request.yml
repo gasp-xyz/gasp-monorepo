@@ -86,7 +86,17 @@ jobs:
             });
             
             core.setFailed("PR title doesn't match conventional commit format");
-            
+
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+      - run: yarn install --immutable
+
+      - name: Run commitlint
+        run: yarn commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
