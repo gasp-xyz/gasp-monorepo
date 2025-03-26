@@ -239,6 +239,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'sequencer/target,updater/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.78.0 rust toolchain
@@ -248,6 +249,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'gasp-avs/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
@@ -257,6 +259,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
           cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           # bins: cargo-tarpaulin@0.26.1
           target-dirs: 'gasp-node/target'
         env:
@@ -320,6 +323,7 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rust-src
           cache: ${{ inputs.cacheEnabled }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'gasp-node/target'
 
       - uses: moonrepo/setup-toolchain@v0.4.1
