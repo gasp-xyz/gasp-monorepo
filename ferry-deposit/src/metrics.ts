@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from "express";
 import promClient, { Gauge } from "prom-client";
 import { L2Interface } from "./l2/L2Interface";
 import { isEqual, sleep } from "./utils.js";
-import { PORT } from "./config";
+import { PORT } from "./config.js";
 
 const register = new promClient.Registry();
 const DELAY_5M = 300 * 1000;
