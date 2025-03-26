@@ -126,6 +126,7 @@ jobs:
   build-and-check-services:
     name: '[AVS] ${{ matrix.name }}'
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
     strategy: 
       matrix:
         include:

@@ -415,8 +415,33 @@ jobs:
       - name: Test ferry
         run: yarn run test-ferry
 
+  e2e-tests-status:
+    name: 'E2E Tests Status'
+    needs: [e2e-test-matrix, ferry-withdrawal-test, ferry-deposit-test]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check test results
+        run: |
+          # Check results of all test jobs
+          if [[ "${{ contains(needs.e2e-test-matrix.result, 'failure') || 
+                  contains(needs.ferry-withdrawal-test.result, 'failure') || 
+                  contains(needs.ferry-deposit-test.result, 'failure') }}" == "true" ]]; then
+            echo "::error::One or more test jobs failed"
+            exit 1
+          # Check for cancelled jobs
+          elif [[ "${{ contains(needs.e2e-test-matrix.result, 'cancelled') || 
+                    contains(needs.ferry-withdrawal-test.result, 'cancelled') || 
+                    contains(needs.ferry-deposit-test.result, 'cancelled') }}" == "true" ]]; then
+            echo "::warning::One or more test jobs were cancelled"
+            exit 1
+          # Success case
+          else
+            echo "::notice::All tests completed successfully"
+          fi
+
   test-complete:
-    needs: [setup-report, e2e-test-matrix, ferry-withdrawal-test, ferry-deposit-test]
+    needs: [e2e-tests-status]
     if: always()
     runs-on: ubuntu-24.04
     steps:
