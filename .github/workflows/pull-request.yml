@@ -74,7 +74,8 @@ jobs:
               "### After fixing the title:",
               "1. Edit the PR title by clicking the pencil icon next to the title at the top of this page",
               "2. Make a small change to your branch and push it, or use the 'Re-run all jobs' button in the Actions tab",
-              "3. This will trigger the workflow to run again with your corrected PR title"
+              "3. Alternatively, you can push an empty commit to trigger CI: `git commit --allow-empty -m 'chore: trigger ci'`",
+              "4. This will trigger the workflow to run again with your corrected PR title"
             ].join('\n');
 
             github.rest.issues.createComment({
