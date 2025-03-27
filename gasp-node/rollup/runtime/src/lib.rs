@@ -868,6 +868,8 @@ impl pallet_market::Config for Runtime {
 	type BuyAndBurnFeePercentage = fees::MarketBuyAndBurnFeePercentage;
 	type FeeDenominator = fees::MarketFeeDenominator;
 
+	type MinSwapFee = fees::MinSwapFee;
+
 	type TreasuryAccountId = cfg::TreasuryAccountIdOf<Runtime>;
 	type BnbAccountId = cfg::BnbAccountIdOf<Runtime>;
 	type FeeLock = FeeLock;
