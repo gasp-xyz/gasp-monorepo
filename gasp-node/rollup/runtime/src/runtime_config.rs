@@ -65,6 +65,8 @@ pub mod fees {
 	pub type MarketBuyAndBurnFeePercentage = frame_support::traits::ConstU128<5>;
 	pub type MarketFeeDenominator = ConstU128<10_000>;
 
+	pub type MinSwapFee = ConstU128<6>;
+
 	// We set these to 0 to not have the stable swap pallet charge any exchange commission fees
 	// We charge commission in the market pallet on the input assetof the first atomic swap
 	// xyk uses 10_000 as fee multiplier
@@ -610,7 +612,7 @@ pub mod config {
 						FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
 							who,
 							asset_id_in,
-							asset_amount_in,
+							asset_amount_in.max(<Runtime as pallet_market::Config>::MinSwapFee::get()),
 						)?;
 					},
 					_ => {},

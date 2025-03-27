@@ -226,6 +226,8 @@ pub mod pallet {
 		type BuyAndBurnFeePercentage: Get<u128>;
 		type FeeDenominator: Get<u128>;
 
+		type MinSwapFee: Get<Self::Balance>;
+
 		type TreasuryAccountId: Get<Self::AccountId>;
 		type BnbAccountId: Get<Self::AccountId>;
 
@@ -273,6 +275,8 @@ pub mod pallet {
 		NotEnoughAssetsForFees,
 		/// Not enough assets for fee lock
 		NotEnoughAssetsForFeeLock,
+		/// Insufficient input amount
+		InsufficientInputAmount
 	}
 
 	// Pallet's events.
@@ -829,7 +833,7 @@ pub mod pallet {
 			T::Currency::ensure_can_withdraw(
 				asset_id_in,
 				&sender,
-				asset_amount_in,
+				asset_amount_in.max(T::MinSwapFee::get()),
 				// Last two args are ignored by orml_tokens
 				WithdrawReasons::all(),
 				Default::default(),
@@ -1028,7 +1032,7 @@ pub mod pallet {
 			T::Currency::ensure_can_withdraw(
 				asset_id_in,
 				&sender,
-				max_amount_in,
+				max_amount_in.max(T::MinSwapFee::get()),
 				// Last two args are ignored by orml_tokens
 				WithdrawReasons::all(),
 				Default::default(),
@@ -1055,7 +1059,7 @@ pub mod pallet {
 						amount_in.saturating_add(
 							fees.ok_or(Error::<T>::UnexpectedFailure { id: function_error_id })?
 						) <= max_amount_in,
-						Error::<T>::ExcesiveInputAmount
+						Error::<T>::InsufficientInputAmount
 					);
 					let swaps =
 						Self::do_swaps(&sender, pools, path.clone(), amount_in, asset_amount_out)?;
@@ -1199,7 +1203,7 @@ pub mod pallet {
 
 			let amount_in = asset_amount_in
 				.checked_sub(&fees)
-				.ok_or(Error::<T>::MathOverflow { id: function_error_id })?;
+				.ok_or(Error::<T>::InsufficientInputAmount)?;
 			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
 
 			if swap_pool_list.len() > 1 {
@@ -1333,7 +1337,7 @@ pub mod pallet {
 			.try_into()
 			.map_err(|_| Error::<T>::MathOverflow { id: function_error_id })?;
 
-			Ok(total_fees)
+			Ok(total_fees.max(T::MinSwapFee::get()))
 		}
 
 		pub fn calc_fees_post(amount: T::Balance) -> Result<T::Balance, DispatchError> {
@@ -1357,7 +1361,7 @@ pub mod pallet {
 			.try_into()
 			.map_err(|_| Error::<T>::MathOverflow { id: function_error_id })?;
 
-			Ok(total_fees)
+			Ok(total_fees.max(T::MinSwapFee::get()))
 		}
 
 		fn charge_fees(

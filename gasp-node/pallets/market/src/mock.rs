@@ -509,6 +509,8 @@ impl market::Config for Test {
 	type BuyAndBurnFeePercentage = ConstU128<5>;
 	type FeeDenominator = ConstU128<10_000>;
 
+	type MinSwapFee = ConstU128<6>;
+
 	type TreasuryAccountId = TreasuryAccount;
 	type BnbAccountId = BnbAccount;
 
