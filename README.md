@@ -1,164 +1,165 @@
 # Gasp Monorepo
 
-<b> Do not use it in Production, testnet only. </b>
+> **Warning:** For testnet use only. Not production-ready.
 
-Monorepo consists of:
+## Project Overview
 
-1. **(RollDown) Gasp ETH Contract:** Smart contract on the Ethereum blockchain that receives ERC20 token deposits and withdrawal requests.
-2. **Gasp Sequencer:** Decentralized service that reads updates from the Gasp ETH Contract and submits transactions with the information to the collator. It also monitors other sequencers for malicious activity and submits cancel requests before the dispute period ends for deposits.
-3. **Gasp Collator (Gasp blockchain node):** Responsible for building blockchain blocks on the Gasp L2 network built in Rust and Substrate framework. Based on information received from the sequencer, can also execute deposits and withdrawal requests.
-4. **Gasp Updater:** Monitors finished tasks on Eigen Layer and submits its results to **(RollDown) Gasp ETH Contract**
-5. **Aggregator & Task Manager:** Gasp runs an off-chain service that generates "tasks" and aggregates tasks processed by Eigen Layer operators. In our case, it will generate a task to finalize every 100th block. The Aggregator will sign the Ethereum TX to the **Eigen ETH Contract.** This service is a centralized off-chain worker.
-6. ** Gasp AVS - (Eigen Operator - AVS):** Collection of decentralized AVS operators that handle tasks. In our case, the task will be “Merkle root verification” and “operator list change”. Operators will sign the results and provide it to the aggregator. The **operator** will also finalise the block by re-executing it.
-7. **Eigen ETH Contracts:** Smart contracts (approx. 15) that handle the storage Merkle Roots and actual Operator Lists with coresponding BLS aggregated keys and stakes.
+Gasp is a Layer 2 solution utilizing Eigen Layer for security and consensus:
 
-## Pre-requisites
+| Component | Directory | Description |
+|-----------|-----------|-------------|
+| **Gasp ETH Contract** | `contracts/` | Handles ERC20 deposits and withdrawals on Ethereum |
+| **Sequencer** | `sequencer/` | Processes transactions and submits them to the collator |
+| **Collator** | `gasp-node/` | Builds L2 blocks using Substrate framework |
+| **Updater** | `updater/` | Monitors Eigen Layer tasks and submits results to ETH contract |
+| **Aggregator & Task Manager** | `avs-aggregator/` | Generates tasks and aggregates operator results |
+| **Gasp AVS** | `gasp-avs/` | Decentralized operators that verify Merkle roots and re-execute blocks |
+| **Ferry Services** | `ferry-deposit/`, `ferry-withdrawal/` | Handle cross-chain asset transfers |
+| **Stash** | `stash/` | Node.js service for data management |
+| **Eigen ETH Contracts** | `contracts/lib/eigenlayer-contracts/` | Manages storage Merkle roots and operator lists |
 
-1. You will need [foundry](https://book.getfoundry.sh/getting-started/installation) to run local testnet.
+## Setup Guide
+
+### Prerequisites
+
+- **Foundry**: Required for running local testnet
+
+  ```bash
+  curl -L https://foundry.paradigm.xyz | bash
+  foundryup
+  ```
+
+- **Rust Toolchain**: Required for Rust-based services
+
+  ```bash
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  ```
+
+- **Go Toolchain**: With zap-pretty for logging
+
+  ```bash
+  go install github.com/maoueh/zap-pretty@latest
+  ```
+
+- **Proto & Moon**: For toolchain and task management
+
+  ```bash
+  # Install proto for toolchain management
+  bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
+  
+  # Run `proto install` to install toolchain dependencies and setup your machine for development
+  proto install
+  ```
+
+- **Docker Compose**: For running multi-container setup
+  See [Docker Compose installation instructions](https://docs.docker.com/compose/install/) for platform-specific instructions
+
+### Development Setup
+
+1. Clone and initialize submodules:
+
+   ```bash
+   git clone https://github.com/gasp-xyz/gasp-monorepo.git
+   cd gasp-monorepo
+   git submodule update --init --recursive
+   ```
+
+2. Setup Git hooks with Husky:
+
+   ```bash
+   # Proto will automatically install dependencies and set up Husky
+   yarn run postinstall
+   ```
+
+   Our repository uses:
+   - [Husky](https://typicode.github.io/husky/) for Git hooks
+   - [commitlint](https://commitlint.js.org/) for validating commit messages using the [Conventional Commits](https://www.conventionalcommits.org/) standard
+
+3. Follow the [contribution guidelines](CONTRIBUTING.md) for branch naming and commit formats
+
+### Proto Shell Activation (Optional)
+
+For an optimized development experience in a complex monorepo with multiple toolchains (Rust, Go, Node.js), you can set up Proto's shell activation. This is particularly helpful as switching between services with different toolchain requirements can become cumbersome:
+
+1. Add shell activation to your profile:
+
+   ```bash
+   # For Bash (~/.bashrc)
+   eval "$(proto activate bash)"
+   
+   # For Zsh (~/.zshrc)
+   eval "$(proto activate zsh)"
+   ```
+
+2. Restart your terminal or source your profile file
+
+Benefits for Gasp monorepo development:
+
+- Handles automatic switching between multiple toolchains when navigating between service directories
+- Recognizes not only `.prototools` files but also `.nvmrc` files for Node.js version management
+- Automatically loads and exports the correct environment variables for each service
+- Ensures all developers use identical toolchain versions across the codebase
+- Prevents the common "wrong version" issues when working with multiple services
+
+The different services in our monorepo (Go-based `avs-aggregator`, Rust-based `sequencer`, Node.js-based `ferry` services) each require specific tool versions and configurations. With Proto shell activation, these are managed automatically as you navigate through the codebase.
+
+> **Note:** Shell activation should be added *after* all PATH modifications in your shell profile, as any PATH changes made after the activation line will be lost when activation triggers. For detailed setup instructions for different shells and additional options, see the [Proto Activate Command documentation](https://moonrepo.dev/docs/proto/commands/activate#setup).
+
+For general information on Proto workflows, see the [Proto Workflows documentation](https://moonrepo.dev/docs/proto/workflows).
+
+### Running Locally
+
+#### Using Docker Compose
 
 ```bash
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-```
-
-2. You will need Rust toolchain
-
-```bash
-url --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-3. You will need [golang toolchain](https://go.dev/doc/install) with [zap-pretty](https://github.com/maoueh/zap-pretty)
-
-```bash
-go install github.com/maoueh/zap-pretty@latest
-```
-
-4. You will need [docker-compose](https://docs.docker.com/compose/install/)
-
-5. You will need [proto](https://moonrepo.dev/docs/proto/install) and [moon](https://moonrepo.dev/docs/install) to build Docker image if you want to run spin up local environment via Docker Compose.
-
-```bash
-bash <(curl -fsSL https://moonrepo.dev/install/proto.sh)
-proto install moon
-```
-
-## Running via make
-
-This simple session illustrates the basic flow of the AVS. The makefile commands are hardcoded for a single gasp-avs. For more gasp-avss you would need to modify setup script to distribute mock ERC20 tokens and deposit into AVS per gasp-avs.
-See [0_AnvilSetup.s.sol](contracts/script/0_AnvilSetup.s.sol#L88) script for more info.
-
-Init submodules and update deps,
-
-```bash
-  git submodule init
-  git submodule update
-```
-
-
-Start anvil in a separate terminal:
-
-```bash
-make start-anvil-chain-with-el-and-avs-deployed
-```
-
-The above command starts a local anvil chain from a [saved state](tests/integration/avs-and-eigenlayer-deployed-anvil-state.json) with eigenlayer and mangata-avs contracts already deployed (but no gasp-avs registered).
-
-Then start the aggregator: 
-```bash
-make start-avs-aggregator
-```
-And lately, the gasp-avs,
-```bash
-make start-gasp-avs
-```
-
-## Running via docker-compose
-
-### Setup
-
-- update eigen layer dependant submodules
-
-```bash
-git submodule update --init --recursive
-```
-
-### Start local environment
-
-In the root folder run:
-
-> [!IMPORTANT]
-> Running `moon :build-image-local` is essential before running `docker compose up -d --wait`
-> [!WARNING]
-> For MacOS users with M1/M2 series processors parameter `Use Rosetta for x86_64/amd64 emulation on Apple Silicon` should be turned OFF in your Docker Desktop configurations
-
-```bash
-# build docker images
+# Build Docker images
 moon :build-image-local
-# start local environment
+
+# Start all services (for M1/M2 Macs, disable Rosetta emulation in Docker Desktop)
 docker compose up -d
-```
 
-### How to modify particular services
-
-Modify source code, then run next commands:
-
-```bash
-moon :build-image-local
-docker compose up -d
-```
-
-### Tear down
-
-```bash
+# Tear down
 docker compose down -v
 ```
 
-## Avs Task Description
+## Technical Architecture
+
+### AVS Architecture
 
 The architecture of the AVS contains:
 
 - [Eigenlayer core](https://github.com/Layr-Labs/eigenlayer-contracts/tree/master) contracts
 - AVS contracts
-  - [ServiceManager](contracts/src/MangataServiceManager.sol) which will eventually contain slashing logic but for M2 is just a placeholder.
-  - [TaskManager](contracts/src/MangataTaskManager.sol) which contains [task creation](contracts/src/MangataTaskManager.sol#L83) and [task response](contracts/src/MangataTaskManager.sol#L102) logic.
-  - Set of [registry contracts](https://github.com/Layr-Labs/eigenlayer-middleware) to manage gasp-avss opted in to this avs
-- Task Generator
-  - in a real world scenario, this could be a separate entity, but for this simple demo, the aggregator also acts as the task generator
-- Aggregator
-  - aggregates BLS signatures from gasp-avss and posts the aggregated response to the task manager
-  - For this simple demo, the aggregator is not an gasp-avs, and thus does not need to register with eigenlayer or the AVS contract. It's IP address is simply hardcoded into the gasp-avs' config.
-- Gasp AVSs
-  - Execute a block sent to the task manager by the task generator, sign it, and send it to the aggregator
+  - [ServiceManager](contracts/src/MangataServiceManager.sol) - Will eventually contain slashing logic
+  - [TaskManager](contracts/src/MangataTaskManager.sol) - Handles task creation and responses
+  - [Registry contracts](https://github.com/Layr-Labs/eigenlayer-middleware) - Manages operator registration
+- Task Generator - Creates tasks for block verification (currently part of the aggregator)
+- Aggregator - Collects and verifies BLS signatures from operators
+- Gasp AVS Operators - Execute blocks and provide signatures
 
+### AVS Task Flow
 
-1. A task generator (in our case, same as the aggregator) publishes tasks once every regular interval (say 10 blocks, you are free to set your own interval) to the Mangata contract's [createNewTask](contracts/src/MangataTaskManager.sol#L83) function. Each task specifies an integer `blockNumber` for which it wants the currently opted-in Gasp AVSs to execute it. `createNewTask` also takes `quorumNumbers` and `quorumThresholdPercentage` which requests that each listed quorum (we only use quorumNumber 0) needs to reach at least thresholdPercentage of Gasp AVS signatures.
+1. Task Generator publishes tasks to the `createNewTask` function, specifying block numbers and quorum thresholds
+2. Registered operators (with minimum 1 delegated token) execute the specified blocks
+3. Operators sign results using BN254 curve and send signatures to the aggregator
+4. Aggregator collects signatures and posts aggregated responses that meet threshold requirements
+5. Responses within the response window enter dispute resolution (not yet implemented)
 
-2. A [registry](https://github.com/Layr-Labs/eigenlayer-middleware/blob/master/src/BLSRegistryCoordinatorWithIndices.sol) contract is deployed that allows any eigenlayer Gasp AVS with at least 1 delegated [mockerc20](contracts/src/ERC20Mock.sol) token to opt-in to this AVS and also de-register from this AVS.
+### Stake Updates
 
-3. [Gasp AVS] The Gasp AVSs who are currently opted-in with the AVS need to read the task number from the Task contract, execute the block, sign on that computed result (over the BN254 curve) and send their taskResponse and signature to the aggregator.
+AVS Registry contracts have a stale view of operator shares in the delegation manager contract. To update the stake table, operators need to periodically call the [StakeRegistry.updateStakes()](https://github.com/Layr-Labs/eigenlayer-middleware/blob/f171a0812126bbb0bb6d44f53c622591a643e987/src/StakeRegistry.sol#L76) function. Currently, we use an internal script to handle this manually.
 
-4. [Aggregator] The aggregator collects the signatures from the Gasp AVSs and aggregates them using BLS aggregation. If any response passes the [quorumThresholdPercentage](contracts/src/IMangataTaskManager.sol#L36) set by the task generator when posting the task, the aggregator posts the aggregated response to the Task contract.
+### Integration Testing
 
-5. If a response was sent within the [response window](contracts/src/MangataTaskManager.sol#L122), we enter the [Dispute resolution] period.
-   - Not yet implemented
+For detailed testing instructions, see the [integration tests README](tests/integration/README.md).
 
-## Avs node spec compliance
+### AVS Node Specification
 
-Every AVS node implementation is required to abide by the [Eigenlayer AVS Node Specification](https://eigen.nethermind.io/). We suggest reading through the whole spec, including the keys management section, but the hard requirements are currently only to:
-- implement the [AVS Node API](https://eigen.nethermind.io/docs/category/avs-node-api)
-- implement the [eigen prometheus metrics](https://eigen.nethermind.io/docs/category/metrics)
+Gasp AVS nodes are being developed to comply with the [Eigenlayer AVS Node Specification](https://eigen.nethermind.io/), which requires:
 
-Work in progress for the current implementation of Gasp AVS.
+- Implementation of the [AVS Node API](https://eigen.nethermind.io/docs/category/avs-node-api)
+- Implementation of [Eigen prometheus metrics](https://eigen.nethermind.io/docs/category/metrics)
 
-## StakeUpdates Cronjob
+## Contributing
 
-AVS Registry contracts have a stale view of Gasp AVS shares in the delegation manager contract. In order to update their stake table, they need to periodically call the [StakeRegistry.updateStakes()](https://github.com/Layr-Labs/eigenlayer-middleware/blob/f171a0812126bbb0bb6d44f53c622591a643e987/src/StakeRegistry.sol#L76) function. We are currently using internal script to get Gasp AVS adresses and call the contract manually.
-
-## Integration Tests
-
-See the integration tests [README](tests/integration/README.md) for more details.
-
-## How to start a local environment
-
-1. Ensure you have Docker Compose installed
-2. Run `docker compose up -d` command from the root of the repository
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our development workflow, branch strategy, and release process.
