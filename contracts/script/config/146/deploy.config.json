@@ -1,0 +1,12 @@
+{
+  "chainInfo": {
+    "chainId": 146
+  },
+  "permissions": {
+    "owner": "0xFc8151F19e338C509D1F5B8c981249324014b6B7",
+    "upgrader": "0xFc8151F19e338C509D1F5B8c981249324014b6B7",
+    "rolldownUpdater": "0xFc8151F19e338C509D1F5B8c981249324014b6B7",
+    "gmrsUpdater": "0xFc8151F19e338C509D1F5B8c981249324014b6B7"
+  },
+  "allow_non_root_gmrs_init": false,
+}
