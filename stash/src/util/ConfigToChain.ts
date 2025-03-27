@@ -1,10 +1,13 @@
 import { Chain } from 'viem'
 import {
   anvil,
-  arbitrumSepolia, arbitrum,
-  baseSepolia, base,
-  holesky, mainnet,
+  arbitrum,
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  holesky,
   localhost,
+  mainnet,
 } from 'viem/chains'
 
 export const CONFIG_TO_CHAIN = new Map<string, Chain>([

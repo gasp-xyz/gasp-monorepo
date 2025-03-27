@@ -6497,12 +6497,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-sort-imports-es6-autofix@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "eslint-plugin-sort-imports-es6-autofix@npm:0.6.0"
+"eslint-plugin-simple-import-sort@npm:^12.1.1":
+  version: 12.1.1
+  resolution: "eslint-plugin-simple-import-sort@npm:12.1.1"
   peerDependencies:
-    eslint: ">=7.7.0"
-  checksum: 10c0/3ca15613a1ec7ebd6c2789d3e651b78abad1d0c6adde476f2b8ce4746bc34aad97e515ea7676a42029ab0ce852e9103c26dc1258565dad1c472fe9da9a8373c2
+    eslint: ">=5.0.0"
+  checksum: 10c0/0ad1907ad9ddbadd1db655db0a9d0b77076e274b793a77b982c8525d808d868e6ecfce24f3a411e8a1fa551077387f9ebb38c00956073970ebd7ee6a029ce2b3
   languageName: node
   linkType: hard
 
@@ -13088,7 +13088,7 @@ __metadata:
     eslint-import-resolver-typescript: "npm:^3.6.3"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-prettier: "npm:^4.2.1"
-    eslint-plugin-sort-imports-es6-autofix: "npm:^0.6.0"
+    eslint-plugin-simple-import-sort: "npm:^12.1.1"
     express: "npm:^4.19.2"
     express-validator: "npm:6.14.2"
     gasp-sdk: "npm:0.0.2-eth-rollup-develop.79"
