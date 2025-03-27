@@ -40,7 +40,7 @@ contract Deployer is Script, Utils, Test {
         avsOwner = vm.parseAddress("0xFc8151F19e338C509D1F5B8c981249324014b6B7");
         avsUpdater = vm.parseAddress("0x74AFD71912532AFeB74B752dA70fF939D9Be7BB8");
 
-        require(block.chainid == 461, "You are on the wrong chain");
+        require(block.chainid == 146, "You are on the wrong chain");
 
         // START BROADCAST
         vm.startBroadcast();
