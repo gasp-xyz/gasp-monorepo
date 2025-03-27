@@ -15,10 +15,6 @@ import {Utils} from "./utils/Utils.sol";
 
 contract MultiStage is Script, Utils {
     bytes32 public envHash = _stringToHash(vm.envString("ENV_SELECTOR"));
-    // gmrs and rolldown contracts needs to point to each other, the only account that can
-    // initialize it is multisig wallet that cant be used to run the script itself
-    // so in such cases the contract connection needs to be performed manucally
-    bool public constant SKIP_ROLLDOWN_GMRS_CONNECTION = true;
 
     function run() public {
         if (envHash == _stringToHash("ethereum-stub")) {
@@ -63,27 +59,22 @@ contract MultiStage is Script, Utils {
         }
 
         if (envHash == _stringToHash("arbitrum-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
         }
 
         if (envHash == _stringToHash("base-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
         }
 
         if (envHash == _stringToHash("monad-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
             return;
         }
 
         if (envHash == _stringToHash("megaeth-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth, !SKIP_ROLLDOWN_GMRS_CONNECTION);
-            return;
-        }
-
-        if (envHash == _stringToHash("sonic")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Sonic, SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
             return;
         }
 
@@ -125,7 +116,7 @@ contract MultiStage is Script, Utils {
                 "Contracts already deployed on Arbitrum Sepolia"
             );
 
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
             return;
         }
 
@@ -135,7 +126,7 @@ contract MultiStage is Script, Utils {
                 "Contracts already deployed on Base Sepolia"
             );
 
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
             return;
         }
 
@@ -145,7 +136,7 @@ contract MultiStage is Script, Utils {
                 "Contracts already deployed on Monad Testnet"
             );
 
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
             return;
         }
 
@@ -155,7 +146,7 @@ contract MultiStage is Script, Utils {
                 "Contracts already deployed on Megaeth Testnet"
             );
 
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth, !SKIP_ROLLDOWN_GMRS_CONNECTION);
+            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
             return;
         }
 
@@ -195,7 +186,7 @@ contract MultiStage is Script, Utils {
         vm.stopBroadcast();
     }
 
-    function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain, bool skipRolldownUpdaterConnection) private {
+    function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
         _incrementAccountNonce();
 
         _printMessage("Deploying rolldown contracts");
@@ -216,19 +207,12 @@ contract MultiStage is Script, Utils {
         string memory rolldownDeployedContracts = readOutput("rolldown_output");
         Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
-        if (!skipRolldownUpdaterConnection) {
-          vm.startBroadcast(avsOwner);
-          gmrs.setRolldown(IRolldown(address(rolldown)));
-          rolldown.setUpdater(address(gmrs));
-          vm.stopBroadcast();
-        }else{
-          console.log("################################################################################");
-          console.log("You will have to call manually gmrs::setRolldown");
-          console.log("You will have to call manually rolldown::setUpdater");
-          console.log("################################################################################");
-          // additional check, you should set this env var if you know what are you doing
-          vm.envString("SKIP_ROLLDOWN_GMRS_CONNECTION");
-        }
+        vm.startBroadcast(avsOwner);
+
+        gmrs.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(gmrs));
+
+        vm.stopBroadcast();
     }
 
     function _printMessage(string memory message) private pure {
