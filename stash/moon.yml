@@ -1,6 +1,7 @@
 language: typescript
 type: application
 tags: ['typescript']
+tags: ['typescript']
 
 toolchain:
   node:

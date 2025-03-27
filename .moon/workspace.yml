@@ -22,16 +22,11 @@ vcs:
   defaultBranch: 'develop'
 
 runner:
+  logRunningCommand: true
   archivableTargets:
     - ':format'
     - ':lint'
     - ':test'
-    - ':format-gasp-avs'
-    - ':lint-gasp-avs'
-    - ':test-gasp-avs'
-    - ':format-gasp-node'
-    - ':lint-gasp-node'
-    - ':test-gasp-node'
     - ':benchmark-tests-gasp-node'
 
 unstable_remote:
@@ -45,3 +40,5 @@ unstable_remote:
 
 hasher:
   walkStrategy: 'glob'
+  ignoreMissingPatterns:
+    - '**/.dockerignore'
