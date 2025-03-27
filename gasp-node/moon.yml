@@ -1,5 +1,7 @@
 type: application
 language: rust
+tags: ['rust']
+
 toolchain:
   rust:
     version: nightly-2024-01-20
@@ -19,8 +21,10 @@ fileGroups:
     - 'pallets/**/*'
     - 'rollup/**/*'
     - 'rpc/**/*'
-    - 'Cargo.toml'
-    - 'Cargo.lock'
+    - 'scripts/**/*'
+    - 'templates/**/*'
+    - 'Cargo.{toml,lock}'
+    - 'rust-toolchain.toml'
   gasp-e2e-sources:
     - 'gasp-e2e/**/*.ts'
     - 'gasp-e2e/package.json'
@@ -34,7 +38,7 @@ tasks:
 
   build:
     command: cargo build --release
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     options:
       outputStyle: 'stream'
     outputs:
@@ -45,7 +49,7 @@ tasks:
 
   build-image-local:
     script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t ${DOCKERHUB_REPOSITORY}:local --load .'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    inputs: ['@group(sources)', '@group(dockerBuildInputs)']
 
   buildkit-build-and-push-image-digests-standard-runtime:
     script: |
@@ -91,7 +95,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
     outputs: ['build/gasp-node-standard-runtime-buildkit-metadata.json', 'build/rollup_runtime_standard.compact.compressed.wasm']
     options:
       outputStyle: buffer-only-failure
@@ -143,7 +147,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
     outputs: ['build/gasp-node-fast-runtime-buildkit-metadata.json', 'build/rollup_runtime_fast.compact.compressed.wasm']
     options:
       outputStyle: buffer-only-failure
@@ -177,15 +181,15 @@ tasks:
 
   format:
     command: cargo fmt --all -- --check
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
 
   lint:
     command: cargo clippy -p pallet-xyk
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
 
   test:
     command: cargo test
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
 
   coverage-gasp-node:
     command: >
@@ -194,7 +198,7 @@ tasks:
       -e rollup-runtime-integration-test rollup-node rollup-runtime
       --exclude-files **/mock.rs **/weights.rs **/weights/*
       --target-dir target-coverage
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['cobertura.xml']
   
   benchmark-tests-gasp-node:
@@ -203,13 +207,13 @@ tasks:
       cargo test --release -j8 --features=runtime-benchmarks -p pallet-bootstrap -p pallet-market
       # NOTE: MGX-742
       cargo test --release -j8 --features=runtime-benchmarks -p pallet-proof-of-stake
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     options:
       outputStyle: stream
 
   build-runtime-benchmarks-gasp-node:
     command: cargo build --release --no-default-features --features=runtime-benchmarks --target-dir target-runtime-benchmarks
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     options:
       internal: true
       outputStyle: stream
@@ -230,7 +234,7 @@ tasks:
 
       target-runtime-benchmarks/release/rollup-node benchmark overhead --chain rollup-local -lblock_builder=debug --max-ext-per-block 50000 --base-path .
       cp block_weights.rs extrinsic_weights.rs ./benchmarks
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['benchmarks']
     deps: ['build-runtime-benchmarks-gasp-node']
     env:
@@ -272,7 +276,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-bootstrap:
@@ -304,7 +308,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel:
@@ -336,7 +340,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequential-no-bootstrap:
@@ -368,7 +372,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-seqgasless:
@@ -400,7 +404,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-maintenance:
@@ -432,7 +436,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rollupUpdate:
@@ -464,7 +468,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rewards-bootstrap:
@@ -496,7 +500,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel-autocompound:
@@ -528,7 +532,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequential-autocompound:
@@ -560,7 +564,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-poolliquidity:
@@ -592,7 +596,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-governance:
@@ -624,7 +628,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-multiswap:
@@ -656,7 +660,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-experimentalStaking:
@@ -688,7 +692,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-crowdloan:
@@ -720,7 +724,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sdk:
@@ -752,7 +756,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-parallel-3rdPartyRewards:
@@ -784,7 +788,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequencerStaking:
@@ -816,7 +820,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequencerCancellation:
@@ -848,7 +852,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rolldown:
@@ -880,7 +884,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rolldownWithdrawal:
@@ -912,7 +916,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rolldownPreOperationWithdrawal:
@@ -944,7 +948,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-sequencerRewards:
@@ -976,7 +980,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-nonTransToken:
@@ -1008,7 +1012,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-issuanceConfig:
@@ -1040,7 +1044,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-marketSwap:
@@ -1072,7 +1076,7 @@ tasks:
       exit $TEST_EXIT_CODE
     options:
       cache: true
-    inputs: ['@globs(sources)', '@globs(gasp-e2e-sources)']
+    inputs: ['@group(sources)', '@group(gasp-e2e-sources)']
     outputs: ['gasp-e2e/reports/*.xml']
 
   e2e-test-rollup:
@@ -1116,8 +1120,8 @@ tasks:
       cache: true
       runFromWorkspaceRoot: true
     inputs: 
-      - '@globs(sources)'
-      - '@globs(gasp-e2e-sources)'
+      - '@group(sources)'
+      - '@group(gasp-e2e-sources)'
       - '/gasp-avs/bindings/**/*.rs'
       - '/gasp-avs/src/**/*.rs'
       - '/gasp-avs/Cargo.toml'

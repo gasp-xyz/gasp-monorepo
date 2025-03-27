@@ -1,5 +1,6 @@
 language: go
 type: application
+tags: ['golang']
 
 toolchain:
   node:
@@ -25,23 +26,18 @@ env:
   DOCKERHUB_REPOSITORY: gaspxyz/avs-aggregator
 
 tasks:
-  prepare-toolchain:
-    command: go version
-    options:
-      cache: false
-
-  # format:
+# format:
   #   command: 'go fmt ./...'
-  #   inputs: ['@globs(sources)']
+  #   inputs: ['@group(sources)']
 
   build:
     command: 'go build -o build/avs-aggregator cmd/main.go'
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['build/avs-aggregator']
   
   build-image-local:
     command: 'docker buildx build -t gaspxyz/avs-aggregator:local -f Dockerfile --load ../'
-    inputs: ['@globs(sources)', 'Dockerfile']
+    inputs: ['@group(sources)', '@group(dockerBuildInputs)']
 
   buildkit-build-and-push-image-digests:
     script: |
@@ -72,7 +68,7 @@ tasks:
       fi
       
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
     outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
     options:
       outputStyle: buffer-only-failure

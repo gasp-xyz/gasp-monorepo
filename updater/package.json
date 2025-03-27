@@ -11,5 +11,5 @@
     "semantic-release": "^24.2.3",
     "semantic-release-monorepo": "^8.0.2"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.7.0"
 }
