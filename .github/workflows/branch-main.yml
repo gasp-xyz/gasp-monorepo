@@ -98,6 +98,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       
       - uses: arduino/setup-protoc@v3
         with:
