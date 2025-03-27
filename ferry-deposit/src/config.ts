@@ -12,7 +12,7 @@ const tokensToTrackSchema = z
 	.array();
 
 export const appConfigSchema = z.object({
-	PORT: z.number().default(8080),
+	METRICS_PORT: z.number().default(8080),
 	MANGATA_CONTRACT_ADDRESS: z.string(),
 	ETH_CHAIN_URL: z.string(),
 	MANGATA_NODE_URL: z.string(),
@@ -40,10 +40,10 @@ const configuration = appConfigSchema.parse({
 	BLOCK_DELAY: BigInt(process.env.BLOCK_DELAY!),
 	TOKENS_TO_TRACK: process.env.TOKENS_TO_TRACK!,
 	LOG: process.env.LOG,
-	PORT: process.env.PORT ? parseInt(process.env.PORT) : undefined,
+	METRICS_PORT: process.env.METRICS_PORT ? parseInt(process.env.METRICS_PORT) : undefined,
 });
 
-export const PORT = configuration.PORT;
+export const METRICS_PORT = configuration.METRICS_PORT;
 export const MANGATA_CONTRACT_ADDRESS =
 	configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;

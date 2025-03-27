@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from "express";
 import promClient, { Gauge } from "prom-client";
 import { L1Interface } from "./l1/L1Interface";
 import { ALERT_WARNING, logger } from "./logger.js";
-import { PORT } from "./Config.js";
+import { METRICS_PORT } from "./Config.js";
 
 const register = new promClient.Registry();
 const DELAY_5M = 300 * 1000;
@@ -24,7 +24,7 @@ export async function serveMetrics() {
 		res.setHeader("Content-Type", register.contentType);
 		res.send(await register.metrics());
 	});
-	app.listen(PORT);
+	app.listen(METRICS_PORT);
 }
 
 export async function reportBalance(account: Uint8Array, l1: L1Interface) {

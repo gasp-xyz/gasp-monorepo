@@ -44,7 +44,7 @@ pub struct CliArgs {
     #[arg(long, env, default_value_t = 4000)]
     pub filter_limit: u64,
 
-    #[arg(long, env = "PORT", default_value_t = 8080)]
+    #[arg(long, env = "METRICS_PORT", default_value_t = 8080)]
     pub metrics_port: u16,
 
     #[arg(long, env, default_value_t = false)]
