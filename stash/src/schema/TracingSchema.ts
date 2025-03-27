@@ -9,7 +9,10 @@ export const startTracingSchema = yup.object().shape({
     .string()
     .required('address is required')
     .matches(/^0x/, 'address must begin with 0x'),
-  type: yup.string().required('type is required'),
+  type: yup
+    .string()
+    .required('type is required')
+    .oneOf(['deposit'], 'type must be "deposit"'),
   chain: yup
     .string()
     .required('chain is required')

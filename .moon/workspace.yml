@@ -15,23 +15,23 @@ projects:
 
 vcs:
   manager: 'git'
-
   # The default branch (master/main/trunk) in the repository for comparing the
   # local branch against. For git, this is is typically "master" or "main",
   # and must include the remote prefix (before /).
   defaultBranch: 'develop'
+  # # git hooks configurations
+  # # More details: https://moonrepo.dev/docs/guides/vcs-hooks
+  # syncHooks: false
+  # hooks:
+  #   commit-msg:
+  #     - 'yarn commitlint --edit $1'
 
 runner:
+  logRunningCommand: true
   archivableTargets:
     - ':format'
     - ':lint'
     - ':test'
-    - ':format-gasp-avs'
-    - ':lint-gasp-avs'
-    - ':test-gasp-avs'
-    - ':format-gasp-node'
-    - ':lint-gasp-node'
-    - ':test-gasp-node'
     - ':benchmark-tests-gasp-node'
 
 unstable_remote:
@@ -45,3 +45,5 @@ unstable_remote:
 
 hasher:
   walkStrategy: 'glob'
+  ignoreMissingPatterns:
+    - '**/.dockerignore'
