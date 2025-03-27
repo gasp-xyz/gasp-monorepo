@@ -94,14 +94,14 @@
     "@types/source-map-support": "^0",
     "@types/supertest": "2.0.12",
     "@types/winston": "2.4.4",
-    "@typescript-eslint/eslint-plugin": "5.39.0",
-    "@typescript-eslint/parser": "5.39.0",
+    "@typescript-eslint/eslint-plugin": "8.28.0",
+    "@typescript-eslint/parser": "8.28.0",
     "@vitest/coverage-c8": "^0.29.7",
     "concurrently": "7.4.0",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
     "husky": "^8.0.3",
@@ -141,5 +141,5 @@
       "unplugged": true
     }
   },
-  "packageManager": "yarn@3.6.1"
+  "packageManager": "yarn@4.7.0"
 }
