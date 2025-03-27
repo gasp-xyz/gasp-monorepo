@@ -612,7 +612,8 @@ pub mod config {
 						FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
 							who,
 							asset_id_in,
-							asset_amount_in.max(<Runtime as pallet_market::Config>::MinSwapFee::get()),
+							asset_amount_in
+								.max(<Runtime as pallet_market::Config>::MinSwapFee::get()),
 						)?;
 					},
 					_ => {},

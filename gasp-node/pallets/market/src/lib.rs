@@ -276,7 +276,7 @@ pub mod pallet {
 		/// Not enough assets for fee lock
 		NotEnoughAssetsForFeeLock,
 		/// Insufficient input amount
-		InsufficientInputAmount
+		InsufficientInputAmount,
 	}
 
 	// Pallet's events.
@@ -1201,9 +1201,8 @@ pub mod pallet {
 
 			let fees = Self::calc_fees_pre(asset_amount_in)?;
 
-			let amount_in = asset_amount_in
-				.checked_sub(&fees)
-				.ok_or(Error::<T>::InsufficientInputAmount)?;
+			let amount_in =
+				asset_amount_in.checked_sub(&fees).ok_or(Error::<T>::InsufficientInputAmount)?;
 			let (pools, path) = Self::get_valid_path(&swap_pool_list, asset_id_in, asset_id_out)?;
 
 			if swap_pool_list.len() > 1 {
