@@ -41,6 +41,9 @@ struct Config {
 
     #[envconfig(from = "TX_COST")]
     pub tx_cost: Option<u128>,
+
+    #[envconfig(from = "METRICS_PORT", default = "8080")]
+    pub metrics_port: u16,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -97,8 +100,9 @@ async fn run(config: Config) -> Result<(), Error> {
         watchdog.run().await;
     });
 
+    let metrics_port = config.metrics_port;
     let _metrics = tokio::spawn(async move {
-        common::serve_metrics(80).await;
+        metrics::serve_metrics(metrics_port).await;
     });
 
     let update_size_limit = config.update_size_limit;

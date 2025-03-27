@@ -1,5 +1,6 @@
 language: typescript
 type: application
+tags: ['typescript']
 
 toolchain:
   node:
@@ -8,11 +9,15 @@ toolchain:
 fileGroups:
   sources:
     - 'src/**/*'
-    - 'package.json'
+    - 'test/**/*'
+    - '__mocks__/**/*'
+    - 'swagger.js'
+    - 'vitest.config.ts'
+    - '.eslintrc'
     - 'tsconfig.json'
-
+    - 'tsconfig.eslint.json'
 tasks:
   build:
     command: 'yarn build'
-    inputs: ['@globs(sources)']
+    inputs: ['@group(sources)']
     outputs: ['dist']

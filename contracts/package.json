@@ -15,8 +15,7 @@
     "cover": "forge coverage --no-match-contract 'Integration'",
     "cover:lcov": "forge coverage --force --no-match-path '(script|test)' --report lcov && genhtml lcov.info -o coverage --ignore-errors inconsistent && open coverage/src/index.html",
     "clean": "forge clean && rm -rf coverage .gas-snapshot lcov.info",
-    "analyze": "slitherin .",
-    "analyze:ci": "slitherin . --skip-clean --ignore-compile",
+    "slither": "docker compose -f compose.contract-tools.yml run --rm slither",
     "release": "semantic-release"
   },
   "repository": {
