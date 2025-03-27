@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
-import * as tokenPriceService from '../service/TokenPriceService.js'
+
 import * as errorHandler from '../error/Handler.js'
+import * as tokenPriceService from '../service/TokenPriceService.js'
 
 export const getTokenPrices = async (
   req: Request,

@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js'
 import moment from 'moment'
+
 import { Session } from '../repository/StakingRepository'
 
 const BG_HUNDRED = new BigNumber('100')

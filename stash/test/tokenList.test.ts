@@ -1,5 +1,6 @@
-import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import { Decimal } from 'decimal.js'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+
 import { TimestampedAmount } from '../src/schema/Models'
 import { tokenDetails, tokenList } from '../src/service/TokenListService'
 import { TokenInfoStats } from '../src/util/Listing'

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
-import { getDataByWallet } from '../service/TradingService.js'
-import { getDataByWalletSchema } from '../schema/TradingSchema.js'
+
 import * as errorHandler from '../error/Handler.js'
+import { getDataByWalletSchema } from '../schema/TradingSchema.js'
+import { getDataByWallet } from '../service/TradingService.js'
 
 export const getData = async (req: Request, res: Response): Promise<void> => {
   /*

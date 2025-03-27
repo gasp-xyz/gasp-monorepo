@@ -1,11 +1,12 @@
 import { ApiPromise } from '@polkadot/api'
-import { Block, Event } from './BlockScraper'
 import _ from 'lodash'
-import { swapRepository } from '../repository/TransactionRepository.js'
-import logger from '../util/Logger.js'
-import { getTokenPrice } from '../service/TokenPriceService.js'
+
 import { timeseries } from '../connector/RedisConnector.js'
+import { swapRepository } from '../repository/TransactionRepository.js'
+import { getTokenPrice } from '../service/TokenPriceService.js'
+import logger from '../util/Logger.js'
 import * as redis from '../util/Redis.js'
+import { Block, Event } from './BlockScraper'
 
 export const processSwapEvents = async (api: ApiPromise, block: Block) => {
   const events = _.chain(block.events)

@@ -1,5 +1,6 @@
-import logger from './Logger.js'
 import moment, { Duration, Moment } from 'moment'
+
+import logger from './Logger.js'
 
 export class Metrics {
   static SEC = 1000

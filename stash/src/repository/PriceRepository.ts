@@ -1,4 +1,5 @@
 import { Decimal } from 'decimal.js'
+
 import { timeseries } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
 import logger from '../util/Logger.js'
