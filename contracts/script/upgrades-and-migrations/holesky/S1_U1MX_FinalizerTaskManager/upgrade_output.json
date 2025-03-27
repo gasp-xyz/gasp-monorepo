@@ -1,0 +1,10 @@
+{
+  "addresses": {
+    "taskManager": "0x150FE8DBB943c372F3e8C31d9c89f1E6A13cBBFd",
+    "taskManagerImplementation": "0xb3a2481e98A342282c503dddfAd5fd1ca123C575"
+  },
+  "chainInfo": {
+    "chainId": 1,
+    "lastUpgradeImplDeployBlock": 22131331
+  }
+}
