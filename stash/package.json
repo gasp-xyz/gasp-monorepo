@@ -7,7 +7,7 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "yarn lint:eslint && yarn lint:tsc",
+    "lint": "FORCE_COLOR=true yarn lint:eslint & FORCE_COLOR=true yarn lint:tsc",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
     "lint:fix": "eslint . --fix",
