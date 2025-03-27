@@ -21,9 +21,13 @@ tasks:
     inputs: ['@group(sources)']
 
   lint:
-    command: 'yarn lint-ci'
+    command: 'yarn lint'
+    inputs: ['@group(sources)']
+
+  format:
+    command: 'yarn format:check'
     inputs: ['@group(sources)']
 
   test:
-    command: 'yarn test'
+    command: 'yarn test:unit'
     inputs: ['@group(sources)']
