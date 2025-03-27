@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 
 
 FROM debian:stable-slim
-RUN apt update -y && apt install -y libssl-dev
+RUN apt update -y && apt install -y libssl-dev ca-certificates && update-ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
