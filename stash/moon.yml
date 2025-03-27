@@ -9,15 +9,13 @@ toolchain:
 fileGroups:
   sources:
     - 'src/**/*'
-    - 'test/**/*'
+    - 'tests/**/*'
     - '__mocks__/**/*'
     - 'swagger.js'
     - 'vitest.config.ts'
     - '.eslintrc'
     - 'tsconfig.json'
-    - 'tsconfig.eslint.json'
 tasks:
   build:
     command: 'yarn build'
     inputs: ['@group(sources)']
-    outputs: ['dist']
