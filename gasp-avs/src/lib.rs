@@ -103,7 +103,7 @@ pub(crate) async fn ephemeral_testnet(
 ) -> eyre::Result<()> {
     operator.clone().wait_for_gasp_to_sync().await?;
     setup_deposits(
-        cfg.eth_rpc_url.clone(),
+        cfg.eth_ws_url.clone(),
         cfg.avs_registry_coordinator_addr,
         stake.unwrap_or(100),
         operator.signer(),
