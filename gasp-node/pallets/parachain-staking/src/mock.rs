@@ -299,8 +299,8 @@ impl Valuate for TestTokenValuator {
 	fn find_paired_pool(
 		base_id: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
-	) -> Result<PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
-		Ok((asset_id / 100, (base_id, asset_id), (0, 0)))
+	) -> Result<Vec<PoolInfo<Self::CurrencyId, Self::Balance>>, DispatchError> {
+		Ok(vec![(asset_id / 100, (base_id, asset_id), (0, 0))])
 	}
 
 	fn check_can_valuate(_: Self::CurrencyId, _: Self::CurrencyId) -> Result<(), DispatchError> {

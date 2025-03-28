@@ -288,9 +288,9 @@ impl Config for Test {
 	type NativeCurrencyId = NativeCurrencyId;
 	type TreasuryPalletId = TreasuryPalletId;
 	type BnbTreasurySubAccDerive = BnbTreasurySubAccDerive;
-	type PoolFeePercentage = ConstU128<20>;
-	type TreasuryFeePercentage = ConstU128<5>;
-	type BuyAndBurnFeePercentage = ConstU128<5>;
+	type PoolFeePercentage = ConstU128<0>;
+	type TreasuryFeePercentage = ConstU128<0>;
+	type BuyAndBurnFeePercentage = ConstU128<0>;
 	type LiquidityMiningRewards = ProofOfStake;
 	type WeightInfo = ();
 	type VestingProvider = Vesting;
@@ -307,7 +307,7 @@ mockall::mock! {
 		type CurrencyId = TokenId;
 		type Balance = Balance;
 
-		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<PoolInfo<TokenId, Balance>, DispatchError>;
+		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<Vec<PoolInfo<TokenId, Balance>>, DispatchError>;
 
 		fn check_can_valuate(base_id: TokenId, pool_id: TokenId) -> Result<(), DispatchError>;
 

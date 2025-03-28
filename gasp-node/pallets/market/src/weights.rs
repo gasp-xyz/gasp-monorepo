@@ -70,6 +70,7 @@ pub trait WeightInfo {
 	fn burn_liquidity_sswap() -> Weight;
 	fn multiswap_asset_sswap(y: u32, ) -> Weight;
 	fn multiswap_asset_buy_sswap(y: u32, ) -> Weight;
+	fn is_swap_tokens_lockless() -> Weight;
 }
 
 /// Weights for pallet_market using the Mangata node and recommended hardware.
@@ -459,6 +460,12 @@ impl<T: frame_system::Config> WeightInfo for ModuleWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(13 as u64))
 			.saturating_add(T::DbWeight::get().writes((7 as u64).saturating_mul(y as u64)))
 	}
+	// Storage: `Xyk::Pools` (r:2 w:0)
+	// Proof: `Xyk::Pools` (`max_values`: None, `max_size`: Some(56), added: 2531, mode: `MaxEncodedLen`)
+	fn is_swap_tokens_lockless() -> Weight {
+		(Weight::from_parts(16_623_000, 0))
+			.saturating_add(RocksDbWeight::get().reads(2 as u64))
+	}
 }
 
 // For backwards compatibility and tests
@@ -846,5 +853,11 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads((12 as u64).saturating_mul(y as u64)))
 			.saturating_add(RocksDbWeight::get().writes(13 as u64))
 			.saturating_add(RocksDbWeight::get().writes((7 as u64).saturating_mul(y as u64)))
+	}
+	// Storage: `Xyk::Pools` (r:2 w:0)
+	// Proof: `Xyk::Pools` (`max_values`: None, `max_size`: Some(56), added: 2531, mode: `MaxEncodedLen`)
+	fn is_swap_tokens_lockless() -> Weight {
+		(Weight::from_parts(16_623_000, 0))
+			.saturating_add(RocksDbWeight::get().reads(2 as u64))
 	}
 }

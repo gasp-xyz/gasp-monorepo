@@ -80,6 +80,12 @@ impl orml_tokens::Config for Test {
 	type NontransferableTokensAllowList = Nothing;
 }
 
+pub const NATIVE_CURRENCY_ID: u32 = 0;
+
+parameter_types! {
+	pub const NativeCurrencyId: u32 = NATIVE_CURRENCY_ID;
+}
+
 impl swap::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = MultiTokenCurrencyAdapter<Test>;
@@ -94,6 +100,8 @@ impl swap::Config for Test {
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<8>;
+	type NativeCurrencyId = NativeCurrencyId;
+	type MaxEqAssets = ConstU32<10>;
 	type WeightInfo = ();
 }
 
