@@ -6108,6 +6108,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serial_test",
+ "sha3",
  "sp-core",
  "sp-crypto-hashing",
  "sp-io",

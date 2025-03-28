@@ -31,7 +31,7 @@ where
         } else {
             tracing::warn!("could not fetch sequencer account balance");
         }
-        tokio::time::sleep(tokio::time::Duration::from_secs(300)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
     }
 }
 
