@@ -9,7 +9,7 @@ toolchain:
 fileGroups:
   sources:
     - 'src/**/*'
-    - 'tests/**/*'
+    - 'test/**/*'
     - '__mocks__/**/*'
     - 'swagger.js'
     - 'vitest.config.ts'
