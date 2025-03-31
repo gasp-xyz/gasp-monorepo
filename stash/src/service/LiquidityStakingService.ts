@@ -1,11 +1,11 @@
 import {
+  calculateClaimedRewards,
   get24HoursAccountRewardsData,
   getDataByAddress,
   getMonthAccountRewardsData,
   KEY_ACCOUNT,
   ProofOfStakeEntry,
   ProofOfStakeReward,
-  calculateClaimedRewards,
 } from '../repository/StakingRepository.js'
 
 export const rewards24hours = async (address: string) => {

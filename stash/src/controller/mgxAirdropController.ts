@@ -1,17 +1,18 @@
 import { Request, Response } from 'express'
-import {
-  getEligibilityAtBlockN,
-  verifySignature,
-} from '../service/MgxAirdropService.js'
-import { mgxAirdropRepository } from '../repository/MgxAirdropRepository.js'
-import * as errorHandler from '../error/Handler.js'
 import { BN_ZERO, Mangata } from 'gasp-sdk'
+
 import { BadRequestException } from '../error/Exception.js'
+import * as errorHandler from '../error/Handler.js'
+import { mgxAirdropRepository } from '../repository/MgxAirdropRepository.js'
 import {
   mgxAirdropEligibilitySchema,
   mgxAirdropLinkAddressSchema,
   mgxAirdropSignatureSchema,
 } from '../schema/MgxAirdropSchema.js'
+import {
+  getEligibilityAtBlockN,
+  verifySignature,
+} from '../service/MgxAirdropService.js'
 
 const SNAPSHOTS = process.env.MGX_AIRDROP_SNAPSHOTS.split(',')
 

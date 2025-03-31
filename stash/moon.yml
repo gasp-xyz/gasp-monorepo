@@ -13,11 +13,21 @@ fileGroups:
     - '__mocks__/**/*'
     - 'swagger.js'
     - 'vitest.config.ts'
-    - '.eslintrc'
     - 'tsconfig.json'
-    - 'tsconfig.eslint.json'
+    - 'eslint.config.cjs'
 tasks:
   build:
     command: 'yarn build'
     inputs: ['@group(sources)']
-    outputs: ['dist']
+
+  lint:
+    command: 'yarn lint'
+    inputs: ['@group(sources)']
+
+  format:
+    command: 'yarn format:check'
+    inputs: ['@group(sources)']
+
+  test:
+    command: 'yarn test:unit'
+    inputs: ['@group(sources)']

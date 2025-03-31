@@ -2,6 +2,7 @@ import { ApiPromise } from '@polkadot/api'
 import { ApiDecoration } from '@polkadot/api/types'
 import { BlockHash, SignedBlock } from '@polkadot/types/interfaces'
 import _ from 'lodash'
+
 import * as store from '../repository/ChainRepository.js'
 import { CodecOrArray, parseNumber, toHuman } from '../util/Chain.js'
 import logger from '../util/Logger.js'

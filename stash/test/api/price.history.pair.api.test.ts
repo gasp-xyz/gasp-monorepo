@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import Joi from 'joi'
 import supertest from 'supertest'
+import { describe, expect, it } from 'vitest'
+
 import app from '../../src/app'
 import { MAX_DAYS, MAX_INTERVAL } from './utils'
-import Joi from 'joi'
 
 const pricesSchema = Joi.object({
   prices: Joi.array().items(
