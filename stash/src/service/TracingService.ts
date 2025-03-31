@@ -1,9 +1,9 @@
-import logger from '../util/Logger.js'
+import { redis } from '../connector/RedisConnector.js'
 import {
   depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
-import { redis } from '../connector/RedisConnector.js'
+import logger from '../util/Logger.js'
 const WITHDRAWAL_INITIATED_BY_FE = 'InitiatedByFrontend'
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 
@@ -117,7 +117,13 @@ export const getTransactionsByAddress = async (
 ): Promise<object[]> => {
   const repository =
     type === 'deposit' ? depositRepository : withdrawalRepository
-  return await repository.search().where('address').equals(address).and('createdBy').equals(CreatedBy.Frontend).all()
+  return await repository
+    .search()
+    .where('address')
+    .equals(address)
+    .and('createdBy')
+    .equals(CreatedBy.Frontend)
+    .all()
 }
 
 export const getByTxHashOrEntityId = async (
