@@ -60,7 +60,7 @@ jobs:
       security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
 
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
@@ -84,7 +84,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
   
   release:
     name: Release
@@ -98,6 +98,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       
       - uses: arduino/setup-protoc@v3
         with:

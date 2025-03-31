@@ -123,7 +123,7 @@ jobs:
       security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
     needs: [init, build-and-test]
@@ -144,7 +144,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      cacheEnabled: ${{ (github.ref_name == 'main' || github.ref_name == 'release/next') && false || true }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
 
   # deploy-fungible:
   #   name: Deploy fungible environment
