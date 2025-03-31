@@ -26,104 +26,71 @@ contract MultiStage is Script, Utils {
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
             if (!rolldownDeployer.isProxyDeployed()) {
-                _printMessage("Deploying eigen layer infra");
+                _printMessage(string.concat("Deploying eigen layer infra to ethereum-stub"));
                 eigenDeployer.run("M2_deploy_from_scratch.anvil.config.json");
 
-                _printMessage("Initializing eigen layer infra");
+                _printMessage(string.concat("Initializing eigen layer infra in ethereum-stub"));
                 anvilDeployer.run();
 
-                _printMessage("Deploying finalizer contracts");
+                _printMessage(string.concat("Deploying finalizer contracts to ethereum-stub"));
                 finalizerAVSDeployer.run();
             }
 
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-stub");
 
-            string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            FinalizerTaskManager taskManager =
-                FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
-
-            string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
-
-            string memory configData = readConfig("deploy.config");
-            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-
-            vm.startBroadcast(avsOwner);
-
-            taskManager.setRolldown(IRolldown(address(rolldown)));
-            rolldown.setUpdater(address(taskManager));
-
-            vm.stopBroadcast();
+            _initializeRolldownAndTaskManager();
             return;
         }
 
         if (envHash == _stringToHash("arbitrum-stub")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-stub");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-stub");
             return;
         }
 
         if (envHash == _stringToHash("base-stub")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Base, "base-stub");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-stub");
             return;
         }
 
         if (envHash == _stringToHash("monad-stub")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Monad, "monad-stub");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-stub");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-stub")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-stub");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-stub");
             return;
         }
 
         if (envHash == _stringToHash("ethereum-holesky")) {
-            _printMessage("Deploying finalizer contracts");
+            _printMessage(string.concat("Deploying finalizer contracts to ethereum-holesky"));
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
-            require(
-                !outputExists(finalizerAVSDeployer.getOutputPath()), "Contracts already deployed on Ethereum Holesky"
-            );
             finalizerAVSDeployer.run();
 
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-holesky");
 
-            string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            FinalizerTaskManager taskManager =
-                FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
-
-            string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
-
-            string memory configData = readConfig("deploy.config");
-            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-
-            vm.startBroadcast(avsOwner);
-
-            taskManager.setRolldown(IRolldown(address(rolldown)));
-            rolldown.setUpdater(address(taskManager));
-
-            vm.stopBroadcast();
+            _initializeRolldownAndTaskManager();
             return;
         }
 
         if (envHash == _stringToHash("arbitrum-sepolia")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-sepolia");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("base-sepolia")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Base, "base-sepolia");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("monad-testnet")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.Monad, "monad-testnet");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-testnet");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-testnet")) {
-            _runContractDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-testnet");
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-testnet");
             return;
         }
 
@@ -136,32 +103,50 @@ contract MultiStage is Script, Utils {
         vm.stopBroadcast();
     }
 
-    function _runContractDeployers(IRolldownPrimitives.ChainId chainId, string memory chainName) private {
+    function _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId chainId, string memory chainName) private {
         _incrementAccountNonce();
 
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
         rolldownDeployer.run(chainId, chainName);
 
-        string memory rolldownDeployedContracts = readOutput("rolldown_output");
+        string memory rolldownDeployedContracts = readOutput(rolldownDeployer.outputPath());
         address rolldownAddress = stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown");
         Rolldown rolldown = Rolldown(payable(rolldownAddress));
 
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
         gaspMultiRollupServiceDeployer.run(chainId, chainName);
 
-        string memory gmrsDeployedContracts = readOutput("gmrs_output");
+        string memory gmrsDeployedContracts = readOutput(gaspMultiRollupServiceDeployer.outputPath());
         address gmrsAddress = stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs");
         GaspMultiRollupService gmrs = GaspMultiRollupService(gmrsAddress);
 
-        string memory configData = readConfig("deploy.config");
-        address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-
-        vm.startBroadcast(avsOwner);
+        vm.startBroadcast(_getAVSOwner());
 
         gmrs.setRolldown(IRolldown(rolldownAddress));
         rolldown.setUpdater(gmrsAddress);
 
         vm.stopBroadcast();
+    }
+
+    function _initializeRolldownAndTaskManager() private {
+        string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
+        FinalizerTaskManager taskManager =
+            FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
+
+        string memory rolldownDeployedContracts = readOutput("rolldown_output");
+        Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
+
+        vm.startBroadcast(_getAVSOwner());
+
+        taskManager.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(taskManager));
+
+        vm.stopBroadcast();
+    }
+
+    function _getAVSOwner() private view returns (address) {
+        string memory configData = readConfig("deploy.config");
+        return stdJson.readAddress(configData, ".permissions.owner");
     }
 
     function _printMessage(string memory message) private pure {

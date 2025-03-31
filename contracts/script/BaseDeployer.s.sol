@@ -22,12 +22,13 @@ abstract contract BaseDeployer is Script, Utils {
 
     function run(IRolldownPrimitives.ChainId chainId, string memory chainName) external {
         if (isProxyDeployed()) {
-            _printMessage(string.concat("Upgrading ", deployerKind, " contracts on ", chainName, "..."));
+            _printMessage(string.concat("Upgrading ", deployerKind, " contracts on ", chainName));
             upgrade();
-        } else {
-            _printMessage(string.concat("Deploying ", deployerKind, " contracts to ", chainName, "..."));
-            deploy(chainId);
+            return;
         }
+
+        _printMessage(string.concat("Deploying ", deployerKind, " contracts to ", chainName));
+        deploy(chainId);
     }
 
     function isProxyDeployed() public returns (bool) {
