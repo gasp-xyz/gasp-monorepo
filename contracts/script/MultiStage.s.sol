@@ -37,7 +37,7 @@ contract MultiStage is Script, Utils {
             }
 
             _printMessage("Deploying rolldown contracts");
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-stub");
 
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
             FinalizerTaskManager taskManager =
@@ -59,22 +59,22 @@ contract MultiStage is Script, Utils {
         }
 
         if (envHash == _stringToHash("arbitrum-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-stub");
             return;
         }
 
         if (envHash == _stringToHash("base-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Base, "base-stub");
             return;
         }
 
         if (envHash == _stringToHash("monad-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Monad, "monad-stub");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
+            _runContractDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-stub");
             return;
         }
 
@@ -84,12 +84,11 @@ contract MultiStage is Script, Utils {
             require(
                 !outputExists(finalizerAVSDeployer.getOutputPath()), "Contracts already deployed on Ethereum Holesky"
             );
-
             finalizerAVSDeployer.run();
 
             _printMessage("Deploying rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-holesky");
 
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
             FinalizerTaskManager taskManager =
@@ -111,69 +110,22 @@ contract MultiStage is Script, Utils {
         }
 
         if (envHash == _stringToHash("arbitrum-sepolia")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Arbitrum Sepolia"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("base-sepolia")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Base Sepolia"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Base, "base-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("monad-testnet")) {
-            require(
-                !outputExists("monad_rolldown_output") && !outputExists("monad_gmrs_output"),
-                "Contracts already deployed on Monad Testnet"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            _runContractDeployers(IRolldownPrimitives.ChainId.Monad, "monad-testnet");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-testnet")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Megaeth Testnet"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Ethereum Holesky");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Arbitrum Sepolia");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-base-sepolia")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Base Sepolia");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
+            _runContractDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-testnet");
             return;
         }
 
@@ -186,31 +138,30 @@ contract MultiStage is Script, Utils {
         vm.stopBroadcast();
     }
 
-    function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
+    function _runContractDeployers(IRolldownPrimitives.ChainId chainId, string memory chainName) private {
         _incrementAccountNonce();
 
-        _printMessage("Deploying rolldown contracts");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(chain);
+        rolldownDeployer.run(chainId, chainName);
+
+        string memory rolldownDeployedContracts = readOutput("rolldown_output");
+        address rolldownAddress = stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown");
+        Rolldown rolldown = Rolldown(payable(rolldownAddress));
+
+        GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
+        gaspMultiRollupServiceDeployer.run(chainId, chainName);
+
+        string memory gmrsDeployedContracts = readOutput("gmrs_output");
+        address gmrsAddress = stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs");
+        GaspMultiRollupService gmrs = GaspMultiRollupService(gmrsAddress);
 
         string memory configData = readConfig("deploy.config");
         address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
 
-        _printMessage("Deploying gasp multi rollup service contracts");
-        GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-        gaspMultiRollupServiceDeployer.run(chain);
-
-        string memory gmrsDeployedContracts = readOutput("gmrs_output");
-        GaspMultiRollupService gmrs =
-            GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
-
-        string memory rolldownDeployedContracts = readOutput("rolldown_output");
-        Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
-
         vm.startBroadcast(avsOwner);
 
-        gmrs.setRolldown(IRolldown(address(rolldown)));
-        rolldown.setUpdater(address(gmrs));
+        gmrs.setRolldown(IRolldown(rolldownAddress));
+        rolldown.setUpdater(gmrsAddress);
 
         vm.stopBroadcast();
     }
