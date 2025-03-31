@@ -47,7 +47,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
 
         vm.stopBroadcast();
 
-        _verifyImplementation(rolldownProxyAdmin, address(rolldownImplementation));
+        _verifyImplementation(rolldownProxyAdmin, address(rolldown), address(rolldownImplementation));
         _verifyInitalization();
         _writeOutput();
     }
@@ -71,7 +71,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
 
         vm.stopBroadcast();
 
-        _verifyImplementation(rolldownProxyAdmin, address(rolldownImplementation));
+        _verifyImplementation(rolldownProxyAdmin, rolldownAddress, address(rolldownImplementation));
         _writeOutput();
     }
 

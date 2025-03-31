@@ -36,7 +36,6 @@ contract MultiStage is Script, Utils {
                 finalizerAVSDeployer.run();
             }
 
-            _printMessage("Deploying rolldown contracts");
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-stub");
 
             string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
@@ -86,7 +85,6 @@ contract MultiStage is Script, Utils {
             );
             finalizerAVSDeployer.run();
 
-            _printMessage("Deploying rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
             rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-holesky");
 

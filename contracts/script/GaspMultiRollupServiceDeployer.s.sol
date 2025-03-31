@@ -10,7 +10,7 @@ import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
 import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {BaseDeployer} from "./BaseDeployer.s.sol";
 
-contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs_output") {
+contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
     ProxyAdmin public gmrsProxyAdmin;
     PauserRegistry public gmrsPauserReg;
     address public dummyRolldownAddress;
@@ -61,7 +61,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs_output") {
 
         vm.stopBroadcast();
 
-        _verifyImplementation(gmrsProxyAdmin, address(gmrsImplementation));
+        _verifyImplementation(gmrsProxyAdmin, address(gmrs), address(gmrsImplementation));
         _verifyInitalization();
         _writeOutput();
     }
@@ -82,7 +82,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs_output") {
 
         vm.stopBroadcast();
 
-        _verifyImplementation(gmrsProxyAdmin, address(gmrsImplementation));
+        _verifyImplementation(gmrsProxyAdmin, gmrsAddress, address(gmrsImplementation));
         _writeOutput();
     }
 

@@ -44,10 +44,13 @@ abstract contract BaseDeployer is Script, Utils {
 
     function upgrade() public virtual;
 
-    function _verifyImplementation(ProxyAdmin proxyAdmin, address implementation) internal view virtual {
+    function _verifyImplementation(ProxyAdmin proxyAdmin, address proxy, address implementation)
+        internal
+        view
+        virtual
+    {
         require(
-            proxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(implementation))))
-                == address(implementation),
+            proxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(proxy))) == implementation,
             string.concat(deployerKind, ": implementation set incorrectly")
         );
     }
