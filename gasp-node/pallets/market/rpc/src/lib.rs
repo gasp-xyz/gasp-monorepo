@@ -105,7 +105,7 @@ pub trait MarketApi<BlockHash, Balance, TokenId> {
 		asset_id_out: TokenId,
 		min_amount_out: NumberOrHex,
 		at: Option<BlockHash>,
-	) -> RpcResult<Result<MultiswapSellInfo<NumberOrHex>, DispatchError>>;
+	) -> RpcResult<MultiswapSellInfo<NumberOrHex>>;
 
 	#[method(name = "market_get_multiswap_buy_info")]
 	fn get_multiswap_buy_info(
@@ -116,7 +116,7 @@ pub trait MarketApi<BlockHash, Balance, TokenId> {
 		asset_id_in: TokenId,
 		max_amount_in: NumberOrHex,
 		at: Option<BlockHash>,
-	) -> RpcResult<Result<MultiswapBuyInfo<NumberOrHex>, DispatchError>>;
+	) -> RpcResult<MultiswapBuyInfo<NumberOrHex>>;
 }
 
 pub struct Market<C, M> {
@@ -343,30 +343,34 @@ where
 		asset_id_out: TokenId,
 		min_amount_out: NumberOrHex,
 		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Result<MultiswapSellInfo<NumberOrHex>, DispatchError>> {
+	) -> RpcResult<MultiswapSellInfo<NumberOrHex>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or(self.client.info().best_hash);
 
-		api.get_multiswap_sell_info(
-			at,
-			swap_pool_list,
-			asset_id_in,
-			asset_amount_in.try_into_balance()?,
-			asset_id_out,
-			min_amount_out.try_into_balance()?,
-		)
-		.map(|info_res| {
-			{
-				info_res.map(|info| MultiswapSellInfo {
-					total_amount_in: info.total_amount_in.into(),
-					swap_amount_in: info.swap_amount_in.into(),
-					amount_out: info.amount_out.into(),
-					fees: info.fees.into(),
-					is_lockless: info.is_lockless,
-				})
-			}
-		})
-		.map_err(|e| ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e))))
+		let result = api
+			.get_multiswap_sell_info(
+				at,
+				swap_pool_list,
+				asset_id_in,
+				asset_amount_in.try_into_balance()?,
+				asset_id_out,
+				min_amount_out.try_into_balance()?,
+			)
+			.map_err(|e| {
+				ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e)))
+			})?;
+
+		result
+			.map(|info| MultiswapSellInfo {
+				total_amount_in: info.total_amount_in.into(),
+				swap_amount_in: info.swap_amount_in.into(),
+				amount_out: info.amount_out.into(),
+				fees: info.fees.into(),
+				is_lockless: info.is_lockless,
+			})
+			.map_err(|e| {
+				ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e)))
+			})
 	}
 
 	fn get_multiswap_buy_info(
@@ -377,29 +381,33 @@ where
 		asset_id_in: TokenId,
 		max_amount_in: NumberOrHex,
 		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Result<MultiswapBuyInfo<NumberOrHex>, DispatchError>> {
+	) -> RpcResult<MultiswapBuyInfo<NumberOrHex>> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or(self.client.info().best_hash);
 
-		api.get_multiswap_buy_info(
-			at,
-			swap_pool_list,
-			asset_id_out,
-			asset_amount_out.try_into_balance()?,
-			asset_id_in,
-			max_amount_in.try_into_balance()?,
-		)
-		.map(|info_res| {
-			{
-				info_res.map(|info| MultiswapBuyInfo {
-					total_amount_in: info.total_amount_in.into(),
-					swap_amount_in: info.swap_amount_in.into(),
-					amount_out: info.amount_out.into(),
-					fees: info.fees.into(),
-					is_lockless: info.is_lockless,
-				})
-			}
-		})
-		.map_err(|e| ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e))))
+		let result = api
+			.get_multiswap_buy_info(
+				at,
+				swap_pool_list,
+				asset_id_out,
+				asset_amount_out.try_into_balance()?,
+				asset_id_in,
+				max_amount_in.try_into_balance()?,
+			)
+			.map_err(|e| {
+				ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e)))
+			})?;
+
+		result
+			.map(|info| MultiswapBuyInfo {
+				total_amount_in: info.total_amount_in.into(),
+				swap_amount_in: info.swap_amount_in.into(),
+				amount_out: info.amount_out.into(),
+				fees: info.fees.into(),
+				is_lockless: info.is_lockless,
+			})
+			.map_err(|e| {
+				ErrorObject::owned(1, "Unable to serve the request", Some(format!("{:?}", e)))
+			})
 	}
 }
