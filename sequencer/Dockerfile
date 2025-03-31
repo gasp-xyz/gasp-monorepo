@@ -30,6 +30,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 		cargo build --locked --release && \
 		# copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
 		cp target/release/sequencer /app/sequencer-bin
+		cp target/release/ferry-withdrawal /app/ferry-withdrawal-bin
+		cp target/release/ferry-deposit /app/ferry-deposit
 
 
 FROM debian:stable-slim
@@ -38,5 +40,7 @@ RUN apt update -y && apt install -y libssl-dev ca-certificates && update-ca-cert
 WORKDIR /app
 
 COPY --from=builder /app/sequencer-bin /app/sequencer
+COPY --from=builder /app/ferry-withdrawal-bin /app/ferry-withdrawal
+COPY --from=builder /app/ferry-deposti-bin /app/ferry-deposit
 
 CMD ["/app/sequencer"]
