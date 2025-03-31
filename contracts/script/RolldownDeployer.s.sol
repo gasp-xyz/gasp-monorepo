@@ -8,6 +8,7 @@ import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
+import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {BaseDeployer} from "./BaseDeployer.s.sol";
 
 contract RolldownDeployer is BaseDeployer("rolldown") {
@@ -15,6 +16,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
 
     ProxyAdmin public rolldownProxyAdmin;
+    GaspTestToken public erc20Mock;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;
     address public owner;
@@ -79,8 +81,9 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
         string memory deployedAddresses = "addresses";
         vm.serializeAddress(deployedAddresses, "rolldownProxyAdmin", address(rolldownProxyAdmin));
         vm.serializeAddress(deployedAddresses, "rolldown", address(rolldown));
+        vm.serializeAddress(deployedAddresses, "rolldownImplementation", address(rolldownImplementation));
         string memory deployedAddressesOutput =
-            vm.serializeAddress(deployedAddresses, "rolldownImplementation", address(rolldownImplementation));
+            vm.serializeAddress(deployedAddresses, "gaspErc20Mock", address(erc20Mock));
 
         string memory chainInfo = "chainInfo";
         vm.serializeUint(chainInfo, "deploymentBlock", block.number);
