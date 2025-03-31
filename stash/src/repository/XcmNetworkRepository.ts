@@ -1,5 +1,6 @@
-import { redis } from '../connector/RedisConnector.js'
 import 'core-js'
+
+import { redis } from '../connector/RedisConnector.js'
 
 const DEFAULT_STRING = 'default'
 const CHANNELS_V2_KEY = 'xcm_channels_v2'

@@ -1,5 +1,6 @@
 import { ChainableCommander } from 'ioredis'
 import _ from 'lodash'
+
 import { RedisClient } from '../connector/RedisConnector.js'
 import logger from './Logger.js'
 
