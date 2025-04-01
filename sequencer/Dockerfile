@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
 	  # copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
 		cp target/release/sequencer /app/sequencer-bin && \
 		cp target/release/ferry-withdrawal /app/ferry-withdrawal-bin && \
-		cp target/release/ferry-deposit /app/ferry-deposit
+		cp target/release/ferry-deposit /app/ferry-deposit-bin
 
 
 FROM debian:stable-slim
