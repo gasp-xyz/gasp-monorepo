@@ -67,13 +67,79 @@ impl TryReceiveAsync for oneshot::Receiver<()> {
     }
 }
 
+pub fn parse_tokens_and_weight(input: &str) -> Result<Vec<([u8; 20], u128)>, ::hex::FromHexError> {
+    let normalize: String = input.chars().filter(|c| !c.is_whitespace()).collect();
+    let input = normalize.trim_matches(|c| c == '[' || c == ']');
+
+    let mut result = Vec::new();
+
+    for item in input.split("],[") {
+        let item = item.trim_matches(|c| c == '[' || c == ']');
+        let mut parts = item.split(',');
+        match (parts.next(), parts.next(), parts.next()) {
+            (Some(addr), Some(weight), None) => {
+                let address_bytes = parse_addr(addr)?;
+                let number = weight
+                    .parse::<u128>()
+                    .map_err(|_| hex::FromHexError::InvalidStringLength)?;
+
+                result.push((address_bytes, number));
+            }
+            _ => return Err(hex::FromHexError::InvalidStringLength),
+        };
+    }
+    Ok(result)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+    use hex_literal::hex;
 
     #[test]
     fn test_get_chunks() {
         let chunks = get_chunks(0, 10, 3);
         assert_eq!(chunks, vec![(0, 2), (3, 5), (6, 8), (9, 10)]);
+    }
+
+    #[test]
+    fn test_parse_tokens_and_weight_valid() {
+        assert_eq!(
+            parse_tokens_and_weight("[  [   0x0123456789abcdef0123456789abcdef01234567, 100], [   0x89abcdef0123456789abcdef0123456789abcdef, 200   ]]"),
+            Ok(vec![
+                (hex!("0123456789abcdef0123456789abcdef01234567"), 100), 
+                (hex!("89abcdef0123456789abcdef0123456789abcdef"), 200), 
+            ]),
+        );
+
+        assert_eq!(
+            parse_tokens_and_weight("[[0x0123456789abcdef0123456789abcdef01234567,100],[0x89abcdef0123456789abcdef0123456789abcdef,200]]"),
+            Ok(vec![
+                (hex!("0123456789abcdef0123456789abcdef01234567"), 100), 
+                (hex!("89abcdef0123456789abcdef0123456789abcdef"), 200), 
+            ]),
+        );
+    }
+
+    #[test]
+    fn test_parse_tokens_and_weight_invalid_address() {
+        let input = "[0xInvalidAddress, 100], [0x89abcdef0123456789abcdef0123456789abcdef, 200]";
+        let result = parse_tokens_and_weight(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_tokens_and_weight_invalid_weight() {
+        let input = "[0x0123456789abcdef0123456789abcdef01234567, InvalidWeight]";
+        let result = parse_tokens_and_weight(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_tokens_and_weight_mismatched_brackets() {
+        let input = "[0x0123456789abcdef0123456789abcdef01234567, 100, 0x89abcdef0123456789abcdef0123456789abcdef, 200]";
+        let result = parse_tokens_and_weight(input);
+        println!("{:?}", result);
+        assert!(result.is_err());
     }
 }

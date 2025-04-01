@@ -2,7 +2,7 @@ use crate::ferry::FerryAction;
 use gasp_types::Withdrawal;
 use l1api::L1Interface;
 use l2api::L2Interface;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use tokio::sync::mpsc;
 
 #[allow(dead_code)]
@@ -11,7 +11,7 @@ pub struct Filter<L1, L2> {
     l2: L2,
     input: mpsc::Receiver<Withdrawal>,
     output: mpsc::Sender<FerryAction>,
-    enabled: HashSet<[u8; 20]>,
+    enabled: HashMap<[u8; 20], u128>,
 }
 
 impl<L1, L2> Filter<L1, L2>
@@ -24,30 +24,29 @@ where
         l2: L2,
         input: mpsc::Receiver<Withdrawal>,
         output: mpsc::Sender<FerryAction>,
-        enabled: Vec<[u8; 20]>,
+        enabled: HashMap<[u8; 20], u128>,
     ) -> Self {
         Self {
             l1,
             l2,
             input,
             output,
-            enabled: enabled.into_iter().collect(),
+            enabled,
         }
     }
 
     pub async fn run(&mut self) {
         while let Some(w) = self.input.recv().await {
-            let is_enabled = self.enabled.contains(&w.token_address);
-            //TODO: add more sophisticated logic here
-            let profit = w.ferry_tip;
-            if is_enabled && !profit.is_zero() {
-                self.output
-                    .send(FerryAction::Ferry {
-                        withdrawal: w,
-                        prio: profit,
-                    })
-                    .await
-                    .expect("infinite");
+            if let Some(min_profit) = self.enabled.get(&w.token_address) {
+                if w.ferry_tip >= (*min_profit).into() {
+                    self.output
+                        .send(FerryAction::Ferry {
+                            withdrawal: w,
+                            prio: w.ferry_tip,
+                        })
+                        .await
+                        .expect("infinite");
+                }
             }
         }
         tracing::info!("closing filter service");
@@ -78,7 +77,9 @@ mod test {
             l2mock,
             input,
             output,
-            vec![ENABLED_TOKEN1, ENABLED_TOKEN2],
+            vec![(ENABLED_TOKEN1, 1), (ENABLED_TOKEN2, 1)]
+                .into_iter()
+                .collect(),
         );
 
         let task = tokio::spawn(async move {

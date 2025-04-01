@@ -80,10 +80,7 @@ pub async fn main() -> Result<(), Error> {
         filter::filter_deposits(
             filter_input,
             to_executor,
-            args.enabled
-                .into_iter()
-                .map(|elem| (elem, 1_000_000u128))
-                .collect(),
+            args.enabled.into_iter().collect(),
         )
         .await
     });

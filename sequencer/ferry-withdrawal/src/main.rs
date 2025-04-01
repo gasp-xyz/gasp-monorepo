@@ -78,7 +78,13 @@ pub async fn main() -> Result<(), Error> {
 
     let mut filter = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
-        filter::Filter::new(l1, l2.clone(), filter_input, to_executor, vec![])
+        filter::Filter::new(
+            l1,
+            l2.clone(),
+            filter_input,
+            to_executor,
+            args.enabled.into_iter().collect(),
+        )
     };
 
     let mut executor = {
