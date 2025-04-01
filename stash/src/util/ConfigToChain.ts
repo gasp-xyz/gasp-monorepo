@@ -5,6 +5,7 @@ import {
   baseSepolia, base,
   holesky, mainnet,
   localhost,
+    sonic
 } from 'viem/chains'
 
 export const CONFIG_TO_CHAIN = new Map<string, Chain>([
@@ -17,6 +18,7 @@ export const CONFIG_TO_CHAIN = new Map<string, Chain>([
   ['prod-ethereum', mainnet],
   ['prod-arbitrum', arbitrum],
   ['prod-base', base],
+  ['prod-sonic', sonic],
   ['frontend-arbitrum', localhost],
   ['frontend-ethereum', localhost],
   ['frontend-base', localhost],

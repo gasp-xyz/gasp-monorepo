@@ -7498,37 +7498,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gasp-sdk@npm:0.0.2-eth-rollup-develop.79":
-  version: 0.0.2-eth-rollup-develop.79
-  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.79"
+"gasp-sdk@npm:0.0.2-feat-new-chains-integration-GASP-2054.8":
+  version: 0.0.2-feat-new-chains-integration-GASP-2054.8
+  resolution: "gasp-sdk@npm:0.0.2-feat-new-chains-integration-GASP-2054.8"
   dependencies:
     big.js: 6.2.1
-    gasp-type-definitions: 0.0.2-eth-rollup-develop.81
+    gasp-type-definitions: 0.0.2-feat-new-chains-integration-GASP-2054.8
     tslib: ^2.3.0
     tslog: 4.8.2
     viem: ^2.17.4
     wagmi: ^2.10.10
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 4fbf0e42e0b0e7100bf598c3b064457120e4cdc12f9385926593d3660c1aecbc05cea950c811b2b83e79156d0198dd1d2babd99c78e72197b534d295772bd49d
+  checksum: 4f7e4afc29692bb1d6bad1a935872eae8bafc0407fdff14067a4d74a13981c246e95ff9349a87dca1be7c0232f0e229acbcf07ba91f2b45ea7a6bd228d4b3125
   languageName: node
   linkType: hard
 
-"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81":
-  version: 0.0.2-eth-rollup-develop.81
-  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81"
+"gasp-type-definitions@npm:0.0.2-feat-new-chains-integration-GASP-2054.8":
+  version: 0.0.2-feat-new-chains-integration-GASP-2054.8
+  resolution: "gasp-type-definitions@npm:0.0.2-feat-new-chains-integration-GASP-2054.8"
   peerDependencies:
     "@polkadot/types": ^11.1.1
-  checksum: 748e6eafd64686a75e41dbe99270c6d994e5a18df3e3ecae6a8ce7d3ff48e763f41a6ba5404676448a355597154faca4ae9f6dd3e796d9fd77a6b3cc94388202
+  checksum: 0d129c9e1b1c9bc8728bb4698803a9bb5eec2e6f24fd8752150b7d2282e6c40aa4fb15423c8fa506d1e325820a4e1970c65c09b1ee6908f99bd1e398139e0bf5
   languageName: node
   linkType: hard
 
-"gasp-types@npm:0.0.2-eth-rollup-develop.78":
-  version: 0.0.2-eth-rollup-develop.78
-  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.78"
+"gasp-types@npm:0.0.2-feat-new-chains-integration-GASP-2054.8":
+  version: 0.0.2-feat-new-chains-integration-GASP-2054.8
+  resolution: "gasp-types@npm:0.0.2-feat-new-chains-integration-GASP-2054.8"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 84eb999300d9b60e9f426e5d33825c4d26c3a4e5750f7f282032d624801ef8acfe94bd70c2da67810170477464d4db2e110559abac6e14788390a5bee261bd7f
+  checksum: 6d2ff65fd835f136085896a83b54e2b931f6fc6323cce4a7ab246ce914c04adac2609eebe28e394b0eb9596de47b3fcde2cc6dfc776b35e519dcc4a68f39f5d1
   languageName: node
   linkType: hard
 
@@ -13299,8 +13299,8 @@ __metadata:
     eslint-plugin-sort-imports-es6-autofix: ^0.6.0
     express: ^4.19.2
     express-validator: 6.14.2
-    gasp-sdk: 0.0.2-eth-rollup-develop.79
-    gasp-types: 0.0.2-eth-rollup-develop.78
+    gasp-sdk: 0.0.2-feat-new-chains-integration-GASP-2054.8
+    gasp-types: 0.0.2-feat-new-chains-integration-GASP-2054.8
     husky: ^8.0.3
     ioredis: ^5.3.0
     joi: ^17.10.1
