@@ -43,6 +43,13 @@ export const initService = async () => {
       MONAD_CHAIN,
       process.env.CONTRACT_ADDRESS_MONAD
     ),
+    watchDepositAcceptedIntoQueue(
+        api,
+        process.env.MEGAETH_CHAIN_URL,
+        CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-megaeth'),
+        MEGAETH_CHAIN,
+        process.env.CONTRACT_ADDRESS_MEGAETH
+    ),
     new Promise((resolve) => {
       setTimeout(() => {
         watchWithdrawalClosed(
@@ -87,10 +94,22 @@ export const initService = async () => {
         ).then(resolve)
       }, 10000)
     }),
+    new Promise((resolve) => {
+      setTimeout(() => {
+        watchWithdrawalClosed(
+            api,
+            process.env.MEGAETH_CHAIN_URL,
+            CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-megaeth'),
+            MEGAETH_CHAIN,
+            process.env.CONTRACT_ADDRESS_MEGAETH
+        ).then(resolve)
+      }, 10000)
+    }),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
     processRequests(api, 'Base'),
     processRequests(api, 'Monad'),
+    processRequests(api, 'MegaEth'),
   ]).then((results) => {
     results.forEach((result) => {
       if (result.status === 'fulfilled') {

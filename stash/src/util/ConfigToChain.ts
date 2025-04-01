@@ -20,6 +20,7 @@ export const CONFIG_TO_CHAIN = new Map<string, Chain>([
   ['testnet-arbitrum', arbitrumSepolia],
   ['testnet-base', baseSepolia],
   ['testnet-monad', monadTestnet],
+  ['testnet-megeth', megaethTestnet],
   ['prod-ethereum', mainnet],
   ['prod-arbitrum', arbitrum],
   ['prod-base', base],
