@@ -1,0 +1,54 @@
+.git
+node_modules
+.env*
+.vscode
+.github
+**/Dockerfile*
+**/build/
+**/dist/
+**/test-results/
+ops
+skaffold.yml
+README.md
+docker-compose*
+.gitignore
+
+.moon/cache
+moon.yml
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
+
+# Ignore buildkit metadata
+*-buildkit-metadata.json
+
+# Additional paths
+**/.classpath
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/.next
+**/.cache
+**/*.*proj.user
+**/*.dbmdl
+**/*.jfm
+**/charts
+**/compose.y*ml
+**/obj
+**/secrets.dev.yaml
+**/values.dev.yaml
+LICENSE
+
+# ignore yarn
+.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/versions
