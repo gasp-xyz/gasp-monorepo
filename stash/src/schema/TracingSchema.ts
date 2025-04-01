@@ -17,8 +17,8 @@ export const startTracingSchema = yup.object().shape({
     .string()
     .required('chain is required')
     .oneOf(
-      ['Ethereum', 'Arbitrum', 'Base', 'Monad'],
-      'network must be either "Ethereum", "Arbitrum", "Base" or "Monad"'
+      ['Ethereum', 'Arbitrum', 'Base', 'Monad', 'MegaEth'],
+      'network must be either "Ethereum", "Arbitrum", "Base", "Monad" or "MegaEth"'
     ),
   amount: yup.string().required('amount is required'),
   asset_chainId: yup
