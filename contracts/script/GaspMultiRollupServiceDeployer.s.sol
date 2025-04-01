@@ -18,14 +18,14 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
     GaspMultiRollupService public gmrsImplementation;
     address public owner;
     address public upgrader;
-    address public updaterAccount;
+    address public gmrsUpdater;
     bool public allowNonRootInit;
 
     function deploy(IRolldownPrimitives.ChainId chainId) public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
-        updaterAccount = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
+        gmrsUpdater = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
         allowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
         vm.startBroadcast();
@@ -52,7 +52,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
                 gmrs.initialize.selector,
                 gmrsPauserReg,
                 owner,
-                updaterAccount,
+                gmrsUpdater,
                 allowNonRootInit,
                 dummyRolldownAddress,
                 chainId
@@ -69,11 +69,8 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
     function upgrade() public override {
         string memory configData = readInput(outputPath);
         upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
-        address gmrsAddress = stdJson.readAddress(configData, ".addresses.gmrs");
-
-        gmrsProxyAdmin = ProxyAdmin(proxyAdmin);
-        gmrs = GaspMultiRollupService(gmrsAddress);
+        gmrsProxyAdmin = ProxyAdmin(stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin"));
+        gmrs = GaspMultiRollupService(stdJson.readAddress(configData, ".addresses.gmrs"));
 
         vm.startBroadcast();
 
@@ -82,14 +79,8 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
 
         vm.stopBroadcast();
 
-        _verifyImplementation(gmrsProxyAdmin, gmrsAddress, address(gmrsImplementation));
+        _verifyImplementation(gmrsProxyAdmin, address(gmrs), address(gmrsImplementation));
         _writeOutput();
-    }
-
-    function _verifyInitalization() internal view {
-        require(gmrs.owner() == owner, "gmrs.owner() != owner");
-        require(gmrs.pauserRegistry() == gmrsPauserReg, "gmrs: pauser registry not set correctly");
-        require(gmrs.paused() == 0, "gmrs: init paused status set incorrectly");
     }
 
     function _writeOutput() internal {
@@ -109,7 +100,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
         string memory permissions = "permissions";
         vm.serializeAddress(permissions, "gmrsOwner", owner);
         vm.serializeAddress(permissions, "gmrsUpgrader", upgrader);
-        string memory permissionsOutput = vm.serializeAddress(permissions, "gmrsUpdater", updaterAccount);
+        string memory permissionsOutput = vm.serializeAddress(permissions, "gmrsUpdater", gmrsUpdater);
 
         vm.serializeString(parentObject, chainInfo, chainInfoOutput);
         vm.serializeString(parentObject, deployedAddresses, deployedAddressesOutput);
@@ -117,5 +108,11 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
         string memory finalJson = vm.serializeString(parentObject, permissions, permissionsOutput);
         console.logString(finalJson);
         writeOutput(finalJson, outputPath);
+    }
+
+    function _verifyInitalization() internal view {
+        require(gmrs.owner() == owner, "gmrs.owner() != owner");
+        require(gmrs.pauserRegistry() == gmrsPauserReg, "gmrs: pauser registry not set correctly");
+        require(gmrs.paused() == 0, "gmrs: init paused status set incorrectly");
     }
 }

@@ -32,6 +32,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
         vm.startBroadcast();
 
         rolldownProxyAdmin = new ProxyAdmin();
+        erc20Mock = new GaspTestToken();
 
         EmptyContract emptyContract = new EmptyContract();
         rolldown = Rolldown(
@@ -55,23 +56,19 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
     function upgrade() public override {
         string memory configData = readInput(outputPath);
         upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
-
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
-        rolldownProxyAdmin = ProxyAdmin(proxyAdmin);
-
-        address rolldownAddress = stdJson.readAddress(configData, ".addresses.rolldown");
-        rolldown = Rolldown(payable(rolldownAddress));
+        rolldownProxyAdmin = ProxyAdmin(stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin"));
+        rolldown = Rolldown(payable(stdJson.readAddress(configData, ".addresses.rolldown")));
 
         vm.startBroadcast();
 
         rolldownImplementation = new Rolldown();
         rolldownProxyAdmin.upgrade(
-            TransparentUpgradeableProxy(payable(rolldownAddress)), address(rolldownImplementation)
+            TransparentUpgradeableProxy(payable(address(rolldown))), address(rolldownImplementation)
         );
 
         vm.stopBroadcast();
 
-        _verifyImplementation(rolldownProxyAdmin, rolldownAddress, address(rolldownImplementation));
+        _verifyImplementation(rolldownProxyAdmin, address(rolldown), address(rolldownImplementation));
         _writeOutput();
     }
 
