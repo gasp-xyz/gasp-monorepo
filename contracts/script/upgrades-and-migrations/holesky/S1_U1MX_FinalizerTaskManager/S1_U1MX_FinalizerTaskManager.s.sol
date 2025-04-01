@@ -31,7 +31,9 @@ contract Deployer is Script, Test, Utils {
         vm.startBroadcast();
 
         taskManagerImplementation = new FinalizerTaskManager();
-        avsProxyAdmin.upgrade(TransparentUpgradeableProxy(payable(address(taskManager))), address(taskManagerImplementation));
+        avsProxyAdmin.upgrade(
+            TransparentUpgradeableProxy(payable(address(taskManager))), address(taskManagerImplementation)
+        );
 
         vm.stopBroadcast();
         _writeOutput();
@@ -58,7 +60,8 @@ contract Deployer is Script, Test, Utils {
         uint256 configChainId = stdJson.readUint(configData, ".chainInfo.chainId");
         require(configChainId == block.chainid, "You are on the wrong chain for this config");
 
-        string memory avsDeploymentOutputPath = string.concat(vm.projectRoot(), "/script/output/17000/avs_deployment_output.json");
+        string memory avsDeploymentOutputPath =
+            string.concat(vm.projectRoot(), "/script/output/17000/avs_deployment_output.json");
         string memory avsDeploymentData = vm.readFile(avsDeploymentOutputPath);
         avsProxyAdmin = ProxyAdmin(stdJson.readAddress(avsDeploymentData, ".addresses.avsProxyAdmin"));
         taskManager = FinalizerTaskManager(stdJson.readAddress(avsDeploymentData, ".addresses.taskManager"));
