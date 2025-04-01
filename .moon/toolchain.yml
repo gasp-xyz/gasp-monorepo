@@ -4,6 +4,7 @@
 #   targets: [ "wasm32-unknown-unknown" ]
 
 node:
+  addEnginesConstraint: false
   packageManager: yarn
   yarn:
     version: 4.7.0
