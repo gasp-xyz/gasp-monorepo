@@ -18,6 +18,7 @@ import * as tracingController from './controller/TracingController.js'
 import * as tradingController from './controller/TradingController.js'
 import * as airdropController from './controller/mgxAirdropController.js'
 import * as tokenPriceController from './controller/TokenPriceController.js'
+import * as keyValueController from './controller/KeyValueController.js'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -128,6 +129,9 @@ app.post('/mgx-airdrop/link-address', airdropController.linkAddress)
 
 // Coinmarketcap listing endpoints
 app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
+
+//key value storage endpoints
+app.post('/key-value/store', keyValueController.store)
 
 app.use('/doc', swaggerUI.serve, swaggerUI.setup(swaggerFile))
 

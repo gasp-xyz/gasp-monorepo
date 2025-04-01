@@ -122,4 +122,10 @@ out
 **/reports/**/*
 
 .cursor
+.cursorignore
 CLAUDE.md
+.giga
+
+# Ensure package-lock.json is not added to the repo as we use yarn for our projects
+package-lock.json
+**/package-lock.json

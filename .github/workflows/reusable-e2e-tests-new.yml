@@ -21,7 +21,7 @@ permissions:
 
 env:
   MOON_COLOR: 2
-  CACHE_VERSION: 1
+  CACHE_VERSION: 2
 
 jobs:
   setup-report:
@@ -161,14 +161,9 @@ jobs:
           cache: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Install proto manually
-      #   run: |
-      #     curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-      #     bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
-      #     echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      # - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && proto setup --yes && proto install
 
       - uses: docker/setup-compose-action@v1
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version: "18.20.7"
@@ -194,28 +189,33 @@ jobs:
 
       - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
 
-      - name: E2E- Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v8
-
-      - name: Current branch name for generating types
-        run: echo "GASP_TYPES_VERSION=${{ steps.branch-name.outputs.current_branch }}" | sed -E 's@[/\.]@-@g; s@_@-@g' >> $GITHUB_ENV
-
-      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install
-      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn add @mangata-finance/types@${{ env.GASP_TYPES_VERSION }}
-      
       - uses: moonrepo/setup-toolchain@v0.4.0
         with:
           cache-version: ${{ env.CACHE_VERSION }}
       
-      - name: Set MOON_CACHE=off for release/next branch
-        if: github.ref_name == 'release/next'
+      - name: Set MOON_CACHE=off to disable `moon` cache usage
+        if: github.ref_name == 'release/next' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'no-cache'))
         run: echo "MOON_CACHE=off" >> $GITHUB_ENV
-      
+
       - name: Run tests
         run: ${{ matrix.command }}
         env:
+          IMAGE_TAG: ${{ inputs.globalVersion }}
           NODE_OPTIONS: --max_old_space_size=12288
+          MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+          NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+          API_URL: "ws://127.0.0.1:9946"
+
+      - name: Show Docker Compose logs in case of failure
+        if: failure()
+        run: cat $GITHUB_WORKSPACE/tmp/logs/*.txt
+
+      - name: Upload logs as an artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-logs
+          path: tmp/logs/
 
       - name: Test Report
         uses: dorny/test-reporter@v1.9.1
@@ -234,11 +234,10 @@ jobs:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
         run: |
-          npm install --no-save @testmo/testmo-cli
-          npx testmo automation:run:submit-thread \
+          yarn dlx @testmo/testmo-cli automation:run:submit-thread \
             --instance https://mangata-finance.testmo.net \
             --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
-            --results e2eTests/reports/*.xml
+            --results $GITHUB_WORKSPACE/gasp-node/gasp-e2e/reports/*.xml
 
   test-complete:
     needs: [setup-report, e2e-test-matrix]
