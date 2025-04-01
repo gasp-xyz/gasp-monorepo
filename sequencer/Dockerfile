@@ -41,6 +41,6 @@ WORKDIR /app
 
 COPY --from=builder /app/sequencer-bin /app/sequencer
 COPY --from=builder /app/ferry-withdrawal-bin /app/ferry-withdrawal
-COPY --from=builder /app/ferry-deposti-bin /app/ferry-deposit
+COPY --from=builder /app/ferry-deposit-bin /app/ferry-deposit
 
 CMD ["/app/sequencer"]
