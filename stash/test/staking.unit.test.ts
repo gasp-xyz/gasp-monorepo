@@ -1,10 +1,11 @@
-import { apy, dailyRewards } from '../src/service/StakingAprService'
-import { describe, it, vi, expect, beforeAll, afterAll } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+
 import {
   DailyRewardResponse,
   ResponseAPY,
   Session,
 } from '../src/repository/StakingRepository'
+import { apy, dailyRewards } from '../src/service/StakingAprService'
 
 describe('[Staking]', () => {
   beforeAll(() => {
@@ -103,11 +104,9 @@ describe('[Staking]', () => {
         collatorAddress: '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
         dateFormat: 'DD/MM/YYYY',
         timestamp: '1692208122954',
-      }
+      },
     ]
-    const results = await apy(
-      '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac'
-    )
+    const results = await apy('0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac')
     expect(results).deep.equal(expectedResponse)
   })
 
