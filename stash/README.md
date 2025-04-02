@@ -28,10 +28,10 @@ Each API has a limit of 50K entries to return.
 
 ## Local quick start
 
-1. Rename `.env.local` to `.env` and add missing envs (if any)
+1. Rename `.env.example` to `.env` and add missing envs (if any)
 2. Install all the dependencies `yarn`
 3. Start local Redis `docker run --name stash-redis-stack -p 6379:6379 -d redis/redis-stack-server`
-4. Make a copy of `.env.local` and name it `.env`. This file will be ignored from git and you can set your own values.
+4. Make a copy of `.env.example` and name it `.env`. This file will be ignored from git and you can set your own values.
 5. Run the app in debug mode with watch option `yarn start-local`
 
 ## Documentation
@@ -106,7 +106,7 @@ To run Stash locally using Docker Compose:
 2. Create a `.env` file from the provided example and add missing values
 
    ```bash
-   cp .env.local .env
+   cp .env.example .env
    ```
 
 3. Start the application stack:
