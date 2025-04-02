@@ -7,10 +7,10 @@ import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/p
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {Test} from "forge-std/Test.sol";
-import { GaspMultiRollupService } from "./../../../src/GaspMultiRollupService.sol";
-import { IRolldownPrimitives } from "./../../../src/interfaces/IRolldownPrimitives.sol";
-import { Rolldown } from "./../../../src/Rolldown.sol";
-import { Utils } from "./../../utils/Utils.sol";
+import {GaspMultiRollupService} from "../../../src/GaspMultiRollupService.sol";
+import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
+import {Rolldown} from "../../../src/Rolldown.sol";
+import {Utils} from "../../utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -81,13 +81,7 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
             abi.encodeWithSelector(
-                gmrs.initialize.selector,
-                avsPauserReg,
-                avsOwner,
-                avsUpdater,
-                false,
-                address(rolldown),
-                chain
+                gmrs.initialize.selector, avsPauserReg, avsOwner, avsUpdater, false, address(rolldown), chain
             )
         );
         // transfer ownership of proxy admin to upgrader

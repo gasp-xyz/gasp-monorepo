@@ -1,11 +1,11 @@
-const globals = require('globals')
-const ts = require('@typescript-eslint/eslint-plugin')
-const tsParser = require('@typescript-eslint/parser')
-const importPlugin = require('eslint-plugin-import')
-const simpleImportSort = require('eslint-plugin-simple-import-sort')
-const prettierPlugin = require('eslint-plugin-prettier')
+import globals from 'globals'
+import ts from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
+import importPlugin from 'eslint-plugin-import'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import prettierPlugin from 'eslint-plugin-prettier'
 
-module.exports = [
+export default [
   // 1. Global Ignores: Apply to everything
   {
     ignores: [
@@ -26,6 +26,12 @@ module.exports = [
       ecmaVersion: 'latest',
       parserOptions: {
         project: ['tsconfig.eslint.json'],
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          modules: true,
+          importAttributes: true,
+        },
       },
       globals: {
         ...globals.es2021,

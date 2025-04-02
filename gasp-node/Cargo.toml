@@ -48,7 +48,7 @@ lazy_static = "1.1.1"
 mockall = "0.11.0"
 serial_test = { version = "0.6.0", default-features = false }
 similar-asserts = "1.1.0"
-test-case = "2.0.2"
+test-case = "3.3.1"
 tokio = "1.22.0"
 
 #orml

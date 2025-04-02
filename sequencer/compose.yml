@@ -58,3 +58,49 @@ services:
       MNEMONIC: ${BASE_SEQUENCER_MNEMONIC}
       TX_COST: ${BASE_SEQUENCER_TX_COST}
       RUST_LOG: debug,sequencer=trace
+
+  ferry-deposit-eth:
+    build: .
+    image: gaspxyz/sequencer:${FERRY_DEPOSIT_VERSION:-local}
+    command: /app/ferry-deposit
+    restart: unless-stopped
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+    environment:
+      L1_URI: ${ETH_FERRY_DEPOSIT_CHAIN_URL}
+      L2_URI: ${ETH_FERRY_DEPOSIT_MANGATA_NODE_URL}
+      ROLLDOWN_CONTRACT: ${ETH_FERRY_DEPOSIT_MANGATA_CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${ETH_FERRY_DEPOSIT_MNEMONIC}
+      CHAIN: ${ETH_FERRY_DEPOSIT_L1_CHAIN}
+      ENABLED_TOKENS: ${ETH_FERRY_DEPOSIT_TOKENS_TO_TRACK}
+      TX_COST: ${ETH_FERRY_DEPOSIT_TX_COST}
+      BLOCK_DELAY: ${ETH_FERRY_DEPOSIT_BLOCK_DELAY}
+      RUST_LOG: ${ETH_FERRY_DEPOSIT_LOG}
+
+  ferry-withdrawal-eth:
+    build: .
+    image: gaspxyz/sequencer:${FERRY_WITHDRAWAL_VERSION:-local}
+    restart: unless-stopped
+    command: /app/ferry-withdrawal
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+
+    environment:
+      L1_URI: ${ETH_FERRY_WITHDRAWAL_ETH_CHAIN_URL}
+      L2_URI: ${ETH_FERRY_WITHDRAWAL_MANGATA_NODE_URL}
+      ROLLDOWN_CONTRACT: ${ETH_FERRY_WITHDRAWAL_MANGATA_CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${ETH_FERRY_WITHDRAWAL_PRIVATE_KEY}
+      ENABLED_TOKENS: ${ETH_FERRY_WITHDRAWAL_TOKENS_TO_TRACK}
+      CHAIN: ${ETH_FERRY_WITHDRAWAL_L1_CHAIN}
+      TX_COST: ${ETH_FERRY_WITHDRAWAL_TX_COST}
+      RUST_LOG: ${ETH_FERRY_WITHDRAWAL_LOG}

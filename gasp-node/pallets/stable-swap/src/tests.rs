@@ -435,3 +435,84 @@ fn dy_dx_should_work() {
 		assert_eq!(dy, swap);
 	});
 }
+
+#[test_case::test_matrix(
+    // Pool configurations
+    [200, 1000],
+    [
+        vec![1_000 * UNIT, 1_000 * UNIT],
+        vec![500 * UNIT, 10_000 * UNIT]
+    ],
+    [
+        vec![UNIT, UNIT],
+        vec![UNIT, UNIT * 2]
+    ],
+    // Dy values to test
+    [10 * UNIT, 50 * UNIT, 100 * UNIT, 200 * UNIT, UNIT / 10]
+)]
+fn test_dx_calculations_matrix(
+	amp_coeff: u128,
+	initial_liquidity: Vec<Balance>,
+	rate_multipliers: Vec<Balance>,
+	dy: Balance,
+) {
+	use insta::assert_yaml_snapshot;
+	use serde::Serialize;
+
+	#[derive(Serialize)]
+	struct TestCase {
+		amp_coeff: u128,
+		initial_liquidity: Vec<Balance>,
+		rate_multipliers: Vec<Balance>,
+		dy: Balance,
+		calculated_dx: Balance,
+	}
+
+	// Use a static vector to collect results across all test cases
+	static RESULTS: std::sync::Mutex<Vec<TestCase>> = std::sync::Mutex::new(Vec::new());
+
+	new_test_ext().execute_with(|| {
+		// Create a pool with parameterized values
+		let account: AccountId = 2;
+		let amount: Balance = 1_000_000 * UNIT;
+
+		// Create tokens and pool
+		StableSwap::create_new_token(&account, amount);
+		StableSwap::create_new_token(&account, amount);
+		StableSwap::create_pool(
+			RuntimeOrigin::signed(account),
+			vec![0, 1],
+			rate_multipliers.clone(),
+			amp_coeff,
+		)
+		.unwrap();
+
+		// Add initial liquidity
+		assert_ok!(StableSwap::add_liquidity(
+			RuntimeOrigin::signed(account),
+			2,
+			initial_liquidity.clone(),
+			0,
+		));
+
+		// Calculate dx for given dy
+		let calculated_dx = StableSwap::get_dx(&2, 0, 1, dy).unwrap();
+
+		// Add result to collection
+		RESULTS.lock().unwrap().push(TestCase {
+			amp_coeff,
+			initial_liquidity,
+			rate_multipliers,
+			dy,
+			calculated_dx,
+		});
+
+		// Create snapshot on the last test case (2 amp coeffs × 2 liquidity levels × 2 rate configs × 5 dy values = 40 total)
+		if RESULTS.lock().unwrap().len() == 40 {
+			let mut results = std::mem::take(&mut *RESULTS.lock().unwrap());
+			// Sort results by calculated_dx only
+			results.sort_by(|a, b| a.calculated_dx.cmp(&b.calculated_dx));
+			assert_yaml_snapshot!("dx_calculations_matrix", results);
+		}
+	});
+}
