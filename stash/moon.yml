@@ -16,7 +16,7 @@ fileGroups:
     - 'vitest.config.ts'
     - 'tsconfig.json'
     - 'tsconfig.eslint.json'
-    - 'eslint.config.cjs'
+    - 'eslint.config.js'
 
 env:
   SERVICE_NAME: stash
