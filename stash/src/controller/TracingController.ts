@@ -1,17 +1,18 @@
 import { Request, Response } from 'express'
-import {
-  findTransactionsByAddressAndStatus,
-  getByTxHashOrEntityId,
-  getTransactionsByAddress,
-  startTracingTransaction,
-} from '../service/TracingService.js'
+
+import * as errorHandler from '../error/Handler.js'
 import {
   getAllTransactionsByAddressAndStatusSchema,
   getAllTransactionsByAddressSchema,
   getStatusByTxHashOrEntityIdSchema,
   startTracingSchema,
 } from '../schema/TracingSchema.js'
-import * as errorHandler from '../error/Handler.js'
+import {
+  findTransactionsByAddressAndStatus,
+  getByTxHashOrEntityId,
+  getTransactionsByAddress,
+  startTracingTransaction,
+} from '../service/TracingService.js'
 
 export const startTracing = async (req: Request, res: Response) => {
   /*
@@ -106,10 +107,7 @@ export const getTransactionByTxHashOrEntityId = async (
       txHashOrEntityId,
       type,
     })
-    const transaction = await getByTxHashOrEntityId(
-      txHashOrEntityId,
-      type
-    )
+    const transaction = await getByTxHashOrEntityId(txHashOrEntityId, type)
     if (transaction && Object.keys(transaction).length > 0) {
       res.status(200).send({ transaction })
     } else {
@@ -128,8 +126,8 @@ export const getAllTransactionsByAddress = async (
 ): Promise<void> => {
   /*
    #swagger.tags = ['Tracing']
-   #swagger.summary = 'Get all transactions by address.'
-   #swagger.description = "Get all transactions by providing a specific address and type of a transaction."
+   #swagger.summary = 'Get all frontend created transactions by address.'
+   #swagger.description = "Get all frontend created transactions by providing a specific address and type of a transaction."
    #swagger.parameters['address'] = {
      in: 'path',
      description: 'Address to get transactions for',

@@ -1,9 +1,12 @@
-import { Block, Event } from './BlockScraper'
-import _ from 'lodash'
-import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
+import { GenericExtrinsic } from '@polkadot/types'
+import { AnyTuple } from '@polkadot/types-codec/types'
+import _ from 'lodash'
+
 import { redis } from '../connector/RedisConnector.js'
+import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import logger from '../util/Logger.js'
+import { Block, Event } from './BlockScraper'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const WITHDRAWAL_PENDING_ON_L2 = 'PendingOnL2'
@@ -20,6 +23,29 @@ export enum CreatedBy {
   Other = 'other',
 }
 
+export async function extractExtrinsicHashAndAnAddressFromBlock(
+  api: ApiPromise,
+  phaseApplyExtrinsic: number,
+  block: Block
+) {
+  let extrinsicHash, address
+  try {
+    const blockHash = await api.rpc.chain.getBlockHash(block.number)
+    const blockHeader = await api.rpc.chain.getHeader(blockHash)
+    const extinsics: GenericExtrinsic<AnyTuple>[] = (
+      await api.rpc.chain.getBlock(blockHeader.hash)
+    ).block.extrinsics
+    let extrinsic = extinsics[phaseApplyExtrinsic]
+    extrinsicHash = extrinsic.hash.toString()
+    address = extrinsic.signer.toString()
+    console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
+    return { extrinsicHash, address }
+  } catch (error) {
+    logger.error('Error extracting extrinsic hash and address:', error)
+    return { extrinsicHash: '', address: '' }
+  }
+}
+
 export const processWithdrawalEvents = async (
   api: ApiPromise,
   block: Block
@@ -27,62 +53,58 @@ export const processWithdrawalEvents = async (
   const events = _.chain(block.events)
     .filter((ev) => filterEvents(ev[1]))
     .groupBy(([idx, _]) => idx)
-    .map((evs, _) => evs.map(([_, ev]) => ev))
+    .map((evs, idx) =>
+      evs.map(([phaseApplyExtrinsic, ev]) => ({ phaseApplyExtrinsic, ev }))
+    )
     .value()
   if (events.length > 0) {
     for (const eventGroup of events) {
       for (const event of eventGroup) {
-        if (event.method === 'WithdrawalRequestCreated') {
-          const existingWithdrawal = await withdrawalRepository
-            .search()
-            .where('txHash')
-            .equals((event.data as any).hash_)
-            .and('type')
-            .equals('withdrawal')
-            .returnFirst()
-
-          if (existingWithdrawal) {
-            await updateWithdrawal(api, existingWithdrawal, event.data)
-          } else {
-            const withdrawalData = await startTracingWithdrawal(api, event.data)
+        if (event.ev.method === 'WithdrawalRequestCreated') {
+          try {
+            const existingWithdrawal = await withdrawalRepository
+              .search()
+              .where('requestId')
+              .equals(
+                Number(
+                  String((event.ev.data as any).requestId.id).replace(/,/g, '')
+                )
+              )
+              .and('chain')
+              .equals((event.ev.data as any).chain)
+              .and('txHash')
+              .equals((event.ev.data as any).hash_)
+              .returnFirst()
+            if (existingWithdrawal) {
+              logger.info(
+                'Existing withdrawal found, skipping the WithdrawalRequestCreated data: ',
+                existingWithdrawal
+              )
+              continue
+            }
+            const withdrawalData = await startTracingWithdrawal(
+              api,
+              event.ev.data,
+              event.phaseApplyExtrinsic,
+              block
+            )
             logger.info('Tracing started for withdrawal', withdrawalData)
+          } catch (error) {
+            logger.error('Error tracing withdrawal:', error)
           }
-        } else if (event.method === 'TxBatchCreated') {
-          await updateWithdrawalsWhenBatchCreated(api, event.data)
+        } else if (event.ev.method === 'TxBatchCreated') {
+          await updateWithdrawalsWhenBatchCreated(api, event.ev.data)
         }
       }
     }
   }
 }
 
-export const updateWithdrawal = async (
-  api: ApiPromise,
-  existingWithdrawal: any,
-  eventData: any
-) => {
-  existingWithdrawal.requestId = Number(
-    String(eventData.requestId.id).replace(/,/g, '')
-  )
-  existingWithdrawal.updated = Date.parse(new Date().toISOString())
-  existingWithdrawal.status = WITHDRAWAL_PENDING_ON_L2
-  existingWithdrawal.recipient = eventData.recipient
-  existingWithdrawal.proof = ''
-  const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
-    eventData.chain,
-    eventData.requestId.id.replace(/,/g, '')
-  )
-  existingWithdrawal.calldata = calldata.toHex()
-  existingWithdrawal.closedBy = null
-  await withdrawalRepository.save(existingWithdrawal)
-  logger.info(
-    'Existing withdrawal updated with event WithdrawalRequestCreated',
-    existingWithdrawal
-  )
-}
-
 export const startTracingWithdrawal = async (
   api: ApiPromise,
-  eventData: any
+  eventData: any,
+  phaseApplyExtrinsic: number,
+  block: Block
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
@@ -94,22 +116,32 @@ export const startTracingWithdrawal = async (
   const network = networks.find((net: Network) => net.key === eventData.chain)
   const chainId = network ? network.chainId : 'unknown'
 
+  const { extrinsicHash, address } =
+    await extractExtrinsicHashAndAnAddressFromBlock(
+      api,
+      phaseApplyExtrinsic,
+      block
+    )
+  const redisKey = `withdrawal:${extrinsicHash}`
+  const keyExists = await redis.client.exists(redisKey)
+  console.log('Key Exists:', keyExists)
+
   const withdrawalData = {
-    requestId: Number(eventData.requestId.id.replace(/,/g, '')),
+    requestId: Number(String(eventData.requestId.id).replace(/,/g, '')),
     txHash: eventData.hash_,
-    address: '', // address (sender) we get from FE when they trigger start tracing, empty when withdrawal is started tracing by other means or until FE updates it
+    address: address,
     recipient: eventData.recipient,
     created: Date.parse(timestamp),
     updated: Date.parse(timestamp),
     status: WITHDRAWAL_PENDING_ON_L2,
     type: type,
     chain: eventData.chain,
-    amount: eventData.amount.replace(/,/g, ''),
+    amount: String(eventData.amount).replace(/,/g, ''),
     asset_chainId: chainId,
     asset_address: eventData.tokenAddress,
     proof: '',
     calldata: calldata.toHex(),
-    createdBy: CreatedBy.Other,
+    createdBy: keyExists ? CreatedBy.Frontend : CreatedBy.Other,
     closedBy: null,
   }
   return withdrawalRepository.save(withdrawalData)

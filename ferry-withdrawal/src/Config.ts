@@ -13,17 +13,33 @@ const tokensToTrackSchema = z
 	.array();
 
 const SUPPORTED_CHAINS = new Map<string, string>([
-	["anvil-arbitrum", "arbitrum"],
+	// anvil
 	["anvil-ethereum", "ethereum"],
-	["holesky", "ethereum"],
+	["anvil-arbitrum", "arbitrum"],
+	["anvil-base", "arbitrum"],
+	["anvil-monad", "monad"],
+	["anvil-megaeth", "megaeth"],
+	["anvil-monad", "monad"],
+	["anvil-sonic", "sonic"],
+	// mainnet
 	["ethereum", "ethereum"],
-	["base-sepolia", "base"],
-	["base", "base"],
 	["arbitrum", "arbitrum"],
+	["base", "base"],
+	["sonic", "sonic"],
+	// testnet
+	["holesky", "ethereum"],
 	["arbitrum-sepolia", "arbitrum"],
+	["base-sepolia", "base"],
+	["monad", "monad"],
+	["megaeth", "megaeth"],
+	["sonic-testnet", "sonic"],
+	// reth
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
 	["reth-base", "base"],
+	["reth-monad", "monad"],
+	["reth-megaeth", "megaeth"],
+	["reth-sonic", "sonic"],
 ]);
 
 const cliConfigSchemat = z.object({
@@ -53,6 +69,7 @@ const cliConfigSchemat = z.object({
 	REPLICA_ID: z.bigint().default(0n),
 	MIN_REQUEST_ID: z.bigint().default(0n),
 	SKIP_STASH: z.boolean().default(false),
+	METRICS_PORT: z.number().default(8080),
 });
 
 function createCliConfig() {
@@ -85,11 +102,15 @@ function createCliConfig() {
 		SKIP_STASH: process.env.SKIP_STASH
 			? Boolean(process.env.SKIP_STASH)
 			: undefined,
+		METRICS_PORT: process.env.METRICS_PORT
+			? parseInt(process.env.METRICS_PORT)
+			: undefined,
 	});
 }
 
 const configuration = createCliConfig();
 
+export const METRICS_PORT = configuration.METRICS_PORT;
 export const MANGATA_CONTRACT_ADDRESS =
 	configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;

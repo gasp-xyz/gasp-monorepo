@@ -2,10 +2,14 @@
 pragma solidity 0.8.13;
 
 import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import { BLSSignatureChecker } from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {IndexRegistry} from  "@eigenlayer-middleware/src/IndexRegistry.sol";
+import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {IndexRegistry} from "@eigenlayer-middleware/src/IndexRegistry.sol";
 import {IStakeRegistry} from "@eigenlayer-middleware/src/interfaces/IStakeRegistry.sol";
-import {IRegistryCoordinator, IServiceManager, RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {
+    IRegistryCoordinator,
+    IServiceManager,
+    RegistryCoordinator
+} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
 import {StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
 import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
 import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
@@ -17,13 +21,13 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import { FinalizerServiceManager } from "./../../../src/FinalizerServiceManager.sol";
-import { FinalizerTaskManager } from "./../../../src/FinalizerTaskManager.sol";
-import { IFinalizerTaskManager } from "./../../../src/interfaces/IFinalizerTaskManager.sol";
-import { IRolldownPrimitives } from "./../../../src/interfaces/IRolldownPrimitives.sol";
-import { OperatorStateRetrieverExtended } from "./../../../src/OperatorStateRetrieverExtended.sol";
-import { Rolldown } from "./../../../src/Rolldown.sol";
-import { Utils } from "./../../utils/Utils.sol";
+import {FinalizerServiceManager} from "../../../src/FinalizerServiceManager.sol";
+import {FinalizerTaskManager} from "../../../src/FinalizerTaskManager.sol";
+import {IFinalizerTaskManager} from "../../../src/interfaces/IFinalizerTaskManager.sol";
+import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
+import {OperatorStateRetrieverExtended} from "../../../src/OperatorStateRetrieverExtended.sol";
+import {Rolldown} from "../../../src/Rolldown.sol";
+import {Utils} from "../../utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv
@@ -84,10 +88,7 @@ contract Deployer is Script, Utils, Test {
             RewardsCoordinator(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.rewardsCoordinator"));
 
         // READ JSON CONFIG DATA
-        path = string.concat(
-            vm.projectRoot(),
-            "/script/config/eth_main/deploy_init.config.json"
-        );
+        path = string.concat(vm.projectRoot(), "/script/config/eth_main/deploy_init.config.json");
         string memory configData = vm.readFile(path);
 
         // check that the chainID matches the one in the config
@@ -231,15 +232,15 @@ contract Deployer is Script, Utils, Test {
 
         taskManagerImplementation = new FinalizerTaskManager();
         taskManagerImplementation.initialize(
-                avsPauserReg,
-                avsOwner,
-                aggregator,
-                aggregator,
-                allowNonRootTmInit,
-                address(blsSignatureChecker),
-                taskResponseWindowBlocks,
-                address(operatorStateRetreiverExtended),
-                rolldown
+            avsPauserReg,
+            avsOwner,
+            aggregator,
+            aggregator,
+            allowNonRootTmInit,
+            address(blsSignatureChecker),
+            taskResponseWindowBlocks,
+            address(operatorStateRetreiverExtended),
+            rolldown
         );
 
         // upgrade task manager proxy to implementation and initialize
@@ -447,7 +448,10 @@ contract Deployer is Script, Utils, Test {
     }
 
     function _checkPauserInitializations() internal view {
-        require(registryCoordinator.pauserRegistry() == avsPauserReg,"registryCoordinator: pauser registry not set correctly");
+        require(
+            registryCoordinator.pauserRegistry() == avsPauserReg,
+            "registryCoordinator: pauser registry not set correctly"
+        );
         require(taskManager.pauserRegistry() == avsPauserReg, "taskManager: pauser registry not set correctly");
 
         require(avsPauserReg.isPauser(avsOwner), "pauserRegistry: avsOwner is not pauser");
@@ -502,7 +506,7 @@ contract Deployer is Script, Utils, Test {
         writeOutput(finalJson, _OUTPUT_PATH);
     }
 
-    function getOutputPath() external view returns (string memory) {
+    function getOutputPath() external pure returns (string memory) {
         return _OUTPUT_PATH;
     }
 }

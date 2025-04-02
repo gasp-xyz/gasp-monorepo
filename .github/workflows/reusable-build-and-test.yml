@@ -7,6 +7,11 @@ on:
         description: Version to be assigned to the built image
         required: true
         type: string
+      cacheEnabled:
+        description: Enable caching for all tests
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -15,8 +20,8 @@ permissions:
 
 env:
   MOON_COLOR: 2
-  MOON_CACHE: read-write
   MOON_DEBUG_PROTO_INSTALL: false
+  MOON_CACHE: ${{ inputs.cacheEnabled && 'read-write' || 'off' }}
   CACHE_VERSION: 2
 jobs:
   contracts-build-and-test:
@@ -27,7 +32,9 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
+
       - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
         uses: actions/cache@v4
         id: cache
         with:
@@ -42,10 +49,12 @@ jobs:
           git submodule update --init --recursive --depth 1
           
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          cache: ${{ inputs.cacheEnabled }}
       - uses: actions/setup-python@v5
         with:
           python-version-file: 'contracts/.python-version'
-          cache: pip
+          cache: ${{ inputs.cacheEnabled && 'pip' || '' }}
       - run: cd contracts && pip install -r requirements.txt
         
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
@@ -55,9 +64,10 @@ jobs:
       #     cache: 'yarn'
       #     cache-dependency-path: "./contracts/yarn.lock"
 
-      - uses: moonrepo/setup-toolchain@v0.4.0
+      - uses: moonrepo/setup-toolchain@v0.4.1
         with:
           cache-version: ${{ env.CACHE_VERSION }}
+          cache: ${{ inputs.cacheEnabled }}
       - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-format
       - run: moon ci :contracts-lint
@@ -95,10 +105,11 @@ jobs:
         working-directory: stash
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'stash/.nvmrc'
-          cache: 'yarn'
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
           cache-dependency-path: "./stash/yarn.lock"
 
       - uses: google-github-actions/auth@v2
@@ -116,6 +127,7 @@ jobs:
   build-and-check-services:
     name: '[AVS] ${{ matrix.name }}'
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
     strategy: 
       matrix:
         include:
@@ -145,6 +157,7 @@ jobs:
           submodules: false
       - name: Cache Git submodules
         uses: actions/cache@v4
+        if: inputs.cacheEnabled == true
         id: cache
         with:
           path: |
@@ -209,8 +222,9 @@ jobs:
                 - limits.memory=14Gi
 
       - uses: mozilla-actions/sccache-action@v0.0.5
+        if: inputs.cacheEnabled == true
       - name: Set Rust caching env vars
-        if: matrix.buildkit-enable == false
+        if: matrix.buildkit-enable == false && inputs.cacheEnabled == true
         run: |
           echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
           echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV
@@ -225,7 +239,8 @@ jobs:
           channel: 1.82.0
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: ${{ (matrix.buildkit-enable == false) && true || false }}
+          cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'sequencer/target,updater/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup 1.78.0 rust toolchain
@@ -234,7 +249,8 @@ jobs:
           channel: 1.78.0
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: ${{ (matrix.buildkit-enable == false) && true || false }}
+          cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'gasp-avs/target'
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
@@ -243,17 +259,21 @@ jobs:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
           components: rustfmt,clippy,rust-src
-          cache: ${{ (matrix.buildkit-enable == false) && true || false }}
+          cache: ${{ (matrix.buildkit-enable == false) && inputs.cacheEnabled || false }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           # bins: cargo-tarpaulin@0.26.1
           target-dirs: 'gasp-node/target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - uses: moonrepo/setup-toolchain@v0.4.0
+      - uses: moonrepo/setup-toolchain@v0.4.1
         with:
           cache-version: ${{ env.CACHE_VERSION }}
-      - run: ${{ matrix.command }}
+          cache: ${{ inputs.cacheEnabled }}
+      
+      - name: Run command "${{ matrix.command }}"
+        run: ${{ matrix.command }}
         env:
           IMAGE_TAG: ${{ inputs.version }}
           MOON_TOOLCHAIN_FORCE_GLOBALS: rust
@@ -303,12 +323,14 @@ jobs:
           channel: nightly-2024-01-20
           targets: wasm32-unknown-unknown
           components: rust-src
-          cache: true
+          cache: ${{ inputs.cacheEnabled }}
+          cache-base: ${{( github.ref_name == 'main' || github.ref_name == 'release/next') && 'main' || 'develop' }}
           target-dirs: 'gasp-node/target'
 
-      - uses: moonrepo/setup-toolchain@v0.4.0
+      - uses: moonrepo/setup-toolchain@v0.4.1
         with:
           cache-version: ${{ env.CACHE_VERSION }}
+          cache: ${{ inputs.cacheEnabled }}
 
       - uses: google-github-actions/auth@v2
         id: auth
@@ -317,7 +339,9 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mozilla-actions/sccache-action@v0.0.5
+        if: inputs.cacheEnabled == true
       - name: Set Rust caching env vars
+        if: inputs.cacheEnabled == true
         run: |
           echo "SCCACHE_GCS_BUCKET=mangata-node-ci-cache" >> $GITHUB_ENV
           echo "SCCACHE_GCS_RW_MODE=READ_WRITE" >> $GITHUB_ENV

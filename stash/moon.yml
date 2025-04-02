@@ -1,5 +1,6 @@
 language: typescript
 type: application
+tags: ['typescript']
 
 toolchain:
   node:
@@ -8,11 +9,25 @@ toolchain:
 fileGroups:
   sources:
     - 'src/**/*'
-    - 'package.json'
+    - 'test/**/*'
+    - '__mocks__/**/*'
+    - 'swagger.js'
+    - 'vitest.config.ts'
     - 'tsconfig.json'
-
+    - 'eslint.config.cjs'
 tasks:
   build:
     command: 'yarn build'
-    inputs: ['@globs(sources)']
-    outputs: ['dist']
+    inputs: ['@group(sources)']
+
+  lint:
+    command: 'yarn lint'
+    inputs: ['@group(sources)']
+
+  format:
+    command: 'yarn format:check'
+    inputs: ['@group(sources)']
+
+  test:
+    command: 'yarn test:unit'
+    inputs: ['@group(sources)']

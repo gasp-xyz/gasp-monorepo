@@ -1,72 +1,35 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
-import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import { console } from "forge-std/console.sol";
-import { Script } from "forge-std/Script.sol";
-import { stdJson } from "forge-std/StdJson.sol";
-import { Test } from "forge-std/Test.sol";
-import { GaspMultiRollupService } from "./../src/GaspMultiRollupService.sol";
-import { IRolldownPrimitives } from "./../src/interfaces/IRolldownPrimitives.sol";
-import { Utils } from "./utils/Utils.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {console} from "forge-std/console.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
+import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
+import {BaseDeployer} from "./BaseDeployer.s.sol";
 
-contract GaspMultiRollupServiceDeployer is Script, Test, Utils {
-    string internal constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string internal constant _CONFIG_PATH = "deploy.config";
-    string internal constant _OUTPUT_PATH = "gmrs_output";
-
-    string public deployConfigPath;
-
+contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
     ProxyAdmin public gmrsProxyAdmin;
     PauserRegistry public gmrsPauserReg;
-    address public dummy_rolldown_address;
-
+    address public dummyRolldownAddress;
     GaspMultiRollupService public gmrs;
     GaspMultiRollupService public gmrsImplementation;
     address public owner;
     address public upgrader;
-    address public updaterAccount;
+    address public gmrsUpdater;
     bool public allowNonRootInit;
 
-    function upgrade() public {
-        string memory configData = readInput(_OUTPUT_PATH);
-        upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
-        address gmrsAddress = stdJson.readAddress(configData, ".addresses.gmrs");
-        gmrsProxyAdmin = ProxyAdmin(proxyAdmin);
-
-        gmrs = GaspMultiRollupService(gmrsAddress);
-        vm.startBroadcast();
-        gmrsImplementation = new GaspMultiRollupService();
-
-        // upgrade gmrs proxy to implementation and initialize
-        gmrsProxyAdmin.upgrade(TransparentUpgradeableProxy(payable(address(gmrs))), address(gmrsImplementation));
-        vm.stopBroadcast();
-
-        _verifyImplementations();
-
-        _writeOutput();
-    }
-
-    function isProxyDeployed() public returns (bool) {
-        if (!inputExists(_OUTPUT_PATH)) {
-            return false;
-        }
-        string memory configData = readInput(_OUTPUT_PATH);
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin");
-        return proxyAdmin.code.length > 0;
-    }
-
-    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
+    function deploy(IRolldownPrimitives.ChainId chainId) public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
-        updaterAccount = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
+        gmrsUpdater = stdJson.readAddress(configData, ".permissions.gmrsUpdater");
         allowNonRootInit = stdJson.readBool(configData, ".allow_non_root_gmrs_init");
 
         vm.startBroadcast();
+
         gmrsProxyAdmin = new ProxyAdmin();
         address[] memory pausers = new address[](1);
         pausers[0] = owner;
@@ -82,7 +45,6 @@ contract GaspMultiRollupServiceDeployer is Script, Test, Utils {
         );
         gmrsImplementation = new GaspMultiRollupService();
 
-        // upgrade gmrs proxy to implementation and initialize
         gmrsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
@@ -90,67 +52,65 @@ contract GaspMultiRollupServiceDeployer is Script, Test, Utils {
                 gmrs.initialize.selector,
                 gmrsPauserReg,
                 owner,
-                updaterAccount,
+                gmrsUpdater,
                 allowNonRootInit,
-                dummy_rolldown_address,
-                chain
+                dummyRolldownAddress,
+                chainId
             )
         );
 
-        // end deployment
         vm.stopBroadcast();
 
-        _verifyImplementations();
-        _verifyInitalizations();
-
+        _verifyImplementation(gmrsProxyAdmin, address(gmrs), address(gmrsImplementation));
+        _verifyInitalization();
         _writeOutput();
     }
 
-    function run(IRolldownPrimitives.ChainId chain) external {
-        if (isProxyDeployed()) {
-            console.log("Upgrading proxy");
-            upgrade();
-        } else {
-            console.log("Initial deployment");
-            initialDeployment(chain);
-        }
+    function upgrade() public override {
+        string memory configData = readInput(outputPath);
+        upgrader = stdJson.readAddress(configData, ".permissions.gmrsUpgrader");
+        gmrsProxyAdmin = ProxyAdmin(stdJson.readAddress(configData, ".addresses.gmrsProxyAdmin"));
+        gmrs = GaspMultiRollupService(stdJson.readAddress(configData, ".addresses.gmrs"));
+
+        vm.startBroadcast();
+
+        gmrsImplementation = new GaspMultiRollupService();
+        gmrsProxyAdmin.upgrade(TransparentUpgradeableProxy(payable(address(gmrs))), address(gmrsImplementation));
+
+        vm.stopBroadcast();
+
+        _verifyImplementation(gmrsProxyAdmin, address(gmrs), address(gmrsImplementation));
+        _writeOutput();
     }
 
     function _writeOutput() internal {
-        string memory parent_object = "parent object";
+        string memory parentObject = "parent object";
 
-        string memory deployed_addresses = "addresses";
-        vm.serializeAddress(deployed_addresses, "gmrsProxyAdmin", address(gmrsProxyAdmin));
-        vm.serializeAddress(deployed_addresses, "gmrsPauseReg", address(gmrsPauserReg));
-        vm.serializeAddress(deployed_addresses, "gmrs", address(gmrs));
-        string memory deployed_addresses_output =
-            vm.serializeAddress(deployed_addresses, "gmrsImplementation", address(gmrsImplementation));
+        string memory deployedAddresses = "addresses";
+        vm.serializeAddress(deployedAddresses, "gmrsProxyAdmin", address(gmrsProxyAdmin));
+        vm.serializeAddress(deployedAddresses, "gmrsPauseReg", address(gmrsPauserReg));
+        vm.serializeAddress(deployedAddresses, "gmrs", address(gmrs));
+        string memory deployedAddressesOutput =
+            vm.serializeAddress(deployedAddresses, "gmrsImplementation", address(gmrsImplementation));
 
-        string memory chain_info = "chainInfo";
-        vm.serializeUint(chain_info, "deploymentBlock", block.number);
-        string memory chain_info_output = vm.serializeUint(chain_info, "chainId", block.chainid);
+        string memory chainInfo = "chainInfo";
+        vm.serializeUint(chainInfo, "deploymentBlock", block.number);
+        string memory chainInfoOutput = vm.serializeUint(chainInfo, "chainId", block.chainid);
 
         string memory permissions = "permissions";
         vm.serializeAddress(permissions, "gmrsOwner", owner);
         vm.serializeAddress(permissions, "gmrsUpgrader", upgrader);
-        string memory permissions_output = vm.serializeAddress(permissions, "gmrsUpdater", updaterAccount);
+        string memory permissionsOutput = vm.serializeAddress(permissions, "gmrsUpdater", gmrsUpdater);
 
-        vm.serializeString(parent_object, chain_info, chain_info_output);
-        vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
-        string memory finalJson = vm.serializeString(parent_object, permissions, permissions_output);
+        vm.serializeString(parentObject, chainInfo, chainInfoOutput);
+        vm.serializeString(parentObject, deployedAddresses, deployedAddressesOutput);
+
+        string memory finalJson = vm.serializeString(parentObject, permissions, permissionsOutput);
         console.logString(finalJson);
-        writeOutput(finalJson, _OUTPUT_PATH);
+        writeOutput(finalJson, outputPath);
     }
 
-    function _verifyImplementations() internal view {
-        require(
-            gmrsProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(gmrs))))
-                == address(gmrsImplementation),
-            "gmrs: implementation set incorrectly"
-        );
-    }
-
-    function _verifyInitalizations() internal view {
+    function _verifyInitalization() internal view {
         require(gmrs.owner() == owner, "gmrs.owner() != owner");
         require(gmrs.pauserRegistry() == gmrsPauserReg, "gmrs: pauser registry not set correctly");
         require(gmrs.paused() == 0, "gmrs: init paused status set incorrectly");

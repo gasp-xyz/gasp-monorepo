@@ -1,9 +1,10 @@
 language: solidity
 type: application
+tags: ["solidity"]
 
 toolchain:
   node:
-    version: '22.14.0'
+    version: "22.14.0"
 
 fileGroups:
   sources:
@@ -15,9 +16,12 @@ fileGroups:
     - "script/**/*.sol"
     - "tools/**/*"
     - package.json
+    - yarn.lock
     - foundry.toml
     - remappings.txt
-  
+    - slither.config.json
+    - requirements.txt
+
 env:
   SERVICE_NAME: contracts
   IMAGE_BUILD_REPOSITORY: europe-docker.pkg.dev/direct-pixel-353917/gaspxyz/gasp-contracts
@@ -26,19 +30,15 @@ env:
 tasks:
   build:
     command: "forge build"
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     outputs: ["out"]
-  
+
   build-image-local:
     command: >
-      docker buildx build
-      --platform linux/amd64
-      --tag gaspxyz/gasp-contracts:local
-      --tag gaspxyz/gasp-contracts:localarb
-      --tag gaspxyz/gasp-contracts:localbase
-      --load
-      .
-    inputs: ["@globs(sources)", "Dockerfile"]
+      docker buildx build --platform linux/amd64 --tag gaspxyz/gasp-contracts:local --tag
+      gaspxyz/gasp-contracts:localarb --tag gaspxyz/gasp-contracts:localbase --tag
+      gaspxyz/gasp-contracts:localmonad --tag gaspxyz/gasp-contracts:localmegaeth --load .
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
 
   buildkit-build-and-push-image-digests:
     script: |
@@ -49,9 +49,9 @@ tasks:
         --cache-to type=registry,ref=${IMAGE_BUILD_REPOSITORY}:buildcache,mode=max \
         --output type=image,push=true,push-by-digest=true,name=${IMAGE_BUILD_REPOSITORY} \
         --metadata-file ${SERVICE_NAME}-buildkit-metadata.json -f Dockerfile ./
-      
+
       BUILD_EXIT_CODE=$?
-      
+
       # Validate the metadata file exists and contains the expected digest
       if [ $BUILD_EXIT_CODE -eq 0 ] && [ -f ${SERVICE_NAME}-buildkit-metadata.json ]; then
         if grep -q "containerimage.digest" ${SERVICE_NAME}-buildkit-metadata.json; then
@@ -67,10 +67,10 @@ tasks:
         [ -f ${SERVICE_NAME}-buildkit-metadata.json ] && cat ${SERVICE_NAME}-buildkit-metadata.json
         exit $BUILD_EXIT_CODE
       fi
-      
+
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
+    outputs: ["${SERVICE_NAME}-buildkit-metadata.json"]
     options:
       outputStyle: buffer-only-failure
       cache: true
@@ -87,26 +87,26 @@ tasks:
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
-    deps: ['buildkit-build-and-push-image-digests']
-    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    deps: ["buildkit-build-and-push-image-digests"]
+    inputs: ["${SERVICE_NAME}-buildkit-metadata.json"]
     options:
       cache: false
 
   contracts-format:
     command: yarn run format
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-lint:
     command: yarn run lint
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-test:
     command: yarn run test
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
@@ -116,27 +116,27 @@ tasks:
       trap 'pkill anvil' EXIT
 
       ../tests/integration/deploy-all-contracts-via-multistage-and-resume.sh
-      
+
       yarn run test-integration
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-size:
     command: yarn run size
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-gas:
     command: yarn run gas
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-coverage:
     command: yarn run cover
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
@@ -159,7 +159,7 @@ tasks:
 
   release:
     command: yarn run release
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       cache: false
       runInCI: false

@@ -49,6 +49,7 @@ jobs:
         env:
           NODE_DOCKER_IMAGE_VERSION: ${{ inputs.globalVersion }}
         with:
+          wait-for-completion-interval: 15s
           ref: ${{ inputs.branch }}
           workflow: pr-automation-types-rollup-solochain.yml
           repo: gasp-xyz/gasp-dev-kit

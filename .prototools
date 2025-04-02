@@ -1,8 +1,7 @@
-moon = "1.33.1"
+moon = "1.33.3"
 proto = "0.47.3"
 yarn = "4.7.0"
 go = "1.21"
-node = "22.14.0"
 
 [settings]
 auto-install = true

@@ -5,78 +5,29 @@ import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console} from "forge-std/console.sol";
-import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {Test} from "forge-std/Test.sol";
 import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
-import {Utils} from "./utils/Utils.sol";
+import {BaseDeployer} from "./BaseDeployer.s.sol";
 
-contract RolldownDeployer is Script, Test, Utils {
+contract RolldownDeployer is BaseDeployer("rolldown") {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
-    string private constant _EIGEN_DEPLOYMENT_PATH = "eigenlayer_deployment_output";
-    string private constant _CONFIG_PATH = "deploy.config";
-    string private constant _OUTPUT_PATH = "rolldown_output";
 
-    string public deployConfigPath;
     ProxyAdmin public rolldownProxyAdmin;
     GaspTestToken public erc20Mock;
     Rolldown public rolldown;
     Rolldown public rolldownImplementation;
     address public owner;
     address public upgrader;
-    address public updaterAccount;
+    address public rolldownUpdater;
 
-    function run(IRolldownPrimitives.ChainId chain) external {
-        if (isProxyDeployed()) {
-            console.log("Upgrading proxy");
-            upgrade();
-        } else {
-            console.log("Initial deployment");
-            initialDeployment(chain);
-        }
-    }
-
-    function isProxyDeployed() public returns (bool) {
-        if (!inputExists(_OUTPUT_PATH)) {
-            return false;
-        }
-
-        string memory configData = readInput(_OUTPUT_PATH);
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
-
-        return proxyAdmin.code.length > 0;
-    }
-
-    function upgrade() public {
-        string memory configData = readInput(_OUTPUT_PATH);
-        upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
-        address proxyAdmin = stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin");
-        address payable rolldownAddress = payable(stdJson.readAddress(configData, ".addresses.rolldown"));
-
-        rolldownProxyAdmin = ProxyAdmin(proxyAdmin);
-        rolldown = Rolldown(rolldownAddress);
-
-        vm.startBroadcast();
-
-        rolldownImplementation = new Rolldown();
-        rolldownProxyAdmin.upgrade(
-            TransparentUpgradeableProxy(payable(address(rolldown))), address(rolldownImplementation)
-        );
-
-        vm.stopBroadcast();
-
-        _verifyImplementations();
-        _writeOutput();
-    }
-
-    function initialDeployment(IRolldownPrimitives.ChainId chain) public {
+    function deploy(IRolldownPrimitives.ChainId chainId) public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
-        updaterAccount = stdJson.readAddress(configData, ".permissions.rolldownUpdater");
+        rolldownUpdater = stdJson.readAddress(configData, ".permissions.rolldownUpdater");
 
         vm.startBroadcast();
 
@@ -92,13 +43,32 @@ contract RolldownDeployer is Script, Test, Utils {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (owner, chain, updaterAccount))
+            abi.encodeCall(rolldown.initialize, (owner, chainId, rolldownUpdater))
         );
 
         vm.stopBroadcast();
 
-        _verifyImplementations();
-        _verifyInitalizations();
+        _verifyImplementation(rolldownProxyAdmin, address(rolldown), address(rolldownImplementation));
+        _verifyInitalization();
+        _writeOutput();
+    }
+
+    function upgrade() public override {
+        string memory configData = readInput(outputPath);
+        upgrader = stdJson.readAddress(configData, ".permissions.rolldownUpgrader");
+        rolldownProxyAdmin = ProxyAdmin(stdJson.readAddress(configData, ".addresses.rolldownProxyAdmin"));
+        rolldown = Rolldown(payable(stdJson.readAddress(configData, ".addresses.rolldown")));
+
+        vm.startBroadcast();
+
+        rolldownImplementation = new Rolldown();
+        rolldownProxyAdmin.upgrade(
+            TransparentUpgradeableProxy(payable(address(rolldown))), address(rolldownImplementation)
+        );
+
+        vm.stopBroadcast();
+
+        _verifyImplementation(rolldownProxyAdmin, address(rolldown), address(rolldownImplementation));
         _writeOutput();
     }
 
@@ -119,27 +89,19 @@ contract RolldownDeployer is Script, Test, Utils {
         string memory permissions = "permissions";
         vm.serializeAddress(permissions, "rolldownOwner", owner);
         vm.serializeAddress(permissions, "rolldownUpgrader", upgrader);
-        string memory permissionsOutput = vm.serializeAddress(permissions, "rolldownUpdater", updaterAccount);
+        string memory permissionsOutput = vm.serializeAddress(permissions, "rolldownUpdater", rolldownUpdater);
 
         vm.serializeString(parentObject, chainInfo, chainInfoOutput);
         vm.serializeString(parentObject, deployedAddresses, deployedAddressesOutput);
 
         string memory finalJson = vm.serializeString(parentObject, permissions, permissionsOutput);
         console.logString(finalJson);
-        writeOutput(finalJson, _OUTPUT_PATH);
+        writeOutput(finalJson, outputPath);
     }
 
-    function _verifyImplementations() internal view {
-        require(
-            rolldownProxyAdmin.getProxyImplementation(TransparentUpgradeableProxy(payable(address(rolldown))))
-                == address(rolldownImplementation),
-            "rolldown: implementation set incorrectly"
-        );
-    }
-
-    function _verifyInitalizations() internal view {
+    function _verifyInitalization() internal view {
         require(rolldown.hasRole(DEFAULT_ADMIN_ROLE, owner), "rolldown.hasRole(DEFAULT_ADMIN_ROLE) != owner");
-        require(rolldown.hasRole(UPDATER_ROLE, updaterAccount), "rolldown.hasRole(UPDATER_ROLE) != updater");
+        require(rolldown.hasRole(UPDATER_ROLE, rolldownUpdater), "rolldown.hasRole(UPDATER_ROLE) != updater");
         require(!rolldown.paused(), "rolldown: paused status set incorrectly");
         require(rolldown.counter() == 1, "rolldown.counter != 1");
         require(rolldown.lastProcessedUpdate_origin_l1() == 0, "rolldown.lastProcessedUpdate_origin_l1 != 0");

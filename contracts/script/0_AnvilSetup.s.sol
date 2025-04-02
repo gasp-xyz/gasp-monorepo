@@ -90,7 +90,10 @@ contract AnvilSetup is Script, Test, Utils {
         strategyManager.addStrategiesToDepositWhitelist(strats, thirdPartyTransfersForbidden);
 
         erc20Mock.mint(operatorAddress, 100);
-        operatorAddress.call{value: 100 ether}("");
+        (bool success,) = operatorAddress.call{value: 100 ether}("");
+        if (!success) {
+            revert("Failed to transfer to operator");
+        }
 
         vm.stopBroadcast();
 
@@ -100,26 +103,28 @@ contract AnvilSetup is Script, Test, Utils {
         strategyManager.depositIntoStrategy(erc20MockStrategy, erc20Mock, 100);
         IDelegationManager.OperatorDetails memory op =
             IDelegationManager.OperatorDetails(operatorAddress, address(0), 0);
-        delegation.registerAsOperator(op, "");
+        if (!delegation.isOperator(operatorAddress)) {
+            delegation.registerAsOperator(op, "");
+        }
         vm.stopBroadcast();
 
         _writeOutput();
     }
 
     function _writeOutput() internal {
-        string memory parent_object = "parent object";
+        string memory parentObject = "parent object";
 
-        string memory deployed_addresses = "addresses";
-        vm.serializeAddress(deployed_addresses, "erc20Mock", address(erc20Mock));
+        string memory deployedAddresses = "addresses";
+        vm.serializeAddress(deployedAddresses, "erc20Mock", address(erc20Mock));
         string memory deployed_addresses_output =
-            vm.serializeAddress(deployed_addresses, "erc20MockStrategy", address(erc20MockStrategy));
+            vm.serializeAddress(deployedAddresses, "erc20MockStrategy", address(erc20MockStrategy));
 
-        string memory chain_info = "chainInfo";
-        vm.serializeUint(chain_info, "deploymentBlock", block.number);
-        string memory chain_info_output = vm.serializeUint(chain_info, "chainId", block.chainid);
+        string memory chainInfo = "chainInfo";
+        vm.serializeUint(chainInfo, "deploymentBlock", block.number);
+        string memory chain_info_output = vm.serializeUint(chainInfo, "chainId", block.chainid);
 
-        vm.serializeString(parent_object, chain_info, chain_info_output);
-        string memory finalJson = vm.serializeString(parent_object, deployed_addresses, deployed_addresses_output);
+        vm.serializeString(parentObject, chainInfo, chain_info_output);
+        string memory finalJson = vm.serializeString(parentObject, deployedAddresses, deployed_addresses_output);
         writeOutput(finalJson, _OUTPUT_PATH);
     }
 }

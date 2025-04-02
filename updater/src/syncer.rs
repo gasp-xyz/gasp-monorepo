@@ -77,8 +77,9 @@ impl Syncer {
             crate::metrics::report_account_balance(provider, address.0).await;
         });
 
+        let metrics_port = cfg.metrics_port;
         let _serve_metrics_handle = tokio::spawn(async move {
-            crate::metrics::serve_metrics(80).await;
+            crate::metrics::serve_metrics(metrics_port).await;
         });
 
         let (source_client, target_client) = (Arc::new(source_client), Arc::new(target_client));

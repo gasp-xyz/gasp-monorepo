@@ -43,6 +43,9 @@ struct Config {
 
     #[envconfig(from = "TX_COST")]
     pub tx_cost: Option<u128>,
+
+    #[envconfig(from = "METRICS_PORT", default = "8080")]
+    pub metrics_port: u16,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -99,8 +102,9 @@ async fn run(config: Config) -> Result<(), Error> {
         watchdog.run().await;
     });
 
+    let metrics_port = config.metrics_port;
     let _metrics = tokio::spawn(async move {
-        metrics::serve_metrics(80).await;
+        metrics::serve_metrics(metrics_port).await;
     });
 
     let update_size_limit = config.update_size_limit;
@@ -116,6 +120,9 @@ async fn run(config: Config) -> Result<(), Error> {
         "ethereum" => Ok(l2::types::Chain::Ethereum),
         "arbitrum" => Ok(l2::types::Chain::Arbitrum),
         "base" => Ok(l2::types::Chain::Base),
+        "monad" => Ok(l2::types::Chain::Monad),
+        "megaeth" => Ok(l2::types::Chain::MegaEth),
+        "sonic" => Ok(l2::types::Chain::Sonic),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 
