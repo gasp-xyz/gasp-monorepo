@@ -4,7 +4,7 @@
 #   targets: [ "wasm32-unknown-unknown" ]
 
 node:
-  # Disabled so that moon doesn't explicitely add a node constraint to package.json
+  # Disabled so that moon doesn't explicitly add a node constraint to package.json
   addEnginesConstraint: false
   packageManager: yarn
   yarn:
