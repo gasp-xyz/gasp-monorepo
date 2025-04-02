@@ -113,6 +113,7 @@ out
 !**/.yarn/plugins
 !**/.yarn/releases
 !**/.yarn/versions
+# Keep the .yarn directory as it is required for Docker image builds
 !**/.yarn/.keep
 
 *.tar
