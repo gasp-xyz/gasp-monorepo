@@ -61,6 +61,25 @@ where
         simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
     }
 
+    #[tracing::instrument(skip(self, request_id))]
+    pub async fn get_deposit(
+        &self,
+        request_id: u128,
+    ) -> Result<crate::types::abi::Deposit, L1Error> {
+        let call = self
+            .contract_handle
+            .deposits(gasp_types::into_l1_u256(request_id.into()));
+        let deposit = call.call().await?;
+        Ok(crate::types::abi::Deposit {
+            requestId: deposit.requestId,
+            depositRecipient: deposit.depositRecipient,
+            tokenAddress: deposit.tokenAddress,
+            amount: deposit.amount,
+            timeStamp: deposit.timeStamp,
+            ferryTip: deposit.ferryTip,
+        })
+    }
+
     #[tracing::instrument(skip(self, withdrawal))]
     pub async fn send_close_withdrawal_tx(
         &self,

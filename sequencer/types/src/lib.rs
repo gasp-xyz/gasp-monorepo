@@ -281,6 +281,19 @@ impl Into<l1types::Deposit> for Deposit {
     }
 }
 
+impl From<l1types::Deposit> for Deposit {
+    fn from(deposit: l1types::Deposit) -> Self {
+        Self {
+            request_id: deposit.requestId.into(),
+            recipient: deposit.depositRecipient.into(),
+            token_address: deposit.tokenAddress.into(),
+            timestamp: from_l1_u256(deposit.timeStamp),
+            amount: from_l1_u256(deposit.amount),
+            ferry_tip: from_l1_u256(deposit.ferryTip),
+        }
+    }
+}
+
 impl Deposit {
     pub fn deposit_hash(&self) -> H256 {
         let encoded = Into::<l1types::Deposit>::into(*self).abi_encode();

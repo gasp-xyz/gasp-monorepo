@@ -80,7 +80,7 @@ where
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
-                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count} (last : {end})",
+                        "looking for pending deposit {range:?} batch {id} / {chunks_count} (last : {end})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );

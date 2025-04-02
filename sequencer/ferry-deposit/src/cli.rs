@@ -24,7 +24,7 @@ pub struct Cli {
     #[arg(long, env = "PROMETHEUS_PORT")]
     pub prometheus_port: Option<u16>,
 
-    #[arg(long, value_parser = common::parse_tokens_and_weight, env = "ENABLED_TOKENS")]
+    #[arg(long, value_parser = common::parse_tokens_and_weight, env = "ENABLED_TOKENS", value_delimiter=',', num_args = 1..)]
     pub enabled: Vec<([u8; 20], u128)>,
 
     #[arg(long, default_value_t = 1_000_000_000_000_000, env = "TX_COST")]

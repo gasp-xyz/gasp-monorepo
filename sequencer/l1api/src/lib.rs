@@ -26,6 +26,7 @@ pub mod types {
     pub mod abi {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
         pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId;
+        pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
         pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
@@ -131,7 +132,12 @@ where
 {
     #[tracing::instrument(skip(self), ret)]
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
-        unimplemented!()
+        let deposit = self.rolldown_contract.get_deposit(request_id).await?;
+        if deposit.timeStamp.is_zero() {
+            Ok(None)
+        } else {
+            Ok(Some(deposit.into()))
+        }
     }
 
     #[tracing::instrument(skip(self), ret)]

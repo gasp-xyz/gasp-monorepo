@@ -166,7 +166,7 @@ where
 
             if !self.ferryable_deposits.is_empty() {
                 tracing::info!(
-                    "found {n} withdrawals ready to ferry",
+                    "found {n} deposit ready to ferry",
                     n = self.ferryable_deposits.len()
                 );
                 //TODO: should ferry as much as possible
