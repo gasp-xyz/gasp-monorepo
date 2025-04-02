@@ -1,10 +1,11 @@
 [package]
-name = "sequencer"
+name = "l1api"
 version = "0.1.0"
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
 
-[[bin]]
-name = "sequencer"
+[lib]
 
 [dependencies]
 subxt = "0.38.0"
@@ -30,18 +31,12 @@ lru = "0.12.5"
 prometheus = "0.13.4"
 lazy_static = "1.4.0"
 warp = "0.3.7"
-
-l1api = { workspace = true }
-l2api = { workspace = true }
+contract-bindings = { workspace = true }
 gasp-types = { workspace = true }
-common = { workspace = true }
-
+mockall = "0.13.0"
 
 
 [dev-dependencies]
-mockall = "0.13.0"
 serial_test = "3.2.0"
+tracing-test = "0.2.5"
 
-# [profile.dev]
-# incremental = true
-# lto = true
