@@ -93,10 +93,7 @@ contract FinalizerServiceManagerTest is Test {
             abi.encode(stakeUpdate)
         );
 
-        vm.expectCall(
-            address(avsDirectory),
-            abi.encodeWithSelector(IAVSDirectory.registerOperatorToAVS.selector)
-        );
+        vm.expectCall(address(avsDirectory), abi.encodeWithSelector(IAVSDirectory.registerOperatorToAVS.selector));
         vm.prank(address(registryCoordinator));
         serviceManager.registerOperatorToAVS(operator, operatorSignature);
     }
@@ -115,9 +112,7 @@ contract FinalizerServiceManagerTest is Test {
             abi.encode()
         );
         vm.expectCall(
-            address(registryCoordinator),
-            abi.encodeWithSelector(IRegistryCoordinator.ejectOperator.selector),
-            2
+            address(registryCoordinator), abi.encodeWithSelector(IRegistryCoordinator.ejectOperator.selector), 2
         );
 
         vm.prank(ejector);

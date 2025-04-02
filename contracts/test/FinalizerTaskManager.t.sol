@@ -277,4 +277,87 @@ contract FinalizerTaskManagerTest is Test {
         assertEq(stakeTotals.signedStakeForQuorum.length, 1);
         assertEq(hashOfNonSigners, bytes32(0));
     }
+
+    function test_ForceCreateNewOpTask() public {
+        uint32 quorumThresholdPercentage = 100;
+        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
+
+        vm.prank(owner);
+        taskManager.forceCreateNewOpTask(quorumThresholdPercentage, quorumNumbers);
+
+        assertEq(taskManager.latestOpTaskNum(), 1);
+        assertEq(taskManager.isTaskPending(), true);
+    }
+
+    function test_RevertIf_NotOwner_ForceCreateNewOpTask() public {
+        uint32 quorumThresholdPercentage = 100;
+        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
+
+        vm.prank(aggregator);
+        vm.expectRevert("Ownable: caller is not the owner");
+        taskManager.forceCreateNewOpTask(quorumThresholdPercentage, quorumNumbers);
+    }
+
+    function test_ForceRespondToOpTask() public {
+        // First create a task
+        uint32 quorumThresholdPercentage = 100;
+        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
+
+        vm.prank(generator);
+        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
+
+        // Setup task response data
+        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
+            taskNum: 0,
+            quorumNumbers: quorumNumbers,
+            quorumThresholdPercentage: quorumThresholdPercentage,
+            taskCreatedBlock: uint32(block.number),
+            lastCompletedOpTaskNum: 0,
+            lastCompletedOpTaskCreatedBlock: uint32(block.number),
+            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
+            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
+        });
+
+        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
+            referenceTaskIndex: 0,
+            referenceTaskHash: bytes32(0),
+            operatorsStateInfoHash: bytes32(0)
+        });
+
+        vm.prank(owner);
+        taskManager.forceRespondToOpTask(task, taskResponse);
+
+        assertEq(taskManager.isTaskPending(), false);
+    }
+
+    function test_RevertIf_NotOwner_ForceRespondToOpTask() public {
+        // First create a task
+        uint32 quorumThresholdPercentage = 100;
+        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
+
+        vm.prank(generator);
+        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
+
+        // Setup task response data
+        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
+            taskNum: 0,
+            quorumNumbers: quorumNumbers,
+            quorumThresholdPercentage: quorumThresholdPercentage,
+            taskCreatedBlock: uint32(block.number),
+            lastCompletedOpTaskNum: 0,
+            lastCompletedOpTaskCreatedBlock: uint32(block.number),
+            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
+            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
+        });
+
+        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
+            referenceTaskIndex: 0,
+            referenceTaskHash: bytes32(0),
+            operatorsStateInfoHash: bytes32(0)
+        });
+
+        vm.prank(aggregator);
+        vm.expectRevert("Ownable: caller is not the owner");
+        taskManager.forceRespondToOpTask(task, taskResponse);
+    }
 }
