@@ -1156,8 +1156,7 @@ pub mod pallet {
 
 		// dyn fee 2* mul
 		fn get_fee_dyn_mul() -> T::HigherPrecisionBalance {
-			T::HigherPrecisionBalance::from(20_000_000_000_u128)
-			// T::HigherPrecisionBalance::from(1_u128)
+			T::HigherPrecisionBalance::from(0_u128)
 		}
 
 		fn has_dynamic_fee() -> bool {
@@ -1298,12 +1297,12 @@ pub mod pallet {
 					&Self::checked_add_div_2(&xp[j], &y)?,
 				)?;
 				let dy_fee = Self::checked_mul_div_u128(
-					&T::HigherPrecisionBalance::from(dy),
+					&T::HigherPrecisionBalance::from(
+						dy.checked_add(&One::one()).ok_or(Error::<T>::MathOverflow)?,
+					),
 					&T::HigherPrecisionBalance::from(pool.rate_multipliers[j]),
 					Self::PRECISION,
 				)?
-				.checked_add(&One::one())
-				.ok_or(Error::<T>::MathOverflow)?
 				.checked_mul(&T::HigherPrecisionBalance::from(Self::FEE_DENOMINATOR))
 				.ok_or(Error::<T>::MathOverflow)?
 				.checked_div(

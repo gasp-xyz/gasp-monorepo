@@ -94,9 +94,9 @@ impl swap::Config for Test {
 	type CurrencyId = TokenId;
 	type TreasuryPalletId = TreasuryPalletId;
 	type BnbTreasurySubAccDerive = BnbTreasurySubAccDerive;
-	type MarketTotalFee = ConstU128<30_000_000>;
-	type MarketTreasuryFeePart = ConstU128<3_333_333_334>;
-	type MarketBnBFeePart = ConstU128<5_000_000_000>;
+	type MarketTotalFee = ConstU128<0>;
+	type MarketTreasuryFeePart = ConstU128<0>;
+	type MarketBnBFeePart = ConstU128<0>;
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<8>;
