@@ -4,8 +4,8 @@ Stash is a service that serves some configurations and also caches some blockcha
 
 ## API
 
-
 ### Hosts
+
 | Environment                                                                              | URL |
 |------------------------------------------------------------------------------------------|----|
 | [FRONTEND](https://gasp-stash-frontend-dot-direct-pixel-353917.oa.r.appspot.com)    | `https://gasp-stash-frontend-dot-direct-pixel-353917.oa.r.appspot.com` |
@@ -13,11 +13,12 @@ Stash is a service that serves some configurations and also caches some blockcha
 | [PROD](https://gasp-stash-prod-dot-direct-pixel-353917.oa.r.appspot.com/)    | `https://gasp-stash-prod-dot-direct-pixel-353917.oa.r.appspot.com/` |
 
 ### API documentation
+
 To access the public API, refer to the ```[HOST]/doc``` endpoint, where you'll find comprehensive documentation for our services.
 This resource provides detailed information about our available API functionalities and how to interact with them.
 
-
 ### Postman collections
+
 The `api/` can be imported into Postman to use the API cals.
 Setup the `$host` env to frontent & holesky, or replace it with actual URL in the API address bar.
 Collection contains scripts to visualize the response data in a graph.
@@ -27,10 +28,10 @@ Each API has a limit of 50K entries to return.
 
 ## Local quick start
 
-1. Rename `.env.local` to `.env` and add missing envs (if any)
+1. Rename `.env.example` to `.env` and add missing envs (if any)
 2. Install all the dependencies `yarn`
 3. Start local Redis `docker run --name stash-redis-stack -p 6379:6379 -d redis/redis-stack-server`
-4. Make a copy of `.env.local` and name it `.env`. This file will be ignored from git and you can set your own values.
+4. Make a copy of `.env.example` and name it `.env`. This file will be ignored from git and you can set your own values.
 5. Run the app in debug mode with watch option `yarn start-local`
 
 ## Documentation
@@ -47,9 +48,11 @@ Tests have their own runtime docker container. Currently, most of the use cases 
 We use a combination of `supertests` & `testcontainers` libraries to achieve smooth and unified integration tests running either on local or CI environment.
 
 ## Storage
+
 Google Memorystore (Redis with RDB)
 
 ## XCM Metadata Network Service
+
 Data in this service are managed by
 
 ### Modification of XCM values
@@ -94,3 +97,76 @@ git config --global diff.sopsdiffer.textconv "sops -d --config /dev/null"
 # To edit secrets.enc.yaml file run next command
 sops frontend.enc.env
 ```
+
+## Running with Docker Compose
+
+To run Stash locally using Docker Compose:
+
+1. Make sure Docker and Docker Compose are installed on your system
+2. Create a `.env` file from the provided example and add missing values
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Start the application stack:
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+   This will start:
+   - Stash API service
+   - Redis for main cache
+   - Redis TimeSeries for time-series data
+
+4. Access the application at `http://localhost:8080`
+5. Access Redis Insight UI at:
+   - Main Redis: `http://localhost:8001`
+   - TimeSeries Redis: `http://localhost:8002`
+
+6. To view logs:
+
+   ```bash
+   docker compose logs -f
+   ```
+
+7. To stop the services:
+
+   ```bash
+   docker compose down
+   ```
+
+### Troubleshooting Redis Connections
+
+If you encounter Redis authentication errors:
+
+- Ensure REDIS_PASS and TIMESERIES_PASS in your .env or compose.yml are properly set with empty defaults:
+
+  ```yaml
+  REDIS_PASS: ${REDIS_PASS:-}
+  TIMESERIES_PASS: ${TIMESERIES_PASS:-}
+  ```
+
+- For password-protected Redis, set the same password values for Redis containers and environment variables
+
+## Moon Command Usage
+
+[Moon](https://moonrepo.dev/) commands can be run using:
+
+- Directory selector: `moon ~:<task>` (from current directory)
+
+  ```bash
+  moon ~:lint    # Lint code
+  moon ~:format  # Format code
+  moon ~:test    # Run unit tests
+  ```
+
+- Project name: `moon stash:<task>` (from anywhere)
+
+  ```bash
+  moon stash:lint               # Lint code
+  moon stash:build-image-local  # Build Docker image
+  ```
+
+View all tasks: `moon project stash`

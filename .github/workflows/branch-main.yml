@@ -132,32 +132,32 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          version: v0.21.1
-          cleanup: true
-          driver: kubernetes
-          driver-opts: |
-            namespace=buildkit
-            nodeselector=github-actions-pool=true
-            "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
-            replicas=1
-            requests.cpu=14
-            requests.memory=14Gi
-            limits.cpu=14
-            limits.memory=14Gi
-          buildkitd-config-inline: |
-            [registry."docker.io"]
-              mirrors = ["mirror.gcr.io"]
-          platforms: linux/amd64
-          append: |
-            - platforms: linux/arm64
-              driver-opts:
-                - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
-                - replicas=1
-                - requests.cpu=14
-                - requests.memory=14Gi
-                - limits.cpu=14
-                - limits.memory=14Gi
+        # with:
+        #   version: v0.21.1
+        #   cleanup: true
+        #   driver: kubernetes
+        #   driver-opts: |
+        #     namespace=buildkit
+        #     nodeselector=github-actions-pool=true
+        #     "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
+        #     replicas=1
+        #     requests.cpu=14
+        #     requests.memory=14Gi
+        #     limits.cpu=14
+        #     limits.memory=14Gi
+        #   buildkitd-config-inline: |
+        #     [registry."docker.io"]
+        #       mirrors = ["mirror.gcr.io"]
+        #   platforms: linux/amd64
+        #   append: |
+        #     - platforms: linux/arm64
+        #       driver-opts:
+        #         - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+        #         - replicas=1
+        #         - requests.cpu=14
+        #         - requests.memory=14Gi
+        #         - limits.cpu=14
+        #         - limits.memory=14Gi
 
       - name: Download gasp-node wasm artifacts
         uses: actions/download-artifact@v4
