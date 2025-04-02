@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "GASP contracts for EVM",
   "scripts": {
-    "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check src test",
-    "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt src test",
+    "format": "yarn run prettier --check '**/*.{json,md,yml}' && forge fmt --check script src test",
+    "format:fix": "yarn run prettier --write '**/*.{json,md,yml}' && forge fmt script src test",
     "lint": "yarn run solhint '{script,src,test}/**/*.sol'",
     "lint:fix": "yarn run solhint --fix --noPrompt '{script,src,test}/**/*.sol' && yarn format:fix",
     "compile": "forge compile",
