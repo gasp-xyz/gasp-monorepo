@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {Test} from "forge-std/Test.sol";
-import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "../src/interfaces/IFinalizerTaskManager.sol";
-import {IPauserRegistry} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
 import {IBLSSignatureChecker} from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
-import {IRolldown} from "../src/interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
-import {IGaspMultiRollupServicePrimitives} from "../src/interfaces/IGaspMultiRollupServicePrimitives.sol";
+import {IPauserRegistry} from "@eigenlayer/contracts/permissions/Pausable.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {Test} from "forge-std/Test.sol";
+import {FinalizerTaskManager} from "./../src/FinalizerTaskManager.sol";
+import {IFinalizerTaskManager} from "./../src/interfaces/IFinalizerTaskManager.sol";
+import {IRolldown} from "./../src/interfaces/IRolldown.sol";
+import {IRolldownPrimitives} from "./../src/interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManagerTest is Test {
     FinalizerTaskManager internal taskManager;
@@ -24,7 +23,7 @@ contract FinalizerTaskManagerTest is Test {
     address internal pauserRegistry;
     address internal rolldown;
 
-    uint32 constant TASK_RESPONSE_WINDOW_BLOCK = 100;
+    uint32 internal constant TASK_RESPONSE_WINDOW_BLOCK = 100;
 
     function setUp() public {
         owner = makeAddr("owner");
