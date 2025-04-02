@@ -43,7 +43,7 @@ export const initService = async () => {
           ETH_CHAIN,
           process.env.CONTRACT_ADDRESS_ETH
         ).then(resolve)
-      }, 20000) // Delay of 20000 milliseconds (20 seconds) to allow past withdrawals to be started and confirmed first
+      }, 90000) // Delay of 90000 milliseconds (90 seconds) to allow past withdrawals to be started and confirmed first
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -54,7 +54,7 @@ export const initService = async () => {
           ARB_CHAIN,
           process.env.CONTRACT_ADDRESS_ARB
         ).then(resolve)
-      }, 20000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -65,7 +65,7 @@ export const initService = async () => {
           BASE_CHAIN,
           process.env.CONTRACT_ADDRESS_BASE
         ).then(resolve)
-      }, 20000)
+      }, 90000)
     }),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
