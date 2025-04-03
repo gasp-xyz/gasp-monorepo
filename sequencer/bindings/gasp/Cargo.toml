@@ -1,10 +1,9 @@
 [package]
-name = "sequencer"
+name = "gasp-bindings"
 version = "0.1.0"
-edition = "2021"
-
-[[bin]]
-name = "sequencer"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
 
 [dependencies]
 subxt = "0.38.0"
@@ -20,28 +19,7 @@ hex = "0.4.3"
 hex-literal = "0.4.1"
 futures = "0.3.17"
 thiserror = "2.0.3"
-alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
 tracing = "0.1.40"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-tracing-tree = "0.4.0"
-envconfig = "0.11.0"
-lru = "0.12.5"
-prometheus = "0.13.4"
-lazy_static = "1.4.0"
-warp = "0.3.7"
 
-l1api = { workspace = true }
-l2api = { workspace = true }
-gasp-types = { workspace = true }
-common = { workspace = true }
-
-
-
-[dev-dependencies]
-mockall = "0.13.0"
-serial_test = "3.2.0"
-
-# [profile.dev]
-# incremental = true
-# lto = true
