@@ -2,6 +2,7 @@ services:
   sequencer-eth:
     build: .
     image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    restart: unless-stopped
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -22,6 +23,7 @@ services:
   sequencer-arb:
     build: .
     image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localarb}
+    restart: unless-stopped
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
@@ -42,6 +44,7 @@ services:
   sequencer-base:
     build: .
     image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-localbase}
+    restart: unless-stopped
     depends_on:
       eth-contracts-deployment:
         condition: service_completed_successfully
