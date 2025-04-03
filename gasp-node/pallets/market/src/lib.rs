@@ -1494,7 +1494,6 @@ pub mod pallet {
 					let _ = T::FeeLock::unlock_fee(who);
 				},
 				false => {
-
 					// This should only fail if the fee_lock_metadata is uninit
 					let fee_lock_amount = match T::FeeLock::get_fee_lock_amount(who) {
 						Ok(v) => v,
