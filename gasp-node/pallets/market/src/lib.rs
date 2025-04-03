@@ -1486,21 +1486,6 @@ pub mod pallet {
 				return Ok(());
 			}
 
-			// This should only fail if the fee_lock_metadata is uninit
-			let fee_lock_amount = match T::FeeLock::get_fee_lock_amount(who) {
-				Ok(v) => v,
-				Err(_) => return Ok(()),
-			};
-
-			T::Currency::ensure_can_withdraw(
-				T::NativeCurrencyId::get().into(),
-				who,
-				fee_lock_amount,
-				WithdrawReasons::all(),
-				Default::default(),
-			)
-			.or(Err(Error::<T>::NotEnoughAssetsForFeeLock))?;
-
 			match is_lockless {
 				// If unlock_fee fails do not return the error
 				// unlock_fee fails if it cannot unlock fee successfully
@@ -1508,9 +1493,25 @@ pub mod pallet {
 				true => {
 					let _ = T::FeeLock::unlock_fee(who);
 				},
-				// Process fee_lock shouldn't fail at this point but if it
-				// does then return the error failing the swap
 				false => {
+
+					// This should only fail if the fee_lock_metadata is uninit
+					let fee_lock_amount = match T::FeeLock::get_fee_lock_amount(who) {
+						Ok(v) => v,
+						Err(_) => return Ok(()),
+					};
+
+					T::Currency::ensure_can_withdraw(
+						T::NativeCurrencyId::get().into(),
+						who,
+						fee_lock_amount,
+						WithdrawReasons::all(),
+						Default::default(),
+					)
+					.or(Err(Error::<T>::NotEnoughAssetsForFeeLock))?;
+
+					// Process fee_lock shouldn't fail at this point but if it
+					// does then return the error failing the swap
 					T::FeeLock::process_fee_lock(who)?;
 				},
 			}
