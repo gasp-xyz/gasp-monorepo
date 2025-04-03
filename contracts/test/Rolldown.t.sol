@@ -1225,10 +1225,9 @@ contract UpdateL1FromL2 is RolldownTest {
 contract CloseWithdrawal is RolldownTest {
     uint256 public amount = 1 ether;
     bytes32 public merkleRoot;
-    Withdrawal public withdrawalA;
-    Withdrawal public withdrawalB;
-    bytes32 public withdrawalHashA;
-    bytes32 public withdrawalHashB;
+    bytes32[] public merkleProof;
+    Withdrawal[] public withdrawals;
+    bytes32[] public withdrawalHashes;
     Range public range = Range(1, 2);
 
     function setUp() public override {
@@ -1237,94 +1236,89 @@ contract CloseWithdrawal is RolldownTest {
         deal(address(rolldown), amount);
         token.mint(users.withdrawerB);
 
-        withdrawalA = Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0);
-        withdrawalHashA = rolldown.hashWithdrawal(withdrawalA);
-        withdrawalB = Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0);
-        withdrawalHashB = rolldown.hashWithdrawal(withdrawalB);
+        merkleProof = new bytes32[](1);
+
+        withdrawals.push(Withdrawal(createRequestId(Origin.L2), users.recipient, nativeTokenAddress, amount, 0));
+        withdrawalHashes.push(rolldown.hashWithdrawal(withdrawals[0]));
+
+        withdrawals.push(Withdrawal(createRequestId(Origin.L2), users.recipient, address(token), amount, 0));
+        withdrawalHashes.push(rolldown.hashWithdrawal(withdrawals[1]));
 
         vm.prank(users.withdrawerA);
-        rolldown.ferryWithdrawal{value: amount}(withdrawalA);
+        rolldown.ferryWithdrawal{value: amount}(withdrawals[0]);
 
         vm.startPrank(users.withdrawerB);
 
         token.approve(address(rolldown), amount);
-        rolldown.ferryWithdrawal(withdrawalB);
+        rolldown.ferryWithdrawal(withdrawals[1]);
 
         vm.stopPrank();
 
-        merkleRoot = keccak256(abi.encodePacked(withdrawalHashA, withdrawalHashB));
+        merkleRoot = keccak256(abi.encodePacked(withdrawalHashes[0], withdrawalHashes[1]));
 
         vm.prank(users.updater);
         rolldown.updateL1FromL2(merkleRoot, range);
     }
 
     function test_EmitNativeTokensWithdrawnAndWithdrawalClosed() public {
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.prank(users.withdrawerA);
         vm.expectEmit();
         emit NativeTokensWithdrawn(users.withdrawerA, amount);
-        emit WithdrawalClosed(2, withdrawalHashA);
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
+        emit WithdrawalClosed(2, withdrawalHashes[0]);
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
     }
 
     function test_EmitNativeTokensWithdrawnAndWithdrawalClosed_BackwardCompatibility() public {
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.prank(users.withdrawerA);
         vm.expectEmit();
         emit NativeTokensWithdrawn(users.withdrawerA, amount);
-        emit WithdrawalClosed(2, withdrawalHashA);
-        rolldown.close_withdrawal(withdrawalA, merkleRoot, merkleProof);
+        emit WithdrawalClosed(2, withdrawalHashes[0]);
+        rolldown.close_withdrawal(withdrawals[0], merkleRoot, merkleProof);
     }
 
     function test_GetProcessedL2Request() public {
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.prank(users.withdrawerA);
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
 
-        assertEq(rolldown.processedL2Requests(withdrawalHashA), closed);
-        assertNotEq(rolldown.processedL2Requests(withdrawalHashB), closed);
+        assertEq(rolldown.processedL2Requests(withdrawalHashes[0]), closed);
+        assertNotEq(rolldown.processedL2Requests(withdrawalHashes[1]), closed);
     }
 
     function test_RevertIf_Paused() public {
         vm.prank(users.admin);
         rolldown.pause();
 
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.prank(users.withdrawerA);
         vm.expectRevert("Pausable: paused");
-        rolldown.closeWithdrawal(withdrawalB, merkleRoot, merkleProof);
+        rolldown.closeWithdrawal(withdrawals[1], merkleRoot, merkleProof);
     }
 
     function test_RevertIf_L2RequestAlreadyProcessed() public {
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.startPrank(users.withdrawerA);
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
 
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
-
-        vm.expectRevert(abi.encodeWithSelector(L2RequestAlreadyProcessed.selector, withdrawalHashA));
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
-
+        vm.expectRevert(abi.encodeWithSelector(L2RequestAlreadyProcessed.selector, withdrawalHashes[0]));
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
         vm.stopPrank();
     }
 
     function test_RevertIf_UnexpectedMerkleRoot() public {
-        merkleRoot = keccak256(abi.encodePacked(withdrawalHashB, withdrawalHashA));
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashB;
+        merkleRoot = keccak256(abi.encodePacked(withdrawalHashes[1], withdrawalHashes[0]));
+        merkleProof[0] = withdrawalHashes[1];
 
         vm.prank(users.withdrawerA);
         vm.expectRevert(UnexpectedMerkleRoot.selector);
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
     }
 
     function test_RevertIf_RequestOutOfRange() public {
@@ -1346,7 +1340,6 @@ contract CloseWithdrawal is RolldownTest {
         vm.stopPrank();
 
         merkleRoot = keccak256(abi.encodePacked(withdrawalHashC));
-        bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashC;
 
         range = Range(3, 3);
@@ -1370,14 +1363,11 @@ contract CloseWithdrawal is RolldownTest {
         rolldown.ferryWithdrawal{value: amount}(withdrawalC);
 
         vm.startPrank(users.withdrawerB);
-
         token.approve(address(rolldown), amount);
         rolldown.ferryWithdrawal(withdrawalD);
-
         vm.stopPrank();
 
         merkleRoot = keccak256(abi.encodePacked(withdrawalHashC));
-        bytes32[] memory merkleProof = new bytes32[](1);
         merkleProof[0] = withdrawalHashC;
 
         range = Range(3, type(uint64).max);
@@ -1390,11 +1380,10 @@ contract CloseWithdrawal is RolldownTest {
     }
 
     function test_RevertIf_InvalidRequestProof() public {
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = withdrawalHashA;
+        merkleProof[0] = withdrawalHashes[0];
 
         vm.prank(users.withdrawerA);
         vm.expectRevert(abi.encodeWithSelector(InvalidRequestProof.selector, merkleRoot));
-        rolldown.closeWithdrawal(withdrawalA, merkleRoot, merkleProof);
+        rolldown.closeWithdrawal(withdrawals[0], merkleRoot, merkleProof);
     }
 }
