@@ -1,6 +1,7 @@
-import logger from './Logger.js'
 import dotenv from 'dotenv'
 import fs from 'fs'
+
+import logger from './Logger.js'
 
 if (fs.existsSync('.env')) {
   logger.info('Using .env for environment variables')

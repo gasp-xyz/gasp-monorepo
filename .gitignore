@@ -113,6 +113,8 @@ out
 !**/.yarn/plugins
 !**/.yarn/releases
 !**/.yarn/versions
+# Keep the .yarn directory as it is required for Docker image builds
+!**/.yarn/.keep
 
 *.tar
 *.tar.zst
@@ -129,3 +131,6 @@ CLAUDE.md
 # Ensure package-lock.json is not added to the repo as we use yarn for our projects
 package-lock.json
 **/package-lock.json
+
+# eslint cache
+.eslintcache

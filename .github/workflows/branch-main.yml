@@ -60,6 +60,7 @@ jobs:
       security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
 
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
@@ -71,10 +72,10 @@ jobs:
       # branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
       branch: eth-rollup-develop
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
-  run-e2e-test:
-    name: '[e2e] Run gasp-avs and ferries e2e tests'
-    needs: [init, build-and-test]
+  
+  run-e2e-tests:
+    name: '[e2e] Run gasp-node and global e2e tests'
+    needs: [init, build-and-test, gasp-node-generate-types]
     uses: ./.github/workflows/reusable-e2e-tests.yml
     secrets: inherit
     permissions:
@@ -83,24 +84,12 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-      e2eBranch: eth-rollup-develop
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
   
-  run-e2e-test-gasp-node:
-    name: '[e2e] Run gasp-node and global e2e tests'
-    needs: [init, build-and-test, gasp-node-generate-types]
-    uses: ./.github/workflows/reusable-e2e-tests-new.yml
-    secrets: inherit
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-    with:
-      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-
   release:
     name: Release
     if: github.ref_name != 'develop'
-    needs: [init, build-and-test, run-e2e-test, run-e2e-test-gasp-node]
+    needs: [init, build-and-test, run-e2e-tests]
     runs-on: ubuntu-24.04
     env:
       MOON_COLOR: 2
@@ -109,6 +98,8 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       
       - uses: arduino/setup-protoc@v3
         with:
@@ -141,32 +132,32 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          version: v0.21.1
-          cleanup: true
-          driver: kubernetes
-          driver-opts: |
-            namespace=buildkit
-            nodeselector=github-actions-pool=true
-            "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
-            replicas=1
-            requests.cpu=14
-            requests.memory=14Gi
-            limits.cpu=14
-            limits.memory=14Gi
-          buildkitd-config-inline: |
-            [registry."docker.io"]
-              mirrors = ["mirror.gcr.io"]
-          platforms: linux/amd64
-          append: |
-            - platforms: linux/arm64
-              driver-opts:
-                - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
-                - replicas=1
-                - requests.cpu=14
-                - requests.memory=14Gi
-                - limits.cpu=14
-                - limits.memory=14Gi
+        # with:
+        #   version: v0.21.1
+        #   cleanup: true
+        #   driver: kubernetes
+        #   driver-opts: |
+        #     namespace=buildkit
+        #     nodeselector=github-actions-pool=true
+        #     "tolerations=key=github-actions-pool,value=true;key=CriticalAddonsOnly,value=true"
+        #     replicas=1
+        #     requests.cpu=14
+        #     requests.memory=14Gi
+        #     limits.cpu=14
+        #     limits.memory=14Gi
+        #   buildkitd-config-inline: |
+        #     [registry."docker.io"]
+        #       mirrors = ["mirror.gcr.io"]
+        #   platforms: linux/amd64
+        #   append: |
+        #     - platforms: linux/arm64
+        #       driver-opts:
+        #         - nodeselector=github-actions-pool-arm=true,"tolerations=key=github-actions-pool-arm,value=true;key=CriticalAddonsOnly,value=true;key=kubernetes.io/arch,value=arm64"
+        #         - replicas=1
+        #         - requests.cpu=14
+        #         - requests.memory=14Gi
+        #         - limits.cpu=14
+        #         - limits.memory=14Gi
 
       - name: Download gasp-node wasm artifacts
         uses: actions/download-artifact@v4

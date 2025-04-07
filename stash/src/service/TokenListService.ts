@@ -1,5 +1,8 @@
-import MangataClient from '../connector/MangataNode.js'
+import Decimal from 'decimal.js'
 import moment from 'moment'
+
+import MangataClient from '../connector/MangataNode.js'
+import { NotFoundException } from '../error/Exception.js'
 import {
   calculate24PriceChange,
   calculate24VolumeChange,
@@ -9,8 +12,6 @@ import {
   TokenInfoStats,
 } from '../util/Listing.js'
 import { matchInterval } from './PriceDiscoveryService.js'
-import Decimal from 'decimal.js'
-import { NotFoundException } from '../error/Exception.js'
 
 const FILTER_LIQUIDITY_TOKENS = 'Liquidity'
 

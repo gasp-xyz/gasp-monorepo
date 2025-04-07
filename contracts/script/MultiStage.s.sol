@@ -26,154 +26,71 @@ contract MultiStage is Script, Utils {
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
 
             if (!rolldownDeployer.isProxyDeployed()) {
-                _printMessage("Deploying eigen layer infra");
+                _printMessage(string.concat("Deploying eigen layer infra to ethereum-stub"));
                 eigenDeployer.run("M2_deploy_from_scratch.anvil.config.json");
 
-                _printMessage("Initializing eigen layer infra");
+                _printMessage(string.concat("Initializing eigen layer infra in ethereum-stub"));
                 anvilDeployer.run();
 
-                _printMessage("Deploying finalizer contracts");
+                _printMessage(string.concat("Deploying finalizer contracts to ethereum-stub"));
                 finalizerAVSDeployer.run();
             }
 
-            _printMessage("Deploying rolldown contracts");
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-stub");
 
-            string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            FinalizerTaskManager taskManager =
-                FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
-
-            string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
-
-            string memory configData = readConfig("deploy.config");
-            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-
-            vm.startBroadcast(avsOwner);
-
-            taskManager.setRolldown(IRolldown(address(rolldown)));
-            rolldown.setUpdater(address(taskManager));
-
-            vm.stopBroadcast();
+            _initializeRolldownAndTaskManager();
             return;
         }
 
         if (envHash == _stringToHash("arbitrum-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-stub");
             return;
         }
 
         if (envHash == _stringToHash("base-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-stub");
             return;
         }
 
         if (envHash == _stringToHash("monad-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-stub");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-stub")) {
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-stub");
             return;
         }
 
         if (envHash == _stringToHash("ethereum-holesky")) {
-            _printMessage("Deploying finalizer contracts");
+            _printMessage(string.concat("Deploying finalizer contracts to ethereum-holesky"));
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();
-            require(
-                !outputExists(finalizerAVSDeployer.getOutputPath()), "Contracts already deployed on Ethereum Holesky"
-            );
-
             finalizerAVSDeployer.run();
 
-            _printMessage("Deploying rolldown contracts");
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
+            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-holesky");
 
-            string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
-            FinalizerTaskManager taskManager =
-                FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
-
-            string memory rolldownDeployedContracts = readOutput("rolldown_output");
-            Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
-
-            string memory configData = readConfig("deploy.config");
-            address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
-
-            vm.startBroadcast(avsOwner);
-
-            taskManager.setRolldown(IRolldown(address(rolldown)));
-            rolldown.setUpdater(address(taskManager));
-
-            vm.stopBroadcast();
+            _initializeRolldownAndTaskManager();
             return;
         }
 
         if (envHash == _stringToHash("arbitrum-sepolia")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Arbitrum Sepolia"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Arbitrum);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("base-sepolia")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Base Sepolia"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Base);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-sepolia");
             return;
         }
 
         if (envHash == _stringToHash("monad-testnet")) {
-            require(
-                !outputExists("monad_rolldown_output") && !outputExists("monad_gmrs_output"),
-                "Contracts already deployed on Monad Testnet"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.Monad);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-testnet");
             return;
         }
 
         if (envHash == _stringToHash("megaeth-testnet")) {
-            require(
-                !outputExists("rolldown_output") && !outputExists("gmrs_output"),
-                "Contracts already deployed on Megaeth Testnet"
-            );
-
-            _deployRolldownAndGMRS(IRolldownPrimitives.ChainId.MegaEth);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-ethereum-holesky")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Ethereum Holesky");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-arbitrum-sepolia")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Arbitrum Sepolia");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Arbitrum);
-            return;
-        }
-
-        if (envHash == _stringToHash("upgrade-rolldown-base-sepolia")) {
-            _printMessage("Upgrading rolldown contracts");
-            RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            require(rolldownDeployer.isProxyDeployed(), "Proxy not deployed on Base Sepolia");
-
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Base);
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-testnet");
             return;
         }
 
@@ -186,33 +103,50 @@ contract MultiStage is Script, Utils {
         vm.stopBroadcast();
     }
 
-    function _deployRolldownAndGMRS(IRolldownPrimitives.ChainId chain) private {
+    function _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId chainId, string memory chainName) private {
         _incrementAccountNonce();
 
-        _printMessage("Deploying rolldown contracts");
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(chain);
+        rolldownDeployer.run(chainId, chainName);
 
-        string memory configData = readConfig("deploy.config");
-        address avsOwner = stdJson.readAddress(configData, ".permissions.owner");
+        string memory rolldownDeployedContracts = readOutput(rolldownDeployer.outputPath());
+        address rolldownAddress = stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown");
+        Rolldown rolldown = Rolldown(payable(rolldownAddress));
 
-        _printMessage("Deploying gasp multi rollup service contracts");
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-        gaspMultiRollupServiceDeployer.run(chain);
+        gaspMultiRollupServiceDeployer.run(chainId, chainName);
 
-        string memory gmrsDeployedContracts = readOutput("gmrs_output");
-        GaspMultiRollupService gmrs =
-            GaspMultiRollupService(stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs"));
+        string memory gmrsDeployedContracts = readOutput(gaspMultiRollupServiceDeployer.outputPath());
+        address gmrsAddress = stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs");
+        GaspMultiRollupService gmrs = GaspMultiRollupService(gmrsAddress);
+
+        vm.startBroadcast(_getAVSOwner());
+
+        gmrs.setRolldown(IRolldown(rolldownAddress));
+        rolldown.setUpdater(gmrsAddress);
+
+        vm.stopBroadcast();
+    }
+
+    function _initializeRolldownAndTaskManager() private {
+        string memory eigenlayerDeployedContracts = readOutput("avs_deployment_output");
+        FinalizerTaskManager taskManager =
+            FinalizerTaskManager(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.taskManager"));
 
         string memory rolldownDeployedContracts = readOutput("rolldown_output");
         Rolldown rolldown = Rolldown(payable(stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown")));
 
-        vm.startBroadcast(avsOwner);
+        vm.startBroadcast(_getAVSOwner());
 
-        gmrs.setRolldown(IRolldown(address(rolldown)));
-        rolldown.setUpdater(address(gmrs));
+        taskManager.setRolldown(IRolldown(address(rolldown)));
+        rolldown.setUpdater(address(taskManager));
 
         vm.stopBroadcast();
+    }
+
+    function _getAVSOwner() private view returns (address) {
+        string memory configData = readConfig("deploy.config");
+        return stdJson.readAddress(configData, ".permissions.owner");
     }
 
     function _printMessage(string memory message) private pure {

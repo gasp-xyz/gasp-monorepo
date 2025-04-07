@@ -4,9 +4,6 @@ pragma solidity 0.8.13;
 import {IRolldown} from "./IRolldown.sol";
 
 interface IFinalizerTaskManager {
-    event PauseTrackingOpState();
-    event ResumeTrackingOpState(bool resetTrackedQuorums);
-
     event BLSSignatureCheckerAddressUpdated(address blsSignatureCheckerAddress);
 
     event OpTaskCancelled(uint32 indexed taskIndex);

@@ -1,6 +1,7 @@
 import { ApiPromise } from '@polkadot/api'
+import { Codec, IEvent } from '@polkadot/types/types'
 import BigNumber from 'bignumber.js'
-import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
+
 import { timeseries } from '../connector/RedisConnector.js'
 import {
   getCandidate,
@@ -12,9 +13,9 @@ import {
   roundCollatorRewardInfo,
   valuateLiquidityToken,
 } from '../repository/StakingRepository.js'
-import { Block } from './BlockScraper.js'
-import { Codec, IEvent } from '@polkadot/types/types'
 import logger from '../util/Logger.js'
+import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
+import { Block } from './BlockScraper.js'
 
 export const processStaking = async (api: ApiPromise, block: Block) => {
   // This assigns the API to a specific block hash,
@@ -102,8 +103,10 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
     const storeInRedis = toStore
       .map((e) => [e.timestamp, JSON.stringify(e)])
       .flat()
-    storeInRedis.length > 0 &&
-      (await timeseries.client.zadd(KEY, ...storeInRedis))
+
+    if (storeInRedis.length > 0) {
+      await timeseries.client.zadd(KEY, ...storeInRedis)
+    }
   }
 }
 
@@ -133,7 +136,9 @@ export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
     const storeInRedis = toStore
       .map((e) => [e.timestamp, JSON.stringify(e)])
       .flat()
-    storeInRedis.length > 0 &&
-      (await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis))
+
+    if (storeInRedis.length > 0) {
+      await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis)
+    }
   }
 }
