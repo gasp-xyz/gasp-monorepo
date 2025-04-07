@@ -16,6 +16,7 @@ export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
 export const DEPOSIT_PENDING_ON_L1 = 'PendingOnL1'
 export const WITHDRAWAL_BATCHED_FOR_L1 = 'BatchedForL1'
 export const PROCESSED_STATUS = 'Processed'
+export const FERRIED_STATUS = 'Ferried'
 
 const keepProcessing = true
 
@@ -127,45 +128,91 @@ export const watchWithdrawalClosed = async (
         fromBlock,
         toBlock,
       })
-      const combinedEvents = [...eventsFerried, ...eventsNotFerried]
+
+      const eventsFundsFerried = await publicClient.getContractEvents({
+        address: `0x${contractAddress}` as `0x${string}`,
+        abi: RolldownContract.abi,
+        eventName: 'WithdrawalFerried',
+        fromBlock,
+        toBlock,
+      })
+      const combinedEvents = [
+        ...eventsFerried,
+        ...eventsNotFerried,
+        ...eventsFundsFerried,
+      ]
       for (const event of combinedEvents) {
         logger.info({
           message: 'Processing withdrawal event:',
           event: event,
         })
-        const {
-          blockNumber,
-          eventName,
-          args: { requestId, withdrawalHash },
-        } = event as any
-        const existingTransaction = await withdrawalRepository
-          .search()
-          .where('requestId')
-          .equals(Number(requestId.toString().replace(/,/g, '')))
-          .and('txHash')
-          .equals(withdrawalHash)
-          .and('type')
-          .equals('withdrawal')
-          .and('status')
-          .equals(WITHDRAWAL_BATCHED_FOR_L1)
-          .and('chain')
-          .equals(chainName)
-          .returnFirst()
-        logger.info(
-          'Existing withdrawal found to be updated:',
-          existingTransaction
-        )
-        if (existingTransaction) {
-          existingTransaction.status = PROCESSED_STATUS
-          existingTransaction.closedBy =
-            eventName === 'FerriedWithdrawalClosed' ? 'ferry' : 'regular'
-          const timestamp = new Date().toISOString()
-          existingTransaction.updated = Date.parse(timestamp)
-          await withdrawalRepository.save(existingTransaction)
-          logger.info({
-            message: 'Withdrawal status updated:',
-            transaction: existingTransaction,
-          })
+        const { eventName, blockNumber } = event as any
+        if (eventName === 'WithdrawalFerried') {
+          const {
+            args: { indexedrequestId, withdrawalHash },
+          } = event as any
+          const existingTransaction = await withdrawalRepository
+            .search()
+            .where('requestId')
+            .equals(Number(indexedrequestId.toString().replace(/,/g, '')))
+            .and('txHash')
+            .equals(withdrawalHash)
+            .and('type')
+            .equals('withdrawal')
+            .and('status')
+            .equals(WITHDRAWAL_BATCHED_FOR_L1)
+            .and('chain')
+            .equals(chainName)
+            .returnFirst()
+          logger.info(
+            'Existing withdrawal found to be updated with event WithdrawalFerried:',
+            existingTransaction
+          )
+          if (existingTransaction) {
+            existingTransaction.status = FERRIED_STATUS
+            const timestamp = new Date().toISOString()
+            existingTransaction.updated = Date.parse(timestamp)
+            await withdrawalRepository.save(existingTransaction)
+            logger.info({
+              message: 'Withdrawal status updated:',
+              transaction: existingTransaction,
+            })
+          }
+        } else {
+          const {
+            args: { requestId, withdrawalHash },
+          } = event as any
+          const existingTransaction = await withdrawalRepository
+            .search()
+            .where('requestId')
+            .equals(Number(requestId.toString().replace(/,/g, '')))
+            .and('txHash')
+            .equals(withdrawalHash)
+            .and('type')
+            .equals('withdrawal')
+            .and('status')
+            .equals(WITHDRAWAL_BATCHED_FOR_L1)
+            .or('status')
+            .equals(FERRIED_STATUS)
+            .and('chain')
+            .equals(chainName)
+            .returnFirst()
+          logger.info(
+            'Existing withdrawal found to be updated:',
+            existingTransaction
+          )
+          if (existingTransaction) {
+            existingTransaction.status = PROCESSED_STATUS
+            existingTransaction.closedBy =
+              eventName === 'FerriedWithdrawalClosed' ? 'ferry' : 'regular'
+            const timestamp = new Date().toISOString()
+            existingTransaction.updated = Date.parse(timestamp)
+            await withdrawalRepository.save(existingTransaction)
+            logger.info({
+              message: 'Withdrawal status updated:',
+              transaction: existingTransaction,
+            })
+          }
         }
         await saveLastProcessedBlock(chainName, blockNumber, 'withdrawal')
       }
