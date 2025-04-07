@@ -3,8 +3,8 @@ services:
     build:
       context: .
       args:
-        ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION:-local}
-    image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local}
+        ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION:-local-fast}
+    image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local-fast}
     restart: unless-stopped
     depends_on:
       eth-stub:

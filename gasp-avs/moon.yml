@@ -36,7 +36,7 @@ tasks:
     outputs: ['target/release/main']
 
   build-image-local:
-    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t ${DOCKERHUB_REPOSITORY}:local --load .'
+    command: 'docker buildx build --build-arg ROLLUP_NODE_VERSION=local -t ${DOCKERHUB_REPOSITORY}:local -t ${DOCKERHUB_REPOSITORY}:local-fast --load .'
     options:
       envFile: '/.env'
     deps: ['gasp-node:build-image-local']
