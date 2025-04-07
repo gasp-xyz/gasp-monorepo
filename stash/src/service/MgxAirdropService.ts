@@ -72,7 +72,7 @@ function calculateTokenHoldings(
     return BN_ZERO
   }
 
-  const holdings = poolMetadata[process.env.MGX_TOKEN_ID]
+  const holdings = poolMetadata[process.env.MGX_TOKEN_ID].toBn()
     .mul(balance)
     .div(issuance)
     .muln(2)
@@ -97,7 +97,7 @@ async function getMgxPools(api: ApiDecoration<'promise'>) {
 const getBalances = async (api: ApiDecoration<'promise'>, address: string) => {
   return new Map(
     (await api.query.tokens.accounts.entries(address)).map(([key, value]) => {
-      return [key.args[1].toString(), value.free.add(value.reserved)]
+      return [key.args[1].toString(), value.free.toBn().add(value.reserved.toBn())]
     })
   )
 }

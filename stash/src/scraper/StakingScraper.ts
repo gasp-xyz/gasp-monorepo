@@ -29,14 +29,14 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
   const collatorEvents = getCollatorEvents(eventsRecord)
   if (collatorEvents.length > 0) {
     const toCollatorEvents = collatorEvents.map(async (event) => {
-      const currentSessionIndex = sessionIndex.current.toNumber()
+      const currentSessionIndex = Number(sessionIndex.current.toString())
       const eventSessionIndex =
         event.event.data.length > 2
           ? Number(event.event.data.toPrimitive()[0])
           : 0
       const jumpInSession = currentSessionIndex - eventSessionIndex
       const numberOfBlocksToSubtract =
-        jumpInSession * api.consts.issuance.blocksPerRound.toNumber()
+        jumpInSession * Number(api.consts.issuance.blocksPerRound.toString())
       const jumpToBlockForCandidate = block.number - numberOfBlocksToSubtract
       const blockHashForCandidate = await api.rpc.chain.getBlockHash(
         jumpToBlockForCandidate
@@ -84,7 +84,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         block: block.number,
         section: event.event.section,
         method: event.event.method,
-        sessionIndex: sessionIndex.current.toNumber(),
+        sessionIndex: Number(sessionIndex.current.toString()),
         collatorAccount,
         amountRewarded: rewardsCollatorAmount.multipliedBy(0.8).toFixed(0),
         liquidityTokenId,

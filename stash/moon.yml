@@ -4,7 +4,7 @@ tags: ['typescript']
 
 toolchain:
   node:
-    version: 18.20.7
+    version: 22.14.0
 
 fileGroups:
   sources:
@@ -43,9 +43,9 @@ tasks:
 
   # TODO: Unit tests are temporarily disabled as they depend on sensitive data
   # Will be re-enabled once tests are updated to use mock data or environment variables
-  # test:
-  #   command: 'yarn test:unit'
-  #   inputs: ['@group(sources)']
+  test:
+     command: 'yarn test:unit'
+     inputs: ['@group(sources)']
 
   release:
     command: 'yarn run release'

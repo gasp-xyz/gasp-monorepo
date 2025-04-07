@@ -42,7 +42,10 @@ export const withBlocks = async (
   let last = 0
   let current = from
   const unsub = await api.rpc.chain.subscribeFinalizedHeads(async (head) => {
-    const headBlock = await getBlockByHash(api, head.hash)
+    const headBlock = await getBlockByHash(
+      api,
+      head.hash as unknown as BlockHash
+    )
     last = headBlock.number
     metrics.setBlocks(from, headBlock.number)
     logger.debug(`BlockScraper: new head ${last}`)
@@ -129,5 +132,5 @@ const getTimestamp = (extrinsics: Extrinsic[]): number => {
   const e = extrinsics.filter(
     ({ section, method }) => 'timestamp.set' === `${section}.${method}`
   )
-  return e.length === 1 ? parseNumber(e[0].args['now']) : 0
+  return e.length === 1 ? Number(e[0].args['now']) : 0
 }

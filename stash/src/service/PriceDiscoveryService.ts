@@ -252,10 +252,15 @@ export const tradesHistory = async (
 }
 
 export const adjustInterval = (days: number | string): Interval => {
-  if (!_.isNumber(days) || days > 90) {
+  if (!_.isNumber(days)) {
     return 'day'
   }
-  if (days <= 5) {
+
+  const daysNum = days as number
+  if (daysNum > 90) {
+    return 'day'
+  }
+  if (daysNum <= 5) {
     return 'minute'
   }
   return 'hour'
@@ -263,7 +268,7 @@ export const adjustInterval = (days: number | string): Interval => {
 
 export const matchInterval = (interval: number | Interval): number => {
   if (_.isNumber(interval)) {
-    return interval * 1000
+    return (interval as number) * 1000
   }
   switch (interval) {
     case 'day':
