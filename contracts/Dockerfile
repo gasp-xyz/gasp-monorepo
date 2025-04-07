@@ -1,4 +1,4 @@
-FROM ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6
+FROM ghcr.io/foundry-rs/foundry:nightly-1f22112b4e9586e39924ab851c055088c3973683
 
 # Copy our source code into the container
 WORKDIR /app
