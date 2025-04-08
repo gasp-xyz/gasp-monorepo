@@ -12,7 +12,7 @@ describe.skip('Integration Test using Test Containers', function () {
   beforeAll(async () => {
     //perhaps we should pull this separatetdly, its a 2GB image. `docker pull p1k1m4n/stash:1`
     container = await new GenericContainer(
-      'mangatasolutions/redis-test-stash:latest'
+      'mangatasolutions/redis-test-stash:latest',
     )
       .withWorkingDir('/')
       .withEntrypoint(['redis-server'])
@@ -37,7 +37,7 @@ describe.skip('Integration Test using Test Containers', function () {
       const actual = await vi.importActual('../src/repository/ChainRepository')
       return {
         ...actual,
-        getPools: vi.fn().mockImplementation((id, from, to) => {
+        getPools: vi.fn().mockImplementation(() => {
           return [
             '{"id":5,"amounts":["13565789249280502","3.90486697526747697749232102e+26"],"assets":[4,0],"block":2288098,"timestamp":1683581142721}',
             '{"id":5,"amounts":["13565789249280502","3.90486697526747697749232102e+26"],"assets":[4,0],"block":2288099,"timestamp":1683581154821}',
@@ -82,7 +82,7 @@ describe.skip('Integration Test using Test Containers', function () {
       'TS.RANGE',
       'price:asset:0',
       '1683581142721',
-      '1683581166793'
+      '1683581166793',
     )) as [number, string][]
     res.length.should.be.equal(3)
     const storeValues = res.map(([tsp, price]) => [tsp, new Decimal(price)])

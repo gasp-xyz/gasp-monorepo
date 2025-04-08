@@ -1,15 +1,11 @@
 import { ApiPromise } from '@polkadot/api'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  depositRepository,
-  withdrawalRepository,
-} from '../src/repository/TransactionRepository'
+import { depositRepository } from '../src/repository/TransactionRepository'
 import {
   processFerriedDeposit,
   processFerriedDepositEvents,
 } from '../src/scraper/DepositScraper'
-import logger from '../src/util/Logger'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('@polkadot/api')
@@ -58,7 +54,7 @@ describe('DepositScraper', () => {
         expect.objectContaining({
           status: 'Processed',
           closedBy: 'ferry',
-        })
+        }),
       )
     })
   })
@@ -96,13 +92,13 @@ describe('DepositScraper', () => {
         expect.objectContaining({
           status: 'Processed',
           closedBy: 'ferry',
-        })
+        }),
       )
       expect(result).toEqual(
         expect.objectContaining({
           status: 'Processed',
           closedBy: 'ferry',
-        })
+        }),
       )
     })
 

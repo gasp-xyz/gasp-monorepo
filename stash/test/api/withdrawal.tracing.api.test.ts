@@ -1,5 +1,5 @@
 import supertest from 'supertest'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import app from '../../src/app'
 import { withdrawalRepository } from '../../src/repository/TransactionRepository'

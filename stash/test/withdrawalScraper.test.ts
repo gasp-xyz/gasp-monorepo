@@ -83,7 +83,7 @@ describe('processWithdrawalEvents', () => {
     }
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
-      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }]),
     )
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue(mockWithdrawalData)
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
@@ -100,7 +100,7 @@ describe('processWithdrawalEvents', () => {
         address: '',
         recipient: '0xrecipient',
         type: 'withdrawal',
-      })
+      }),
     )
   })
 
@@ -152,7 +152,7 @@ describe('processWithdrawalEvents', () => {
     }
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
-      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }]),
     )
     vi.spyOn(withdrawalRepository, 'search').mockReturnValue({
       where: vi.fn().mockReturnThis(),
@@ -200,7 +200,7 @@ describe('processWithdrawalEvents', () => {
       expect.objectContaining({
         status: 'BatchedForL1',
         proof: expect.any(String),
-      })
+      }),
     )
   })
 })
@@ -267,7 +267,7 @@ describe('startTracingWithdrawal', () => {
     } as any
 
     vi.spyOn(redis.client, 'get').mockResolvedValue(
-      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }])
+      JSON.stringify([{ key: 'testchain', chainId: 'testchain' }]),
     )
 
     vi.spyOn(withdrawalRepository, 'save').mockResolvedValue({
@@ -293,7 +293,7 @@ describe('startTracingWithdrawal', () => {
       mockApi,
       mockEventData,
       1,
-      mockBlock
+      mockBlock,
     )
 
     expect(result).toEqual(
@@ -314,13 +314,13 @@ describe('startTracingWithdrawal', () => {
         calldata: '0xabcdef',
         createdBy: 'other',
         closedBy: null,
-      })
+      }),
     )
     expect(withdrawalRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
         status: 'PendingOnL2',
         type: 'withdrawal',
-      })
+      }),
     )
   })
 
@@ -375,7 +375,7 @@ describe('startTracingWithdrawal', () => {
       mockApi,
       mockEventData,
       1,
-      mockBlock
+      mockBlock,
     )
 
     expect(result.asset_chainId).toBe('unknown')
@@ -439,7 +439,7 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
       expect.objectContaining({
         status: 'BatchedForL1',
         proof: '0xproof',
-      })
+      }),
     )
   })
 
@@ -466,7 +466,6 @@ describe('updateWithdrawalsWhenBatchCreated', () => {
 
 describe('extractExtrinsicHashAndAnAddressFromBlock', () => {
   let mockApi: any
-  let mockBlock: any
 
   beforeEach(() => {
     // Reset all mocks
@@ -518,14 +517,14 @@ describe('extractExtrinsicHashAndAnAddressFromBlock', () => {
         parent: '',
         timestamp: 0,
         number: mockBlockNumber,
-      } // block
+      }, // block
     )
 
     // Assertions
     expect(mockApi.rpc.chain.getBlockHash).toHaveBeenCalledWith(mockBlockNumber)
     expect(mockApi.rpc.chain.getHeader).toHaveBeenCalledWith(mockBlockHash)
     expect(mockApi.rpc.chain.getBlock).toHaveBeenCalledWith(
-      mockBlockHeader.hash
+      mockBlockHeader.hash,
     )
 
     expect(result).toEqual({
@@ -540,7 +539,7 @@ describe('extractExtrinsicHashAndAnAddressFromBlock', () => {
 
     // Set up mock API methods to throw an error
     mockApi.rpc.chain.getBlockHash.mockRejectedValue(
-      new Error('Block hash retrieval failed')
+      new Error('Block hash retrieval failed'),
     )
 
     // Call the function
@@ -555,7 +554,7 @@ describe('extractExtrinsicHashAndAnAddressFromBlock', () => {
         parent: '',
         timestamp: 0,
         number: mockBlockNumber,
-      } // block
+      }, // block
     )
 
     // Assertions

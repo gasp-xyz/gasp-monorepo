@@ -14,7 +14,7 @@ describe('[Staking]', () => {
   beforeAll(() => {
     vi.mock('../src/repository/StakingRepository', async () => {
       const actual = await vi.importActual(
-        '../src/repository/StakingRepository'
+        '../src/repository/StakingRepository',
       )
       return {
         ...actual,
@@ -99,7 +99,7 @@ describe('[Staking]', () => {
       { liquidityTokenId: '8', amountClaimed: '503619012693557062128' },
     ]
     const results = await rewards24hours(
-      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1'
+      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1',
     )
     expect(results).deep.equal(expectedResponse)
   })
@@ -109,7 +109,7 @@ describe('[Staking]', () => {
       { liquidityTokenId: '8', amountClaimed: '704238025387114124256' },
     ]
     const results = await rewardsMonth(
-      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1'
+      '5FFTemNzVqVduFk7n8z7G6qukrnBfTTQRE8EGPbjmtdpz2c1',
     )
     expect(results).deep.equal(expectedResponse)
   })

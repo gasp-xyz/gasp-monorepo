@@ -1,7 +1,6 @@
 import { Decimal } from 'decimal.js'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import app from '../src/app'
 import { pairs, tickers } from '../src/service/CoingeckoListingService'
 
 vi.mock('gasp-sdk')

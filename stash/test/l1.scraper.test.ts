@@ -21,12 +21,10 @@ vi.mock('../src/scraper/L1LogScraper', () => ({
   processRequests: vi.fn(),
   watchWithdrawalClosed: vi.fn(),
 }))
-let keepProcessing = true
 
 describe('L1LogScraper', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    keepProcessing = true
   })
 
   it('should update transaction status to SubmittedToL2 on DepositAcceptedIntoQueue event', async () => {
@@ -77,7 +75,7 @@ describe('L1LogScraper', () => {
       mockApi,
       'http://chain.url',
       holesky,
-      'Ethereum'
+      'Ethereum',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -88,7 +86,7 @@ describe('L1LogScraper', () => {
         txHash: '0x123',
         status: 'SubmittedToL2',
         requestId: 1,
-      })
+      }),
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
   }, 10000)
@@ -135,7 +133,7 @@ describe('L1LogScraper', () => {
       await timeseries.client.hset(
         `transactions_scanned:withdrawal:Ethereum`,
         'lastBlock',
-        100
+        100,
       )
     })
 
@@ -143,7 +141,7 @@ describe('L1LogScraper', () => {
       mockApi,
       'http://chain.url',
       holesky,
-      'Ethereum'
+      'Ethereum',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -154,7 +152,7 @@ describe('L1LogScraper', () => {
         requestId: 1,
         txHash: '0x456',
         status: 'Processed',
-      })
+      }),
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
   }, 10000)
@@ -231,7 +229,7 @@ describe('L1LogScraper', () => {
         expect.objectContaining({
           txHash: '0x102',
           status: 'PROCESSED',
-        })
+        }),
       )
       expect(timeseries.client.hset).toHaveBeenCalled()
     })

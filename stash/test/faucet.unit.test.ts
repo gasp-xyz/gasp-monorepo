@@ -37,11 +37,11 @@ describe('FaucetService', () => {
   it('should fail address usage check', async () => {
     const errorMessage = `Address ${toAddress} has requested the token more than ${MAX_REQUESTS} times.`
     vi.spyOn(faucetService, 'checkRequestCount').mockRejectedValue(
-      new ForbiddenException(errorMessage)
+      new ForbiddenException(errorMessage),
     )
 
     await expect(faucetService.checkRequestCount(toAddress)).rejects.toThrow(
-      ForbiddenException
+      ForbiddenException,
     )
   })
 
@@ -54,7 +54,7 @@ describe('FaucetService', () => {
   it('should fail to send tokens', async () => {
     const errorMessage = 'Token transfer failed'
     vi.spyOn(faucetService, 'sendTokens').mockRejectedValue(
-      new Error(errorMessage)
+      new Error(errorMessage),
     )
 
     await expect(faucetService.sendTokens(toAddress)).rejects.toThrow(Error)
