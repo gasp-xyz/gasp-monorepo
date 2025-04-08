@@ -10,7 +10,7 @@ export const initService = async (): Promise<void> => {
 export const listTokenOrderBuckets = async (): Promise<TokenOrderBucket[]> => {
   const tokens = await tokenRepository.listTokenOrderBuckets()
   const sortedResult = Array.from(tokens.values()).sort(
-    (a, b) => a.rank - b.rank
+    (a, b) => a.rank - b.rank,
   )
 
   return [...sortedResult]

@@ -12,7 +12,7 @@ export const rewards24hours = async (address: string) => {
   const data: ProofOfStakeReward[] = await getDataByAddress<ProofOfStakeEntry>(
     KEY_ACCOUNT,
     address,
-    (data) => data.account
+    (data) => data.account,
   )
 
   const rewards24hoursData = get24HoursAccountRewardsData(data)
@@ -24,7 +24,7 @@ export const rewardsMonth = async (address: string) => {
   const data: ProofOfStakeReward[] = await getDataByAddress<ProofOfStakeEntry>(
     KEY_ACCOUNT,
     address,
-    (data) => data.account
+    (data) => data.account,
   )
 
   const rewardsMonthData = getMonthAccountRewardsData(data)

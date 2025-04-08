@@ -11,7 +11,7 @@ const AIRDROP_WEIGHT = new BN(34466)
 export const getEligibilityAtBlockN = async (
   _api: ApiPromise,
   block: string,
-  address: string
+  address: string,
 ) => {
   const api = await _api.at(block)
 
@@ -22,7 +22,7 @@ export const getEligibilityAtBlockN = async (
   const poolMetadata = await getPoolMetadata(api, mgxPools)
 
   const lpAssets = Array.from(balances.keys()).filter((k) =>
-    poolMetadata.has(k)
+    poolMetadata.has(k),
   )
 
   const mgxBalance = balances.get(process.env.MGX_TOKEN_ID) ?? BN_ZERO
@@ -33,13 +33,13 @@ export const getEligibilityAtBlockN = async (
     return calculateTokenHoldings(
       poolMetadata.get(lpId),
       balances.get(lpId),
-      issuance.get(lpId)
+      issuance.get(lpId),
     )
   })
 
   const lpMgxHoldingsSum = lpMgxHoldings.reduce(
     (acc, weight) => acc.add(weight),
-    BN_ZERO
+    BN_ZERO,
   )
   const lpWeight = lpMgxHoldingsSum
     .mul(AIRDROP_WEIGHT)
@@ -55,7 +55,7 @@ export const getEligibilityAtBlockN = async (
 
 export function verifySignature(
   data: Record<'mangataXAddress' | 'ethereumAddress', string>,
-  signature: string
+  signature: string,
 ) {
   const message = `0x${Buffer.from(JSON.stringify(data)).toString('hex')}`
   const { isValid } = signatureVerify(message, signature, data.mangataXAddress)
@@ -66,13 +66,14 @@ export function verifySignature(
 function calculateTokenHoldings(
   poolMetadata: Record<string, u128> | undefined,
   balance: BN,
-  issuance: BN
+  issuance: BN,
 ) {
   if (!poolMetadata) {
     return BN_ZERO
   }
 
-  const holdings = poolMetadata[process.env.MGX_TOKEN_ID].toBn()
+  const holdings = poolMetadata[process.env.MGX_TOKEN_ID]
+    .toBn()
     .mul(balance)
     .div(issuance)
     .muln(2)
@@ -97,8 +98,11 @@ async function getMgxPools(api: ApiDecoration<'promise'>) {
 const getBalances = async (api: ApiDecoration<'promise'>, address: string) => {
   return new Map(
     (await api.query.tokens.accounts.entries(address)).map(([key, value]) => {
-      return [key.args[1].toString(), value.free.toBn().add(value.reserved.toBn())]
-    })
+      return [
+        key.args[1].toString(),
+        value.free.toBn().add(value.reserved.toBn()),
+      ]
+    }),
   )
 }
 
@@ -106,20 +110,20 @@ const getTokenIssuance = async (api: ApiDecoration<'promise'>) => {
   return new Map(
     (await api.query.tokens.totalIssuance.entries()).map(([key, value]) => {
       return [key.args[0].toString(), value.toBn()]
-    })
+    }),
   )
 }
 
 const getPoolMetadata = async (
   api: ApiDecoration<'promise'>,
-  pools: Array<[string, [u32, u32]]>
+  pools: Array<[string, [u32, u32]]>,
 ) => {
   const poolsLiquidity = await Promise.all(
-    pools.map(([, tokens]) => api.query.xyk.pools(tokens))
+    pools.map(([, tokens]) => api.query.xyk.pools(tokens)),
   )
 
   const lpAssets = await Promise.all(
-    pools.map(([, tokens]) => api.query.xyk.liquidityAssets(tokens))
+    pools.map(([, tokens]) => api.query.xyk.liquidityAssets(tokens)),
   )
 
   const poolsArray = pools.map<[string, Record<string, u128>]>(
@@ -131,7 +135,7 @@ const getPoolMetadata = async (
           [tokens[1].toString()]: poolsLiquidity[i][1],
         },
       ]
-    }
+    },
   )
 
   return new Map(poolsArray)

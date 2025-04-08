@@ -46,7 +46,7 @@ export const verifyCaptcha = async (captchaToken: string): Promise<void> => {
     //hcaptcha returns success as false if the captcha is not valid
     const errorCodes = response.data['error-codes']
     throw new ForbiddenException(
-      'Captcha verification failed. Reason: ' + errorCodes
+      'Captcha verification failed. Reason: ' + errorCodes,
     )
   }
 }
@@ -65,7 +65,7 @@ export const checkRequestCount = async (toAddress: string): Promise<void> => {
   const requestCount = await redis.client.get(key)
   if (requestCount && Number(requestCount) >= MAX_REQUESTS) {
     throw new ForbiddenException(
-      `Address ${toAddress} has requested the token more than ${MAX_REQUESTS} times.`
+      `Address ${toAddress} has requested the token more than ${MAX_REQUESTS} times.`,
     )
   }
 }
@@ -78,7 +78,7 @@ const incrementTokenRequest = async (address: string): Promise<void> => {
 const send = async (
   tokenToSendAddress: any,
   toAddress: string,
-  amount: bigint
+  amount: bigint,
 ) => {
   // Create a new wallet client
   const client = createWalletClient({
@@ -86,7 +86,7 @@ const send = async (
     transport: http(process.env.RPC_ADDRESS),
   }).extend(publicActions)
   const account = privateKeyToAccount(
-    `0x${process.env.ORIGIN_ACCOUNT_PRIVATE_KEY}`
+    `0x${process.env.ORIGIN_ACCOUNT_PRIVATE_KEY}`,
   )
   logger.info('Sending tokens...')
   const transaction: SimulateTransactionRequest = {

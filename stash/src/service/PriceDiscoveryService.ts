@@ -3,7 +3,7 @@ import { Decimal } from 'decimal.js'
 import { fromBN, TokenInfo } from 'gasp-sdk'
 import _ from 'lodash'
 import moment from 'moment'
-import { string, StringSchema } from 'yup'
+import { StringSchema } from 'yup'
 
 import * as coinGecko from '../connector/CoinGecko.js'
 import { CoinGeckoCoinData } from '../connector/CoinGecko.js'
@@ -54,16 +54,16 @@ const refresh = async () => {
     assetInfo = new Map()
     const storedPools = await chainStore.getAssets()
     const registeredAssets = Object.values(
-      await MangataClient.query.getAssetsInfo()
+      await MangataClient.query.getAssetsInfo(),
     )
     const idToAsset = new Map(
-      registeredAssets.map((a) => [Number.parseInt(a.id), a])
+      registeredAssets.map((a) => [Number.parseInt(a.id), a]),
     )
 
     // only pools we have stored in DB
     const assetIds = _.uniq(storedPools.map((p) => p.pool).flat())
     const assets = registeredAssets.filter((a) =>
-      assetIds.includes(Number.parseInt(a.id))
+      assetIds.includes(Number.parseInt(a.id)),
     )
     assetInfo = new Map(assets.map((a) => [a.id, a]))
 
@@ -105,7 +105,7 @@ const getAsset = (id: string, isPool: boolean) => {
 }
 
 export const priceDiscovery = async (
-  currencyId: string
+  currencyId: string,
 ): Promise<PriceDiscoveryDto> => {
   await refresh()
 
@@ -119,10 +119,10 @@ export const priceDiscovery = async (
   const buyPriceInPriceToken = await MangataClient.rpc.calculateBuyPriceId(
     priceTokenAssetInfo.id,
     calculatedAsset.id,
-    buyAmount
+    buyAmount,
   )
   const priceTokenDecimalValue = new Decimal(
-    fromBN(buyPriceInPriceToken, priceTokenAssetInfo.decimals)
+    fromBN(buyPriceInPriceToken, priceTokenAssetInfo.decimals),
   )
   const results: Record<string, string> = {}
 
@@ -146,7 +146,7 @@ export const priceHistoryPair = async (
   base: string,
   target: string,
   days: number | 'max' = 'max',
-  interval: number | Interval = 0
+  interval: number | Interval = 0,
 ): Promise<PriceHistoryDto> => {
   await refresh()
 
@@ -154,7 +154,7 @@ export const priceHistoryPair = async (
   const baseAsset = getAsset(base, false)
   const targetAsset = getAsset(target, false)
   const exponent = new Decimal(`1e${baseAsset.decimals}`).div(
-    new Decimal(`1e${targetAsset.decimals}`)
+    new Decimal(`1e${targetAsset.decimals}`),
   )
   const current = moment.utc()
   const to = current.valueOf()
@@ -165,7 +165,7 @@ export const priceHistoryPair = async (
       targetAsset.id,
       from,
       to,
-      matchInterval(intervalAdjusted)
+      matchInterval(intervalAdjusted),
     )
   ).map(([t, a]) => [t, a.mul(exponent)] as TimestampedAmount)
 
@@ -175,7 +175,7 @@ export const priceHistoryPair = async (
 export const priceHistory = async (
   currencyId: string,
   days: number | 'max' = 'max',
-  interval: number | Interval = 0
+  interval: number | Interval = 0,
 ): Promise<PriceHistoryDto> => {
   await refresh()
 
@@ -186,7 +186,7 @@ export const priceHistory = async (
   const to = current.valueOf()
   const from = days === 'max' ? 0 : current.subtract(days, 'days').valueOf()
   const tokenIdsToHardcode = process.env.TOKENS_TO_HARDCODE.split(',').map(
-    (id) => id.trim()
+    (id) => id.trim(),
   )
   const prices = (
     await priceStore.get(asset.id, from, to, matchInterval(intervalAdjusted))
@@ -197,7 +197,7 @@ export const priceHistory = async (
         tokenIdsToHardcode.includes(asset.id)
           ? new Decimal(1.0).toFixed(2)
           : a.mul(exponent),
-      ] as TimestampedAmount
+      ] as TimestampedAmount,
   )
 
   return { prices }
@@ -207,7 +207,7 @@ export const volumeHistory = async (
   currencyId: string,
   isPool: boolean,
   days: number | 'max' = 'max',
-  interval: number | Interval = 0
+  interval: number | Interval = 0,
 ): Promise<VolumeHistoryDto> => {
   await refresh()
 
@@ -221,7 +221,7 @@ export const volumeHistory = async (
     isPool,
     from,
     to,
-    matchInterval(intervalAdjusted)
+    matchInterval(intervalAdjusted),
   )
 
   return { volumes }
@@ -231,7 +231,7 @@ export const tradesHistory = async (
   currencyId: string,
   isPool: boolean,
   days: number | 'max' = 'max',
-  interval: number | Interval = 0
+  interval: number | Interval = 0,
 ): Promise<VolumeHistoryDto> => {
   await refresh()
 
@@ -245,7 +245,7 @@ export const tradesHistory = async (
     isPool,
     from,
     to,
-    matchInterval(intervalAdjusted)
+    matchInterval(intervalAdjusted),
   )
 
   return { volumes }
