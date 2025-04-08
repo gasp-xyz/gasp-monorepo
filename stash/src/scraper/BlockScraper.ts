@@ -4,7 +4,7 @@ import { BlockHash, SignedBlock } from '@polkadot/types/interfaces'
 import _ from 'lodash'
 
 import * as store from '../repository/ChainRepository.js'
-import { CodecOrArray, parseNumber, toHuman } from '../util/Chain.js'
+import { CodecOrArray, toHuman } from '../util/Chain.js'
 import logger from '../util/Logger.js'
 import { Metrics } from '../util/Metrics.js'
 
@@ -36,7 +36,7 @@ export interface Event {
 export const withBlocks = async (
   api: ApiPromise,
   from: number,
-  fn: (b: Block) => Promise<void>
+  fn: (b: Block) => Promise<void>,
 ) => {
   const metrics = new Metrics('BlockScraper')
   let last = 0
@@ -44,7 +44,7 @@ export const withBlocks = async (
   const unsub = await api.rpc.chain.subscribeFinalizedHeads(async (head) => {
     const headBlock = await getBlockByHash(
       api,
-      head.hash as unknown as BlockHash
+      head.hash as unknown as BlockHash,
     )
     last = headBlock.number
     metrics.setBlocks(from, headBlock.number)
@@ -71,8 +71,8 @@ export const withBlocks = async (
 export const processEvents = async (block: Block) => {
   const events = _.chain(block.events)
     .filter((ev) => filterEvents(ev[1]))
-    .groupBy(([idx, _]) => idx)
-    .map((evs, _) => evs.map(([_, ev]) => ev))
+    .groupBy(([idx]) => idx)
+    .map((evs) => evs.map(([, ev]) => ev))
     .filter((evs) => evs.length > 1)
     .value()
 
@@ -101,17 +101,17 @@ const getBlockByHash = async (api: ApiPromise, hash: BlockHash) => {
 const mapper = (
   api: ApiDecoration<'promise'>,
   blockRpc: SignedBlock,
-  eventsRpc: CodecOrArray
+  eventsRpc: CodecOrArray,
 ): Block => {
   const events: [number, Event][] = toHuman(eventsRpc).map(
-    ({ phase, event }) => [phase.ApplyExtrinsic, event]
+    ({ phase, event }) => [phase.ApplyExtrinsic, event],
   )
   const extrinsics: Extrinsic[] = toHuman(blockRpc.block.extrinsics).map(
-    ({ method }) => method
+    ({ method }) => method,
   )
   const timestamp = getTimestamp(extrinsics)
 
-  const block: Block = {
+  return {
     number: blockRpc.block.header.number.toNumber(),
     hash: blockRpc.block.hash.toString(),
     parent: blockRpc.block.header.parentHash.toString(),
@@ -120,8 +120,6 @@ const mapper = (
     timestamp,
     api,
   }
-
-  return block
 }
 
 const filterEvents = (ev: Event) => {
@@ -130,7 +128,7 @@ const filterEvents = (ev: Event) => {
 
 const getTimestamp = (extrinsics: Extrinsic[]): number => {
   const e = extrinsics.filter(
-    ({ section, method }) => 'timestamp.set' === `${section}.${method}`
+    ({ section, method }) => 'timestamp.set' === `${section}.${method}`,
   )
   return e.length === 1 ? Number(e[0].args['now']) : 0
 }

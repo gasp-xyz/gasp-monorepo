@@ -13,7 +13,6 @@ import {
   roundCollatorRewardInfo,
   valuateLiquidityToken,
 } from '../repository/StakingRepository.js'
-import logger from '../util/Logger.js'
 import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
 import { Block } from './BlockScraper.js'
 
@@ -39,7 +38,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         jumpInSession * Number(api.consts.issuance.blocksPerRound.toString())
       const jumpToBlockForCandidate = block.number - numberOfBlocksToSubtract
       const blockHashForCandidate = await api.rpc.chain.getBlockHash(
-        jumpToBlockForCandidate
+        jumpToBlockForCandidate,
       )
       const apiAtForCandidate = await api.at(blockHashForCandidate)
       const candidate = await getCandidate(apiAtForCandidate, event)
@@ -55,13 +54,12 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         liquidityTokenReserve: BigNumber
       }
       if (liquidityTokenId === '0') {
-        const liquidityTokenReserve = await apiAt.query.tokens.totalIssuance(
-          liquidityTokenId
-        )
+        const liquidityTokenReserve =
+          await apiAt.query.tokens.totalIssuance(liquidityTokenId)
         valuation = {
           liquidityTokenAmountInMgx: liquidityTokenAmount,
           liquidityTokenReserve: new BigNumber(
-            liquidityTokenReserve.toString()
+            liquidityTokenReserve.toString(),
           ),
           mgxTokenReserve: liquidityTokenAmount,
         }
@@ -69,14 +67,14 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         valuation = await valuateLiquidityToken(
           apiAt,
           liquidityTokenId,
-          liquidityTokenAmount
+          liquidityTokenAmount,
         )
       }
       const rewardsCollatorAmount = roundCollatorRewardInfo(event.event.data)
       const collatorAccount = getCollatorAccount(event.event.data)
       const apyPerSession = calculateAnnualPercentageYieldPerSession(
         rewardsCollatorAmount,
-        valuation.liquidityTokenAmountInMgx
+        valuation.liquidityTokenAmountInMgx,
       )
 
       return {
@@ -98,7 +96,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
     })
 
     const toStore = (await Promise.all(toCollatorEvents)).filter(
-      (event) => event !== null
+      (event) => event !== null,
     )
     const storeInRedis = toStore
       .map((e) => [e.timestamp, JSON.stringify(e)])

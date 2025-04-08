@@ -1,5 +1,3 @@
-import process from 'node:process'
-
 import { ApiPromise } from '@polkadot/api'
 import { setTimeout } from 'timers/promises'
 import { createPublicClient, http, type PublicClientConfig } from 'viem'
@@ -24,7 +22,7 @@ export const watchDepositAcceptedIntoQueue = async (
   chainUrl: string,
   chain: any,
   chainName: string,
-  contractAddress: string
+  contractAddress: string,
 ) => {
   const publicClient = getPublicClient({
     transport: http(chainUrl),
@@ -68,7 +66,7 @@ export const watchDepositAcceptedIntoQueue = async (
         if (existingTransaction) {
           existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
           existingTransaction.requestId = Number(
-            String((log as any).args.requestId).replace(/,/g, '')
+            String((log as any).args.requestId).replace(/,/g, ''),
           )
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
@@ -96,7 +94,7 @@ export const watchWithdrawalClosed = async (
   chainUrl: string,
   chain: any,
   chainName: string,
-  contractAddress: string
+  contractAddress: string,
 ) => {
   const publicClient = getPublicClient({
     transport: http(chainUrl),
@@ -153,7 +151,7 @@ export const watchWithdrawalClosed = async (
           .returnFirst()
         logger.info(
           'Existing withdrawal found to be updated:',
-          existingTransaction
+          existingTransaction,
         )
         if (existingTransaction) {
           existingTransaction.status = PROCESSED_STATUS
@@ -186,11 +184,11 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
       const lastProcessedRequestId = Number.parseInt(
         (await api.query.rolldown.lastProcessedRequestOnL2(l1Chain))
           .toString()
-          .replace(/,/g, '')
+          .replace(/,/g, ''),
       )
       const lastSavedProcessedRequestId = await getLastProcessedRequestId(
         l1Chain,
-        'deposit'
+        'deposit',
       )
       const transactionsToProcess = await depositRepository
         .search()
@@ -217,7 +215,7 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
         //even if we don't have any transaction to process, we save the last processed request id
         l1Chain,
         lastProcessedRequestId,
-        'deposit'
+        'deposit',
       )
     } catch (error) {
       logger.error('Error processing requests:', error)
@@ -233,25 +231,25 @@ export const getPublicClient = (options: PublicClientConfig) => {
 const saveLastProcessedRequestId = async (
   l1Chain: string,
   lastProcessedRequestId: number,
-  type: string
+  type: string,
 ) => {
   await timeseries.client.hset(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId',
-    lastProcessedRequestId.toString()
+    lastProcessedRequestId.toString(),
   )
   logger.info(
-    `${type} : Last processed requestId ${lastProcessedRequestId} chain ${l1Chain} saved`
+    `${type} : Last processed requestId ${lastProcessedRequestId} chain ${l1Chain} saved`,
   )
 }
 
 const getLastProcessedRequestId = async (
   l1Chain: string,
-  type: string
+  type: string,
 ): Promise<number | null> => {
   const result = await timeseries.client.hget(
     `transactions_scanned:${type}:${l1Chain}`,
-    'lastRequestId'
+    'lastRequestId',
   )
   return result ? Number(result) : 0
 }
@@ -259,25 +257,25 @@ const getLastProcessedRequestId = async (
 const saveLastProcessedBlock = async (
   l1Chain: string,
   lastProcessedBlock: bigint,
-  type: string
+  type: string,
 ) => {
   await timeseries.client.hset(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock',
-    lastProcessedBlock.toString()
+    lastProcessedBlock.toString(),
   )
   logger.info(
-    `${type} : Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`
+    `${type} : Last processed block ${lastProcessedBlock} saved for chain ${l1Chain}`,
   )
 }
 
 const getLastProcessedBlock = async (
   l1Chain: string,
-  type: string
+  type: string,
 ): Promise<bigint | null> => {
   const result = await timeseries.client.hget(
     `transactions_scanned:${type}:${l1Chain}`,
-    'lastBlock'
+    'lastBlock',
   )
   return result ? BigInt(result) : 0n
 }

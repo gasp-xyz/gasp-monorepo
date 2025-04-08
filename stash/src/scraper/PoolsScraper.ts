@@ -28,7 +28,7 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
 
   const liquidityTokenIds = (
     await block.api.query.xyk.liquidityAssets.entries()
-  ).map(([_, tokenId]) => {
+  ).map(([, tokenId]) => {
     return tokenId.toString()
   })
 
@@ -36,7 +36,7 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
     const amounts = poolAssetsAmount.toHuman() as [string, string]
     const liquidityAssetsInPool = storageKey.args[0].toHuman() as [
       string,
-      string
+      string,
     ]
     const liquidityPoolId = await block.api.query.xyk.liquidityAssets([
       liquidityAssetsInPool[0].toString(),
@@ -61,7 +61,7 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
   })
 
   const poolEntries = (await Promise.all(filteredPools)).filter(
-    (p) => p.amounts[0].gt(ZERO) && p.amounts[1].gt(ZERO)
+    (p) => p.amounts[0].gt(ZERO) && p.amounts[1].gt(ZERO),
   )
 
   for (const key of liquidityTokenIds) {
@@ -92,7 +92,7 @@ const checkHasAsset = async (block: Block, key: string) => {
     logger.debug(
       `PoolsScraper: fetch asset ${asset.id.toString()}->${
         asset.pool
-      } at block ${block.number}`
+      } at block ${block.number}`,
     )
   }
 }
@@ -105,7 +105,7 @@ const fetchAssets = async (block: Block): Promise<Asset[]> => {
     const poolId = optionValue.unwrap() as BN
     const liquidityAssetsInPool = storageKey.args[0].toHuman() as [
       string,
-      string
+      string,
     ]
     return {
       id: poolId.toNumber(),
