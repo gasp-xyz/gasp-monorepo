@@ -88,7 +88,7 @@ impl Valuate for MockValuateForNative {
 	fn find_paired_pool(
 		base_id: Self::CurrencyId,
 		asset_id: Self::CurrencyId,
-	) -> Result<PoolInfo<Self::CurrencyId, Self::Balance>, DispatchError> {
+	) -> Result<Vec<PoolInfo<Self::CurrencyId, Self::Balance>>, DispatchError> {
 		unimplemented!()
 	}
 
