@@ -17,7 +17,7 @@ use mangata_support::{
 use orml_tokens::{MultiTokenCurrencyExtended, MultiTokenReservableCurrency};
 
 use sp_runtime::{
-	traits::{CheckedAdd, Zero},
+	traits::{Bounded, CheckedAdd, Zero},
 	Saturating,
 };
 use sp_std::{convert::TryInto, prelude::*};
@@ -174,6 +174,15 @@ pub mod pallet {
 	#[pallet::storage]
 	pub type UnlockQueueEnd<T: Config> = StorageValue<_, u128, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn get_token_value_threshold)]
+	pub type TokenValueThreshold<T: Config> =
+		StorageMap<_, Twox64Concat, CurrencyIdOf<T>, BalanceOf<T>, ValueQuery, BalanceMaxValue<T>>;
+	#[pallet::type_value]
+	pub fn BalanceMaxValue<T: Config>() -> BalanceOf<T> {
+		BalanceOf::<T>::max_value()
+	}
+
 	#[derive(
 		Eq, PartialEq, Clone, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo, Default,
 	)]
@@ -198,6 +207,7 @@ pub mod pallet {
 		FeeLockMetadataUpdated,
 		FeeLockUnlocked(T::AccountId, BalanceOf<T>),
 		FeeLocked { who: T::AccountId, lock_amount: BalanceOf<T>, total_locked: BalanceOf<T> },
+		TokenValueThresholdsUpdated,
 	}
 
 	#[pallet::error]
@@ -355,6 +365,32 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 
 			Ok(<Self as FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>>::unlock_fee(&who)?.into())
+		}
+
+		// The weight is calculated using MaxCuratedTokens so it is the worst case weight
+		#[pallet::call_index(2)]
+		#[transactional]
+		#[pallet::weight(T::DbWeight::get().writes(token_value_thresholds.len() as u64).saturating_add(Weight::from_parts(40_000_000, 0)))]
+		pub fn update_token_value_threshold(
+			origin: OriginFor<T>,
+			token_value_thresholds: Vec<(CurrencyIdOf<T>, Option<BalanceOf<T>>)>,
+		) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			for (token_id, maybe_set) in token_value_thresholds.iter() {
+				match maybe_set {
+					Some(v) => {
+						TokenValueThreshold::<T>::insert(token_id, v);
+					},
+					None => {
+						TokenValueThreshold::<T>::remove(token_id);
+					},
+				}
+			}
+
+			Pallet::<T>::deposit_event(Event::TokenValueThresholdsUpdated);
+
+			Ok(().into())
 		}
 	}
 }

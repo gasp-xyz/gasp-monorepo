@@ -540,10 +540,15 @@ pub mod config {
 		where
 			T: pallet_transaction_payment::Config
 				+ pallet_treasury::Config
-				+ pallet_fee_lock::Config<Tokens = C>,
+				+ pallet_fee_lock::Config<Tokens = C>
+				+ frame_system::Config<RuntimeCall = RuntimeCall, AccountId = sp_runtime::AccountId20>,
 			<T as frame_system::Config>::RuntimeCall:
 				Into<crate::CallType> + Dispatchable<PostInfo = PostDispatchInfo>,
-			C: MultiTokenCurrencyExtended<T::AccountId, Balance = Balance, CurrencyId = TokenId>,
+			C: MultiTokenCurrencyExtended<
+				sp_runtime::AccountId20,
+				Balance = Balance,
+				CurrencyId = TokenId,
+			>,
 			OU: OnMultiTokenUnbalanced<TokenId, NegativeImbalanceOf<C, T>>,
 			OCA: OnChargeTransaction<
 				T,
@@ -609,12 +614,72 @@ pub mod config {
 								InvalidTransaction::SwapPrevalidation.into(),
 							)
 						);
+						let check_amount = asset_amount_in
+							.max(<Runtime as pallet_market::Config>::MinSwapFee::get());
 						FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
 							who,
 							asset_id_in,
-							asset_amount_in
-								.max(<Runtime as pallet_market::Config>::MinSwapFee::get()),
+							check_amount,
 						)?;
+
+						let is_sell_swap = match *call {
+							RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+								..
+							}) => true,
+							_ => false,
+						};
+
+						let native_token_id = tokens::RxTokenId::get();
+						// This should only fail if the fee_lock_metadata is uninit
+						// And if it is uninit then we use fee_lock_amount as zero to trivially pass these checks here
+						// because later on fee lock metadata being uninit we are going to charge normal fees anyway
+						let fee_lock_amount = FeeLock::get_fee_lock_amount(who).unwrap_or_default();
+						let user_has_fee_lock_amount = match (asset_id_in, native_token_id) {
+							(a, b) if a == b => FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
+								who,
+								native_token_id,
+								check_amount.checked_add(fee_lock_amount).ok_or(
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									),
+								)?,
+							)
+							.is_ok(),
+							_ => FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
+								who,
+								native_token_id,
+								fee_lock_amount,
+							)
+							.is_ok(),
+						};
+						match (user_has_fee_lock_amount, is_sell_swap) {
+							(true, _) => {},
+							(false, true) => {
+								ensure!(
+									FeeLock::is_whitelisted(asset_id_in),
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+								ensure!(
+									FeeLock::get_token_value_threshold(asset_id_in) >=
+										asset_amount_in,
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+								ensure!(
+									native_token_id == asset_id_out,
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+							},
+							(false, false) =>
+								return Err(TransactionValidityError::Invalid(
+									InvalidTransaction::SwapPrevalidation.into(),
+								)),
+						}
 					},
 					_ => {},
 				};
