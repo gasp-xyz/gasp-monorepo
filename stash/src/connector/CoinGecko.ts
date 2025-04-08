@@ -9,7 +9,7 @@ import {
 const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
 
 export const getCoinInfo = async (
-  tokenId: string
+  tokenId: string,
 ): Promise<CoinGeckoCoinData> => {
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
@@ -27,7 +27,7 @@ export const getCoinInfo = async (
   if (coinDataResponse.status !== HttpStatus.OK)
     throw new HttpResponseException(
       'Coin Gecko returned unexpected status. Status: ' +
-        coinDataResponse.status
+        coinDataResponse.status,
     )
 
   return (await coinDataResponse.json()) as CoinGeckoCoinData
@@ -37,7 +37,7 @@ export const getCoinInfo = async (
 export const getCoinHistory = async (
   tokenId: string,
   days: number,
-  currency: string = 'usd'
+  currency: string = 'usd',
 ): Promise<CoinGeckoPrice[]> => {
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
@@ -60,7 +60,7 @@ export const getCoinHistory = async (
   if (coinDataResponse.status !== HttpStatus.OK)
     throw new HttpResponseException(
       'Coin Gecko returned unexpected status. Status: ' +
-        coinDataResponse.status
+        coinDataResponse.status,
     )
 
   const prices: CoinGeckoPrice[] = (await coinDataResponse.json()).prices.map(
@@ -69,7 +69,7 @@ export const getCoinHistory = async (
         timestamp: ts,
         price: new Decimal(p),
       } as CoinGeckoPrice
-    }
+    },
   )
 
   // last one is a price at a call time, not daily

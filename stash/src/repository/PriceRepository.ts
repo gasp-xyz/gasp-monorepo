@@ -25,7 +25,7 @@ export const save = async (
   poolId: number | string,
   id: number,
   prices: TimestampedAmount[],
-  latest: number
+  latest: number,
 ) => {
   const trx = timeseries.client.multi()
   const key = keyPrice(id)
@@ -42,7 +42,7 @@ export const save = async (
         'FIRST',
         'LABELS',
         'asset',
-        id
+        id,
       )
     }
 
@@ -60,7 +60,7 @@ export const get = async (
   id: number | string,
   from: number,
   to: number,
-  interval: number = 0
+  interval: number = 0,
 ): Promise<TimestampedAmount[]> => {
   const key = keyPrice(id)
   if (!(await redis.hasKey(timeseries, key))) {
@@ -79,7 +79,7 @@ export const get = async (
           interval,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
       : timeseries.client.call(
           'TS.RANGE',
@@ -88,7 +88,7 @@ export const get = async (
           to,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
   const stored = (await call) as [number, string][]
   return stored.map(([tsp, price]) => [tsp, new Decimal(price)])

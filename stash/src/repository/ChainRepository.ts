@@ -70,7 +70,7 @@ export const saveEvents = async (event: EventEntry) => {
 
 export const getEvents = async (
   latest: number,
-  to: number
+  to: number,
 ): Promise<EventEntry[]> => {
   const stored = await redis.client.zrangebyscore(
     KEY_EVENTS,
@@ -78,7 +78,7 @@ export const getEvents = async (
     to,
     'LIMIT',
     0,
-    LIMIT
+    LIMIT,
   )
   return stored
     .map((s) => JSON.parse(s))
@@ -109,7 +109,7 @@ export const savePools = async (pools: PoolEntry[]) => {
 export const getPools = async (
   poolId: number,
   from: number,
-  to: number = -1
+  to: number = -1,
 ): Promise<PoolEntry[]> => {
   const max = to === -1 ? '+inf' : to
   const stored = await redis.client.zrangebyscore(
@@ -118,7 +118,7 @@ export const getPools = async (
     max,
     'LIMIT',
     0,
-    LIMIT
+    LIMIT,
   )
   return stored
     .map((s) => JSON.parse(s))

@@ -5,7 +5,7 @@ import * as tokenPriceService from '../service/TokenPriceService.js'
 
 export const getTokenPrices = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*
     #swagger.tags = ['Token Prices']

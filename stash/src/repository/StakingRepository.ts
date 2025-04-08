@@ -86,7 +86,7 @@ export type ProofOfStakeReward = {
 }
 
 export const getTimeSeriesRedisData = async (
-  key: string
+  key: string,
 ): Promise<string[]> => {
   return await timeseries.client.zrangebyscore(key, '-inf', 'inf', 'WITHSCORES')
 }
@@ -94,7 +94,7 @@ export const getTimeSeriesRedisData = async (
 export const getDataByAddress = async <T>(
   key: string,
   address: string,
-  getAddress: (data: T) => string
+  getAddress: (data: T) => string,
 ): Promise<{ timestamp: string; data: T }[]> => {
   const data = await getTimeSeriesRedisData(key)
   const result: { timestamp: string; data: T }[] = []
@@ -113,7 +113,7 @@ export const getDataByAddress = async <T>(
 
 export function calculateDailyRewards(
   sessions: Session[],
-  date: string | undefined
+  date: string | undefined,
 ): DailyRewardResponse[] {
   const providedTimestamp = date ? convertDateToTimestamp(date) : 0
 
@@ -136,7 +136,7 @@ export function calculateDailyRewards(
       const latestSession = sessions.find(
         (item) =>
           item.data.liquidityTokenId === liquidityTokenId &&
-          item.data.timestamp === latestTimestamp
+          item.data.timestamp === latestTimestamp,
       )
 
       const dailyRewards = new BigNumber(latestSession.data.amountRewarded)
@@ -149,7 +149,7 @@ export function calculateDailyRewards(
         date: moment(latestSession.data.timestamp).format('DD/MM/YYYY'),
         dateFormat: 'DD/MM/YYYY',
       }
-    }
+    },
   )
 }
 
@@ -168,8 +168,8 @@ export function calculateMultipleCollatorApy(sessions: Session[]) {
           apy: calculateAnnualPercentageYield(
             new BigNumber(session.data.collatorAccountAmountStakedInMgx),
             new BigNumber(session.data.amountRewarded).multipliedBy(
-              new BigNumber('6')
-            )
+              new BigNumber('6'),
+            ),
           ).toString(),
           token: liquidityTokenId,
           collatorAddress: session.data.collatorAccount,
@@ -183,8 +183,8 @@ export function calculateMultipleCollatorApy(sessions: Session[]) {
         apy: calculateAnnualPercentageYield(
           new BigNumber(session.data.collatorAccountAmountStakedInMgx),
           new BigNumber(session.data.amountRewarded).multipliedBy(
-            new BigNumber('6')
-          )
+            new BigNumber('6'),
+          ),
         ).toString(),
         token: liquidityTokenId,
         collatorAddress: session.data.collatorAccount,
@@ -211,8 +211,8 @@ export function calculateSingleCollatorApy(sessions: Session[]) {
           apy: calculateAnnualPercentageYield(
             new BigNumber(session.data.collatorAccountAmountStakedInMgx),
             new BigNumber(session.data.amountRewarded).multipliedBy(
-              new BigNumber('6')
-            )
+              new BigNumber('6'),
+            ),
           ).toString(),
           collatorAddress: session.data.collatorAccount,
           date: moment(session.data.timestamp).format('DD/MM/YYYY'),
@@ -226,8 +226,8 @@ export function calculateSingleCollatorApy(sessions: Session[]) {
         apy: calculateAnnualPercentageYield(
           new BigNumber(session.data.collatorAccountAmountStakedInMgx),
           new BigNumber(session.data.amountRewarded).multipliedBy(
-            new BigNumber('6')
-          )
+            new BigNumber('6'),
+          ),
         ).toString(),
         collatorAddress: session.data.collatorAccount,
         date: moment(session.data.timestamp).format('DD/MM/YYYY'),
@@ -247,17 +247,20 @@ export function get24HoursAccountRewardsData(data: ProofOfStakeReward[]): {
   const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000
   return data
     .filter((entry) => parseInt(entry.timestamp) > twentyFourHoursAgo)
-    .reduce((groups, entry) => {
-      const liquidityTokenId = entry.data.liquidityTokenId
+    .reduce(
+      (groups, entry) => {
+        const liquidityTokenId = entry.data.liquidityTokenId
 
-      if (!groups[liquidityTokenId]) {
-        groups[liquidityTokenId] = []
-      }
+        if (!groups[liquidityTokenId]) {
+          groups[liquidityTokenId] = []
+        }
 
-      groups[liquidityTokenId].push(entry)
+        groups[liquidityTokenId].push(entry)
 
-      return groups
-    }, {} as { [key: string]: ProofOfStakeReward[] })
+        return groups
+      },
+      {} as { [key: string]: ProofOfStakeReward[] },
+    )
 }
 
 export function getMonthAccountRewardsData(data: ProofOfStakeReward[]): {
@@ -275,17 +278,20 @@ export function getMonthAccountRewardsData(data: ProofOfStakeReward[]): {
         entryTimestamp <= endDate.valueOf()
       )
     })
-    .reduce((groups, entry) => {
-      const liquidityTokenId = entry.data.liquidityTokenId
+    .reduce(
+      (groups, entry) => {
+        const liquidityTokenId = entry.data.liquidityTokenId
 
-      if (!groups[liquidityTokenId]) {
-        groups[liquidityTokenId] = []
-      }
+        if (!groups[liquidityTokenId]) {
+          groups[liquidityTokenId] = []
+        }
 
-      groups[liquidityTokenId].push(entry)
+        groups[liquidityTokenId].push(entry)
 
-      return groups
-    }, {} as { [key: string]: ProofOfStakeReward[] })
+        return groups
+      },
+      {} as { [key: string]: ProofOfStakeReward[] },
+    )
 }
 
 export function calculateClaimedRewards(data: {
@@ -299,7 +305,7 @@ export function calculateClaimedRewards(data: {
           new BigNumber(sum)
             .plus(new BigNumber(entry.data.amountClaimed))
             .toFixed(0),
-        '0'
+        '0',
       ),
     }
   })
@@ -313,19 +319,18 @@ export function calculateClaimedRewards(data: {
 export async function valuateLiquidityToken(
   apiAt: ApiDecoration<'promise'>,
   liquidityTokenId: string,
-  liquidityTokenAmount: BigNumber
+  liquidityTokenAmount: BigNumber,
 ) {
   const liquidityPool = await apiAt.query.xyk.liquidityPools(liquidityTokenId)
   const [firstTokenId, secondTokenId] = liquidityPool
     .unwrap()
     .map((num) => num.toString())
-  const [_, mgxTokenReserve] = await apiAt.query.xyk.pools([
+  const [, mgxTokenReserve] = await apiAt.query.xyk.pools([
     firstTokenId,
     secondTokenId,
   ])
-  const liquidityTokenReserve = await apiAt.query.tokens.totalIssuance(
-    liquidityTokenId
-  )
+  const liquidityTokenReserve =
+    await apiAt.query.tokens.totalIssuance(liquidityTokenId)
   return {
     liquidityTokenAmountInMgx: new BigNumber(mgxTokenReserve.toString())
       .multipliedBy(new BigNumber(2))
@@ -342,7 +347,7 @@ export async function valuateLiquidityToken(
  * */
 export async function getCandidate(
   apiAt: ApiDecoration<'promise'>,
-  event: FrameSystemEventRecord
+  event: FrameSystemEventRecord,
 ): Promise<ParachainStakingBond> {
   // We need to retrieve the pool of collator candidates,
   // each with their respective total backing stake at the current block hash
@@ -372,18 +377,18 @@ export function getCollatorEvents(eventsRecord: Vec<FrameSystemEventRecord>) {
     eventsRecord,
     (event) =>
       event.event.section === EVENT_SECTION &&
-      event.event.method === EVENT_METHOD
+      event.event.method === EVENT_METHOD,
   )
 }
 
 export function getLiquidStakingEvents(
-  eventsRecord: Vec<FrameSystemEventRecord>
+  eventsRecord: Vec<FrameSystemEventRecord>,
 ) {
   return _.filter(
     eventsRecord,
     (event) =>
       event.event.section === EVENT_SECTION_LIQUID_STAKING &&
-      event.event.method === EVENT_METHOD_LIQUID_STAKING
+      event.event.method === EVENT_METHOD_LIQUID_STAKING,
   )
 }
 

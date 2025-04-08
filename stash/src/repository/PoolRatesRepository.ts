@@ -26,7 +26,7 @@ export const getLatest = async (id: number) => {
 export const save = async (
   asset: Asset,
   rates: [TimestampedBaseTargetAmount[], TimestampedBaseTargetAmount[]],
-  latest: number
+  latest: number,
 ) => {
   let timeseriesData = []
   const trx = timeseries.client.multi()
@@ -71,7 +71,7 @@ const createTable = async (asset: Asset, trx: ChainableCommander) => {
         'DUPLICATE_POLICY',
         'FIRST',
         'LABELS',
-        ...label
+        ...label,
       )
     }
   }
@@ -82,7 +82,7 @@ export const get = async (
   target: number | string,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ): Promise<TimestampedAmount[]> => {
   const key = keyPair(base, target)
   if (!(await redis.hasKey(timeseries, key))) {
@@ -101,7 +101,7 @@ export const get = async (
           interval,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
       : timeseries.client.call(
           'TS.RANGE',
@@ -110,7 +110,7 @@ export const get = async (
           to,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
   const stored = (await call) as [number, string][]
   return stored.map(([tsp, price]) => [tsp, new Decimal(price)])

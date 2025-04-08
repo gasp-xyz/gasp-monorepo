@@ -12,14 +12,14 @@ export class RedisClient {
     console.log(
       `[${name}] Connecting to redis at ${host}:${port} ${
         pass ? 'with password' : 'without password'
-      }`
+      }`,
     )
 
     this.client = new IORedis({ host, port, password: pass })
 
     this.client.on('connect', () => console.log(`[${name}] Connected to Redis`))
     this.client.on('error', (err) =>
-      console.error(`[${name}] Redis connection error:`, err)
+      console.error(`[${name}] Redis connection error:`, err),
     )
     this.client.on('ready', () => console.log(`[${name}] Redis client ready`))
 
@@ -41,13 +41,13 @@ export const redis = new RedisClient(
   'main',
   process.env.REDIS_HOST,
   parseInt(process.env.REDIS_PORT),
-  process.env.REDIS_PASS
+  process.env.REDIS_PASS,
 )
 export const timeseries = new RedisClient(
   'timeseries',
   process.env.TIMESERIES_HOST,
   parseInt(process.env.TIMESERIES_PORT),
-  process.env.TIMESERIES_PASS
+  process.env.TIMESERIES_PASS,
 )
 
 export function getTimeseriesUrl(): string {

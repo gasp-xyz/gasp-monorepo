@@ -29,7 +29,7 @@ const processPrices = async (base: number) => {
     // both assets have prices already, we need to traverse twice with base as both
     if (pricedIn.includes(asset.pool[0]) && pricedIn.includes(asset.pool[1])) {
       logger.debug(
-        `PriceService: assets ${asset} has both base prices, traverse twice`
+        `PriceService: assets ${asset} has both base prices, traverse twice`,
       )
       const latest = await priceStore.getLatest(asset.id)
       await processAsset(asset.pool[0], asset, head)
@@ -42,11 +42,11 @@ const processPrices = async (base: number) => {
     const id = pricedIn.includes(asset.pool[0])
       ? asset.pool[1]
       : pricedIn.includes(asset.pool[1])
-      ? asset.pool[0]
-      : -1
+        ? asset.pool[0]
+        : -1
     if (id < 0) {
       logger.debug(
-        `PriceService: assets ${asset} has no base prices, save latest`
+        `PriceService: assets ${asset} has no base prices, save latest`,
       )
       await priceStore.saveLatest(asset.id, head)
       continue
@@ -60,7 +60,7 @@ const processPrices = async (base: number) => {
 const processAsset = async (id: number, asset: Asset, head: number) => {
   const base = asset.pool[0] === id ? asset.pool[1] : asset.pool[0]
   logger.info(
-    `PriceService: processing asset ${asset} with ${base} as base price`
+    `PriceService: processing asset ${asset} with ${base} as base price`,
   )
   let pools = []
   let processed = 0
@@ -68,7 +68,7 @@ const processAsset = async (id: number, asset: Asset, head: number) => {
     const from = await priceStore.getLatest(asset.id)
     pools = await chainStore.getPools(asset.id, from, head)
     logger.debug(
-      `PriceService: processing pool ${asset} in ${from}-${head} with ${pools.length} pools`
+      `PriceService: processing pool ${asset} in ${from}-${head} with ${pools.length} pools`,
     )
     processed += await processPools(asset, base, id, pools)
   } while (pools.length === chainStore.LIMIT)
@@ -80,14 +80,14 @@ const processPools = async (
   asset: Asset,
   base: number,
   id: number,
-  pools: PoolEntry[]
+  pools: PoolEntry[],
 ) => {
   if (pools.length === 0) {
     return 0
   }
   const basePrices = await getPrices(base, pools)
   logger.debug(
-    `PriceService: for ${asset} asset & base ${base} have ${basePrices.size} prices`
+    `PriceService: for ${asset} asset & base ${base} have ${basePrices.size} prices`,
   )
 
   let shouldFilter = false
@@ -126,7 +126,7 @@ const getPrices = async (id: number, pools: chainStore.PoolEntry[]) => {
 const getPrice = (
   id: number,
   timestamp: number,
-  prices: Map<number, Decimal>
+  prices: Map<number, Decimal>,
 ) => {
   let key = timestamp
   if (id === BASE_TOKEN) {
@@ -164,11 +164,11 @@ const prepareKusama = async () => {
     BASE_TOKEN,
     BASE_TOKEN,
     prices.map((p) => [p.timestamp, p.price.div(ETH_DECIMALS)]),
-    prices.length === 0 ? 0 : _.last(prices).timestamp
+    prices.length === 0 ? 0 : _.last(prices).timestamp,
   )
   logger.debug(
     `PriceService: fetched 'ethereum'
-     ${prices.length} prices`
+     ${prices.length} prices`,
   )
 }
 
@@ -179,7 +179,7 @@ const getAssets = async (base: number) => {
   while (stored.length > 0) {
     const [acc, next] = _.partition(
       stored,
-      (a) => ids.includes(a.pool[0]) || ids.includes(a.pool[1])
+      (a) => ids.includes(a.pool[0]) || ids.includes(a.pool[1]),
     )
     if (acc.length > 0) {
       assets.push(...acc)

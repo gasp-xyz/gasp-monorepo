@@ -1,5 +1,4 @@
 import { Decimal } from 'decimal.js'
-import { ChainableCommander } from 'ioredis'
 
 import { timeseries } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
@@ -17,7 +16,7 @@ export const get = async (
   isPool: boolean,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ): Promise<TimestampedAmount[]> => {
   const key = isPool ? keyPool(id) : keyAsset(id)
   if (!(await redis.hasKey(timeseries, key))) {
@@ -36,7 +35,7 @@ export const get = async (
           interval,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
       : timeseries.client.call(
           'TS.RANGE',
@@ -45,7 +44,7 @@ export const get = async (
           to,
           'LIMIT',
           0,
-          API_LIMIT
+          API_LIMIT,
         )
   const stored = (await call) as [number, string][]
   if (isPool) {

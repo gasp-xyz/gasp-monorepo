@@ -9,7 +9,7 @@ export const dailyReward = async (req: Request, res: Response) => {
     const { date } = dailyRewardDateSchema.validateSync(req.query)
     const dailyRewards = await stakingAprService.dailyRewards(
       req.params.collatorAddress,
-      date
+      date,
     )
     res.json(dailyRewards)
   } catch (e) {
