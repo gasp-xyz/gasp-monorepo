@@ -26,14 +26,14 @@ export const getPoolVolumeInUsd = async (
   poolId: string,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ) => await tradesStore.get(poolId, true, from, to, interval)
 
 export const getTokenVolumeInUsd = async (
   tokenId: string,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ) => await tradesStore.get(tokenId, false, from, to, interval)
 
 export const getTokenPrices = async (
@@ -41,31 +41,31 @@ export const getTokenPrices = async (
   tokenDecimals: number,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ) =>
   (await priceStore.get(tokenId, from, to, interval)).map(
     ([t, a]) =>
-      [t, a.mul(new Decimal(`1e${tokenDecimals}`))] as TimestampedAmount
+      [t, a.mul(new Decimal(`1e${tokenDecimals}`))] as TimestampedAmount,
   )
 
 export const getLiquidityPoolInUsd = async (
   poolId: string,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ) => await volumeStore.get(poolId, true, from, to, interval)
 
 export const getLiquidityTokenInUsd = async (
   tokenId: string,
   from: number,
   to: number,
-  interval: number
+  interval: number,
 ) => await volumeStore.get(tokenId, false, from, to, interval)
 
 export const calculatePrice = async (
   baseTokenReserve: BN,
   targetTokenReserve: BN,
-  decimals: number
+  decimals: number,
 ) => {
   return await MangataClient.rpc.calculateBuyPrice({
     inputReserve: targetTokenReserve,
@@ -76,10 +76,10 @@ export const calculatePrice = async (
 
 export const getTokenInfoBasedOnTheSymbol = (
   assetsInfo: MainTokens,
-  currencySymbol: string
+  currencySymbol: string,
 ) => {
   return Object.values(assetsInfo).filter(
-    (info) => info.symbol === currencySymbol
+    (info) => info.symbol === currencySymbol,
   )[0]
 }
 
@@ -94,14 +94,14 @@ export const poolsWithNonZeroIssuance = async (assetsInfo: MainTokens) => {
       filteredPools.map(async (info) => {
         const issuance = await MangataClient.query.getTotalIssuance(info.id)
         return { ...info, issuance }
-      })
+      }),
     )
   ).filter((pool) => !pool.issuance.isZero())
 }
 
 export const calculateVolumeForTheToken = (
   poolTradeVolumeInUsd: TimestampedAmount[],
-  tokenPrices: TimestampedAmount[]
+  tokenPrices: TimestampedAmount[],
 ) => {
   if (poolTradeVolumeInUsd.length === 0 || tokenPrices.length === 0)
     return new Decimal(0)
@@ -112,7 +112,7 @@ export const calculateVolumeForTheToken = (
 }
 
 export const calculateLiquidityInUsd = (
-  liquidityPoolInUsd: TimestampedAmount[]
+  liquidityPoolInUsd: TimestampedAmount[],
 ) => {
   if (liquidityPoolInUsd.length === 0) return new Decimal(0)
   return liquidityPoolInUsd.at(LAST_INDEX)[SECOND_ELEMENT_INDEX]

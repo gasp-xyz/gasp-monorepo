@@ -33,12 +33,12 @@ export class Metrics {
       const av = this.done / elapsed.asSeconds()
       const eta = moment.duration((this.total - this.done) / av, 'seconds')
       const completed = `completed: ${((this.done / this.total) * 100).toFixed(
-        2
+        2,
       )}% (${this.done}/${this.total})`
       logger.info(
         `${this.tag}: current: ${this.ticks / 60}b/s, average: ${av.toFixed(
-          2
-        )}, eta: ${this.eta(eta)}, ${completed}`
+          2,
+        )}, eta: ${this.eta(eta)}, ${completed}`,
       )
 
       this.ticks = 0

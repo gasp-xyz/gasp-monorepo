@@ -16,7 +16,7 @@ const loggingWinston = new LoggingWinston({
 const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.splat(),
-    winston.format.simple()
+    winston.format.simple(),
   ),
   level: 'debug',
   transports: [
