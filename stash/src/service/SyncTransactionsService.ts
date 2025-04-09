@@ -1,11 +1,11 @@
 import MangataClient from '../connector/MangataNode.js'
 import {
-  watchDepositAcceptedIntoQueue,
   processRequests,
+  watchDepositAcceptedIntoQueue,
   watchWithdrawalClosed,
 } from '../scraper/L1LogScraper.js'
-import logger from '../util/Logger.js'
 import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
+import logger from '../util/Logger.js'
 const ETH_CHAIN = 'Ethereum'
 const ARB_CHAIN = 'Arbitrum'
 const BASE_CHAIN = 'Base'
@@ -51,7 +51,7 @@ export const initService = async () => {
           ETH_CHAIN,
           process.env.CONTRACT_ADDRESS_ETH
         ).then(resolve)
-      }, 10000) // Delay of 10000 milliseconds (10 seconds) to allow past withdrawals to be started and confirmed first
+      }, 90000) // Delay of 90000 milliseconds (90 seconds) to allow past withdrawals to be started and confirmed first
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -62,7 +62,7 @@ export const initService = async () => {
           ARB_CHAIN,
           process.env.CONTRACT_ADDRESS_ARB
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -73,7 +73,7 @@ export const initService = async () => {
           BASE_CHAIN,
           process.env.CONTRACT_ADDRESS_BASE
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {

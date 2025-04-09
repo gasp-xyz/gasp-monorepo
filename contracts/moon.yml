@@ -1,9 +1,10 @@
 language: solidity
 type: application
+tags: ["solidity"]
 
 toolchain:
   node:
-    version: '22.14.0'
+    version: "22.14.0"
 
 fileGroups:
   sources:
@@ -15,8 +16,11 @@ fileGroups:
     - "script/**/*.sol"
     - "tools/**/*"
     - package.json
+    - yarn.lock
     - foundry.toml
     - remappings.txt
+    - slither.config.json
+    - requirements.txt
 
 env:
   SERVICE_NAME: contracts
@@ -26,21 +30,15 @@ env:
 tasks:
   build:
     command: "forge build"
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     outputs: ["out"]
 
   build-image-local:
     command: >
-      docker buildx build
-      --platform linux/amd64
-      --tag gaspxyz/gasp-contracts:local
-      --tag gaspxyz/gasp-contracts:localarb
-      --tag gaspxyz/gasp-contracts:localbase
-      --tag gaspxyz/gasp-contracts:localmonad
-      --tag gaspxyz/gasp-contracts:localmegaeth
-      --load
-      .
-    inputs: ["@globs(sources)", "Dockerfile"]
+      docker buildx build --platform linux/amd64 --tag gaspxyz/gasp-contracts:local --tag
+      gaspxyz/gasp-contracts:localarb --tag gaspxyz/gasp-contracts:localbase --tag
+      gaspxyz/gasp-contracts:localmonad --tag gaspxyz/gasp-contracts:localmegaeth --load .
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
 
   buildkit-build-and-push-image-digests:
     script: |
@@ -71,8 +69,8 @@ tasks:
       fi
 
       exit $BUILD_EXIT_CODE
-    inputs: ["@globs(sources)", "Dockerfile"]
-    outputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    inputs: ["@group(sources)", "@group(dockerBuildInputs)"]
+    outputs: ["${SERVICE_NAME}-buildkit-metadata.json"]
     options:
       outputStyle: buffer-only-failure
       cache: true
@@ -89,26 +87,26 @@ tasks:
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST}
 
       echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
-    deps: ['buildkit-build-and-push-image-digests']
-    inputs: ['${SERVICE_NAME}-buildkit-metadata.json']
+    deps: ["buildkit-build-and-push-image-digests"]
+    inputs: ["${SERVICE_NAME}-buildkit-metadata.json"]
     options:
       cache: false
 
   contracts-format:
     command: yarn run format
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-lint:
     command: yarn run lint
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-test:
     command: yarn run test
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
@@ -120,25 +118,25 @@ tasks:
       ../tests/integration/deploy-all-contracts-via-multistage-and-resume.sh
 
       yarn run test-integration
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-size:
     command: yarn run size
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-gas:
     command: yarn run gas
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
   contracts-coverage:
     command: yarn run cover
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       outputStyle: stream
 
@@ -161,7 +159,7 @@ tasks:
 
   release:
     command: yarn run release
-    inputs: ["@globs(sources)"]
+    inputs: ["@group(sources)"]
     options:
       cache: false
       runInCI: false

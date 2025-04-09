@@ -4,7 +4,7 @@ FROM node:${NODE_VERSION} AS build
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+RUN corepack enable && corepack prepare yarn@4.7.0 --activate
 
 # # Use bind mounts for package.json and yarn.lock, and cache mounts for yarn install
 # RUN --mount=type=bind,source=package.json,target=package.json \
