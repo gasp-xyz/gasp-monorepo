@@ -12,6 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@adraffy/ens-normalize@npm:^1.10.1":
+  version: 1.11.0
+  resolution: "@adraffy/ens-normalize@npm:1.11.0"
+  checksum: 10c0/5111d0f1a273468cb5661ed3cf46ee58de8f32f84e2ebc2365652e66c1ead82649df94c736804e2b9cfa831d30ef24e1cc3575d970dbda583416d3a98d8870a6
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.22.13":
   version: 7.26.2
   resolution: "@babel/code-frame@npm:7.26.2"
@@ -978,10 +985,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.8.1, @noble/curves@npm:^1.6.0, @noble/curves@npm:~1.8.1":
+  version: 1.8.1
+  resolution: "@noble/curves@npm:1.8.1"
+  dependencies:
+    "@noble/hashes": "npm:1.7.1"
+  checksum: 10c0/84902c7af93338373a95d833f77981113e81c48d4bec78f22f63f1f7fdd893bc1d3d7a3ee78f01b9a8ad3dec812a1232866bf2ccbeb2b1560492e5e7d690ab1f
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.4.0, @noble/hashes@npm:~1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 10c0/8c3f005ee72e7b8f9cff756dfae1241485187254e3f743873e22073d63906863df5d4f13d441b7530ea614b7a093f0d889309f28b59850f33b66cb26a779a4a5
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.7.1, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.7.1":
+  version: 1.7.1
+  resolution: "@noble/hashes@npm:1.7.1"
+  checksum: 10c0/2f8ec0338ccc92b576a0f5c16ab9c017a3a494062f1fbb569ae641c5e7eab32072f9081acaa96b5048c0898f972916c818ea63cbedda707886a4b5ffcfbf94e3
   languageName: node
   linkType: hard
 
@@ -2303,6 +2326,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:~1.2.2, @scure/base@npm:~1.2.4":
+  version: 1.2.4
+  resolution: "@scure/base@npm:1.2.4"
+  checksum: 10c0/469c8aee80d6d6973e1aac6184befa04568f1b4016e40c889025f4a721575db9c1ca0c2ead80613896cce929392740322a18da585a427f157157e797dc0a42a9
+  languageName: node
+  linkType: hard
+
 "@scure/bip32@npm:1.4.0":
   version: 1.4.0
   resolution: "@scure/bip32@npm:1.4.0"
@@ -2311,6 +2341,17 @@ __metadata:
     "@noble/hashes": "npm:~1.4.0"
     "@scure/base": "npm:~1.1.6"
   checksum: 10c0/6849690d49a3bf1d0ffde9452eb16ab83478c1bc0da7b914f873e2930cd5acf972ee81320e3df1963eb247cf57e76d2d975b5f97093d37c0e3f7326581bf41bd
+  languageName: node
+  linkType: hard
+
+"@scure/bip32@npm:1.6.2, @scure/bip32@npm:^1.5.0":
+  version: 1.6.2
+  resolution: "@scure/bip32@npm:1.6.2"
+  dependencies:
+    "@noble/curves": "npm:~1.8.1"
+    "@noble/hashes": "npm:~1.7.1"
+    "@scure/base": "npm:~1.2.2"
+  checksum: 10c0/a0abd62d1fe34b4d90b84feb25fa064ad452fd51be9fd7ea3dcd376059c0e8d08d4fe454099030f43fb91a1bee85cd955f093f221bbc522178919f779fbe565c
   languageName: node
   linkType: hard
 
@@ -2331,6 +2372,16 @@ __metadata:
     "@noble/hashes": "npm:~1.5.0"
     "@scure/base": "npm:~1.1.8"
   checksum: 10c0/dcdceeac348ed9c0f545c1a7ef8854ef62d6eb4e7b7aaafa4e2ef27f7e1c5744b0cd26292afd04e1ee59ae035b19abdd65174a444b8db8c238ccc662f6b90eac
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:1.5.4, @scure/bip39@npm:^1.4.0":
+  version: 1.5.4
+  resolution: "@scure/bip39@npm:1.5.4"
+  dependencies:
+    "@noble/hashes": "npm:~1.7.1"
+    "@scure/base": "npm:~1.2.4"
+  checksum: 10c0/0b398b8335b624c16dfb0d81b0e79f80f098bb98e327f1d68ace56636e0c56cc09a240ed3ba9c1187573758242ade7000260d65c15d3a6bcd95ac9cb284b450a
   languageName: node
   linkType: hard
 
@@ -4008,6 +4059,21 @@ __metadata:
     zod:
       optional: true
   checksum: 10c0/dc954877fba19e2b7a70f1025807d69fa5aabec8bd58ce94e68d1a5ec1697fff3fe5214b4392508db7191762150f19a2396cf66ffb1d3ba8c1f37a89fd25e598
+  languageName: node
+  linkType: hard
+
+"abitype@npm:1.0.8, abitype@npm:^1.0.6":
+  version: 1.0.8
+  resolution: "abitype@npm:1.0.8"
+  peerDependencies:
+    typescript: ">=5.0.4"
+    zod: ^3 >=3.22.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/d3393f32898c1f0f6da4eed2561da6830dcd0d5129a160fae9517214236ee6a6c8e5a0380b8b960c5bc1b949320bcbd015ec7f38b5d7444f8f2b854a1b5dd754
   languageName: node
   linkType: hard
 
@@ -7380,37 +7446,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gasp-sdk@npm:0.0.2-eth-rollup-develop.79":
-  version: 0.0.2-eth-rollup-develop.79
-  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.79"
+"gasp-sdk@npm:0.0.2-eth-rollup-develop.223":
+  version: 0.0.2-eth-rollup-develop.223
+  resolution: "gasp-sdk@npm:0.0.2-eth-rollup-develop.223"
   dependencies:
     big.js: "npm:6.2.1"
-    gasp-type-definitions: "npm:0.0.2-eth-rollup-develop.81"
+    gasp-type-definitions: "npm:0.0.2-eth-rollup-develop.227"
     tslib: "npm:^2.3.0"
     tslog: "npm:4.8.2"
     viem: "npm:^2.17.4"
     wagmi: "npm:^2.10.10"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/b2b9d26b0a2f4008889f385e2681f544fdeff701f95a561a7a3ed480e904017de4af2091f9a51492420023e1b12d10f39405f077718684bc7fff6c7dcf9dc0b1
+  checksum: 10c0/4ce12e45891ee6e8a84dd8dd4f1c258d3d461b3e539232bd3a7bde2c390b5b02529f14d8974e5bdd15e5d8a4a7d5da5906cc055007c7001fb40ad1186e91e54a
   languageName: node
   linkType: hard
 
-"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81":
-  version: 0.0.2-eth-rollup-develop.81
-  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.81"
+"gasp-type-definitions@npm:0.0.2-eth-rollup-develop.227":
+  version: 0.0.2-eth-rollup-develop.227
+  resolution: "gasp-type-definitions@npm:0.0.2-eth-rollup-develop.227"
   peerDependencies:
     "@polkadot/types": ^11.1.1
-  checksum: 10c0/42da12b58634ae00692699a0a83bf0694a4aca895a6705645633395882701ec05dd7b46690bab8b22c763110d7478cf62a2937e54abd7e645d1e4be1904ed904
+  checksum: 10c0/e8fe5470098ae6f41d8bdd48702054cf317c2049843fcfd659043eff12964fce3c28fa5eaada9413a2209f10c04161d35bc5fab80285fc0a3e819078ea9c463a
   languageName: node
   linkType: hard
 
-"gasp-types@npm:0.0.2-eth-rollup-develop.78":
-  version: 0.0.2-eth-rollup-develop.78
-  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.78"
+"gasp-types@npm:0.0.2-eth-rollup-develop.223":
+  version: 0.0.2-eth-rollup-develop.223
+  resolution: "gasp-types@npm:0.0.2-eth-rollup-develop.223"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/2a27196aedfce50902b9e2d931665bb295a06b0a18b99e2872d7e1780c004a8cb0bc3a989a152bd4550082e52be762a1205114482e8d6bf88b750ee9c8af0239
+  checksum: 10c0/7c270eb5990be736236d077bc40fd3abc8823a2ac510899746c871351ab1da0c86f8a1ae66a3c8a38ddf93c1d01fad7aaeca33311a933a732c1ac7eae6d2efb6
   languageName: node
   linkType: hard
 
@@ -8753,6 +8819,15 @@ __metadata:
   peerDependencies:
     ws: "*"
   checksum: 10c0/46f43b07edcf148acba735ddfc6ed985e1e124446043ea32b71023e67671e46619c8818eda8c34a9ac91cb37c475af12a3aeeee676a88a0aceb5d67a3082313f
+  languageName: node
+  linkType: hard
+
+"isows@npm:1.0.6":
+  version: 1.0.6
+  resolution: "isows@npm:1.0.6"
+  peerDependencies:
+    ws: "*"
+  checksum: 10c0/f89338f63ce2f497d6cd0f86e42c634209328ebb43b3bdfdc85d8f1589ee75f02b7e6d9e1ba274101d0f6f513b1b8cbe6985e6542b4aaa1f0c5fd50d9c1be95c
   languageName: node
   linkType: hard
 
@@ -10881,6 +10956,26 @@ __metadata:
     type-check: "npm:^0.4.0"
     word-wrap: "npm:^1.2.5"
   checksum: 10c0/4afb687a059ee65b61df74dfe87d8d6815cd6883cb8b3d5883a910df72d0f5d029821f37025e4bccf4048873dbdb09acc6d303d27b8f76b1a80dd5a7d5334675
+  languageName: node
+  linkType: hard
+
+"ox@npm:0.6.9":
+  version: 0.6.9
+  resolution: "ox@npm:0.6.9"
+  dependencies:
+    "@adraffy/ens-normalize": "npm:^1.10.1"
+    "@noble/curves": "npm:^1.6.0"
+    "@noble/hashes": "npm:^1.5.0"
+    "@scure/bip32": "npm:^1.5.0"
+    "@scure/bip39": "npm:^1.4.0"
+    abitype: "npm:^1.0.6"
+    eventemitter3: "npm:5.0.1"
+  peerDependencies:
+    typescript: ">=5.4.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/02a7ea9795eaac0a7a672e983094f62ae6f19b7d0c786e6d7ef4584683faf535b5b133e42452dd3abb77115382e16b2cb5c0f629d5a0f2b80832c47756e0ecd1
   languageName: node
   linkType: hard
 
@@ -13091,8 +13186,8 @@ __metadata:
     eslint-plugin-simple-import-sort: "npm:^12.1.1"
     express: "npm:^4.19.2"
     express-validator: "npm:6.14.2"
-    gasp-sdk: "npm:0.0.2-eth-rollup-develop.79"
-    gasp-types: "npm:0.0.2-eth-rollup-develop.78"
+    gasp-sdk: "npm:0.0.2-eth-rollup-develop.223"
+    gasp-types: "npm:0.0.2-eth-rollup-develop.223"
     husky: "npm:^8.0.3"
     ioredis: "npm:^5.3.0"
     joi: "npm:^17.10.1"
@@ -13118,7 +13213,7 @@ __metadata:
     testcontainers: "npm:^9.11.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:5.0.4"
-    viem: "npm:^2.18.6"
+    viem: "npm:^2.23.9"
     vite: "npm:^4.2.1"
     vitest: "npm:^0.29.7"
     winston: "npm:3.8.2"
@@ -14468,7 +14563,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^2.1.1, viem@npm:^2.17.4, viem@npm:^2.18.6":
+"viem@npm:^2.1.1, viem@npm:^2.17.4":
   version: 2.21.3
   resolution: "viem@npm:2.21.3"
   dependencies:
@@ -14487,6 +14582,27 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/b0cbc03da740ecd090955f2a4d4ef270071274617eeab01bc2505682ab128706311d0c0045aefc9861c13be99ccb43f14dae21a610d2ced224e1972e92778117
+  languageName: node
+  linkType: hard
+
+"viem@npm:^2.23.9":
+  version: 2.26.2
+  resolution: "viem@npm:2.26.2"
+  dependencies:
+    "@noble/curves": "npm:1.8.1"
+    "@noble/hashes": "npm:1.7.1"
+    "@scure/bip32": "npm:1.6.2"
+    "@scure/bip39": "npm:1.5.4"
+    abitype: "npm:1.0.8"
+    isows: "npm:1.0.6"
+    ox: "npm:0.6.9"
+    ws: "npm:8.18.1"
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/6dbbf38e590475cc9f249cab5edf5bf175ba7bdaf41cb5d5d3c52f809ae0d859034ba10e8a321de7910918cb7481eea689eefefc1a5c49d5e82e7db282155ef6
   languageName: node
   linkType: hard
 
@@ -14883,6 +14999,21 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/f4a49064afae4500be772abdc2211c8518f39e1c959640457dcee15d4488628620625c783902a52af2dd02f68558da2868fd06e6fd0e67ebcd09e6881b1b5bfe
+  languageName: node
+  linkType: hard
+
+"ws@npm:8.18.1":
+  version: 8.18.1
+  resolution: "ws@npm:8.18.1"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/e498965d6938c63058c4310ffb6967f07d4fa06789d3364829028af380d299fe05762961742971c764973dce3d1f6a2633fe8b2d9410c9b52e534b4b882a99fa
   languageName: node
   linkType: hard
 
