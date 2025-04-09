@@ -47,8 +47,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
-      - run: yarn install --mode=update-lockfile
-      - run: sops exec-env frontend.enc.env 'yarn install'
+      - run: yarn install --immutable
       - run: sops exec-env frontend.enc.env 'yarn run build'
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
@@ -72,7 +71,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
-      - run: yarn install --mode=update-lockfile
+      - run: yarn install --immutable
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
 
       - name: Deploy to Google App Engine
@@ -101,8 +100,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
-      - run: yarn install --mode=update-lockfile
-      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn install'
+      - run: yarn install --immutable
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
 
       - name: Deploy to Google App Engine
@@ -131,8 +129,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
-      - run: yarn install --mode=update-lockfile
-      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn install'
+      - run: yarn install --immutable
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
 
       - name: Deploy to Google App Engine
@@ -161,8 +158,7 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - uses: mdgreenwald/mozilla-sops-action@v1.6.0
 
-      - run: yarn install --mode=update-lockfile
-      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn install'
+      - run: yarn install --immutable
       - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
 
       - name: Deploy to Google App Engine

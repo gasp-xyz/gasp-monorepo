@@ -118,7 +118,7 @@
     "swagger-autogen": "latest",
     "testcontainers": "^9.11.0",
     "ts-node": "^10.9.2",
-    "typescript": "5.0.4",
+    "typescript": "5.4.2",
     "vite": "^4.2.1",
     "vitest": "^0.29.7"
   },
