@@ -36,11 +36,11 @@ export const initService = async () => {
       process.env.CONTRACT_ADDRESS_BASE
     ),
     watchDepositAcceptedIntoQueue(
-        api,
-        process.env.SONIC_CHAIN_URL,
-        CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
-        SONIC_CHAIN,
-        process.env.CONTRACT_ADDRESS_SONIC
+      api,
+      process.env.SONIC_CHAIN_URL,
+      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
+      SONIC_CHAIN,
+      process.env.CONTRACT_ADDRESS_SONIC
     ),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -78,13 +78,13 @@ export const initService = async () => {
     new Promise((resolve) => {
       setTimeout(() => {
         watchWithdrawalClosed(
-            api,
-            process.env.SONIC_CHAIN_URL,
-            CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
-            SONIC_CHAIN,
-            process.env.CONTRACT_ADDRESS_SONIC
+          api,
+          process.env.SONIC_CHAIN_URL,
+          CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
+          SONIC_CHAIN,
+          process.env.CONTRACT_ADDRESS_SONIC
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
