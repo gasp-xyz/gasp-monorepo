@@ -479,3 +479,4 @@ sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch 
 # orml-asset-registry = { path = "../../open-runtime-module-library/asset-registry", default-features = false }
 # orml-traits = { path = "../../open-runtime-module-library/traits", default-features = false }
 # orml-utilities = { path = "../../open-runtime-module-library/utilities", default-features = false }
+
