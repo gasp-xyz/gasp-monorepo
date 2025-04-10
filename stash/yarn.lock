@@ -3215,13 +3215,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint@npm:8.4.6":
-  version: 8.4.6
-  resolution: "@types/eslint@npm:8.4.6"
+"@types/eslint@npm:^8.56.12":
+  version: 8.56.12
+  resolution: "@types/eslint@npm:8.56.12"
   dependencies:
     "@types/estree": "npm:*"
     "@types/json-schema": "npm:*"
-  checksum: 10c0/0f11bc8623ec4238ad999d7a1d05d57e28c962c0b127b3e632b9f9ba72dc882f45aa84191c6b4e19db65d4f31ee46841eea6b44cad91e08ff8dfb69da4ee4b88
+  checksum: 10c0/e4ca426abe9d55f82b69a3250bec78b6d340ad1e567f91c97ecc59d3b2d6a1d8494955ac62ad0ea14b97519db580611c02be8277cbea370bdfb0f96aa2910504
   languageName: node
   linkType: hard
 
@@ -13300,7 +13300,7 @@ __metadata:
     "@types/concurrently": "npm:6.4.0"
     "@types/cors": "npm:^2.8.13"
     "@types/errorhandler": "npm:1.5.0"
-    "@types/eslint": "npm:8.4.6"
+    "@types/eslint": "npm:^8.56.12"
     "@types/express": "npm:4.17.14"
     "@types/ioredis": "npm:^4.28.8"
     "@types/lodash": "npm:^4"
