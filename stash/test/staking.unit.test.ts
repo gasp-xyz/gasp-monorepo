@@ -90,12 +90,12 @@ describe('[Staking]', () => {
   it('should mock the apy endpoint method', async () => {
     const expectedResponse: ResponseAPY[] = [
       {
-        apy: '62.027726047981274135',
-        token: '5',
-        date: '16/08/2023',
+        apy: '212.550402589504005115',
+        token: '0',
+        date: '19/11/2024',
         collatorAddress: '0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac',
         dateFormat: 'DD/MM/YYYY',
-        timestamp: '1692208122954',
+        timestamp: '1732018266000',
       },
     ]
     const results = await apy('0xf24ff3a9cf04c71dbc94d0b566f7a27b94566cac')
@@ -105,10 +105,10 @@ describe('[Staking]', () => {
   it('should mock the daily rewards endpoint method', async () => {
     const expectedResponse: DailyRewardResponse[] = [
       {
-        tokenId: '5',
-        dailyRewards: '17924667451226017462350',
-        timestamp: 1692208122954,
-        date: '16/08/2023',
+        tokenId: '0',
+        dailyRewards: '582330180078676136073516',
+        timestamp: 1732018266000,
+        date: '19/11/2024',
         dateFormat: 'DD/MM/YYYY',
       },
     ]
