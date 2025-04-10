@@ -25,4 +25,5 @@ export const CONFIG_TO_CHAIN = new Map<string, Chain>([
   ['frontend-arbitrum', localhost],
   ['frontend-ethereum', localhost],
   ['frontend-base', localhost],
+  ['frontend-sonic', localhost],
 ])
