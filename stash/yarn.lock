@@ -2869,9 +2869,9 @@ __metadata:
   linkType: hard
 
 "@sigstore/protobuf-specs@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "@sigstore/protobuf-specs@npm:0.4.0"
-  checksum: 10c0/5b9e074ad132b977050cbd9431c09ea88b21af266dae91dda8d51e29c7b295e73e3be255c10d68874259326229dde1805dd1f5ff29082d2f3d32a932809816eb
+  version: 0.4.1
+  resolution: "@sigstore/protobuf-specs@npm:0.4.1"
+  checksum: 10c0/8de75bc84f307b7d7bf4fa265f89a8bfa717d96e091be29ee9be1ffd6036b81355a349955e5036b86570d37f2b30b18a68a43f5e40bd958bd4128aa6bb39a3f3
   languageName: node
   linkType: hard
 
@@ -4156,9 +4156,9 @@ __metadata:
   linkType: hard
 
 "abbrev@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "abbrev@npm:3.0.0"
-  checksum: 10c0/049704186396f571650eb7b22ed3627b77a5aedf98bb83caf2eac81ca2a3e25e795394b0464cfb2d6076df3db6a5312139eac5b6a126ca296ac53c5008069c28
+  version: 3.0.1
+  resolution: "abbrev@npm:3.0.1"
+  checksum: 10c0/21ba8f574ea57a3106d6d35623f2c4a9111d9ee3e9a5be47baed46ec2457d2eac46e07a5c4a60186f88cb98abbe3e24f2d4cca70bc2b12f1692523e2209a9ccf
   languageName: node
   linkType: hard
 
@@ -6536,13 +6536,13 @@ __metadata:
   linkType: hard
 
 "eslint-config-prettier@npm:^10.1.1":
-  version: 10.1.1
-  resolution: "eslint-config-prettier@npm:10.1.1"
+  version: 10.1.2
+  resolution: "eslint-config-prettier@npm:10.1.2"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 10c0/3dbfdf6495dd62e2e1644ea9e8e978100dabcd8740fd264df1222d130001a1e8de05d6ed6c67d3a60727386a07507f067d1ca79af6d546910414beab19e7966e
+  checksum: 10c0/c22c8e29193cc8fd70becf1c2dd072513f2b3004a175c2a49404c79d1745ba4dc0edc2afd00d16b0e26d24f95813a0469e7445a25104aec218f6d84cdb1697e9
   languageName: node
   linkType: hard
 
@@ -13298,11 +13298,11 @@ __metadata:
   linkType: hard
 
 "swagger-ui-dist@npm:>=5.0.0":
-  version: 5.20.7
-  resolution: "swagger-ui-dist@npm:5.20.7"
+  version: 5.20.8
+  resolution: "swagger-ui-dist@npm:5.20.8"
   dependencies:
     "@scarf/scarf": "npm:=1.4.0"
-  checksum: 10c0/4048c304144772e01bd06078652942b022aba884aca9adc7c7ecfe18ce3c30671ebf12a727e6089117fe7df230cdfc2ee5a2898141e1e66febf4fb187df0aebf
+  checksum: 10c0/5511630bdb3680c3d79d663ab9d139f4a1b5b467ee4e0ee266786c50a7e1091b507529d4c8a45df3764509d35a3bc01753dada3cd82c90b8c27e8132955bbcb2
   languageName: node
   linkType: hard
 
