@@ -100,7 +100,7 @@ const getBalances = async (api: ApiDecoration<'promise'>, address: string) => {
     (await api.query.tokens.accounts.entries(address)).map(([key, value]) => {
       return [
         key.args[1].toString(),
-        value.free.toBn().add(value.reserved.toBn()),
+        new BN(value.free.toString()).add(new BN(value.reserved.toString())),
       ]
     }),
   )

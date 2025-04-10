@@ -7,7 +7,7 @@ chai.should()
 describe.skip('Integration Test using Test Containers', function () {
   let redisClientTs
   let container
-  let timeseriesContainer
+  let redisContainer
 
   beforeAll(async () => {
     //perhaps we should pull this separatetdly, its a 2GB image. `docker pull p1k1m4n/stash:1`
@@ -20,18 +20,10 @@ describe.skip('Integration Test using Test Containers', function () {
       .withNetworkMode('host')
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
-    timeseriesContainer = await new GenericContainer('redis/redis-stack:latest')
-      .withExposedPorts({ container: 6379, host: 6380 })
-      .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-      .start()
 
     process.env.REDIS_HOST = container.getHost()
     process.env.REDIS_PORT = '6379'
     process.env.REDIS_PASS = ''
-
-    process.env.TIMESERIES_HOST = timeseriesContainer.getHost()
-    process.env.TIMESERIES_PORT = '6380'
-    process.env.TIMESERIES_PASS = ''
 
     vi.mock('../src/repository/ChainRepository', async () => {
       const actual = await vi.importActual('../src/repository/ChainRepository')
@@ -76,7 +68,7 @@ describe.skip('Integration Test using Test Containers', function () {
 
     redisClientTs = new IORedis({
       port: 6380,
-      host: timeseriesContainer.getHost(),
+      host: redisContainer.getHost(),
     })
     const res = (await redisClientTs.call(
       'TS.RANGE',
