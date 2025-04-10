@@ -103,15 +103,7 @@ export const get = async (
           0,
           API_LIMIT,
         )
-      : redis.client.call(
-          'TS.RANGE',
-          key,
-          start,
-          to,
-          'LIMIT',
-          0,
-          API_LIMIT,
-        )
+      : redis.client.call('TS.RANGE', key, start, to, 'LIMIT', 0, API_LIMIT)
   const stored = (await call) as [number, string][]
   return stored.map(([tsp, price]) => [tsp, new Decimal(price)])
 }

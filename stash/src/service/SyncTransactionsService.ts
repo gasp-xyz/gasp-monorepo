@@ -40,7 +40,7 @@ export const initService = async () => {
       process.env.SONIC_CHAIN_URL,
       CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
       SONIC_CHAIN,
-      process.env.CONTRACT_ADDRESS_SONIC
+      process.env.CONTRACT_ADDRESS_SONIC,
     ),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -82,7 +82,7 @@ export const initService = async () => {
           process.env.SONIC_CHAIN_URL,
           CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
           SONIC_CHAIN,
-          process.env.CONTRACT_ADDRESS_SONIC
+          process.env.CONTRACT_ADDRESS_SONIC,
         ).then(resolve)
       }, 90000)
     }),

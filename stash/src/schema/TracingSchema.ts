@@ -18,7 +18,7 @@ export const startTracingSchema = yup.object().shape({
     .required('chain is required')
     .oneOf(
       ['Ethereum', 'Arbitrum', 'Base', 'Sonic'],
-      'network must be either "Ethereum", "Arbitrum", "Base" or "Sonic"'
+      'network must be either "Ethereum", "Arbitrum", "Base" or "Sonic"',
     ),
   amount: yup.string().required('amount is required'),
   asset_chainId: yup

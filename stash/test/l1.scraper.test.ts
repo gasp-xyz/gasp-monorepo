@@ -76,7 +76,7 @@ describe('L1LogScraper', () => {
       'http://chain.url',
       holesky,
       'Ethereum',
-      '0x123'
+      '0x123',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -201,7 +201,7 @@ describe('L1LogScraper', () => {
       await timeseries.client.hset(
         `transactions_scanned:withdrawal:Ethereum`,
         'lastBlock',
-        100
+        100,
       )
     })
 
@@ -210,7 +210,7 @@ describe('L1LogScraper', () => {
       'http://chain.url',
       holesky,
       'Ethereum',
-      '0x789'
+      '0x789',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -221,7 +221,7 @@ describe('L1LogScraper', () => {
         requestId: 1,
         txHash: '0x789',
         status: 'Ferried',
-      })
+      }),
     )
     expect(timeseries.client.hset).toHaveBeenCalled()
   }, 10000)

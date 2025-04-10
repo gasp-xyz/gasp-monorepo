@@ -220,12 +220,7 @@ export const processDataForVolumeHistory = async (
         `Fetched volume for asset with id ${assetOut}, value from the database is: ${assetOutVolumeValue}`,
       )
       const newAssetOutVolume = assetOutVolumeValue + (volumeOutUSD as number)
-      redis.client.call(
-        'TS.ADD',
-        assetOutVolumeKey,
-        '*',
-        newAssetOutVolume,
-      )
+      redis.client.call('TS.ADD', assetOutVolumeKey, '*', newAssetOutVolume)
       logger.info(
         `Formula for assetId ${assetOut} new volume is =  ${assetOutVolumeValue} + ${Number(
           volumeOutUSD,

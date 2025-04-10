@@ -164,7 +164,7 @@ export const watchWithdrawalClosed = async (
             .returnFirst()
           logger.info(
             'Existing withdrawal found to be updated with event WithdrawalFerried:',
-            existingTransaction
+            existingTransaction,
           )
           if (existingTransaction) {
             existingTransaction.status = FERRIED_STATUS
@@ -197,7 +197,7 @@ export const watchWithdrawalClosed = async (
             .returnFirst()
           logger.info(
             'Existing withdrawal found to be updated:',
-            existingTransaction
+            existingTransaction,
           )
           if (existingTransaction) {
             existingTransaction.status = PROCESSED_STATUS
