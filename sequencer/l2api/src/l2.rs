@@ -1,13 +1,16 @@
 use futures::future::join_all;
+use futures::FutureExt;
+use gasp_bindings::api::utility::calls::types::Batch;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 
 use hex::encode as hex_encode;
 
-use crate::types::Finalization;
+use crate::types::{BatchId, BatchInfo, Finalization};
 use crate::L2Error;
 use futures::StreamExt;
 use primitive_types::H256;
@@ -428,6 +431,26 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(level = "trace", skip(self), ret)]
+    async fn get_merkle_root(
+        &self,
+        range: (u128, u128),
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<H256, L2Error> {
+        let chain: crate::types::subxt::Chain = chain.into();
+        let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
+            .get_merkle_root(chain, range);
+
+        Ok(self
+            .client
+            .runtime_api()
+            .at_latest()
+            .await?
+            .call(call)
+            .await?)
+    }
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
     async fn get_merkle_proof(
         &self,
         request_id: u128,
@@ -452,6 +475,91 @@ impl L2Interface for Gasp {
         });
 
         Ok(proof)
+    }
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
+    async fn get_latest_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(BatchId, (u128, u128))>, L2Error> {
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_requests_batch_last();
+        let chain: crate::types::subxt::Chain = chain.into();
+        let last_batch = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+
+        Ok(last_batch
+            .iter()
+            .find(|(c, _)| *c == chain)
+            .map(|(_m, (_block, batch_id, range))| {
+                (*batch_id as u128, (range.0 as u128, range.1 as u128))
+            }))
+    }
+
+    async fn get_batch_range(
+        &self,
+        batch_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(u128, u128)>, L2Error> {
+        let gasp_chain: crate::types::subxt::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_requests_batch(gasp_chain, batch_id);
+
+        if let Some((_, range, _)) = self.client.storage().at(at).fetch(&storage).await? {
+            Ok(Some(range))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn bisect_find_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<BatchInfo>, L2Error> {
+        if let Some((batch_id, range)) = self.get_latest_batch(request_id, chain, at).await? {
+            let lastest_request_id = range.1;
+            if request_id > lastest_request_id {
+                Ok(None)
+            } else {
+                let left = 1u128;
+                let right = batch_id;
+                let mut mid = (left + right) / 2;
+                loop {
+                    let (range_start, range_end) = self
+                        .get_batch_range(mid, chain, at)
+                        .await?
+                        .ok_or(L2Error::MissingBatch(mid))?;
+                    if request_id >= range_start && request_id <= range_end {
+                        let merkle_root = self.get_merkle_root((range_start, range_end), chain, at).await?;
+                        break Ok(Some(BatchInfo {
+                            batch_id,
+                            range,
+                            merkle_root: todo!(),
+                        }));
+                    } else if request_id > range_end {
+                        mid = (mid + right) / 2;
+                    } else if request_id < range_start {
+                        mid = (mid + left) / 2;
+                    } else {
+                        break Ok(None);
+                    }
+                }
+            }
+        } else {
+            Ok(None)
+        }
     }
 
     #[tracing::instrument(skip(self))]

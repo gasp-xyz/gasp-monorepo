@@ -62,6 +62,8 @@ pub enum L1Error {
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
+// pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u128, u128), L1Error>> + Send + 'static>>;
+
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
@@ -88,7 +90,7 @@ pub trait L1Interface {
     async fn close_withdrawal(
         &self,
         withdrawal: gasp_types::Withdrawal,
-        cerkle_root: H256,
+        merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
 }
