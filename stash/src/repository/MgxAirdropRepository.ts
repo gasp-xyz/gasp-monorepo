@@ -1,6 +1,7 @@
 import { Client } from 'redis-om'
-import { mgxAirdropSchema } from '../model/MgxAirdrop.js'
+
 import { getTimeseriesUrl } from '../connector/RedisConnector.js'
+import { mgxAirdropSchema } from '../model/MgxAirdrop.js'
 import logger from '../util/Logger.js'
 
 const client = new Client()

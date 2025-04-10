@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { describe, expect, it } from 'vitest'
+ 
 import supertest from 'supertest'
+import { describe, expect, it } from 'vitest'
+
 import app from '../../src/app'
 import { MAX_DAYS, MAX_INTERVAL } from './utils'
 
