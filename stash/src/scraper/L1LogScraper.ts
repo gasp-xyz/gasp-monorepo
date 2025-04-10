@@ -157,8 +157,6 @@ export const watchWithdrawalClosed = async (
             .equals(withdrawalHash)
             .and('type')
             .equals('withdrawal')
-            .and('status')
-            .equals(WITHDRAWAL_BATCHED_FOR_L1)
             .and('chain')
             .equals(chainName)
             .returnFirst()
