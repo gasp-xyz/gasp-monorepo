@@ -190,10 +190,10 @@ describe('volume history events', () => {
     )
     const poolId = 6
     const key = `trades:pool:${poolId}`
-    const [timestamp, value] = (await redis.client.call(
-      'TS.GET',
-      key,
-    )) as [string, string]
+    const [timestamp, value] = (await redis.client.call('TS.GET', key)) as [
+      string,
+      string,
+    ]
     console.log(`Timestamp: ${timestamp}, Value: ${value}`)
     expect(logger.info).toHaveBeenNthCalledWith(
       3,
