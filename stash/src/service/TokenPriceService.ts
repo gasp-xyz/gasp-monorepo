@@ -89,7 +89,7 @@ async function getCoingeckoPrice(chainId: any, contractAddress: any) {
     logger.error(
       'Coin Gecko returned unexpected status. Status: ' +
         coinPriceResponse.status +
-        coinPriceResponse.statusText
+        coinPriceResponse.statusText,
     )
     return null
   }
@@ -104,7 +104,7 @@ async function getPoolPrice(tokenId: any) {
     if (currentPrice !== null && parseFloat(currentPrice) !== 0) {
       logger.info(
         `Price found in price discovery for tokenId ${tokenId}:`,
-        currentPrice
+        currentPrice,
       )
       return currentPrice
     }
@@ -113,7 +113,7 @@ async function getPoolPrice(tokenId: any) {
   }
   try {
     logger.info(
-      `Price discovery is 0 for tokenId ${tokenId}, calling price history`
+      `Price discovery is 0 for tokenId ${tokenId}, calling price history`,
     )
     const priceHistoryData = await priceDiscoveryService.priceHistory(tokenId)
     return priceHistoryData.prices.length > 0
@@ -125,7 +125,7 @@ async function getPoolPrice(tokenId: any) {
     logger.error(
       'Price history did not return the price for tokenId:',
       tokenId,
-      error
+      error,
     )
     return undefined
   }
@@ -138,7 +138,7 @@ async function refreshPrices() {
     if (
       new Date(token.timestamp) >
       new Date(
-        Date.now() - Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000
+        Date.now() - Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000,
       )
     ) {
       logger.info('Token price is fresh, skipping', token.tokenId)
@@ -148,14 +148,14 @@ async function refreshPrices() {
       'Price is stale, refreshing for token',
       token.tokenId,
       token.chainId,
-      token.contractAddress
+      token.contractAddress,
     )
     let price = await getCoingeckoPrice(token.chainId, token.contractAddress)
     if (price && Object.keys(price).length > 0) {
       logger.info(
         'Coingecko returned price for token id',
         token.tokenId,
-        price[token.contractAddress].usd
+        price[token.contractAddress].usd,
       )
       token.price = price[token.contractAddress].usd
       token.timestamp = new Date()
@@ -165,14 +165,14 @@ async function refreshPrices() {
     }
     logger.info(
       'Price not found on coingecko, trying local memory for token ',
-      token.tokenId
+      token.tokenId,
     )
     const poolPrice = await getPoolPrice(token.tokenId)
     if (poolPrice && Object.keys(poolPrice).length > 0) {
       logger.info(
         'Price found in local memory for token id',
         token.tokenId,
-        poolPrice
+        poolPrice,
       )
       token.price = parseFloat(poolPrice)
       token.timestamp = new Date()

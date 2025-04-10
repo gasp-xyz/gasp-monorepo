@@ -13,7 +13,7 @@ const tokenPricesSchema = new Schema(
   },
   {
     dataStructure: 'JSON',
-  }
+  },
 )
 
 export { tokenPricesSchema }

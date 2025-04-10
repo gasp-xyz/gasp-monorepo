@@ -50,35 +50,35 @@ app.get('/xcm/tokens', xcmController.tokens)
 
 app.get(
   '/collator/:collatorAddress/staking/dailyReward',
-  stakingAprController.dailyReward
+  stakingAprController.dailyReward,
 )
 app.get('/collator/:collatorAddress/staking/apy', stakingAprController.apy)
 app.get('/collators/staking/apy', stakingAprController.collatorsApy)
 
 app.get(
   '/account/:address/liquid-staking/rewards-history/24h/sum',
-  liquidStakingController.rewards24hours
+  liquidStakingController.rewards24hours,
 )
 app.get(
   '/account/:address/liquid-staking/rewards-history/month/sum',
-  liquidStakingController.rewardsMonth
+  liquidStakingController.rewardsMonth,
 )
 
 // Price Discovery API
 app.get('/price-discovery/:currencyId/', priceDiscoveryController.getPrice)
 app.get(
   '/price-history/pair/:baseCurrencyId/:targetCurrencyId',
-  priceDiscoveryController.getHistoryPair
+  priceDiscoveryController.getHistoryPair,
 )
 app.get('/price-history/:currencyId/', priceDiscoveryController.getHistory)
 app.get(
   '/volume-history/pools/:currencyId/',
-  priceDiscoveryController.getTradesPool
+  priceDiscoveryController.getTradesPool,
 )
 app.get('/volume-history/:currencyId/', priceDiscoveryController.getTradesAsset)
 app.get(
   '/tvl-history/pools/:currencyId/',
-  priceDiscoveryController.getVolumePool
+  priceDiscoveryController.getVolumePool,
 )
 app.get('/tvl-history/:currencyId/', priceDiscoveryController.getVolumeAsset)
 
@@ -90,13 +90,13 @@ app.get('/affirmed-network/list', networkController.networkList)
 app.get('/affirmed-token/list', networkController.tokenList)
 app.get(
   '/account/:address/token-portfolio',
-  tokenNetworkPortfolioController.tokenNetworkPortfolio
+  tokenNetworkPortfolioController.tokenNetworkPortfolio,
 )
 
 //Faucet endpoint
 app.get(
   '/faucet/requestTokens/:toAddress/captcha/:captcha/',
-  faucetController.captcha
+  faucetController.captcha,
 )
 
 // Tracing endpoints
@@ -104,17 +104,17 @@ app.post('/tracing/tx/start', tracingController.startTracing)
 
 app.get(
   '/tracing/type/:type/tx/:txHashOrEntityId',
-  tracingController.getTransactionByTxHashOrEntityId
+  tracingController.getTransactionByTxHashOrEntityId,
 )
 
 app.get(
   '/tracing/type/:type/tx/listByAddress/:address',
-  tracingController.getAllTransactionsByAddress
+  tracingController.getAllTransactionsByAddress,
 )
 
 app.get(
   '/tracing/type/:type/tx/listByAddress/:address/:status',
-  tracingController.getAllTransactionsByAddressAndStatus
+  tracingController.getAllTransactionsByAddressAndStatus,
 )
 
 //Token prices endpoint

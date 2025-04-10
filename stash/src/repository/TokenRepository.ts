@@ -28,7 +28,7 @@ export const listTokenOrderBuckets = async (): Promise<
   return new Map(
     Object.values(allChannels)
       .map((it) => JSON.parse(it) as TokenOrderBucket)
-      .map((it) => [it.bucket, it])
+      .map((it) => [it.bucket, it]),
   )
 }
 

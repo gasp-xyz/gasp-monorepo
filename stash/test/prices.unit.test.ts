@@ -16,8 +16,8 @@ describe('test pricing processor', () => {
           id === fixtures.BASE
             ? fixtures.LEN
             : latests.has(id)
-            ? latests.get(id)
-            : 0
+              ? latests.get(id)
+              : 0,
         ),
       save: vi.fn().mockImplementation(async (poolId, id, prices, latest) => {
         const all = (store.has(id) ? store.get(id) : [])!.concat(prices)
@@ -29,8 +29,8 @@ describe('test pricing processor', () => {
           id === fixtures.BASE
             ? fixtures.basePrices
             : !store.has(id)
-            ? []
-            : store.get(id)
+              ? []
+              : store.get(id)
         return arr!.filter(([t]) => t >= from && t <= to)
       }),
       saveLatest: vi
@@ -43,7 +43,7 @@ describe('test pricing processor', () => {
         fixtures.pools
           .get(id)!
           .filter((p) => p.timestamp > from && p.timestamp <= to)
-          .slice(0, fixtures.LIMIT)
+          .slice(0, fixtures.LIMIT),
       ),
       getLatest: vi.fn().mockReturnValue({ timestamp: fixtures.LEN }),
       LIMIT: fixtures.LIMIT,

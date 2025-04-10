@@ -21,7 +21,7 @@ const mgxAirdropSchema = new Schema<MgxAirdropSchema>(
   },
   {
     dataStructure: 'JSON',
-  }
+  },
 )
 
 export { mgxAirdropSchema }

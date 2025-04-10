@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api'
 import { Codec, IEvent } from '@polkadot/types/types'
 import BigNumber from 'bignumber.js'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import {
   getCandidate,
   getCollatorAccount,
@@ -13,7 +13,6 @@ import {
   roundCollatorRewardInfo,
   valuateLiquidityToken,
 } from '../repository/StakingRepository.js'
-import logger from '../util/Logger.js'
 import { calculateAnnualPercentageYieldPerSession } from '../util/Staking.js'
 import { Block } from './BlockScraper.js'
 
@@ -29,17 +28,17 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
   const collatorEvents = getCollatorEvents(eventsRecord)
   if (collatorEvents.length > 0) {
     const toCollatorEvents = collatorEvents.map(async (event) => {
-      const currentSessionIndex = sessionIndex.current.toNumber()
+      const currentSessionIndex = Number(sessionIndex.current.toString())
       const eventSessionIndex =
         event.event.data.length > 2
           ? Number(event.event.data.toPrimitive()[0])
           : 0
       const jumpInSession = currentSessionIndex - eventSessionIndex
       const numberOfBlocksToSubtract =
-        jumpInSession * api.consts.issuance.blocksPerRound.toNumber()
+        jumpInSession * Number(api.consts.issuance.blocksPerRound.toString())
       const jumpToBlockForCandidate = block.number - numberOfBlocksToSubtract
       const blockHashForCandidate = await api.rpc.chain.getBlockHash(
-        jumpToBlockForCandidate
+        jumpToBlockForCandidate,
       )
       const apiAtForCandidate = await api.at(blockHashForCandidate)
       const candidate = await getCandidate(apiAtForCandidate, event)
@@ -55,13 +54,12 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         liquidityTokenReserve: BigNumber
       }
       if (liquidityTokenId === '0') {
-        const liquidityTokenReserve = await apiAt.query.tokens.totalIssuance(
-          liquidityTokenId
-        )
+        const liquidityTokenReserve =
+          await apiAt.query.tokens.totalIssuance(liquidityTokenId)
         valuation = {
           liquidityTokenAmountInMgx: liquidityTokenAmount,
           liquidityTokenReserve: new BigNumber(
-            liquidityTokenReserve.toString()
+            liquidityTokenReserve.toString(),
           ),
           mgxTokenReserve: liquidityTokenAmount,
         }
@@ -69,14 +67,14 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         valuation = await valuateLiquidityToken(
           apiAt,
           liquidityTokenId,
-          liquidityTokenAmount
+          liquidityTokenAmount,
         )
       }
       const rewardsCollatorAmount = roundCollatorRewardInfo(event.event.data)
       const collatorAccount = getCollatorAccount(event.event.data)
       const apyPerSession = calculateAnnualPercentageYieldPerSession(
         rewardsCollatorAmount,
-        valuation.liquidityTokenAmountInMgx
+        valuation.liquidityTokenAmountInMgx,
       )
 
       return {
@@ -84,7 +82,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
         block: block.number,
         section: event.event.section,
         method: event.event.method,
-        sessionIndex: sessionIndex.current.toNumber(),
+        sessionIndex: Number(sessionIndex.current.toString()),
         collatorAccount,
         amountRewarded: rewardsCollatorAmount.multipliedBy(0.8).toFixed(0),
         liquidityTokenId,
@@ -98,14 +96,14 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
     })
 
     const toStore = (await Promise.all(toCollatorEvents)).filter(
-      (event) => event !== null
+      (event) => event !== null,
     )
     const storeInRedis = toStore
       .map((e) => [e.timestamp, JSON.stringify(e)])
       .flat()
 
     if (storeInRedis.length > 0) {
-      await timeseries.client.zadd(KEY, ...storeInRedis)
+      await redis.client.zadd(KEY, ...storeInRedis)
     }
   }
 }
@@ -138,7 +136,7 @@ export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
       .flat()
 
     if (storeInRedis.length > 0) {
-      await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis)
+      await redis.client.zadd(KEY_ACCOUNT, ...storeInRedis)
     }
   }
 }

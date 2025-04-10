@@ -56,7 +56,12 @@ export default [
     rules: {
       // Common rules for all TS/TSX files
       ...ts.configs.recommended.rules,
-      'prettier/prettier': 'error',
+      'prettier/prettier': [
+        'warn',
+        {
+          importAttributes: 'with',
+        },
+      ],
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

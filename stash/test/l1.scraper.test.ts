@@ -1,7 +1,7 @@
 import { holesky } from 'viem/chains'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { timeseries } from '../src/connector/RedisConnector'
+import { redis } from '../src/connector/RedisConnector'
 import {
   depositRepository,
   withdrawalRepository,
@@ -21,12 +21,10 @@ vi.mock('../src/scraper/L1LogScraper', () => ({
   processRequests: vi.fn(),
   watchWithdrawalClosed: vi.fn(),
 }))
-let keepProcessing = true
 
 describe('L1LogScraper', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    keepProcessing = true
   })
 
   it('should update transaction status to SubmittedToL2 on DepositAcceptedIntoQueue event', async () => {
@@ -54,8 +52,8 @@ describe('L1LogScraper', () => {
       }),
     })
     vi.mocked(depositRepository.save).mockResolvedValue({})
-    vi.mocked(timeseries.client.hget).mockResolvedValue('0')
-    vi.mocked(timeseries.client.hset).mockResolvedValue({})
+    vi.mocked(redis.client.hget).mockResolvedValue('0')
+    vi.mocked(redis.client.hset).mockResolvedValue({})
     vi.mocked(logger.info).mockImplementation(() => {})
     vi.mocked(logger.error).mockImplementation(() => {})
 
@@ -70,7 +68,7 @@ describe('L1LogScraper', () => {
         status: 'SubmittedToL2',
         requestId: 1,
       })
-      await timeseries.client.hset()
+      await redis.client.hset()
     })
 
     await watchDepositAcceptedIntoQueue(
@@ -78,7 +76,7 @@ describe('L1LogScraper', () => {
       'http://chain.url',
       holesky,
       'Ethereum',
-      '0x123'
+      '0x123',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -89,9 +87,9 @@ describe('L1LogScraper', () => {
         txHash: '0x123',
         status: 'SubmittedToL2',
         requestId: 1,
-      })
+      }),
     )
-    expect(timeseries.client.hset).toHaveBeenCalled()
+    expect(redis.client.hset).toHaveBeenCalled()
   }, 10000)
 
   it('should update transaction status to Processed on WithdrawalClosed event', async () => {
@@ -119,8 +117,8 @@ describe('L1LogScraper', () => {
       }),
     })
     vi.mocked(withdrawalRepository.save).mockResolvedValue({})
-    vi.mocked(timeseries.client.hget).mockResolvedValue('0')
-    vi.mocked(timeseries.client.hset).mockResolvedValue(100)
+    vi.mocked(redis.client.hget).mockResolvedValue('0')
+    vi.mocked(redis.client.hset).mockResolvedValue(100)
 
     vi.mocked(watchWithdrawalClosed).mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
@@ -133,10 +131,10 @@ describe('L1LogScraper', () => {
         txHash: '0x456',
         status: 'Processed',
       })
-      await timeseries.client.hset(
+      await redis.client.hset(
         `transactions_scanned:withdrawal:Ethereum`,
         'lastBlock',
-        100
+        100,
       )
     })
 
@@ -145,7 +143,7 @@ describe('L1LogScraper', () => {
       'http://chain.url',
       holesky,
       'Ethereum',
-      '0x456'
+      '0x456',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -156,9 +154,9 @@ describe('L1LogScraper', () => {
         requestId: 1,
         txHash: '0x456',
         status: 'Processed',
-      })
+      }),
     )
-    expect(timeseries.client.hset).toHaveBeenCalled()
+    expect(redis.client.hset).toHaveBeenCalled()
   }, 10000)
 
   it('should update transaction status to Ferried on WithdrawalFerried event', async () => {
@@ -186,8 +184,8 @@ describe('L1LogScraper', () => {
       }),
     })
     vi.mocked(withdrawalRepository.save).mockResolvedValue({})
-    vi.mocked(timeseries.client.hget).mockResolvedValue('0')
-    vi.mocked(timeseries.client.hset).mockResolvedValue(100)
+    vi.mocked(redis.client.hget).mockResolvedValue('0')
+    vi.mocked(redis.client.hset).mockResolvedValue(100)
 
     vi.mocked(watchWithdrawalClosed).mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
@@ -200,10 +198,10 @@ describe('L1LogScraper', () => {
         txHash: '0x789',
         status: 'Ferried',
       })
-      await timeseries.client.hset(
+      await redis.client.hset(
         `transactions_scanned:withdrawal:Ethereum`,
         'lastBlock',
-        100
+        100,
       )
     })
 
@@ -212,7 +210,7 @@ describe('L1LogScraper', () => {
       'http://chain.url',
       holesky,
       'Ethereum',
-      '0x789'
+      '0x789',
     )
 
     expect(mockPublicClient.getBlockNumber).toHaveBeenCalled()
@@ -223,9 +221,9 @@ describe('L1LogScraper', () => {
         requestId: 1,
         txHash: '0x789',
         status: 'Ferried',
-      })
+      }),
     )
-    expect(timeseries.client.hset).toHaveBeenCalled()
+    expect(redis.client.hset).toHaveBeenCalled()
   }, 10000)
 
   describe('processRequests', () => {
@@ -258,7 +256,7 @@ describe('L1LogScraper', () => {
 
     it('should process transactions and update their status to PROCESSED', async () => {
       mockApi.query.rolldown.lastProcessedRequestOnL2.mockResolvedValue(2)
-      vi.mocked(timeseries.client.hget).mockResolvedValue('0')
+      vi.mocked(redis.client.hget).mockResolvedValue('0')
       vi.mocked(depositRepository.search).mockReturnValue({
         where: vi.fn().mockReturnThis(),
         equals: vi.fn().mockReturnThis(),
@@ -268,7 +266,7 @@ describe('L1LogScraper', () => {
         return: { all: vi.fn().mockResolvedValue([mockTransaction]) },
       })
       vi.mocked(depositRepository.save).mockResolvedValue(mockTransaction)
-      vi.mocked(timeseries.client.hset).mockResolvedValue({})
+      vi.mocked(redis.client.hset).mockResolvedValue({})
       vi.mocked(processRequests).mockImplementation(async (api, l1Chain) => {
         await new Promise((resolve) => setTimeout(resolve, 100))
         await api.query.rolldown.lastProcessedRequestOnL2(l1Chain)
@@ -286,7 +284,7 @@ describe('L1LogScraper', () => {
           asset_chainId: '0x106',
           asset_address: '0x107',
         })
-        await timeseries.client.hset()
+        await redis.client.hset()
       })
       const promise = processRequests(mockApi, 'Ethereum')
       await new Promise((resolve) => setTimeout(resolve, 100))
@@ -300,9 +298,9 @@ describe('L1LogScraper', () => {
         expect.objectContaining({
           txHash: '0x102',
           status: 'PROCESSED',
-        })
+        }),
       )
-      expect(timeseries.client.hset).toHaveBeenCalled()
+      expect(redis.client.hset).toHaveBeenCalled()
     })
   })
 })

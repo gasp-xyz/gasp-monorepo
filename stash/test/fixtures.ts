@@ -78,7 +78,7 @@ export const assets: Asset[] = [
 }))
 
 export const basePrices = RANGE().map(
-  (t) => [t, new Decimal(1)] as TimestampedAmount
+  (t) => [t, new Decimal(1)] as TimestampedAmount,
 )
 
 export const pool = (asset, n1, n2) =>

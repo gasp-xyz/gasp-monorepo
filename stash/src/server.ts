@@ -17,7 +17,7 @@ const server = app.listen(app.get('port'), async () => {
   logger.info(
     'Server started: http://localhost:%d in %s mode',
     app.get('port'),
-    app.get('env')
+    app.get('env'),
   )
 
   await tokenService.initService()
@@ -53,7 +53,7 @@ const runPeriodically = async () => {
 
 setInterval(
   runPeriodically,
-  Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000
+  Number(process.env.MINUTES_FOR_TOKEN_REFRESH) * 60 * 1000,
 )
 
 export default server

@@ -22,10 +22,10 @@ const interval: Interval[] = [
 
 export const bodyHistorySchema = object({
   days: lazy((d) =>
-    isNaN(d) ? mixed<'max'>().oneOf(['max']) : number().positive()
+    isNaN(d) ? mixed<'max'>().oneOf(['max']) : number().positive(),
   ),
   interval: lazy((d) =>
-    isNaN(d) ? mixed<Interval>().oneOf(interval) : number().positive()
+    isNaN(d) ? mixed<Interval>().oneOf(interval) : number().positive(),
   ),
 })
 
