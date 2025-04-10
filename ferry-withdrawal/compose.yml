@@ -25,6 +25,32 @@ services:
       LOG: ${ETH_CLOSER_LOG}
       DELAY: ${ETH_CLOSER_DELAY}
 
+  closer-test:
+    build: .
+    image: gaspxyz/ferry-withdrawal:${FERRY_WITHDRAWAL_VERSION:-localcloser}
+    restart: unless-stopped
+    command: ["node", "build/src/closer.js"]
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+      stash-mock:
+        condition: service_started
+    environment:
+      MANGATA_NODE_URL: ${TEST_CLOSER_MANGATA_NODE_URL}
+      ETH_CHAIN_URL: ${TEST_CLOSER_ETH_CHAIN_URL}
+      STASH_URL: http://stash-mock:8080
+      MANGATA_CONTRACT_ADDRESS: ${TEST_CLOSER_MANGATA_CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${TEST_CLOSER_PRIVATE_KEY}
+      TOKENS_TO_TRACK: ${TEST_CLOSER_TOKENS_TO_TRACK}
+      L1_CHAIN: ${TEST_CLOSER_L1_CHAIN}
+      TX_COST: ${TEST_CLOSER_TX_COST}
+      LOG: ${TEST_CLOSER_LOG}
+      DELAY: ${TEST_CLOSER_DELAY}
+
   stash-mock:
     image: wiremock/wiremock
     ports:

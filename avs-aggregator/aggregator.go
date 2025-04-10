@@ -958,6 +958,8 @@ func (agg *Aggregator) verifyTaskResponseExistsOnL2(rdTaskResponse taskmanager.I
 		chain = "MegaEth"
 	} else if rdTaskResponse.ChainId == 5 {
 		chain = "Sonic"
+	} else if rdTaskResponse.ChainId == 6 {
+		chain = "Berachain"
 	} else {
 		return fmt.Errorf("Aggregator::verifyTaskResponseExistsOnL2 unknown chain id %v", rdTaskResponse.ChainId)
 	}

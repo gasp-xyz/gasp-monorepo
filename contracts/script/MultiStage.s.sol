@@ -62,6 +62,11 @@ contract MultiStage is Script, Utils {
             return;
         }
 
+        if (envHash == _stringToHash("berachain-stub")) {
+            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Berachain, "berachain-stub");
+            return;
+        }
+
         if (envHash == _stringToHash("ethereum-holesky")) {
             _printMessage(string.concat("Deploying finalizer contracts to ethereum-holesky"));
             FinalizerAVSDeployer finalizerAVSDeployer = new FinalizerAVSDeployer();

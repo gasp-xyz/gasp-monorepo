@@ -28,6 +28,8 @@ import {
 	mainnet,
 	sonic,
 	sonicBlazeTestnet,
+	berachain,
+	berachainBepolia
 } from "viem/chains";
 import { isEqual } from "../utils.js";
 import { estimateMaxPriorityFeePerGas } from "viem/actions";
@@ -92,11 +94,13 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["anvil-monad", devChain(31340)],
 	["anvil-megaeth", devChain(31341)],
 	["anvil-sonic", devChain(31342)],
+	["anvil-berachain", devChain(31343)],
 	// mainnet
 	["ethereum", mainnet],
 	["arbitrum", arbitrum],
 	["base", base],
 	["sonic", sonic],
+	["berachain", berachain],
 	// testnet
 	["holesky", holesky],
 	["arbitrum-sepolia", arbitrumSepolia],
@@ -104,6 +108,7 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["sonic-blaze", sonicBlazeTestnet],
 	["monad", monadTestnet],
 	["megaeth", megaethTestnet],
+	["berachain-bepolia", berachainBepolia],
 	//
 	["reth-arbitrum", devChain(31338)],
 	["reth-ethereum", devChain(31337)],
@@ -111,6 +116,7 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 	["reth-monad", devChain(31340)],
 	["reth-megaeth", devChain(31341)],
 	["reth-sonic", devChain(31342)],
+	["reth-berachain", devChain(31343)],
 ]);
 
 class L1Api implements L1Interface {

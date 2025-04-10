@@ -121,6 +121,7 @@ async fn run(config: Config) -> Result<(), Error> {
         "monad" => Ok(Chain::Monad),
         "megaeth" => Ok(Chain::MegaEth),
         "sonic" => Ok(Chain::Sonic),
+        "berachain" => Ok(Chain::Berachain),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 

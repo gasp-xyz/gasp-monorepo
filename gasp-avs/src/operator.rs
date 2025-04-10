@@ -251,6 +251,7 @@ impl Operator {
             3 => String::from("Monad"),
             4 => String::from("MegaEth"),
             5 => String::from("Sonic"),
+            6 => String::from("Berachain"),
             _ => return Err(eyre!("Unexpected chain in task")),
         };
         let params = rpc_params!(chain_as_string, (range_start, range_end));

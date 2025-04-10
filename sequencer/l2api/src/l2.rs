@@ -665,6 +665,7 @@ impl L2Interface for Gasp {
             gasp_types::Chain::Monad => L1Asset::Monad(token),
             gasp_types::Chain::MegaEth => L1Asset::MegaEth(token),
             gasp_types::Chain::Sonic => L1Asset::Sonic(token),
+            gasp_types::Chain::Berachain => L1Asset::Berachain(token),
         };
 
         let storage = gasp_bindings::api::storage()

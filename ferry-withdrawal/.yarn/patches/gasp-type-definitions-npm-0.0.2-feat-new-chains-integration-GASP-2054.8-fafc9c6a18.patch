@@ -1,0 +1,13 @@
+diff --git a/src/index.js b/src/index.js
+index e18de48a91fa8f7bdaccc3de77503cbc366ff9f2..62461a8fe6fbdbe36ed2c8e1a5b60f8b8da199fe 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -48,7 +48,7 @@ export const mTypes = {
+         _enum: ['L1', 'L2']
+     },
+     Chain: {
+-        _enum: ['Ethereum', 'Arbitrum', 'Base', 'Monad', 'MegaEth', 'Sonic']
++        _enum: ['Ethereum', 'Arbitrum', 'Base', 'Monad', 'MegaEth', 'Sonic', 'Berachain']
+     },
+     CancelResolution: {
+         requestId: "RequestId",

@@ -4652,7 +4652,7 @@ __metadata:
     semantic-release: "npm:22.0.12"
     semantic-release-monorepo: "npm:^8.0.2"
     typescript: "npm:5.4.5"
-    viem: "npm:^2.23.12"
+    viem: "npm:^2.26.2"
     vitest: "npm:^2.0.3"
     winston: "npm:^3.15.0"
     zod: "npm:^3.22.5"
@@ -4945,6 +4945,15 @@ __metadata:
   peerDependencies:
     "@polkadot/types": ^11.1.1
   checksum: 10c0/84832c6b991ccb48da1f126b1a9b6b98141ee88deb1d6d668e3beba1177dd438a5c2654c4128a9a60f7b96f0f55b811ca1b261ed2c55815a7dd4cf7df34bb461
+  languageName: node
+  linkType: hard
+
+"gasp-type-definitions@patch:gasp-type-definitions@npm%3A0.0.2-feat-new-chains-integration-GASP-2054.8#~/.yarn/patches/gasp-type-definitions-npm-0.0.2-feat-new-chains-integration-GASP-2054.8-fafc9c6a18.patch":
+  version: 0.0.2-feat-new-chains-integration-GASP-2054.8
+  resolution: "gasp-type-definitions@patch:gasp-type-definitions@npm%3A0.0.2-feat-new-chains-integration-GASP-2054.8#~/.yarn/patches/gasp-type-definitions-npm-0.0.2-feat-new-chains-integration-GASP-2054.8-fafc9c6a18.patch::version=0.0.2-feat-new-chains-integration-GASP-2054.8&hash=2f92f6"
+  peerDependencies:
+    "@polkadot/types": ^11.1.1
+  checksum: 10c0/17718ddb5a8a291c8c61f8adc8f9007592c26e37e6cdee9babb33060d7452de678c60e7f76dc3e2b48585772505f8f15c477d1f7539333c5e7b57b63cea95d72
   languageName: node
   linkType: hard
 
@@ -9536,9 +9545,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^2.1.1, viem@npm:^2.17.4, viem@npm:^2.23.12":
-  version: 2.23.12
-  resolution: "viem@npm:2.23.12"
+"viem@npm:^2.1.1, viem@npm:^2.17.4, viem@npm:^2.26.2":
+  version: 2.26.2
+  resolution: "viem@npm:2.26.2"
   dependencies:
     "@noble/curves": "npm:1.8.1"
     "@noble/hashes": "npm:1.7.1"
@@ -9553,7 +9562,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/4bed6d5266879ce49e4a4d3cbd8ef310505fb4c605e4ae59a539a7387ce2d7bfa7c5dcad2e3a5adb6fb282d547fb5a5efbf6aeb27042490384e864798aeb751d
+  checksum: 10c0/6dbbf38e590475cc9f249cab5edf5bf175ba7bdaf41cb5d5d3c52f809ae0d859034ba10e8a321de7910918cb7481eea689eefefc1a5c49d5e82e7db282155ef6
   languageName: node
   linkType: hard
 

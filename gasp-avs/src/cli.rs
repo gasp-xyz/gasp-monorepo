@@ -103,6 +103,8 @@ impl CliArgs {
             31339,
             31340,
             31341,
+            31342,
+            31343,
             Chain::Dev as u64,
         ]
         .contains(&args.chain_id)

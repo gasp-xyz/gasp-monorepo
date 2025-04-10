@@ -62,6 +62,27 @@ services:
       TX_COST: ${BASE_SEQUENCER_TX_COST}
       RUST_LOG: debug,sequencer=trace
 
+  sequencer-test:
+    build: .
+    image: gaspxyz/sequencer:${ROLLUP_SEQUENCER_VERSION:-local}
+    restart: unless-stopped
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+    environment:
+      WATCHDOG: ${TEST_SEQUENCER_WATCHDOG}
+      ETH_CHAIN_URL: ${TEST_SEQUENCER_ETH_CHAIN_URL}
+      PRIVATE_KEY: ${TEST_SEQUENCER_ETH_PRIV_KEY}
+      L1_CHAIN: ${TEST_SEQUENCER_L1_CHAIN}
+      LIMIT: ${TEST_SEQUENCER_LIMIT}
+      MANGATA_CONTRACT_ADDRESS: ${TEST_SEQUENCER_MANGATA_CONTRACT_ADDRESS}
+      MANGATA_NODE_URL: ${TEST_SEQUENCER_MANGATA_NODE_URL}
+      MNEMONIC: ${TEST_SEQUENCER_MNEMONIC}
+      TX_COST: ${TEST_SEQUENCER_TX_COST}
+      RUST_LOG: debug,sequencer=trace
+
   ferry-deposit-eth:
     build: .
     image: gaspxyz/sequencer:${FERRY_DEPOSIT_VERSION:-local}

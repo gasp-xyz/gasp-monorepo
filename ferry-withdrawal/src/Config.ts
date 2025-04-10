@@ -21,11 +21,13 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["anvil-megaeth", "megaeth"],
 	["anvil-monad", "monad"],
 	["anvil-sonic", "sonic"],
+	["anvil-berachain", "berachain"],
 	// mainnet
 	["ethereum", "ethereum"],
 	["arbitrum", "arbitrum"],
 	["base", "base"],
 	["sonic", "sonic"],
+	["berachain", "berachain"],
 	// testnet
 	["holesky", "ethereum"],
 	["arbitrum-sepolia", "arbitrum"],
@@ -33,6 +35,7 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["monad", "monad"],
 	["megaeth", "megaeth"],
 	["sonic-testnet", "sonic"],
+	["berachain-bepolia", "berachain"],
 	// reth
 	["reth-arbitrum", "arbitrum"],
 	["reth-ethereum", "ethereum"],
@@ -40,6 +43,7 @@ const SUPPORTED_CHAINS = new Map<string, string>([
 	["reth-monad", "monad"],
 	["reth-megaeth", "megaeth"],
 	["reth-sonic", "sonic"],
+	["reth-berachain", "berachain"],
 ]);
 
 const cliConfigSchemat = z.object({

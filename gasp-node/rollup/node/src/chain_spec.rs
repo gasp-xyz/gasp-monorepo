@@ -66,6 +66,7 @@ pub fn rollup_local_config(
 	monad_sequencers: Vec<AccountId>,
 	megaeth_sequencers: Vec<AccountId>,
 	sonic_sequencers: Vec<AccountId>,
+	berachain_sequencers: Vec<AccountId>,
 	evm_chain: EvmChain,
 	decode_url: Option<String>,
 ) -> ChainSpec {
@@ -131,7 +132,7 @@ pub fn rollup_local_config(
 			let monad = monad_sequencers.clone();
 			let megaeth = megaeth_sequencers.clone();
 			let sonic = sonic_sequencers.clone();
-
+			let berachain = berachain_sequencers.clone();
 			let tokens_endowment = [
 				eth_sequencers.clone(),
 				arb_sequencers.clone(),
@@ -139,6 +140,7 @@ pub fn rollup_local_config(
 				monad_sequencers.clone(),
 				megaeth_sequencers.clone(),
 				sonic_sequencers.clone(),
+				berachain_sequencers.clone(),
 				vec![
 					get_account_id_from_seed::<ecdsa::Public>("Alith"),
 					get_account_id_from_seed::<ecdsa::Public>("Baltathar"),
@@ -233,6 +235,7 @@ pub fn rollup_local_config(
 				monad,
 				megaeth,
 				sonic,
+				berachain,
 				eth_chain_id,
 				decode_url.clone(),
 				vec![],
@@ -304,6 +307,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 			let monad_sequencers: Vec<AccountId> = vec![];
 			let megaeth_sequencers: Vec<AccountId> = vec![];
 			let sonic_sequencers: Vec<AccountId> = vec![];
+			let berachain_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![];
 
@@ -314,6 +318,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 				monad_sequencers.clone(),
 				megaeth_sequencers.clone(),
 				sonic_sequencers.clone(),
+				berachain_sequencers.clone(),
 			]
 			.iter()
 			.flatten()
@@ -422,6 +427,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 				monad_sequencers,
 				megaeth_sequencers,
 				sonic_sequencers,
+				berachain_sequencers,
 				eth_chain_id,
 				decode_url.clone(),
 				council_members,
@@ -514,6 +520,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 			let monad_sequencers: Vec<AccountId> = vec![];
 			let megaeth_sequencers: Vec<AccountId> = vec![];
 			let sonic_sequencers: Vec<AccountId> = vec![];
+			let berachain_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![
 				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
@@ -532,6 +539,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				monad_sequencers.clone(),
 				megaeth_sequencers.clone(),
 				sonic_sequencers.clone(),
+				berachain_sequencers.clone(),
 			]
 			.iter()
 			.flatten()
@@ -670,6 +678,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				monad_sequencers,
 				megaeth_sequencers,
 				sonic_sequencers,
+				berachain_sequencers,
 				eth_chain_id,
 				decode_url.clone(),
 				council_members,
@@ -709,6 +718,7 @@ fn rollup_genesis(
 	monad_initial_sequencers: Vec<AccountId>,
 	megaeth_initial_sequencers: Vec<AccountId>,
 	sonic_initial_sequencers: Vec<AccountId>,
+	berachain_initial_sequencers: Vec<AccountId>,
 	chain_id: u64,
 	decode_url: String,
 	council_members: Vec<AccountId>,
@@ -896,6 +906,16 @@ fn rollup_genesis(
 						(seq, pallet_rolldown::messages::Chain::Sonic, 100u128 * currency::DOLLARS)
 					})
 					.collect::<Vec<_>>(),
+				berachain_initial_sequencers
+					.into_iter()
+					.map(|seq| {
+						(
+							seq,
+							pallet_rolldown::messages::Chain::Berachain,
+							100u128 * currency::DOLLARS,
+						)
+					})
+					.collect::<Vec<_>>(),
 			]
 			.iter()
 			.flatten()
@@ -912,6 +932,7 @@ fn rollup_genesis(
 				(pallet_rolldown::messages::Chain::Monad, 200u128),
 				(pallet_rolldown::messages::Chain::MegaEth, 200u128),
 				(pallet_rolldown::messages::Chain::Sonic, 200u128),
+				(pallet_rolldown::messages::Chain::Berachain, 200u128),
 			]
 			.iter()
 			.cloned()
@@ -927,6 +948,7 @@ fn rollup_genesis(
 				(pallet_rolldown::messages::Chain::Monad, 10u128),
 				(pallet_rolldown::messages::Chain::MegaEth, 15u128),
 				(pallet_rolldown::messages::Chain::Sonic, 15u128),
+				(pallet_rolldown::messages::Chain::Berachain, 15u128),
 			]
 			.iter()
 			.cloned()

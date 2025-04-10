@@ -59,6 +59,7 @@ pub enum Chain {
     Monad,
     MegaEth,
     Sonic,
+    Berachain,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -89,6 +90,7 @@ impl From<l2types::Chain> for Chain {
             l2types::Chain::Monad => Chain::Monad,
             l2types::Chain::MegaEth => Chain::MegaEth,
             l2types::Chain::Sonic => Chain::Sonic,
+            l2types::Chain::Berachain => Chain::Berachain,
         }
     }
 }
@@ -99,6 +101,7 @@ const BASE_CHAIN_ID: u8 = 2;
 const MONAD_CHAIN_ID: u8 = 3;
 const MEGAETH_CHAIN_ID: u8 = 4;
 const SONIC_CHAIN_ID: u8 = 5;
+const BERACHAIN_CHAIN_ID: u8 = 6;
 
 impl From<l1types::Chain> for Chain {
     fn from(value: l1types::Chain) -> Self {
@@ -109,6 +112,7 @@ impl From<l1types::Chain> for Chain {
             MONAD_CHAIN_ID => Chain::Monad,
             MEGAETH_CHAIN_ID => Chain::MegaEth,
             SONIC_CHAIN_ID => Chain::Sonic,
+            BERACHAIN_CHAIN_ID => Chain::Berachain,
             _ => panic!("unknown chain"),
         }
     }
@@ -123,6 +127,7 @@ impl Into<l1types::Chain> for Chain {
             Chain::Monad => l1types::Chain::from(MONAD_CHAIN_ID),
             Chain::MegaEth => l1types::Chain::from(MEGAETH_CHAIN_ID),
             Chain::Sonic => l1types::Chain::from(SONIC_CHAIN_ID),
+            Chain::Berachain => l1types::Chain::from(BERACHAIN_CHAIN_ID),
         }
     }
 }
@@ -136,6 +141,7 @@ impl Into<l2types::Chain> for Chain {
             Chain::Monad => l2types::Chain::Monad,
             Chain::MegaEth => l2types::Chain::MegaEth,
             Chain::Sonic => l2types::Chain::Sonic,
+            Chain::Berachain => l2types::Chain::Berachain,
         }
     }
 }

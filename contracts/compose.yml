@@ -24,6 +24,7 @@ services:
       - ./script/output/31337/:/app/script/output/31337
     environment:
       ENV_SELECTOR: ethereum-stub
+
   arbitrum-contracts-deployment:
     build: .
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localarb}
@@ -43,6 +44,7 @@ services:
       - ./script/output/31338/:/app/script/output/31338
     environment:
       ENV_SELECTOR: arbitrum-stub
+
   base-contracts-deployment:
     build: .
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localbase}
@@ -62,3 +64,23 @@ services:
       - ./script/output/31339/:/app/script/output/31339
     environment:
       ENV_SELECTOR: base-stub
+
+  test-contracts-deployment:
+    build: .
+    image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localbase}
+    platform: linux/amd64
+    depends_on:
+      test-stub:
+        condition: service_healthy
+    command:
+      - script
+      - script/MultiStage.s.sol
+      - --rpc-url
+      - ${BASE_RPC_URL:-http://test-stub:8545}
+      - --private-key
+      - "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      - --broadcast
+    volumes:
+      - ./script/output/$TEST_CHAIN_ID/:/app/script/output/$TEST_CHAIN_ID
+    environment:
+      ENV_SELECTOR: $TEST_ENV

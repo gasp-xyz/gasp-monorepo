@@ -127,6 +127,7 @@ mod benchmarks {
 				L1Asset::Monad(v) => (crate::messages::Chain::Monad, v),
 				L1Asset::MegaEth(v) => (crate::messages::Chain::MegaEth, v),
 				L1Asset::Sonic(v) => (crate::messages::Chain::Sonic, v),
+				L1Asset::Berachain(v) => (crate::messages::Chain::Berachain, v),
 			};
 		Rolldown::<T>::withdraw(
 			RawOrigin::Signed(who).into(),
@@ -204,6 +205,7 @@ mod benchmarks {
 				L1Asset::Monad(v) => (crate::messages::Chain::Monad, v),
 				L1Asset::MegaEth(v) => (crate::messages::Chain::MegaEth, v),
 				L1Asset::Sonic(v) => (crate::messages::Chain::Sonic, v),
+				L1Asset::Berachain(v) => (crate::messages::Chain::Berachain, v),
 			};
 		Ok((l1_aset_chain, l1_asset_address))
 	}

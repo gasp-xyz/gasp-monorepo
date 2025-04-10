@@ -71,7 +71,8 @@ interface IRolldownPrimitives {
         Base,
         Monad,
         MegaEth,
-        Sonic
+        Sonic,
+        Berachain
     }
 
     enum L2RequestType {

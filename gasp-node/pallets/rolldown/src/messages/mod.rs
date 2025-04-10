@@ -108,6 +108,7 @@ pub enum Chain {
 	Monad,
 	MegaEth,
 	Sonic,
+	Berachain,
 }
 
 impl AsRef<str> for Chain {
@@ -119,6 +120,7 @@ impl AsRef<str> for Chain {
 			Chain::Monad => "Monad",
 			Chain::MegaEth => "MegaEth",
 			Chain::Sonic => "Sonic",
+			Chain::Berachain => "Berachain",
 		}
 	}
 }
@@ -450,6 +452,7 @@ impl TryFrom<eth_abi::Chain> for Chain {
 			eth_abi::Chain::Monad => Ok(Chain::Monad),
 			eth_abi::Chain::MegaEth => Ok(Chain::MegaEth),
 			eth_abi::Chain::Sonic => Ok(Chain::Sonic),
+			eth_abi::Chain::Berachain => Ok(Chain::Berachain),
 			_ => Err(String::from("Invalid origin type")),
 		}
 	}

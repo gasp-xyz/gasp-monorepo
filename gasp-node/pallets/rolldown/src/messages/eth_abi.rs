@@ -60,6 +60,7 @@ impl From<crate::messages::Chain> for Chain {
 			crate::messages::Chain::Monad => Chain::Monad,
 			crate::messages::Chain::MegaEth => Chain::MegaEth,
 			crate::messages::Chain::Sonic => Chain::Sonic,
+			crate::messages::Chain::Berachain => Chain::Berachain,
 		}
 	}
 }
@@ -145,7 +146,7 @@ sol! {
 	}
 
 	#[derive(Debug, Eq, PartialEq, Encode, Decode, TypeInfo)]
-	enum Chain{ Ethereum, Arbitrum, Base, Monad, MegaEth, Sonic}
+	enum Chain{ Ethereum, Arbitrum, Base, Monad, MegaEth, Sonic, Berachain}
 
 	#[derive(Debug, Eq, PartialEq, Encode, Decode, TypeInfo)]
 	enum L2RequestType{ Withdrawal, Cancel, FailedDepositResolution }

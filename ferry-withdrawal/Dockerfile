@@ -15,6 +15,7 @@ RUN corepack enable && corepack prepare yarn@4.7.0 --activate
 # Use bind mounts for package.json and yarn.lock, and cache mounts for yarn install
 
 COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 COPY . .

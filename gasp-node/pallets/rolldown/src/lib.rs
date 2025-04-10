@@ -1954,6 +1954,7 @@ impl Convert<(messages::Chain, [u8; 20]), L1Asset> for MultiEvmChainAddressConve
 			messages::Chain::Monad => L1Asset::Monad(address),
 			messages::Chain::MegaEth => L1Asset::MegaEth(address),
 			messages::Chain::Sonic => L1Asset::Sonic(address),
+			messages::Chain::Berachain => L1Asset::Berachain(address),
 		}
 	}
 }
