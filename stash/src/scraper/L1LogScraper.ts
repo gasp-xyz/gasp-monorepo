@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api'
 import { setTimeout } from 'timers/promises'
 import { createPublicClient, http, type PublicClientConfig } from 'viem'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import {
   depositRepository,
   withdrawalRepository,
@@ -280,7 +280,7 @@ const saveLastProcessedRequestId = async (
   lastProcessedRequestId: number,
   type: string,
 ) => {
-  await timeseries.client.hset(
+  await redis.client.hset(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId',
     lastProcessedRequestId.toString(),
@@ -294,7 +294,7 @@ const getLastProcessedRequestId = async (
   l1Chain: string,
   type: string,
 ): Promise<number | null> => {
-  const result = await timeseries.client.hget(
+  const result = await redis.client.hget(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastRequestId',
   )
@@ -306,7 +306,7 @@ const saveLastProcessedBlock = async (
   lastProcessedBlock: bigint,
   type: string,
 ) => {
-  await timeseries.client.hset(
+  await redis.client.hset(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock',
     lastProcessedBlock.toString(),
@@ -320,7 +320,7 @@ const getLastProcessedBlock = async (
   l1Chain: string,
   type: string,
 ): Promise<bigint | null> => {
-  const result = await timeseries.client.hget(
+  const result = await redis.client.hget(
     `transactions_scanned:${type}:${l1Chain}`,
     'lastBlock',
   )

@@ -1,11 +1,11 @@
 import { ApiPromise } from '@polkadot/api'
 import _ from 'lodash'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import { swapRepository } from '../repository/TransactionRepository.js'
 import { getTokenPrice } from '../service/TokenPriceService.js'
 import logger from '../util/Logger.js'
-import * as redis from '../util/Redis.js'
+import * as redisUtil from '../util/Redis.js'
 import { Block, Event } from './BlockScraper'
 
 export const processSwapEvents = async (api: ApiPromise, block: Block) => {
@@ -120,7 +120,7 @@ export const processDataForVolumeHistory = async (
         'asset',
         assetOut,
       ])
-      const [, poolVolumeValueRaw] = (await timeseries.client.call(
+      const [, poolVolumeValueRaw] = (await redis.client.call(
         'TS.GET',
         poolVolumeKey,
       )) as [string, string]
@@ -144,7 +144,7 @@ export const processDataForVolumeHistory = async (
         volumeInUSD === 0 || volumeOutUSD === 0
           ? poolVolumeValue
           : poolVolumeValue + Number(volumeInUSD) + Number(volumeOutUSD)
-      timeseries.client.call('TS.ADD', poolVolumeKey, '*', newPoolVolume)
+      redis.client.call('TS.ADD', poolVolumeKey, '*', newPoolVolume)
       logger.info(
         `Formula for poolId ${poolId} new volume is =  ${poolVolumeValue} + ${Number(
           volumeInUSD,
@@ -158,7 +158,7 @@ export const processDataForVolumeHistory = async (
       //update pool ALL volume
       const ALLpoolVolumeKey = `trades:pool:ALL`
       await checkKey(ALLpoolVolumeKey, ['pool', 'ALL'])
-      const [, ALLpoolVolumeValueRaw] = (await timeseries.client.call(
+      const [, ALLpoolVolumeValueRaw] = (await redis.client.call(
         'TS.GET',
         ALLpoolVolumeKey,
       )) as [string, string]
@@ -172,7 +172,7 @@ export const processDataForVolumeHistory = async (
           : ALLpoolVolumeValue +
             (volumeInUSD as number) +
             (volumeOutUSD as number)
-      timeseries.client.call('TS.ADD', ALLpoolVolumeKey, '*', ALLnewPoolVolume)
+      redis.client.call('TS.ADD', ALLpoolVolumeKey, '*', ALLnewPoolVolume)
       logger.info(
         `Formula for ALL pools new volume is =  ${ALLpoolVolumeValue} + ${Number(
           volumeInUSD,
@@ -184,7 +184,7 @@ export const processDataForVolumeHistory = async (
       //update assets volume
       const assetInVolumeKey = `trades:asset:${assetIn}`
       await checkKey(assetInVolumeKey, ['asset', assetIn])
-      const [, assetInVolumeValueRaw] = (await timeseries.client.call(
+      const [, assetInVolumeValueRaw] = (await redis.client.call(
         'TS.GET',
         assetInVolumeKey,
       )) as [string, string]
@@ -196,7 +196,7 @@ export const processDataForVolumeHistory = async (
         `Fetched volume for asset with id ${assetIn}, value from the database is: ${assetInVolumeValue}`,
       )
       const newAssetInVolume = assetInVolumeValue + (volumeInUSD as number)
-      timeseries.client.call('TS.ADD', assetInVolumeKey, '*', newAssetInVolume)
+      redis.client.call('TS.ADD', assetInVolumeKey, '*', newAssetInVolume)
       logger.info(
         `Formula for assetId ${assetIn} new volume is =  ${assetInVolumeValue} + ${Number(
           volumeInUSD,
@@ -208,7 +208,7 @@ export const processDataForVolumeHistory = async (
 
       const assetOutVolumeKey = `trades:asset:${assetOut}`
       await checkKey(assetOutVolumeKey, ['asset', assetOut])
-      const [, assetOutVolumeValueRaw] = (await timeseries.client.call(
+      const [, assetOutVolumeValueRaw] = (await redis.client.call(
         'TS.GET',
         assetOutVolumeKey,
       )) as [string, string]
@@ -220,7 +220,7 @@ export const processDataForVolumeHistory = async (
         `Fetched volume for asset with id ${assetOut}, value from the database is: ${assetOutVolumeValue}`,
       )
       const newAssetOutVolume = assetOutVolumeValue + (volumeOutUSD as number)
-      timeseries.client.call(
+      redis.client.call(
         'TS.ADD',
         assetOutVolumeKey,
         '*',
@@ -245,9 +245,9 @@ export const processDataForVolumeHistory = async (
 }
 
 export async function checkKey(key: string, label: string[]): Promise<void> {
-  const exist = await redis.hasKey(timeseries, key)
+  const exist = await redisUtil.hasKey(redis, key)
   if (!exist) {
-    timeseries.client.call(
+    redis.client.call(
       'TS.CREATE',
       key,
       'RETENTION',
@@ -280,7 +280,7 @@ export const processDataForTVLHistory = async (
         'asset',
         assetOut,
       ])
-      const [, poolTVLValueRaw] = (await timeseries.client.call(
+      const [, poolTVLValueRaw] = (await redis.client.call(
         'TS.GET',
         poolTVLKey,
       )) as [string, string]
@@ -303,7 +303,7 @@ export const processDataForTVLHistory = async (
         volumeInUSD === 0 || volumeOutUSD === 0
           ? poolTVLValue
           : poolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
-      timeseries.client.call('TS.ADD', poolTVLKey, '*', newPoolTVL)
+      redis.client.call('TS.ADD', poolTVLKey, '*', newPoolTVL)
       logger.info(
         `Formula for poolId ${poolId} new TVL is =  ${poolTVLValue} + ${Number(
           volumeInUSD,
@@ -317,7 +317,7 @@ export const processDataForTVLHistory = async (
       //update pool ALL TVL
       const ALLpoolTVLKey = `volumes:pool:ALL`
       await checkKey(ALLpoolTVLKey, ['pool', 'ALL'])
-      const [, ALLpoolTVLValueRaw] = (await timeseries.client.call(
+      const [, ALLpoolTVLValueRaw] = (await redis.client.call(
         'TS.GET',
         ALLpoolTVLKey,
       )) as [string, string]
@@ -330,7 +330,7 @@ export const processDataForTVLHistory = async (
         volumeInUSD === 0 || volumeOutUSD === 0
           ? ALLpoolTVLValue
           : ALLpoolTVLValue + (volumeInUSD as number) - (volumeOutUSD as number)
-      timeseries.client.call('TS.ADD', ALLpoolTVLKey, '*', ALLnewPoolTVL)
+      redis.client.call('TS.ADD', ALLpoolTVLKey, '*', ALLnewPoolTVL)
       logger.info(
         `Formula for ALL pools new TVL is =  ${ALLpoolTVLValue} + ${Number(
           volumeInUSD,
@@ -344,7 +344,7 @@ export const processDataForTVLHistory = async (
       //update assets TVL
       const assetInTVLKey = `volumes:asset:${assetIn}`
       await checkKey(assetInTVLKey, ['asset', assetIn])
-      const [, assetInTVLValueRaw] = (await timeseries.client.call(
+      const [, assetInTVLValueRaw] = (await redis.client.call(
         'TS.GET',
         assetInTVLKey,
       )) as [string, string]
@@ -354,7 +354,7 @@ export const processDataForTVLHistory = async (
         `Fetched TVL for asset with id ${assetIn}, value in the database is: ${assetInTVLValue}`,
       )
       const newAssetInTVL = assetInTVLValue + (volumeInUSD as number)
-      timeseries.client.call('TS.ADD', assetInTVLKey, '*', newAssetInTVL)
+      redis.client.call('TS.ADD', assetInTVLKey, '*', newAssetInTVL)
       logger.info(
         `Formula for assetId ${assetIn} new TVL is =  ${assetInTVLValue} + ${Number(
           volumeInUSD,
@@ -365,7 +365,7 @@ export const processDataForTVLHistory = async (
       )
       const assetOutTVLKey = `volumes:asset:${assetOut}`
       await checkKey(assetOutTVLKey, ['asset', assetOut])
-      const [, assetOutTVLValueRaw] = (await timeseries.client.call(
+      const [, assetOutTVLValueRaw] = (await redis.client.call(
         'TS.GET',
         assetOutTVLKey,
       )) as [string, string]
@@ -378,7 +378,7 @@ export const processDataForTVLHistory = async (
         assetOutTVLValue - (volumeOutUSD as number) < 0
           ? 0
           : assetOutTVLValue - (volumeOutUSD as number)
-      timeseries.client.call('TS.ADD', assetOutTVLKey, '*', newAssetOutTVL)
+      redis.client.call('TS.ADD', assetOutTVLKey, '*', newAssetOutTVL)
       logger.info(
         `Formula for assetId ${assetOut} new TVL is =  ${assetOutTVLValue} - ${Number(
           volumeOutUSD,

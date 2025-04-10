@@ -1,9 +1,9 @@
 import { Decimal } from 'decimal.js'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
 import { API_LIMIT } from '../util/Misc.js'
-import * as redis from '../util/Redis.js'
+import * as redisUtil from '../util/Redis.js'
 
 const PREFIX_ASSET = 'trades:asset:'
 const PREFIX_POOL = 'trades:pool:'
@@ -19,13 +19,13 @@ export const get = async (
   interval: number,
 ): Promise<TimestampedAmount[]> => {
   const key = isPool ? keyPool(id) : keyAsset(id)
-  if (!(await redis.hasKey(timeseries, key))) {
+  if (!(await redisUtil.hasKey(redis, key))) {
     return []
   }
   const start = from === 0 ? '-' : from
   const call =
     interval > 0
-      ? timeseries.client.call(
+      ? redis.client.call(
           'TS.RANGE',
           key,
           start,
@@ -37,7 +37,7 @@ export const get = async (
           0,
           API_LIMIT,
         )
-      : timeseries.client.call(
+      : redis.client.call(
           'TS.RANGE',
           key,
           start,

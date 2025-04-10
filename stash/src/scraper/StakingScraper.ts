@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api'
 import { Codec, IEvent } from '@polkadot/types/types'
 import BigNumber from 'bignumber.js'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import {
   getCandidate,
   getCollatorAccount,
@@ -103,7 +103,7 @@ export const processStaking = async (api: ApiPromise, block: Block) => {
       .flat()
 
     if (storeInRedis.length > 0) {
-      await timeseries.client.zadd(KEY, ...storeInRedis)
+      await redis.client.zadd(KEY, ...storeInRedis)
     }
   }
 }
@@ -136,7 +136,7 @@ export const processLiquidStaking = async (api: ApiPromise, block: Block) => {
       .flat()
 
     if (storeInRedis.length > 0) {
-      await timeseries.client.zadd(KEY_ACCOUNT, ...storeInRedis)
+      await redis.client.zadd(KEY_ACCOUNT, ...storeInRedis)
     }
   }
 }

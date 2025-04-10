@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js'
 import _ from 'lodash'
 import moment from 'moment'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import { CodecOrArray } from '../util/Chain.js'
 import {
   calculateAnnualPercentageYield,
@@ -88,7 +88,7 @@ export type ProofOfStakeReward = {
 export const getTimeSeriesRedisData = async (
   key: string,
 ): Promise<string[]> => {
-  return await timeseries.client.zrangebyscore(key, '-inf', 'inf', 'WITHSCORES')
+  return await redis.client.zrangebyscore(key, '-inf', 'inf', 'WITHSCORES')
 }
 
 export const getDataByAddress = async <T>(

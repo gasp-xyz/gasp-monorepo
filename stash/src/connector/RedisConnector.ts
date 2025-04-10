@@ -43,16 +43,10 @@ export const redis = new RedisClient(
   parseInt(process.env.REDIS_PORT),
   process.env.REDIS_PASS,
 )
-export const timeseries = new RedisClient(
-  'timeseries',
-  process.env.TIMESERIES_HOST,
-  parseInt(process.env.TIMESERIES_PORT),
-  process.env.TIMESERIES_PASS,
-)
 
-export function getTimeseriesUrl(): string {
-  const host = process.env.TIMESERIES_HOST
-  const port = parseInt(process.env.TIMESERIES_PORT)
-  const pass = process.env.TIMESERIES_PASS
+export function getRedisUrl(): string {
+  const host = process.env.REDIS_HOST
+  const port = parseInt(process.env.REDIS_PORT)
+  const pass = process.env.REDIS_PASS
   return pass ? `redis://:${pass}@${host}:${port}` : `redis://${host}:${port}`
 }

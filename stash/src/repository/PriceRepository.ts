@@ -1,10 +1,10 @@
 import { Decimal } from 'decimal.js'
 
-import { timeseries } from '../connector/RedisConnector.js'
+import { redis } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
 import logger from '../util/Logger.js'
 import { API_LIMIT } from '../util/Misc.js'
-import * as redis from '../util/Redis.js'
+import * as redisUtil from '../util/Redis.js'
 
 const PREFIX = 'price:asset:'
 const PREFIX_LATEST = 'price:pool:latest:'
@@ -13,12 +13,12 @@ const keyPrice = (id: number | string) => PREFIX + id
 const keyLatest = (id: number | string) => PREFIX_LATEST + id
 
 export const getLatest = async (id: number) => {
-  const latest = await timeseries.client.get(keyLatest(id))
+  const latest = await redis.client.get(keyLatest(id))
   return latest ? Number.parseInt(latest) : 0
 }
 
 export const saveLatest = async (id: number, latest: number) => {
-  await timeseries.client.set(keyLatest(id), latest)
+  await redis.client.set(keyLatest(id), latest)
 }
 
 export const save = async (
@@ -27,11 +27,11 @@ export const save = async (
   prices: TimestampedAmount[],
   latest: number,
 ) => {
-  const trx = timeseries.client.multi()
+  const trx = redis.client.multi()
   const key = keyPrice(id)
 
   if (prices.length > 0) {
-    const exist = (await timeseries.client.exists(key)) > 0
+    const exist = (await redis.client.exists(key)) > 0
     if (!exist) {
       trx.call(
         'TS.CREATE',
@@ -63,13 +63,13 @@ export const get = async (
   interval: number = 0,
 ): Promise<TimestampedAmount[]> => {
   const key = keyPrice(id)
-  if (!(await redis.hasKey(timeseries, key))) {
+  if (!(await redisUtil.hasKey(redis, key))) {
     return []
   }
   const start = from === 0 ? '-' : from
   const call =
     interval > 0
-      ? timeseries.client.call(
+      ? redis.client.call(
           'TS.RANGE',
           key,
           start,
@@ -81,7 +81,7 @@ export const get = async (
           0,
           API_LIMIT,
         )
-      : timeseries.client.call(
+      : redis.client.call(
           'TS.RANGE',
           key,
           start,
