@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api'
 import { ApiDecoration } from '@polkadot/api/types/index.js'
-import { u32, u128 } from '@polkadot/types-codec'
+import { u128, u32 } from '@polkadot/types-codec'
 import { BN } from '@polkadot/util'
 import { signatureVerify } from '@polkadot/util-crypto'
 import { BN_ZERO } from 'gasp-sdk'
@@ -72,13 +72,9 @@ function calculateTokenHoldings(
     return BN_ZERO
   }
 
-  const holdings = poolMetadata[process.env.MGX_TOKEN_ID]
-    .toBn()
-    .mul(balance)
-    .div(issuance)
-    .muln(2)
-
-  return holdings
+  const mgxValue = poolMetadata[process.env.MGX_TOKEN_ID]
+  const mgxBN = typeof mgxValue.toBn === 'function' ? mgxValue.toBn() : mgxValue
+  return mgxBN.mul(balance).div(issuance).muln(2)
 }
 
 async function getMgxPools(api: ApiDecoration<'promise'>) {

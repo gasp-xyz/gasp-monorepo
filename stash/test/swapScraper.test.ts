@@ -1,7 +1,7 @@
 import { ApiPromise } from '@polkadot/api'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { timeseries } from '../src/connector/RedisConnector'
+import { redis } from '../src/connector/RedisConnector'
 import { swapRepository } from '../src/repository/TransactionRepository'
 import {
   calculateVolume,
@@ -190,7 +190,7 @@ describe('volume history events', () => {
     )
     const poolId = 6
     const key = `trades:pool:${poolId}`
-    const [timestamp, value] = (await timeseries.client.call(
+    const [timestamp, value] = (await redis.client.call(
       'TS.GET',
       key,
     )) as [string, string]
@@ -301,7 +301,7 @@ describe('volume history events', () => {
 
   it('should handle errors if a specific swap in  volume history processing fails', async () => {
     const error = new Error('Timeseries error')
-    vi.spyOn(timeseries.client, 'call').mockRejectedValue(
+    vi.spyOn(redis.client, 'call').mockRejectedValue(
       new Error('Timeseries error'),
     )
     await processDataForVolumeHistory(mockApi, mockEvent)
@@ -486,7 +486,7 @@ describe('TVL history events', () => {
     vi.spyOn(logger, 'error').mockImplementation(() => {})
     vi.spyOn(logger, 'info').mockImplementation(() => {})
     const error = new Error('Timeseries error')
-    vi.spyOn(timeseries.client, 'call').mockRejectedValue(
+    vi.spyOn(redis.client, 'call').mockRejectedValue(
       new Error('Timeseries error'),
     )
     await processDataForTVLHistory(mockApi, mockEvent)
@@ -558,7 +558,7 @@ describe('decimalsFromTokenId', () => {
 
 describe('checkKey', () => {
   it('should create a new key if it does not exist', async () => {
-    const callSpy = vi.spyOn(timeseries.client, 'call').mockResolvedValue('OK')
+    const callSpy = vi.spyOn(redis.client, 'call').mockResolvedValue('OK')
 
     await checkKey('testKey', ['label1', 'label2'])
 
@@ -576,7 +576,7 @@ describe('checkKey', () => {
   })
 
   it('should not create a new key if it already exists', async () => {
-    const callSpy = vi.spyOn(timeseries.client, 'call')
+    const callSpy = vi.spyOn(redis.client, 'call')
 
     await checkKey('testKey', ['label1', 'label2'])
 
