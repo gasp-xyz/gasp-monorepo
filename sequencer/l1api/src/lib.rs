@@ -1,3 +1,5 @@
+use std::pin::Pin;
+
 use alloy::{
     network::{EthereumWallet, Network, NetworkWallet},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
@@ -5,6 +7,7 @@ use alloy::{
     sol_types::SolValue,
     transports::Transport,
 };
+use futures::Stream;
 use hex::encode as hex_encode;
 use hex_literal::hex;
 use primitive_types::H256;
@@ -32,6 +35,7 @@ pub mod types {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
         pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
+        pub use contract_bindings::rolldown::Rolldown::L2UpdateAccepted;
     }
 
     #[derive(Debug, PartialEq, Copy, Clone)]
@@ -58,11 +62,12 @@ pub enum L1Error {
     TxSendError(#[from] PendingTransactionError),
     #[error("Transaction execution failure `{0}`")]
     TxReverted(H256),
+    #[error("subscritption failed")]
+    SubscriptionFailed,
 }
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
-// pub type HeaderStream = Pin<Box<dyn Stream<Item = Result<(u128, u128), L1Error>> + Send + 'static>>;
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {

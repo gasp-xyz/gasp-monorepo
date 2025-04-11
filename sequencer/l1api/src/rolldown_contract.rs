@@ -1,9 +1,13 @@
 use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
+use contract_bindings::irolldownprimitives::IRolldownPrimitives::L2UpdateAccepted;
+use futures::{Stream, StreamExt};
+use std::pin::Pin;
 use lazy_static::lazy_static;
 
 use alloy::network::Network;
+use alloy::rpc::types::{Filter, Log};
 use alloy::providers::{Provider, WalletProvider};
 use alloy::transports::Transport;
 use primitive_types::H256;
@@ -26,12 +30,31 @@ pub struct RolldownContract<T, P, N> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
 }
 
+pub type BatchStream = Pin<Box<dyn Stream<Item = Result<H256, L1Error>> + Send + 'static>>;
+
+
 impl<T, P, N> RolldownContract<T, P, N>
 where
     T: Transport + Clone,
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_new_batch(&self) -> Result<impl Stream<Item = (H256, (u128, u128))>, L1Error>{
+        let p = self.contract_handle.provider();
+        let filter = self.contract_handle.L2UpdateAccepted_filter().filter;
+        Ok(p.subscribe_logs(&filter).await.unwrap()
+            .into_stream()
+            .map(|elem| {
+                let log = elem.log_decode::<crate::types::abi::L2UpdateAccepted>().expect("can decode subscribed log");
+                let merkle_root = log.data().root.0; 
+                let start = gasp_types::from_l1_u256(log.data().range.start);
+                let end = gasp_types::from_l1_u256(log.data().range.end);
+                (merkle_root.into(), (start.try_into().unwrap(), end.try_into().unwrap()))
+            })
+        )
+    }
+
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
         &self,

@@ -1,12 +1,14 @@
 use super::*;
 use crate::utils::test_utils::DevToken;
 use crate::{create_provider, types::RequestStatus};
+use futures::StreamExt;
 use gasp_types::{Origin, RequestId, U256};
 use hex_literal::hex;
 use serial_test::serial;
 use tracing_test::traced_test;
 
 const URI: &str = "http://localhost:8545";
+const WS_URI: &str = "ws://localhost:8545";
 const ALICE_PKEY: [u8; 32] =
     hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
 const ALICE_ADDRESS: [u8; 20] = hex!("23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f");
@@ -315,4 +317,41 @@ async fn test_get_erc20_balance() {
             .unwrap(),
         100u128
     );
+}
+
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_subscribe() {
+    let provider = create_provider(WS_URI, ALICE_PKEY).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+
+    let rolldown_handle = rolldown.clone();
+    let dummy_hash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
+
+    let x = tokio::spawn(async move {
+        let mut id = 0u128;
+        loop {
+            id+=1;
+            tracing::info!("sending merkle root");
+            tokio::time::sleep(tokio::time::Duration::from_secs_f64(1.0)).await;
+            rolldown_handle
+                .submit_merkle_root(
+                    dummy_hash,
+                    (
+                        id,
+                        id,
+                    ),
+                )
+                .await
+                .unwrap();
+        }
+    });
+
+    let mut subscription = rolldown.subscribe_new_batch().await.unwrap().take(3);
+    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(1u128, 1u128))));
+    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(2u128, 2u128))));
+    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(3u128, 3u128))));
+    assert_eq!(subscription.next().await, None);
+
 }

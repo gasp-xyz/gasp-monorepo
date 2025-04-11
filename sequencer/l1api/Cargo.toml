@@ -21,7 +21,8 @@ hex = "0.4.3"
 hex-literal = "0.4.1"
 futures = "0.3.17"
 thiserror = "2.0.3"
-alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
+alloy = { version = "0.8.3", features = ["full", "sol-types", "contract", "signer-local", "provider-http", "provider-ws", "rpc-types", "pubsub"] }
+
 tracing = "0.1.40"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
