@@ -1,7 +1,8 @@
 use clap::Parser;
-use futures::{future::join_all, stream::FuturesUnordered, StreamExt};
+use futures::{future::join_all, stream::FuturesUnordered, FutureExt, StreamExt};
 use hex_literal::hex;
 use l1api::create_provider;
+use tokio::time::error::Elapsed;
 
 mod cli;
 mod closer;
@@ -61,27 +62,45 @@ pub async fn main() -> Result<(), Error> {
         // ("wss://carrot.megaeth.com/ws", hex!("998AaF69F731009d4E2d470E974766F1EB8f5142")),
     ];
 
-    let mut futures: FuturesUnordered<_> = uris.into_iter().map(|(uri, addr)| {
-        tokio::spawn(async move {
-            let network = uri.split('.').next().unwrap();
-            tracing::info!("{uri} subscribing");
-            let provider = create_provider(&uri, ALICE_PKEY).await.unwrap();
-            let rolldown = l1api::RolldownContract::new(provider, addr);
-            let mut subscription = rolldown.subscribe_deposit().await.expect("can subscribe");
-            while let Some(deposit) = subscription.next().await {
-                tracing::info!("{network} new deposit found {deposit}");
-                match rolldown.get_deposit(deposit).await {
-                    Ok(deposit) => {
-                        let d : gasp_types::Deposit = deposit.into();
-                        tracing::info!("deposit found {d}");
-                    },
-                    Err(e) => {
-                        tracing::warn!("deposit not there yet {e}");
+    let mut futures: FuturesUnordered<_> = uris
+        .into_iter()
+        .map(|(uri, addr)| {
+            tokio::spawn(async move {
+                let network = uri.split('.').next().unwrap();
+                tracing::info!("{uri} subscribing");
+                let provider = create_provider(&uri, ALICE_PKEY).await.unwrap();
+                let rolldown = l1api::RolldownContract::new(provider, addr);
+                let mut subscription = rolldown.subscribe_deposit().await.expect("can subscribe");
+                loop {
+                    match tokio::time::timeout(
+                        tokio::time::Duration::from_secs_f64(60.0),
+                        subscription.next(),
+                    ).await {
+                        Ok(notification) => {
+                            let deposit_id = notification.expect("infinite stream");
+                            let deposit= rolldown
+                                .get_deposit(deposit_id)
+                                .map(|d| d.map(gasp_types::Deposit::from))
+                                .await
+                                .expect("should exists");
+                            tracing::trace!("deposit found {deposit}")
+                        }
+                        Err(Elapsed) => {
+                            tracing::info!("{uri} keep alive");
+                        } // match rolldown.get_deposit(deposit).await {
+                          //     Ok(deposit) => {
+                          //         let d : gasp_types::Deposit = deposit.into();
+                          //         tracing::info!("deposit found {d}");
+                          //     },
+                          //     Err(e) => {
+                          //         tracing::warn!("deposit not there yet {e}");
+                          //     }
+                          // }
                     }
                 }
-            }
+            })
         })
-    }).collect();
+        .collect();
 
     let result = futures.next().await;
 
