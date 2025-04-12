@@ -55,6 +55,20 @@ where
         )
     }
 
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_deposit(&self) -> Result<impl Stream<Item = u128>, L1Error>{
+        let p = self.contract_handle.provider();
+        let filter = self.contract_handle.DepositAcceptedIntoQueue_filter().filter;
+        Ok(p.subscribe_logs(&filter).await.unwrap()
+            .into_stream()
+            .map(|elem| {
+                let log = elem.log_decode::<crate::types::abi::DepositAcceptedIntoQueue>().expect("can decode subscribed log");
+                gasp_types::from_l1_u256(log.data().requestId).try_into().unwrap()
+            })
+        )
+    }
+
+
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
         &self,

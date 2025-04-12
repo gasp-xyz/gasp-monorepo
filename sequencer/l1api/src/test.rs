@@ -322,7 +322,7 @@ async fn test_get_erc20_balance() {
 #[serial]
 #[traced_test]
 #[tokio::test]
-async fn test_subscribe() {
+async fn test_subscribe_new_batches() {
     let provider = create_provider(WS_URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
@@ -334,7 +334,6 @@ async fn test_subscribe() {
         loop {
             id+=1;
             tracing::info!("sending merkle root");
-            tokio::time::sleep(tokio::time::Duration::from_secs_f64(1.0)).await;
             rolldown_handle
                 .submit_merkle_root(
                     dummy_hash,
@@ -352,6 +351,25 @@ async fn test_subscribe() {
     assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(1u128, 1u128))));
     assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(2u128, 2u128))));
     assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(3u128, 3u128))));
+    assert_eq!(subscription.next().await, None);
+
+}
+
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_subscribe_deposits() {
+    let provider = create_provider(WS_URI, ALICE_PKEY).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+
+    let mut subscription = rolldown.subscribe_deposit().await.unwrap().take(3);
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+
+    assert_eq!(subscription.next().await, Some(1u128));
+    assert_eq!(subscription.next().await, Some(2u128));
+    assert_eq!(subscription.next().await, Some(3u128));
     assert_eq!(subscription.next().await, None);
 
 }

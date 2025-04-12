@@ -36,6 +36,7 @@ pub mod types {
         pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
         pub use contract_bindings::rolldown::Rolldown::L2UpdateAccepted;
+        pub use contract_bindings::rolldown::Rolldown::DepositAcceptedIntoQueue;
     }
 
     #[derive(Debug, PartialEq, Copy, Clone)]
