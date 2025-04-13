@@ -6,6 +6,9 @@ use tokio::time::error::Elapsed;
 
 mod cli;
 mod closer;
+mod past_withdrawals_finder;
+mod filter;
+mod batch_subscription;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()

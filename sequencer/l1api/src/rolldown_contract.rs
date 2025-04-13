@@ -1,8 +1,10 @@
 use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
+use crate::L1;
+use alloy::consensus::BlockHeader;
 use contract_bindings::irolldownprimitives::IRolldownPrimitives::L2UpdateAccepted;
-use futures::{Stream, StreamExt};
+use futures::{FutureExt, Stream, StreamExt};
 use std::pin::Pin;
 use lazy_static::lazy_static;
 
@@ -39,35 +41,6 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
-    #[tracing::instrument(skip(self))]
-    pub async fn subscribe_new_batch(&self) -> Result<impl Stream<Item = (H256, (u128, u128))>, L1Error>{
-        let p = self.contract_handle.provider();
-        let filter = self.contract_handle.L2UpdateAccepted_filter().filter;
-        Ok(p.subscribe_logs(&filter).await.unwrap()
-            .into_stream()
-            .map(|elem| {
-                let log = elem.log_decode::<crate::types::abi::L2UpdateAccepted>().expect("can decode subscribed log");
-                let merkle_root = log.data().root.0; 
-                let start = gasp_types::from_l1_u256(log.data().range.start);
-                let end = gasp_types::from_l1_u256(log.data().range.end);
-                (merkle_root.into(), (start.try_into().unwrap(), end.try_into().unwrap()))
-            })
-        )
-    }
-
-    #[tracing::instrument(skip(self))]
-    pub async fn subscribe_deposit(&self) -> Result<impl Stream<Item = u128>, L1Error>{
-        let p = self.contract_handle.provider();
-        let filter = self.contract_handle.DepositAcceptedIntoQueue_filter().filter;
-        Ok(p.subscribe_logs(&filter).await.unwrap()
-            .into_stream()
-            .map(|elem| {
-                let log = elem.log_decode::<crate::types::abi::DepositAcceptedIntoQueue>().expect("can decode subscribed log");
-                gasp_types::from_l1_u256(log.data().requestId).try_into().unwrap()
-            })
-        )
-    }
-
 
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
@@ -183,12 +156,117 @@ where
     }
 }
 
+
+use async_stream::stream;
+fn dedup_stream<S>(mut input: S) -> impl Stream<Item = S::Item>
+where
+    S: Stream + Unpin,
+    S::Item: PartialEq + Clone,
+{
+    stream! {
+        let mut last = None;
+
+        while let Some(item) = input.next().await {
+            if Some(&item) != last.as_ref() {
+                last = Some(item.clone());
+                yield item;
+            }
+        }
+    }
+}
+
+pub async fn foo<T,P,N>(provider: P, addr: [u8;20]) -> Result<Option<(H256, (u128, u128))>, L1Error>
+where 
+    T: Transport + Clone,
+    P: Provider<T, N> + Clone,
+    N: Network,
+{
+    let rolldown = RolldownContract::new(provider, addr);
+    let amount = rolldown.get_amount_of_merkle_roots().await?;
+    if amount > 0 {
+        let root = rolldown.get_merkle_root_by_id(amount - 1).await?;
+        let range = rolldown.get_request_range_from_merkle_root(root).await?;
+        Ok(Some((root.into(), range)))
+    }else{
+        Ok(None)
+    }
+}
+
 impl<T, P, N> RolldownContract<T, P, N>
 where
     T: Transport + Clone,
     P: Provider<T, N> + Clone,
     N: Network,
 {
+
+    #[tracing::instrument(skip(self))]
+        pub async fn subscribe_new_batch<'a>(&'a self) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error>{
+        let p = self.contract_handle.provider();
+        let filter = self.contract_handle.L2UpdateAccepted_filter().filter;
+        Ok(p.subscribe_logs(&filter).await.unwrap()
+            .into_stream()
+            .map(|elem| {
+                let log = elem.log_decode::<crate::types::abi::L2UpdateAccepted>().expect("can decode subscribed log");
+                let merkle_root = log.data().root.0; 
+                let start = gasp_types::from_l1_u256(log.data().range.start);
+                let end = gasp_types::from_l1_u256(log.data().range.end);
+                (merkle_root.into(), (start.try_into().unwrap(), end.try_into().unwrap()))
+            })
+        )
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn get_latest_batch(&self) -> Result<Option<(H256, (u128, u128))>, L1Error>{
+        let amount = self.get_amount_of_merkle_roots().await?;
+        if amount > 0 {
+            let root = self.get_merkle_root_by_id(amount - 1).await?;
+            let range = self.get_request_range_from_merkle_root(root).await?;
+            Ok(Some((root.into(), range)))
+        }else{
+            Ok(None)
+        }
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_new_batch_polling(& self) -> Result<impl Stream<Item = (H256, (u128, u128)) >, L1Error>{
+        let p = self.contract_handle.provider().clone();
+        let addr = *self.contract_handle.address();
+
+        let block_subscription = p.subscribe_blocks().await?;
+        let stream = block_subscription
+            .into_stream()
+            .map(move |elem| {((p.clone(), *addr), elem)})
+            .filter(|(_ ,header)| {
+                let nr = header.number();
+                Box::pin(async move {nr % 10 == 0})
+            })
+            .then(move |((provider, addr), header)| {
+                 foo(provider, addr.into())
+            })
+            .filter_map(|elem| async move { 
+                match elem{
+                    Ok(Some(batch)) => Some(batch),
+                    Ok(None) => None,
+                    Err(err) => None,
+                }});
+       Ok(stream) 
+    }
+
+
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_deposit(&self) -> Result<impl Stream<Item = u128>, L1Error>{
+        let p = self.contract_handle.provider();
+        let filter = self.contract_handle.DepositAcceptedIntoQueue_filter().filter;
+        Ok(p.subscribe_logs(&filter).await.unwrap()
+            .into_stream()
+            .map(|elem| {
+                let log = elem.log_decode::<crate::types::abi::DepositAcceptedIntoQueue>().expect("can decode subscribed log");
+                gasp_types::from_l1_u256(log.data().requestId).try_into().unwrap()
+            })
+        )
+    }
+
+
     pub fn address(&self) -> [u8; 20] {
         (*self.contract_handle.address()).into()
     }

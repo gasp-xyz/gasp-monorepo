@@ -16,6 +16,7 @@ members = [
   "closer",
   "ferry-withdrawal",
   "ferry-deposit",
+  "stash-api",
 ]
 
 [profile.dev]
@@ -41,3 +42,4 @@ l1api = { path = "./l1api/" }
 l2api = { path = "./l2api/" }
 gasp-types = { path = "./types/" }
 common = { path = "./common/" }
+stash-api = { path = "./stash-api/" }

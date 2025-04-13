@@ -1,3 +1,4 @@
+use futures::stream::BoxStream;
 use primitive_types::H256;
 use std::cell::RefCell;
 use std::num::NonZeroUsize;
@@ -29,6 +30,10 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
+    async fn subscribe_new_batch(&self, subscription: crate::Subscription) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>{
+        self.l1.subscribe_new_batch(subscription).await
+    }
+
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         self.l1.get_deposit(request_id).await
     }

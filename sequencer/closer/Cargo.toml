@@ -26,6 +26,8 @@ clap = { version = "4.4.8", features = ["derive", "env"] }
 l1api = { workspace = true }
 l2api = { workspace = true }
 gasp-types = { workspace = true }
+common = { workspace = true }
+stash-api = { workspace = true }
 
 
 [dev-dependencies]

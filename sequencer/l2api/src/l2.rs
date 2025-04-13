@@ -3,6 +3,7 @@ use futures::FutureExt;
 use gasp_bindings::api::utility::calls::types::Batch;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
+use subxt::client::OfflineClientT;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use subxt::ext::subxt_core;
@@ -187,14 +188,6 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         deposit: gasp_types::Deposit,
     ) -> Result<bool, L2Error> {
-        // let request_id: types::ferry_deposit::RequestId,
-        // let deposit_recipient: types::ferry_deposit::DepositRecipient,
-        // let token_address: types::ferry_deposit::TokenAddress,
-        // let amount: types::ferry_deposit::Amount,
-        // let timestamp: types::ferry_deposit::Timestamp,
-        // let ferry_tip: types::ferry_deposit::FerryTip,
-        // let deposit_hash: types::ferry_deposit::DepositHash,
-        //
         let call = gasp_bindings::api::tx().rolldown().ferry_deposit(
             chain.into(),
             deposit.request_id.into(),

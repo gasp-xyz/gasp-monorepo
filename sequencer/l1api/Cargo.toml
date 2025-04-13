@@ -35,6 +35,7 @@ warp = "0.3.7"
 contract-bindings = { workspace = true }
 gasp-types = { workspace = true }
 mockall = "0.13.0"
+async-stream = "0.3.6"
 
 
 [dev-dependencies]

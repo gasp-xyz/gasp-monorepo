@@ -7,7 +7,7 @@ use alloy::{
     sol_types::SolValue,
     transports::Transport,
 };
-use futures::Stream;
+use futures::{stream::BoxStream, Stream, StreamExt};
 use hex::encode as hex_encode;
 use hex_literal::hex;
 use primitive_types::H256;
@@ -69,9 +69,14 @@ pub enum L1Error {
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
+pub enum Subscription{
+    Subscription,
+    Polling
+}
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
+    async fn subscribe_new_batch(& self, subscription: Subscription) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>;
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
@@ -138,6 +143,18 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+
+    async fn subscribe_new_batch(& self, subscription: Subscription) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>{
+        match subscription{
+            Subscription::Polling => {
+                Ok(self.rolldown_contract.subscribe_new_batch_polling().await?.boxed())
+            },
+            Subscription::Subscription => {
+                Ok(self.rolldown_contract.subscribe_new_batch().await?.boxed())
+            }
+        }
+    }
+
     #[tracing::instrument(skip(self), ret)]
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         let deposit = self.rolldown_contract.get_deposit(request_id).await?;
