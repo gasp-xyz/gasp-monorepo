@@ -3,6 +3,7 @@ use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
 use crate::L1;
 use alloy::consensus::BlockHeader;
+use alloy::contract::{CallBuilder, CallDecoder};
 use contract_bindings::irolldownprimitives::IRolldownPrimitives::L2UpdateAccepted;
 use futures::{FutureExt, Stream, StreamExt};
 use std::pin::Pin;
@@ -30,6 +31,7 @@ lazy_static! {
 #[derive(Clone)]
 pub struct RolldownContract<T, P, N> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
+    dry_run: bool,
 }
 
 pub type BatchStream = Pin<Box<dyn Stream<Item = Result<H256, L1Error>> + Send + 'static>>;
@@ -41,6 +43,17 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
+    async fn execute_tx<D>(&self, call: CallBuilder<T, &P, D, N>) -> Result<H256, L1Error> 
+    where
+    D: CallDecoder + Send + Sync + Unpin,
+    {
+        if self.dry_run{
+            tracing::warn!("running in dry run mode - tx is not beeing executed");
+            Ok(H256::default())
+        }else{
+            simulate_send_and_wait_for_result::<T,P,D,N>(self.contract_handle.provider(), call).await
+        }
+    }
 
     #[tracing::instrument(skip(self, cancel))]
     pub async fn send_close_cancel_tx(
@@ -53,7 +66,7 @@ where
         let call = self
             .contract_handle
             .close_cancel(cancel, merkle_root.0.into(), proof);
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
+        self.execute_tx(call).await
     }
 
     #[tracing::instrument(skip(self, withdrawal))]
@@ -68,7 +81,7 @@ where
         withdrawal: gasp_types::Withdrawal,
     ) -> Result<H256, L1Error> {
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
+        self.execute_tx(call).await
     }
 
     #[tracing::instrument(skip(self, request_id))]
@@ -102,7 +115,7 @@ where
         let call =
             self.contract_handle
                 .closeWithdrawal(native_withdrawal, merkle_root.0.into(), proof);
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await
+        self.execute_tx(call).await
     }
 
     #[cfg(test)]
@@ -118,7 +131,7 @@ where
         simulate_send_and_wait_for_result(contract_handle.provider(), call).await?;
         tracing::info!("contract initialized");
 
-        Ok(RolldownContract { contract_handle })
+        Ok(RolldownContract { contract_handle, dry_run: false })
     }
 
     #[cfg(test)]
@@ -133,7 +146,7 @@ where
             .deposit_native_1(alloy::primitives::U256::from(ferry_tip))
             .value(alloy::primitives::U256::from(amount));
 
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
+        self.execute_tx(call).await?;
         Ok(())
     }
 
@@ -151,7 +164,7 @@ where
 
         let call = self.contract_handle.update_l1_from_l2(root.into(), range);
 
-        simulate_send_and_wait_for_result(self.contract_handle.provider(), call).await?;
+        self.execute_tx(call).await?;
         Ok(())
     }
 }
@@ -175,23 +188,6 @@ where
     }
 }
 
-pub async fn foo<T,P,N>(provider: P, addr: [u8;20]) -> Result<Option<(H256, (u128, u128))>, L1Error>
-where 
-    T: Transport + Clone,
-    P: Provider<T, N> + Clone,
-    N: Network,
-{
-    let rolldown = RolldownContract::new(provider, addr);
-    let amount = rolldown.get_amount_of_merkle_roots().await?;
-    if amount > 0 {
-        let root = rolldown.get_merkle_root_by_id(amount - 1).await?;
-        let range = rolldown.get_request_range_from_merkle_root(root).await?;
-        Ok(Some((root.into(), range)))
-    }else{
-        Ok(None)
-    }
-}
-
 impl<T, P, N> RolldownContract<T, P, N>
 where
     T: Transport + Clone,
@@ -200,7 +196,7 @@ where
 {
 
     #[tracing::instrument(skip(self))]
-        pub async fn subscribe_new_batch<'a>(&'a self) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error>{
+    pub async fn subscribe_new_batch(&self) -> Result<impl Stream<Item = (H256, (u128, u128))>, L1Error>{
         let p = self.contract_handle.provider();
         let filter = self.contract_handle.L2UpdateAccepted_filter().filter;
         Ok(p.subscribe_logs(&filter).await.unwrap()
@@ -228,28 +224,24 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn subscribe_new_batch_polling(& self) -> Result<impl Stream<Item = (H256, (u128, u128)) >, L1Error>{
-        let p = self.contract_handle.provider().clone();
-        let addr = *self.contract_handle.address();
+    pub async fn subscribe_new_batch_polling<'a>(&'a self) -> Result<impl Stream<Item = (H256, (u128, u128)) >+ 'a, L1Error>{
+        let p = self.contract_handle.provider();
 
         let block_subscription = p.subscribe_blocks().await?;
         let stream = block_subscription
             .into_stream()
-            .map(move |elem| {((p.clone(), *addr), elem)})
-            .filter(|(_ ,header)| {
+            .filter(|header| {
                 let nr = header.number();
                 Box::pin(async move {nr % 10 == 0})
             })
-            .then(move |((provider, addr), header)| {
-                 foo(provider, addr.into())
-            })
+            .then(|elem| self.get_latest_batch())
             .filter_map(|elem| async move { 
                 match elem{
                     Ok(Some(batch)) => Some(batch),
                     Ok(None) => None,
                     Err(err) => None,
                 }});
-       Ok(stream) 
+       Ok(stream.boxed()) 
     }
 
 
@@ -297,6 +289,17 @@ where
                 address.into(),
                 provider,
             ),
+            dry_run: false
+        }
+    }
+
+    pub fn new_dry_run(provider: P, address: [u8; 20]) -> Self {
+        RolldownContract {
+            contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance::new(
+                address.into(),
+                provider,
+            ),
+            dry_run: true
         }
     }
 

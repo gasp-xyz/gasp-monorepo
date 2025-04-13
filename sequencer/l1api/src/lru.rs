@@ -81,10 +81,6 @@ where
         }
     }
 
-    // async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
-    //     self.l1.estimate_gas_in_wei().await
-    // }
-
     async fn close_cancel(
         &self,
         cancel: gasp_types::Cancel,
