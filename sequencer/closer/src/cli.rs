@@ -16,6 +16,9 @@ pub struct Cli {
     #[arg(long, env = "CHAIN")]
     pub chain_id: u16,
 
+    #[arg(long, env = "DRY_RUN")]
+    pub dry_run: bool,
+
     #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
