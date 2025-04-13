@@ -123,6 +123,7 @@ pub fn address(provider: impl Provider + WalletProvider + Clone) -> [u8; 20] {
     provider.wallet().default_signer_address().into()
 }
 
+#[derive(Clone)]
 pub struct L1<T, P, N> {
     rolldown_contract: RolldownContract<T, P, N>,
     provider: P,
@@ -136,6 +137,8 @@ impl<T, P, N> L1<T, P, N> {
         }
     }
 }
+
+
 
 impl<T, P, N> L1Interface for L1<T, P, N>
 where

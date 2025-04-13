@@ -47,13 +47,13 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2, chunk_size:usize, time_between_queries: Duration, sink: mpsc::Sender<Withdrawal>) -> Self {
+    pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2, chunk_size:usize, offset: u128,time_between_queries: Duration, sink: mpsc::Sender<Withdrawal>) -> Self {
         FerryHunter {
             chain,
             l1,
             l2,
             sink,
-            latest_processed: 0u128,
+            latest_processed: offset,
             chunk_size,
             time_between_queries,
         }

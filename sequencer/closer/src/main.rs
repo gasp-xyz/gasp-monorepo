@@ -1,8 +1,12 @@
 use clap::Parser;
 use futures::{future::join_all, stream::FuturesUnordered, FutureExt, StreamExt};
 use hex_literal::hex;
-use l1api::create_provider;
+use l2api::{Gasp, L2Error};
+use tokio::sync::mpsc;
+use l1api::{create_provider, L1Error, L1};
 use tokio::time::error::Elapsed;
+use tokio::time::Duration;
+use gasp_types::ChainParseError;
 
 mod cli;
 mod closer;
@@ -21,16 +25,43 @@ fn init_logger() {
         .init();
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {}
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("unsupported chain id")]
+    UnknwonL2Chain(#[from] ChainParseError),
+    #[error("L1 error")]
+    L1Error(#[from] L1Error),
+    #[error("L2 error")]
+    L2Error(#[from] L2Error)
+}
 
 const ALICE_PKEY: [u8; 32] =
     hex!("dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97");
 
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
-    // let _args = cli::Cli::parse();
     init_logger();
+    let args = cli::Cli::parse();
+
+    let (filter_input, receiver) = mpsc::channel(1_000_000);
+
+    let chain: gasp_types::Chain = args.chain_id.try_into()?;
+
+    let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
+    let sender = l1api::address(provider.clone());
+    let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
+    let l1 = L1::new(rolldown, provider);
+
+    let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+
+    let finder = past_withdrawals_finder::FerryHunter::new(chain, l1.clone(), l2.clone(), args.batch_size, args.offset, Duration::from_secs_f64(0.25), filter_input.clone());
+    let new_withdrawals_subscriber = batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input, args.batch_size);
+
+    // let filter = 
+
+    // batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input, args.batch_size);
+
+
 
     let uris = vec![
         (

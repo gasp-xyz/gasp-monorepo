@@ -1,4 +1,5 @@
-use futures::{channel::mpsc, SinkExt, StreamExt};
+use futures::StreamExt;
+use tokio::sync::mpsc;
 use gasp_types::{Chain, L2Request, Withdrawal, H256};
 use l1api::{types::RequestStatus, L1Error, L1Interface, Subscription};
 use l2api::{L2Error, L2Interface};
@@ -10,7 +11,7 @@ pub enum Error {
     #[error("L2 error")]
     L2(#[from] L2Error),
     #[error("Sink send error")]
-    NoBatchForL2RequestId(#[from] mpsc::SendError),
+    NoBatchForL2RequestId(#[from] mpsc::error::SendError<Withdrawal>),
 }
 
 pub struct WithdrawalSubscriber<L1, L2> {

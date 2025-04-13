@@ -14,7 +14,10 @@ pub struct Cli {
     pub private_key: [u8; 32],
 
     #[arg(long, env = "CHAIN")]
-    pub chain_id: u16,
+    pub chain_id: u32,
+
+    #[arg(long, default_value_t = 0u128, env = "OFFSET")]
+    pub offset: u128,
 
     #[arg(long, env = "DRY_RUN")]
     pub dry_run: bool,
@@ -23,7 +26,7 @@ pub struct Cli {
     pub rolldown_contract_address: [u8; 20],
 
     #[arg(long, env = "BATCH_SIZE")]
-    pub update_size_limit: usize,
+    pub batch_size: usize,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {

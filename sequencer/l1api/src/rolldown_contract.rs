@@ -169,7 +169,6 @@ where
     }
 }
 
-
 use async_stream::stream;
 fn dedup_stream<S>(mut input: S) -> impl Stream<Item = S::Item>
 where
@@ -241,7 +240,7 @@ where
                     Ok(None) => None,
                     Err(err) => None,
                 }});
-       Ok(stream.boxed()) 
+       Ok(dedup_stream(stream.boxed())) 
     }
 
 

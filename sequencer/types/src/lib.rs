@@ -75,6 +75,9 @@ impl TryFrom<u32> for Chain {
             1 | 17000 | 31337 => Ok(Chain::Ethereum),
             42161 | 421614 | 31338 => Ok(Chain::Arbitrum),
             8453 | 84532 | 31339 => Ok(Chain::Arbitrum),
+            146 => Ok(Chain::Sonic),
+            10143 => Ok(Chain::Monad),
+            6342 => Ok(Chain::MegaEth),
             _ => Err(ChainParseError::UnsupportedChainId(value)),
         }
     }
