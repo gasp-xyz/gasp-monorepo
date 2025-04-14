@@ -40,7 +40,7 @@ pub mod types {
     pub use super::HeaderStream;
     pub type BatchId = u128;
 
-    pub struct BatchInfo{
+    pub struct BatchInfo {
         pub batch_id: BatchId,
         pub range: (u128, u128),
         pub merkle_root: H256,
@@ -119,7 +119,7 @@ pub trait L2Interface {
         request_id: u128,
         chain: gasp_types::Chain,
         at: H256,
-    ) -> Result<Option<types::BatchInfo>, L2Error> ;
+    ) -> Result<Option<types::BatchInfo>, L2Error>;
 
     async fn get_latest_created_request_id(
         &self,

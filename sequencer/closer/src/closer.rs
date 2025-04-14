@@ -82,7 +82,7 @@ where
 
     async fn close_withdrawals(&self, withdrawals: Vec<Withdrawal>) -> Result<(), Error> {
         let (_, at) = self.l2.get_best_block().await?;
-        for w in withdrawals{
+        for w in withdrawals {
             self.close_single_withdrawal(w, at).await?;
         }
         Ok(())
@@ -118,5 +118,4 @@ where
             .await?;
         Ok((batch, proof))
     }
-
 }

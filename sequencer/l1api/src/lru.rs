@@ -30,11 +30,11 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
-    async fn subscribe_deposit(& self) -> Result<BoxStream<u128>, L1Error>{
+    async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error> {
         self.l1.subscribe_deposit().await
     }
 
-    async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>{
+    async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error> {
         self.l1.subscribe_new_batch().await
     }
 

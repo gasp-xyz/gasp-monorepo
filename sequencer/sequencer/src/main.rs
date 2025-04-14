@@ -72,7 +72,6 @@ pub async fn main() {
 
     let mut config = Config::init_from_env().unwrap();
 
-
     config.tx_cost = match config.tx_cost {
         Some(0u128) => None,
         Some(amount) => Some(amount),
@@ -95,7 +94,11 @@ fn strip_prefix(str: &String) -> &str {
 }
 
 async fn run(config: Config) -> Result<(), Error> {
-    let subscription = if config.polling { Subscription::Polling } else { Subscription::Subscription };
+    let subscription = if config.polling {
+        Subscription::Polling
+    } else {
+        Subscription::Subscription
+    };
     let timeout = config.timeout;
     let duration = Duration::from_secs(timeout.try_into().expect("overflow"));
     let (tx, mut watchdog) = Watchdog::new(duration);

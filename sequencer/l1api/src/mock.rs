@@ -1,6 +1,6 @@
 use crate::L1Error;
-use gasp_types::H256;
 use futures::stream::BoxStream;
+use gasp_types::H256;
 
 mockall::mock! {
 

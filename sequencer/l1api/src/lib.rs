@@ -1,4 +1,3 @@
-
 use alloy::{
     network::{EthereumWallet, Network, NetworkWallet},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
@@ -34,8 +33,8 @@ pub mod types {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
         pub use contract_bindings::rolldown::IRolldownPrimitives::RequestId;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Withdrawal;
-        pub use contract_bindings::rolldown::Rolldown::L2UpdateAccepted;
         pub use contract_bindings::rolldown::Rolldown::DepositAcceptedIntoQueue;
+        pub use contract_bindings::rolldown::Rolldown::L2UpdateAccepted;
     }
 
     #[derive(Debug, PartialEq, Copy, Clone)]
@@ -48,14 +47,13 @@ pub mod types {
     use std::fmt;
     impl fmt::Display for RequestStatus {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            match self{
-                RequestStatus::Pending => write!( f, "Pending"),
-                RequestStatus::Closed => write!( f, "Closed"),
-                RequestStatus::Ferried(addr) => write!( f, "Ferried({})", hex::encode(addr)),
+            match self {
+                RequestStatus::Pending => write!(f, "Pending"),
+                RequestStatus::Closed => write!(f, "Closed"),
+                RequestStatus::Ferried(addr) => write!(f, "Ferried({})", hex::encode(addr)),
             }
         }
     }
-
 
     pub use gasp_types::Deposit;
     pub use gasp_types::Withdrawal;
@@ -82,15 +80,15 @@ pub enum L1Error {
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
 #[derive(Debug, Clone)]
-pub enum Subscription{
+pub enum Subscription {
     Subscription,
-    Polling
+    Polling,
 }
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
-    async fn subscribe_deposit(& self) -> Result<BoxStream<u128>, L1Error>;
-    async fn subscribe_new_batch(& self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>;
+    async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error>;
+    async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>;
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
@@ -141,20 +139,22 @@ pub fn address(provider: impl Provider + WalletProvider + Clone) -> [u8; 20] {
 pub struct L1<T, P, N> {
     rolldown_contract: RolldownContract<T, P, N>,
     provider: P,
-    subscription: Subscription
+    subscription: Subscription,
 }
 
 impl<T, P, N> L1<T, P, N> {
-    pub fn new(rolldown_contract: RolldownContract<T, P, N>, provider: P, subscription: Subscription) -> Self {
+    pub fn new(
+        rolldown_contract: RolldownContract<T, P, N>,
+        provider: P,
+        subscription: Subscription,
+    ) -> Self {
         L1 {
             rolldown_contract,
             provider,
-            subscription
+            subscription,
         }
     }
 }
-
-
 
 impl<T, P, N> L1Interface for L1<T, P, N>
 where
@@ -162,25 +162,26 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
-
-
-    async fn subscribe_deposit(& self) -> Result<BoxStream<u128>, L1Error>{
-        match self.subscription{
-            Subscription::Polling => {
-                Ok(self.rolldown_contract.subscribe_deposit_polling().await?.boxed())
-            },
+    async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error> {
+        match self.subscription {
+            Subscription::Polling => Ok(self
+                .rolldown_contract
+                .subscribe_deposit_polling()
+                .await?
+                .boxed()),
             Subscription::Subscription => {
                 Ok(self.rolldown_contract.subscribe_deposit().await?.boxed())
             }
         }
     }
 
-
-    async fn subscribe_new_batch(& self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>{
-        match self.subscription{
-            Subscription::Polling => {
-                Ok(self.rolldown_contract.subscribe_new_batch_polling().await?.boxed())
-            },
+    async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error> {
+        match self.subscription {
+            Subscription::Polling => Ok(self
+                .rolldown_contract
+                .subscribe_new_batch_polling()
+                .await?
+                .boxed()),
             Subscription::Subscription => {
                 Ok(self.rolldown_contract.subscribe_new_batch().await?.boxed())
             }

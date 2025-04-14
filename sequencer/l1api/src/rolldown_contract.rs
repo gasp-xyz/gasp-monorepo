@@ -236,38 +236,42 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn get_deposit_if_exists(&self, request_id: u128) -> Result<Option<types::abi::Deposit>, L1Error> {
-        let deposit = self.contract_handle.deposits(gasp_types::into_l1_u256(request_id.into())).call().await?;
+    pub async fn get_deposit_if_exists(
+        &self,
+        request_id: u128,
+    ) -> Result<Option<types::abi::Deposit>, L1Error> {
+        let deposit = self
+            .contract_handle
+            .deposits(gasp_types::into_l1_u256(request_id.into()))
+            .call()
+            .await?;
         if deposit.requestId.id > gasp_types::into_l1_u256(0u128.into()) {
-            Ok(Some(types::abi::Deposit{ 
-                requestId: deposit.requestId, 
-                depositRecipient: deposit.depositRecipient, 
-                tokenAddress: deposit.tokenAddress, 
-                amount: deposit.amount, 
-                timeStamp: deposit.timeStamp, 
-                ferryTip: deposit.ferryTip
-            }
-            ))
-        }else{
+            Ok(Some(types::abi::Deposit {
+                requestId: deposit.requestId,
+                depositRecipient: deposit.depositRecipient,
+                tokenAddress: deposit.tokenAddress,
+                amount: deposit.amount,
+                timeStamp: deposit.timeStamp,
+                ferryTip: deposit.ferryTip,
+            }))
+        } else {
             Ok(None)
         }
-
     }
-
 
     #[tracing::instrument(skip(self))]
     pub async fn get_latest_deposit(&self) -> Result<Option<types::abi::Deposit>, L1Error> {
-        match self.get_latest_reqeust_id().await?{
+        match self.get_latest_reqeust_id().await? {
             Some(mut id) => {
                 while id > 0u128 {
-                    if let Some(deposit) = self.get_deposit_if_exists(id).await?{
+                    if let Some(deposit) = self.get_deposit_if_exists(id).await? {
                         return Ok(Some(deposit));
-                    }else{
+                    } else {
                         id -= 1;
                     }
                 }
                 Ok(None)
-            },
+            }
             None => Ok(None),
         }
     }
@@ -281,8 +285,6 @@ where
             Ok(next_request_id.checked_sub(1u128))
         }
     }
-
-
 
     #[tracing::instrument(skip(self))]
     pub async fn subscribe_new_batch_polling<'a>(
@@ -331,8 +333,8 @@ where
                 gasp_types::from_l1_u256(log.data().requestId)
                     .try_into()
                     .unwrap()
-            }).map(|request_id| request_id)
-        )
+            })
+            .map(|request_id| request_id))
     }
 
     #[tracing::instrument(skip(self))]
@@ -364,7 +366,6 @@ where
 
         Ok(dedup_stream(stream.boxed()))
     }
-
 
     pub fn address(&self) -> [u8; 20] {
         (*self.contract_handle.address()).into()

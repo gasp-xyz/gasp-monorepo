@@ -50,7 +50,11 @@ pub async fn main() -> Result<(), Error> {
 
     tracing::info!("{args:?}");
 
-    let subscription = if args.polling { Subscription::Polling } else { Subscription::Subscription };
+    let subscription = if args.polling {
+        Subscription::Polling
+    } else {
+        Subscription::Subscription
+    };
     let (hunter_to_filter, filter_input) = channel(1_000_000);
     let (to_executor, executor) = channel(1_000_000);
 
@@ -72,9 +76,7 @@ pub async fn main() -> Result<(), Error> {
         )
     };
 
-    let mut hunter = {
-        hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter)
-    };
+    let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
     let mut filter = {
         filter::Filter::new(
@@ -87,7 +89,14 @@ pub async fn main() -> Result<(), Error> {
     };
 
     let mut executor = {
-        ferry::Ferry::new(l1.clone(), l2.clone(), sender, chain, args.tx_cost, executor)
+        ferry::Ferry::new(
+            l1.clone(),
+            l2.clone(),
+            sender,
+            chain,
+            args.tx_cost,
+            executor,
+        )
     };
 
     if let Some(port) = args.prometheus_port {

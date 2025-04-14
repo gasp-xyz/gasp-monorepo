@@ -20,27 +20,29 @@ impl Stash {
     }
 }
 
-pub struct RateLimitedStash<S>{
+pub struct RateLimitedStash<S> {
     inner: S,
     rps: usize,
 }
 
-impl<S> RateLimitedStash<S> where 
-S: StashInterface
+impl<S> RateLimitedStash<S>
+where
+    S: StashInterface,
 {
     fn new(stash: S, rps: usize) -> RateLimitedStash<S> {
-        RateLimitedStash {
-            inner: stash,
-            rps
-        }
+        RateLimitedStash { inner: stash, rps }
     }
 }
 
 #[allow(async_fn_in_trait)]
-impl<S> StashInterface for RateLimitedStash<S> where 
-S: StashInterface
+impl<S> StashInterface for RateLimitedStash<S>
+where
+    S: StashInterface,
 {
-     async fn get_withdrawal_status( &self, withdrawal_hash: H256,) -> Result<WithdrawalStatus, StashError> {
+    async fn get_withdrawal_status(
+        &self,
+        withdrawal_hash: H256,
+    ) -> Result<WithdrawalStatus, StashError> {
         self.inner.get_withdrawal_status(withdrawal_hash).await
     }
 }

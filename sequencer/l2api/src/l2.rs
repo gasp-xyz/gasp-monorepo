@@ -2,8 +2,8 @@ use futures::future::join_all;
 use futures::FutureExt;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
-use subxt::client::OfflineClientT;
 use std::collections::HashMap;
+use subxt::client::OfflineClientT;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 
@@ -533,7 +533,9 @@ impl L2Interface for Gasp {
                         .await?
                         .ok_or(L2Error::MissingBatch(mid))?;
                     if request_id >= range_start && request_id <= range_end {
-                        let merkle_root = self.get_merkle_root((range_start, range_end), chain, at).await?;
+                        let merkle_root = self
+                            .get_merkle_root((range_start, range_end), chain, at)
+                            .await?;
                         break Ok(Some(BatchInfo {
                             batch_id,
                             range,

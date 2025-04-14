@@ -333,27 +333,29 @@ async fn test_subscribe_new_batches() {
     let x = tokio::spawn(async move {
         let mut id = 0u128;
         loop {
-            id+=1;
+            id += 1;
             tracing::info!("sending merkle root");
             rolldown_handle
-                .submit_merkle_root(
-                    dummy_hash,
-                    (
-                        id,
-                        id,
-                    ),
-                )
+                .submit_merkle_root(dummy_hash, (id, id))
                 .await
                 .unwrap();
         }
     });
 
     let mut subscription = rolldown.subscribe_new_batch().await.unwrap().take(3);
-    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(1u128, 1u128))));
-    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(2u128, 2u128))));
-    assert_eq!(subscription.next().await, Some((dummy_hash.into() ,(3u128, 3u128))));
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (1u128, 1u128)))
+    );
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (2u128, 2u128)))
+    );
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (3u128, 3u128)))
+    );
     assert_eq!(subscription.next().await, None);
-
 }
 
 #[serial]
@@ -372,5 +374,4 @@ async fn test_subscribe_deposits() {
     assert_eq!(subscription.next().await, Some(2u128));
     assert_eq!(subscription.next().await, Some(3u128));
     assert_eq!(subscription.next().await, None);
-
 }

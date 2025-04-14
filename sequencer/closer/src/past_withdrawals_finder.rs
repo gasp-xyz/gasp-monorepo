@@ -47,7 +47,15 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(chain: gasp_types::Chain, l1: L1, l2: L2, chunk_size:usize, offset: u128,time_between_queries: Duration, sink: mpsc::Sender<Withdrawal>) -> Self {
+    pub fn new(
+        chain: gasp_types::Chain,
+        l1: L1,
+        l2: L2,
+        chunk_size: usize,
+        offset: u128,
+        time_between_queries: Duration,
+        sink: mpsc::Sender<Withdrawal>,
+    ) -> Self {
         FerryHunter {
             chain,
             l1,
@@ -101,8 +109,10 @@ where
 
         match self.l1.get_latest_finalized_request_id().await? {
             Some(latest_closable) if latest_closable < first => {
-                tracing::info!("offset:{first} is higher than latest available request id:{latest_closable}");
-            },
+                tracing::info!(
+                    "offset:{first} is higher than latest available request id:{latest_closable}"
+                );
+            }
             Some(latest_closable) => {
                 let chunks = common::get_chunks(first, latest_closable, self.chunk_size);
 
@@ -124,11 +134,10 @@ where
                         self.sink.send(w).await?;
                     }
                 }
-
-            },
+            }
             None => {
                 tracing::info!("no withdrawals yet found");
-            },
+            }
         }
         tracing::info!("finished");
         Ok(())

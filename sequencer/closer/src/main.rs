@@ -1,16 +1,16 @@
 use clap::Parser;
 use closer::Closer;
+use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc;
-use l1api::{Subscription, L1};
 use tokio::task::JoinHandle;
 use tokio::time::Duration;
 
+mod batch_subscription;
 mod cli;
 mod closer;
-mod past_withdrawals_finder;
 mod filter;
-mod batch_subscription;
+mod past_withdrawals_finder;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()
@@ -31,7 +31,11 @@ pub async fn main() -> Result {
     init_logger();
     let args = cli::Cli::parse();
 
-    let subscription = if args.polling { Subscription::Polling } else { Subscription::Subscription };
+    let subscription = if args.polling {
+        Subscription::Polling
+    } else {
+        Subscription::Subscription
+    };
     tracing::info!("L1 subscription type {subscription:?}");
     let (filter_input, filter) = mpsc::channel(1_000_000);
     let (closer_input, closer_sink) = mpsc::channel(1_000_000);
@@ -40,19 +44,34 @@ pub async fn main() -> Result {
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
     let sender = l1api::address(provider.clone());
-    let rolldown = if args.dry_run { 
+    let rolldown = if args.dry_run {
         l1api::RolldownContract::new_dry_run(provider.clone(), args.rolldown_contract_address)
-    }else{
+    } else {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
     let l1 = L1::new(rolldown, provider, subscription);
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
 
-    let mut finder= past_withdrawals_finder::FerryHunter::new(chain, l1.clone(), l2.clone(), args.batch_size, args.offset, Duration::from_secs_f64(0.25), filter_input.clone());
-    let finder_task: TaskHandle= tokio::spawn(async move{Ok(finder.run().await?)});
-    let mut new_withdrawals_subscriber= batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input.clone(), args.batch_size);
-    let new_withdrawals_subscriber_task:  TaskHandle= tokio::spawn(async move{Ok(new_withdrawals_subscriber.run().await?)});
+    let mut finder = past_withdrawals_finder::FerryHunter::new(
+        chain,
+        l1.clone(),
+        l2.clone(),
+        args.batch_size,
+        args.offset,
+        Duration::from_secs_f64(0.25),
+        filter_input.clone(),
+    );
+    let finder_task: TaskHandle = tokio::spawn(async move { Ok(finder.run().await?) });
+    let mut new_withdrawals_subscriber = batch_subscription::WithdrawalSubscriber::new(
+        chain,
+        l1.clone(),
+        l2.clone(),
+        filter_input.clone(),
+        args.batch_size,
+    );
+    let new_withdrawals_subscriber_task: TaskHandle =
+        tokio::spawn(async move { Ok(new_withdrawals_subscriber.run().await?) });
 
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {
@@ -63,17 +82,17 @@ pub async fn main() -> Result {
                 filter::filter_deposits_created_by_frontend(stash, filter, closer_input).await;
                 Ok(())
             })
-        },
+        }
         (_, true) => {
             tracing::info!("filtering withdrawals with ferry tip > 0");
             tokio::spawn(async move {
                 filter::filter_deposits_without_fee(filter, closer_input).await;
                 Ok(())
             })
-        },
+        }
         (None, false) => {
             panic!("stash uri not set");
-        },
+        }
     };
 
     let closer_task: TaskHandle = tokio::spawn(async move {
@@ -81,7 +100,14 @@ pub async fn main() -> Result {
         Ok(closer.run().await?)
     });
 
-    if let Err(e) = futures::future::try_join_all([finder_task, new_withdrawals_subscriber_task, filter_task, closer_task]).await{
+    if let Err(e) = futures::future::try_join_all([
+        finder_task,
+        new_withdrawals_subscriber_task,
+        filter_task,
+        closer_task,
+    ])
+    .await
+    {
         tracing::error!("err : {e}");
     }
 
