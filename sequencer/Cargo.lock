@@ -1449,6 +1449,7 @@ dependencies = [
  "lazy_static",
  "lru",
  "mockall",
+ "oneshot",
  "prometheus",
  "serde",
  "serial_test",

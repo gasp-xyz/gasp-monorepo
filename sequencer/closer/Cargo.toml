@@ -35,4 +35,5 @@ stash-api = { workspace = true }
 mockall = "0.13.0"
 serial_test = "3.2.0"
 tracing-test = "0.2.5"
+oneshot = "0.1.11"
 
