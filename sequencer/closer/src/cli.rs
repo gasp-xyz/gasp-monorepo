@@ -36,6 +36,12 @@ pub struct Cli {
 
     #[arg(long, env = "BATCH_SIZE")]
     pub batch_size: usize,
+
+    #[arg(long, env = "REPLICA_ID")]
+    pub replica_id: Option<usize>,
+
+    #[arg(long, env = "REPLICA_COUNT")]
+    pub replica_count: Option<usize>,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {

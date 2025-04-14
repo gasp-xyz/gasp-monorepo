@@ -37,6 +37,7 @@ pub async fn main() -> Result {
     let args = cli::Cli::parse();
 
     let subscription = if args.polling { Subscription::Polling } else { Subscription::Subscription };
+    tracing::info!("L1 subscription type {subscription:?}");
     let (filter_input, filter) = mpsc::channel(1_000_000);
     let (closer_input, closer_sink) = mpsc::channel(1_000_000);
 
@@ -55,7 +56,7 @@ pub async fn main() -> Result {
 
     let mut finder= past_withdrawals_finder::FerryHunter::new(chain, l1.clone(), l2.clone(), args.batch_size, args.offset, Duration::from_secs_f64(0.25), filter_input.clone());
     let finder_task: TaskHandle= tokio::spawn(async move{Ok(finder.run().await?)});
-    let mut new_withdrawals_subscriber= batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input, args.batch_size);
+    let mut new_withdrawals_subscriber= batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input.clone(), args.batch_size);
     let new_withdrawals_subscriber_task:  TaskHandle= tokio::spawn(async move{Ok(new_withdrawals_subscriber.run(subscription).await?)});
 
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {

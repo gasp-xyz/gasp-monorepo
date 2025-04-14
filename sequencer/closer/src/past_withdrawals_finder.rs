@@ -74,7 +74,7 @@ where
         })
     }
 
-    #[tracing::instrument(level = "debug", skip(self, at), ret)]
+    #[tracing::instrument(level = "debug", skip(self, at))]
     pub async fn get_pending_withdrawal(
         &self,
         id: u128,
@@ -82,7 +82,9 @@ where
     ) -> HunterResult<Option<Withdrawal>> {
         match self.l2.get_l2_request(self.chain, id, at).await? {
             Some(L2Request::Withdrawal(w)) => {
-                match self.l1.get_status(w.withdrawal_hash()).await? {
+                let status = self.l1.get_status(w.withdrawal_hash()).await?;
+                tracing::info!("{status}");
+                match status {
                     RequestStatus::Pending => Ok::<_, HunterError>(Some(w)),
                     _ => Ok(None),
                 }
@@ -128,7 +130,7 @@ where
                 tracing::info!("no withdrawals yet found");
             },
         }
-        tracing::warn!("header stream ended");
+        tracing::info!("finished");
         Ok(())
     }
 }

@@ -45,6 +45,19 @@ pub mod types {
         Ferried([u8; 20]),
         Closed,
     }
+
+    use std::fmt;
+    impl fmt::Display for RequestStatus {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self{
+                RequestStatus::Pending => write!( f, "Pending"),
+                RequestStatus::Closed => write!( f, "Closed"),
+                RequestStatus::Ferried(addr) => write!( f, "Ferried({})", hex::encode(addr)),
+            }
+        }
+    }
+
+
     pub use gasp_types::Deposit;
     pub use gasp_types::Withdrawal;
 }
@@ -69,6 +82,7 @@ pub enum L1Error {
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
 
+#[derive(Debug)]
 pub enum Subscription{
     Subscription,
     Polling

@@ -95,8 +95,10 @@ where
         loop {
             buffer.clear();
             let count = self.input.recv_many(&mut buffer, 25).await;
-            tracing::debug!("found {count} withdrawals to close");
-            self.close_withdrawals(buffer.clone()).await?;
+            if count > 0 {
+                tracing::debug!("found {count} withdrawals to close");
+                self.close_withdrawals(buffer.clone()).await?;
+            }
         }
         Ok(())
     }

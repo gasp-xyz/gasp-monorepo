@@ -1,8 +1,9 @@
 use futures::StreamExt;
-use tokio::sync::mpsc;
 use gasp_types::{Chain, L2Request, Withdrawal, H256};
 use l1api::{types::RequestStatus, L1Error, L1Interface, Subscription};
 use l2api::{L2Error, L2Interface};
+use tokio::sync::mpsc;
+use tokio::time::{timeout, Duration, Timeout};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -12,6 +13,8 @@ pub enum Error {
     L2(#[from] L2Error),
     #[error("Sink send error")]
     NoBatchForL2RequestId(#[from] mpsc::error::SendError<Withdrawal>),
+    #[error("Withdrawals subscription failed")]
+    SubscriptionFailed,
 }
 
 pub struct WithdrawalSubscriber<L1, L2> {
@@ -63,18 +66,30 @@ where
     pub async fn run(&mut self, subscription: Subscription) -> Result<(), Error> {
         let mut subscription = self.l1.subscribe_new_batch(subscription).await?;
 
-        while let Some((merkle_root, range)) = subscription.next().await {
-            let (_, at) = self.l2.get_best_block().await?;
-            for (start, end) in common::get_chunks(range.0, range.1, self.chunk_size) {
-                let queries = (start..=end)
-                    .map(|elem| self.get_pending_withdrawal(elem, at))
-                    .collect::<Vec<_>>();
-                for w in futures::future::try_join_all(queries)
-                    .await?
-                    .into_iter()
-                    .flatten()
-                {
-                    self.sink.send(w).await?;
+        loop {
+            let elem = timeout(Duration::from_secs_f64(30.0), subscription.next()).await;
+            match elem {
+                Err(Timeout ) => {
+                    tracing::info!("keep alive");
+                },
+                Ok(None) => {
+                    return Err(Error::SubscriptionFailed);
+                }
+                Ok(Some((merkle_root, range))) => {
+                    tracing::info!("new batch found {merkle_root} with request {range:?}");
+                    let (_, at) = self.l2.get_best_block().await?;
+                    for (start, end) in common::get_chunks(range.0, range.1, self.chunk_size) {
+                        let queries = (start..=end)
+                            .map(|elem| self.get_pending_withdrawal(elem, at))
+                            .collect::<Vec<_>>();
+                        for w in futures::future::try_join_all(queries)
+                            .await?
+                            .into_iter()
+                            .flatten()
+                        {
+                            self.sink.send(w).await?;
+                        }
+                    }
                 }
             }
         }
