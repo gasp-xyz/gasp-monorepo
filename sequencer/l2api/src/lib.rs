@@ -40,6 +40,7 @@ pub mod types {
     pub use super::HeaderStream;
     pub type BatchId = u128;
 
+    #[derive(Clone, Copy)]
     pub struct BatchInfo {
         pub batch_id: BatchId,
         pub range: (u128, u128),

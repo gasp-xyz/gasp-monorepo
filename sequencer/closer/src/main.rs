@@ -58,8 +58,10 @@ pub async fn main() -> Result {
         l2.clone(),
         args.batch_size,
         args.offset,
-        Duration::from_secs_f64(0.25),
+        Duration::from_secs_f64(args.delay_between_queries),
         filter_input.clone(),
+        args.replica_id,
+        args.replica_count,
     );
     let finder_task: TaskHandle = tokio::spawn(async move { Ok(finder.run().await?) });
     let mut new_withdrawals_subscriber = batch_subscription::WithdrawalSubscriber::new(
@@ -68,6 +70,8 @@ pub async fn main() -> Result {
         l2.clone(),
         filter_input.clone(),
         args.batch_size,
+        args.replica_id,
+        args.replica_count,
     );
     let new_withdrawals_subscriber_task: TaskHandle =
         tokio::spawn(async move { Ok(new_withdrawals_subscriber.run().await?) });
@@ -94,7 +98,13 @@ pub async fn main() -> Result {
     };
 
     let closer_task: TaskHandle = tokio::spawn(async move {
-        let mut closer = Closer::new(chain, l1, l2, closer_sink);
+        let mut closer = Closer::new(
+            chain,
+            l1,
+            l2,
+            closer_sink,
+            args.close_withdrawals_in_batches,
+        );
         Ok(closer.run().await?)
     });
 

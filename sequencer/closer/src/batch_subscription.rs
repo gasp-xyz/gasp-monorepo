@@ -25,6 +25,8 @@ pub struct WithdrawalSubscriber<L1, L2> {
     chain: Chain,
     sink: mpsc::Sender<Withdrawal>,
     chunk_size: usize,
+    replica_id: u128,
+    replica_count: u128,
 }
 
 impl<L1, L2> WithdrawalSubscriber<L1, L2>
@@ -38,6 +40,8 @@ where
         l2: L2,
         sink: mpsc::Sender<Withdrawal>,
         chunk_size: usize,
+        replica_id: u128,
+        replica_count: u128,
     ) -> Self {
         WithdrawalSubscriber {
             l1,
@@ -45,6 +49,8 @@ where
             chain,
             sink,
             chunk_size,
+            replica_id,
+            replica_count,
         }
     }
 
@@ -83,6 +89,7 @@ where
                     let (_, at) = self.l2.get_best_block().await?;
                     for (start, end) in common::get_chunks(range.0, range.1, self.chunk_size) {
                         let queries = (start..=end)
+                            .filter(|id| id % self.replica_count == self.replica_id)
                             .map(|elem| self.get_pending_withdrawal(elem, at))
                             .collect::<Vec<_>>();
                         for w in futures::future::try_join_all(queries)
@@ -152,7 +159,7 @@ mod test {
             .returning(|_, id, _| Ok(Some(dummy_withdrawal_request(id))));
 
         let _t = tokio::spawn(async move {
-            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10)
+            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10, 1u128, 1u128)
                 .run()
                 .await
                 .unwrap();
@@ -197,7 +204,7 @@ mod test {
             .returning(|_, id, _| Ok(Some(dummy_withdrawal_request(id))));
 
         let _t = tokio::spawn(async move {
-            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10)
+            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10, 1u128, 1u128)
                 .run()
                 .await
                 .unwrap();
@@ -237,7 +244,7 @@ mod test {
             .returning(|_, id, _| Ok(Some(dummy_withdrawal_request(id))));
 
         assert!(matches!(
-            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10)
+            WithdrawalSubscriber::new(CHAIN, l1mock, l2mock, sender, 10, 1u128, 1u128)
                 .run()
                 .await,
             Err(Error::L2RequestDoesNotExists(3u128))

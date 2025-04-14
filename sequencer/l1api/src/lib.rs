@@ -118,6 +118,11 @@ pub trait L1Interface {
         merkle_root: H256,
         proof: Vec<H256>,
     ) -> Result<H256, L1Error>;
+
+    async fn close_withdrawals_at_once(
+        &self,
+        withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
+    ) -> Result<Vec<H256>, L1Error>;
 }
 
 pub async fn create_provider(
@@ -321,6 +326,14 @@ where
         self.rolldown_contract
             .send_close_withdrawal_tx(withdrawal, merkle_root, proof)
             .await
+    }
+
+    #[tracing::instrument(skip(self), ret)]
+    async fn close_withdrawals_at_once(
+        &self,
+        withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
+    ) -> Result<Vec<H256>, L1Error> {
+        unimplemented!()
     }
 
     #[tracing::instrument(skip(self), ret)]

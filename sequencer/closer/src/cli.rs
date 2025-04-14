@@ -37,11 +37,17 @@ pub struct Cli {
     #[arg(long, env = "BATCH_SIZE")]
     pub batch_size: usize,
 
-    #[arg(long, env = "REPLICA_ID")]
-    pub replica_id: Option<usize>,
+    #[arg(long, default_value_t = 1, env = "REPLICA_ID")]
+    pub replica_id: u128,
 
-    #[arg(long, env = "REPLICA_COUNT")]
-    pub replica_count: Option<usize>,
+    #[arg(long, default_value_t = 1, env = "REPLICA_COUNT")]
+    pub replica_count: u128,
+
+    #[arg(long, default_value_t = 0.25, env = "DELAY_TIME_BETWEEN_QUERIES")]
+    pub delay_between_queries: f64,
+
+    #[arg(long, default_value_t = false, env = "CLOSE_WITHDRAWALS_IN_BATCHES")]
+    pub close_withdrawals_in_batches: bool,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {

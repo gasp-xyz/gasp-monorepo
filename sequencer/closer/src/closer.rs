@@ -24,6 +24,7 @@ pub struct Closer<L1, L2> {
     l2: L2,
     chain: Chain,
     input: mpsc::Receiver<Withdrawal>,
+    close_withdrawals_in_batches: bool,
 }
 
 impl<L1, L2> Closer<L1, L2>
@@ -31,12 +32,19 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(chain: Chain, l1: L1, l2: L2, input: mpsc::Receiver<Withdrawal>) -> Self {
+    pub fn new(
+        chain: Chain,
+        l1: L1,
+        l2: L2,
+        input: mpsc::Receiver<Withdrawal>,
+        close_withdrawals_in_batches: bool,
+    ) -> Self {
         Closer {
             l1,
             l2,
             chain,
             input,
+            close_withdrawals_in_batches,
         }
     }
 
@@ -78,9 +86,41 @@ where
 
     async fn close_withdrawals(&self, withdrawals: Vec<Withdrawal>) -> Result<(), Error> {
         let (_, at) = self.l2.get_best_block().await?;
-        for w in withdrawals {
-            if self.is_pending(w).await? {
-                self.close_single_withdrawal(w, at).await?;
+        if self.close_withdrawals_in_batches {
+            let withdrawals_with_proofs = futures::future::try_join_all(
+                withdrawals
+                    .iter()
+                    .map(|elem| self.get_batch_proof_and_status(*elem, at)),
+            )
+            .await?;
+
+            let closable_withdrawals = withdrawals_with_proofs
+                .into_iter()
+                .filter_map(|(w, status, batch, proof)| {
+                    if status == RequestStatus::Pending {
+                        Some((w, batch.merkle_root, proof))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            let closable_withdrawals_ids: Vec<u128> = closable_withdrawals
+                .iter()
+                .map(|(w, _, _)| w.request_id.id.try_into().unwrap())
+                .collect();
+
+            tracing::info!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
+            self.l1
+                .close_withdrawals_at_once(closable_withdrawals)
+                .await?;
+
+            tracing::info!("batch closing finished");
+        } else {
+            for w in withdrawals {
+                if self.is_pending(w).await? {
+                    self.close_single_withdrawal(w, at).await?;
+                }
             }
         }
         Ok(())
@@ -112,6 +152,18 @@ where
         Ok(())
     }
 
+    async fn get_batch_proof_and_status(
+        &self,
+        withdrawal: Withdrawal,
+        at: H256,
+    ) -> CloserResult<(Withdrawal, RequestStatus, BatchInfo, Vec<H256>)> {
+        let (batch, range) = self
+            .get_batch_and_proof(withdrawal.request_id.id.try_into().unwrap(), at)
+            .await?;
+        let status = self.l1.get_status(withdrawal.withdrawal_hash()).await?;
+        Ok((withdrawal, status, batch, range))
+    }
+
     async fn get_batch_and_proof(
         &self,
         l2_request_id: u128,
@@ -132,12 +184,14 @@ where
 
 #[cfg(test)]
 mod test {
+
     use super::*;
     use common::TryReceiveAsync;
     use gasp_types::RequestId;
     use l1api::mock::MockL1;
     use l2api::mock::MockL2;
     use l2api::types::BatchInfo;
+    use mockall::predicate::eq;
     use mockall::Sequence;
     use tokio::time::Duration;
     use tracing_test::traced_test;
@@ -189,11 +243,74 @@ mod test {
         let (sender, receiver) = mpsc::channel(100);
 
         let _t = tokio::spawn(async move {
-            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver);
+            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver, false);
             closer.run().await
         });
 
         sender.send(dummy_withdrawal(1u128)).await.unwrap();
+
+        is_closed.recv_timeout_async(TIMEOUT).await.unwrap();
+    }
+
+    #[tokio::test]
+    #[tracing_test::traced_test]
+    async fn test_close_multiple_withdrawals_at_once_ignoring_non_pending_withdrawals() {
+        let (signal, is_closed) = oneshot::channel();
+        let mut l1mock = MockL1::new();
+        let mut l2mock = MockL2::new();
+
+        let w1 = dummy_withdrawal(1u128);
+        let w2 = dummy_withdrawal(2u128);
+        let w3 = dummy_withdrawal(3u128);
+
+        l1mock
+            .expect_get_status()
+            .with(eq(w1.withdrawal_hash()))
+            .returning(|_| Ok(RequestStatus::Pending));
+        l1mock
+            .expect_get_status()
+            .with(eq(w2.withdrawal_hash()))
+            .returning(|_| Ok(RequestStatus::Closed));
+        l1mock
+            .expect_get_status()
+            .with(eq(w3.withdrawal_hash()))
+            .returning(|_| Ok(RequestStatus::Pending));
+
+        let closable_withdrawals =
+            vec![(w1, H256::default(), vec![]), (w3, H256::default(), vec![])];
+        l1mock
+            .expect_close_withdrawals_at_once()
+            .with(eq(closable_withdrawals))
+            .return_once(|_| {
+                signal.send(()).unwrap();
+                Ok(vec![H256::default(), H256::default()])
+            });
+
+        l2mock
+            .expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+
+        l2mock.expect_bisect_find_batch().returning(move |_, _, _| {
+            Ok(Some(BatchInfo {
+                batch_id: 1u128,
+                range: (1u128, 1u128),
+                merkle_root: H256::default(),
+            }))
+        });
+        l2mock
+            .expect_get_merkle_proof()
+            .returning(|_, _, _, _| Ok(Default::default()));
+
+        let (sender, receiver) = mpsc::channel(100);
+
+        sender.send(w1).await.unwrap();
+        sender.send(w2).await.unwrap();
+        sender.send(w3).await.unwrap();
+
+        let _t = tokio::spawn(async move {
+            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver, true);
+            closer.run().await
+        });
 
         is_closed.recv_timeout_async(TIMEOUT).await.unwrap();
     }
@@ -220,7 +337,7 @@ mod test {
         let (sender, receiver) = mpsc::channel(100);
         sender.send(dummy_withdrawal(1u128)).await.unwrap();
 
-        let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver);
+        let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver, false);
         assert!(matches!(
             closer.run().await,
             Err(Error::NoBatchForL2RequestId(1u128))
@@ -272,7 +389,7 @@ mod test {
         let (sender, receiver) = mpsc::channel(100);
 
         let t = tokio::spawn(async move {
-            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver);
+            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver, false);
             closer.run().await.unwrap()
         });
 
