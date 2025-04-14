@@ -1,10 +1,7 @@
 use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
-use crate::L1;
-use alloy::consensus::BlockHeader;
 use alloy::contract::{CallBuilder, CallDecoder};
-use contract_bindings::irolldownprimitives::IRolldownPrimitives::L2UpdateAccepted;
 use futures::{FutureExt, Stream, StreamExt};
 use lazy_static::lazy_static;
 use std::pin::Pin;
@@ -13,7 +10,6 @@ use tokio::time::Duration;
 
 use alloy::network::Network;
 use alloy::providers::{Provider, WalletProvider};
-use alloy::rpc::types::{Filter, Log};
 use alloy::transports::Transport;
 use primitive_types::H256;
 

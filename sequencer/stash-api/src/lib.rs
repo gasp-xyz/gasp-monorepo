@@ -36,11 +36,11 @@ S: StashInterface
     }
 }
 
+#[allow(async_fn_in_trait)]
 impl<S> StashInterface for RateLimitedStash<S> where 
 S: StashInterface
 {
      async fn get_withdrawal_status( &self, withdrawal_hash: H256,) -> Result<WithdrawalStatus, StashError> {
-        //TODO: implement rate limiting
         self.inner.get_withdrawal_status(withdrawal_hash).await
     }
 }

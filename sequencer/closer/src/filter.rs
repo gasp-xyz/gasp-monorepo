@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 
 use gasp_types::Withdrawal;
 use stash_api::{CreatedBy, StashInterface};

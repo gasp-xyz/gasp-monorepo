@@ -1,9 +1,9 @@
 use futures::StreamExt;
 use gasp_types::{Chain, L2Request, Withdrawal, H256};
-use l1api::{types::RequestStatus, L1Error, L1Interface, Subscription};
+use l1api::{types::RequestStatus, L1Error, L1Interface};
 use l2api::{L2Error, L2Interface};
 use tokio::sync::mpsc;
-use tokio::time::{timeout, Duration, Timeout};
+use tokio::time::{timeout, Duration};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

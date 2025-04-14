@@ -1,10 +1,9 @@
 #![allow(dead_code)]
-use std::time::Duration;
 
 use gasp_types::Withdrawal;
 use l1api::types::RequestStatus;
 use l1api::{L1Error, L1Interface};
-use l2api::types::{BatchId, BatchInfo, Chain, L2Request, H256};
+use l2api::types::{BatchInfo, Chain, H256};
 use l2api::{L2Error, L2Interface};
 use tokio::sync::mpsc;
 

@@ -1,15 +1,10 @@
 use clap::Parser;
 use closer::Closer;
-use futures::future::Join;
-use futures::{future::join_all, stream::FuturesUnordered, FutureExt, StreamExt};
-use hex_literal::hex;
-use l2api::{Gasp, L2Error};
+use l2api::Gasp;
 use tokio::sync::mpsc;
-use l1api::{create_provider, L1Error, Subscription, L1};
+use l1api::{Subscription, L1};
 use tokio::task::JoinHandle;
-use tokio::time::error::Elapsed;
 use tokio::time::Duration;
-use gasp_types::ChainParseError;
 
 mod cli;
 mod closer;

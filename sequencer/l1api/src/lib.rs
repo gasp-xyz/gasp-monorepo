@@ -1,4 +1,3 @@
-use std::{ops::Sub, pin::Pin};
 
 use alloy::{
     network::{EthereumWallet, Network, NetworkWallet},
@@ -7,7 +6,7 @@ use alloy::{
     sol_types::SolValue,
     transports::Transport,
 };
-use futures::{stream::BoxStream, Stream, StreamExt};
+use futures::{stream::BoxStream, StreamExt};
 use hex::encode as hex_encode;
 use hex_literal::hex;
 use primitive_types::H256;
