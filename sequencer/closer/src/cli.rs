@@ -10,6 +10,15 @@ pub struct Cli {
     #[arg(long, env = "L2_URI")]
     pub l2_uri: String,
 
+    #[arg(long, env = "STASH_URI")]
+    pub stash_uri: Option<String>,
+
+    #[arg(long, default_value_t = false, env = "SKIP_STASH")]
+    pub skip_stash: bool,
+
+    #[arg(long, default_value_t = false, env = "FORCE_POLLING")]
+    pub polling: bool,
+
     #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
     pub private_key: [u8; 32],
 

@@ -22,6 +22,7 @@ prometheus = "0.13.4"
 lazy_static = "1.4.0"
 warp = "0.3.7"
 clap = { version = "4.4.8", features = ["derive", "env"] }
+anyhow = "1.0.98"
 
 l1api = { workspace = true }
 l2api = { workspace = true }
