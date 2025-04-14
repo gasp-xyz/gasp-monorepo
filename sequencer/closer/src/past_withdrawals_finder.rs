@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use gasp_types::{Chain, L2Request, H256};
-use gasp_types::{Withdrawal, U256};
+use gasp_types::Withdrawal;
+use gasp_types::{L2Request, H256};
 use l1api::types::RequestStatus;
 use l1api::L1Interface;
 use l2api::L2Interface;
@@ -15,15 +15,6 @@ pub enum HunterError {
 
     #[error("L2Error `{0}`")]
     L2Error(#[from] l2api::L2Error),
-
-    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
-    RequestIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
-
-    #[error("Unknown merkle root for finalized request id `{0}`")]
-    UnknownMerkleRootForFinalizedRequestId(U256),
-
-    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
-    WithdrawalIdDoesNotExistsOnL2 { request_id: U256, chain: Chain },
 
     #[error("Sink send error")]
     SinkSendError(#[from] tokio::sync::mpsc::error::SendError<Withdrawal>),
@@ -65,21 +56,6 @@ where
             chunk_size,
             time_between_queries,
         }
-    }
-
-    async fn get_closable_requests(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
-        let latest_request_id_on_l2 = self
-            .l2
-            .get_latest_created_request_id(self.chain, l2_state)
-            .await?;
-        Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
-            (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id + 1, l2_request_id))
-            }
-            (None, Some(l2_request_id)) => Some((1, l2_request_id)),
-            _ => None,
-        })
     }
 
     #[tracing::instrument(level = "debug", skip(self, at))]

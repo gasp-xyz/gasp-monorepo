@@ -99,7 +99,6 @@ where
                 self.close_withdrawals(buffer.clone()).await?;
             }
         }
-        Ok(())
     }
 
     async fn get_batch_and_proof(

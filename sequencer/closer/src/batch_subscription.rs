@@ -69,7 +69,7 @@ where
         loop {
             let elem = timeout(Duration::from_secs_f64(30.0), subscription.next()).await;
             match elem {
-                Err(Timeout) => {
+                Err(_timeout) => {
                     tracing::info!("keep alive");
                 }
                 Ok(None) => {
@@ -93,6 +93,5 @@ where
                 }
             }
         }
-        Ok(())
     }
 }

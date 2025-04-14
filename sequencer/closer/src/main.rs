@@ -43,7 +43,6 @@ pub async fn main() -> Result {
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
-    let sender = l1api::address(provider.clone());
     let rolldown = if args.dry_run {
         l1api::RolldownContract::new_dry_run(provider.clone(), args.rolldown_contract_address)
     } else {
@@ -76,7 +75,6 @@ pub async fn main() -> Result {
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {
             tracing::info!("filtering withdrawals created by frontend");
-            let sink = closer_input.clone();
             tokio::spawn(async move {
                 let stash = stash_api::Stash::new(stash_uri);
                 filter::filter_deposits_created_by_frontend(stash, filter, closer_input).await;
