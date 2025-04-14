@@ -47,7 +47,7 @@ impl crate::L2Interface for L2{
     async fn get_l2_request(
         &self,
         chain: Chain,
-        range: u128,
+        request_id: u128,
         at: H256,
     ) -> Result<Option<L2Request>, L2Error>;
 
