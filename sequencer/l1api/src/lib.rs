@@ -1,3 +1,5 @@
+use tokio::time::Duration;
+
 use alloy::{
     network::{EthereumWallet, Network, NetworkWallet},
     providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
@@ -166,7 +168,7 @@ where
         match self.subscription {
             Subscription::Polling => Ok(self
                 .rolldown_contract
-                .subscribe_deposit_polling()
+                .subscribe_deposit_polling(tokio::time::Duration::from_secs_f32(30.0))
                 .await?
                 .boxed()),
             Subscription::Subscription => {
@@ -179,7 +181,7 @@ where
         match self.subscription {
             Subscription::Polling => Ok(self
                 .rolldown_contract
-                .subscribe_new_batch_polling()
+                .subscribe_new_batch_polling(Duration::from_secs(30))
                 .await?
                 .boxed()),
             Subscription::Subscription => {

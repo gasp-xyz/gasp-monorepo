@@ -287,24 +287,25 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn subscribe_new_batch_polling<'a>(
         &'a self,
+        timeout: Duration,
     ) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error> {
         let stream = stream! {
             match self.get_latest_batch().await{
                 Ok(Some(batch)) => yield batch,
                 Err(err) => {
                     tracing::warn!("could not get batch - err {err}");
-                    sleep(Duration::from_secs_f64(30.0)).await;
+                    sleep(timeout).await;
                 }
                 _ => {}
             };
 
             loop {
-                sleep(Duration::from_secs_f64(60.0)).await;
+                sleep(timeout).await;
                 match self.get_latest_batch().await{
                     Ok(Some(batch)) => yield batch,
                     Err(err) => {
                         tracing::warn!("could not get batch - err {err}");
-                        sleep(Duration::from_secs_f64(30.0)).await;
+                        sleep(timeout).await;
                     },
                     _ => {}
                 }
@@ -338,24 +339,41 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn subscribe_deposit_polling<'a>(
         &'a self,
+        timeout: Duration,
     ) -> Result<impl Stream<Item = u128> + 'a, L1Error> {
+        let get_id = |elem: types::abi::Deposit| {
+            gasp_types::from_l1_u256(elem.requestId.id)
+                .try_into()
+                .unwrap()
+        };
+        let mut last_sent: u128 = self
+            .get_latest_deposit()
+            .await?
+            .map(get_id)
+            .unwrap_or_default();
+
         let stream = stream! {
-            match self.get_latest_deposit().await{
-                Ok(Some(deposit)) => yield gasp_types::from_l1_u256(deposit.requestId.id).try_into().unwrap(),
-                Err(err) => {
-                    tracing::warn!("could not get deposit - err {err}");
-                    sleep(Duration::from_secs_f64(30.0)).await;
-                }
-                _ => {}
-            };
+            if last_sent > 0 {
+                yield last_sent;
+            }
 
             loop {
-                sleep(Duration::from_secs_f64(60.0)).await;
-                match self.get_latest_deposit().await{
-                    Ok(Some(deposit)) => yield gasp_types::from_l1_u256(deposit.requestId.id).try_into().unwrap(),
+                sleep(timeout).await;
+                match self.get_latest_deposit().await.map(|e| e.map(get_id)){
+                    Ok(Some(latest_id)) => {
+                        let start = last_sent;
+                        for id in start..=latest_id{
+                            if let Ok(Some(deposit_id)) = self.get_deposit_if_exists(id).await.map(|e| e.map(get_id)){
+                                if deposit_id > last_sent {
+                                    last_sent = deposit_id;
+                                    yield deposit_id;
+                                }
+                            }
+                        }
+                    },
                     Err(err) => {
                         tracing::warn!("could not get deposit - err {err}");
-                        sleep(Duration::from_secs_f64(30.0)).await;
+                        sleep(timeout).await;
                     }
                     _ => {}
                 }

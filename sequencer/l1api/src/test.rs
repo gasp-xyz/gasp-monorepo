@@ -375,3 +375,26 @@ async fn test_subscribe_deposits() {
     assert_eq!(subscription.next().await, Some(3u128));
     assert_eq!(subscription.next().await, None);
 }
+
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_subscribe_deposits_polling() {
+    let provider = create_provider(WS_URI, ALICE_PKEY).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+
+    let mut subscription = rolldown
+        .subscribe_deposit_polling(tokio::time::Duration::from_secs_f32(0.25))
+        .await
+        .unwrap()
+        .take(3)
+        .boxed();
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+    rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
+
+    assert_eq!(subscription.next().await, Some(1u128));
+    assert_eq!(subscription.next().await, Some(2u128));
+    assert_eq!(subscription.next().await, Some(3u128));
+    assert_eq!(subscription.next().await, None);
+}
