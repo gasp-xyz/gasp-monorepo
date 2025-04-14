@@ -13,20 +13,11 @@ pub struct Cli {
     #[arg(long, env = "STASH_URI")]
     pub stash_uri: Option<String>,
 
-    #[arg(long, default_value_t = false, env = "SKIP_STASH")]
-    pub skip_stash: bool,
-
-    #[arg(long, default_value_t = false, env = "FORCE_POLLING")]
-    pub polling: bool,
-
     #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
     pub private_key: [u8; 32],
 
     #[arg(long, env = "CHAIN")]
     pub chain_id: u32,
-
-    #[arg(long, default_value_t = 0u128, env = "OFFSET")]
-    pub offset: u128,
 
     #[arg(long, env = "DRY_RUN")]
     pub dry_run: bool,
@@ -34,7 +25,16 @@ pub struct Cli {
     #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
-    #[arg(long, env = "BATCH_SIZE")]
+    #[arg(long, default_value_t = false, env = "SKIP_STASH")]
+    pub skip_stash: bool,
+
+    #[arg(long, default_value_t = false, env = "FORCE_POLLING")]
+    pub polling: bool,
+
+    #[arg(long, default_value_t = 0u128, env = "OFFSET")]
+    pub offset: u128,
+
+    #[arg(long, default_value_t= 25, env = "BATCH_SIZE")]
     pub batch_size: usize,
 
     #[arg(long, default_value_t = 1, env = "REPLICA_ID")]
