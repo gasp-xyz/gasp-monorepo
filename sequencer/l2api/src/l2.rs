@@ -1,9 +1,7 @@
 use futures::future::join_all;
-use futures::FutureExt;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
 use std::collections::HashMap;
-use subxt::client::OfflineClientT;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 
