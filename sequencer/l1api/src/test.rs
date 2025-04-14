@@ -330,7 +330,7 @@ async fn test_subscribe_new_batches() {
     let rolldown_handle = rolldown.clone();
     let dummy_hash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
 
-    let x = tokio::spawn(async move {
+    let _task = tokio::spawn(async move {
         let mut id = 0u128;
         loop {
             id += 1;

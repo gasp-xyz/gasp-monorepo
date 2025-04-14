@@ -2,9 +2,8 @@ use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
 use alloy::contract::{CallBuilder, CallDecoder};
-use futures::{FutureExt, Stream, StreamExt};
+use futures::{Stream, StreamExt};
 use lazy_static::lazy_static;
-use std::pin::Pin;
 use tokio::time::sleep;
 use tokio::time::Duration;
 
@@ -31,8 +30,6 @@ pub struct RolldownContract<T, P, N> {
     contract_handle: contract_bindings::rolldown::Rolldown::RolldownInstance<T, P, N>,
     dry_run: bool,
 }
-
-pub type BatchStream = Pin<Box<dyn Stream<Item = Result<H256, L1Error>> + Send + 'static>>;
 
 impl<T, P, N> RolldownContract<T, P, N>
 where
@@ -304,11 +301,11 @@ where
                 sleep(Duration::from_secs_f64(60.0)).await;
                 match self.get_latest_batch().await{
                     Ok(Some(batch)) => yield batch,
-                    _ => {}
                     Err(err) => {
                         tracing::warn!("could not get batch - err {err}");
                         sleep(Duration::from_secs_f64(30.0)).await;
-                    }
+                    },
+                    _ => {}
                 }
             }
         };
@@ -355,11 +352,11 @@ where
                 sleep(Duration::from_secs_f64(60.0)).await;
                 match self.get_latest_deposit().await{
                     Ok(Some(deposit)) => yield gasp_types::from_l1_u256(deposit.requestId.id).try_into().unwrap(),
-                    _ => {}
                     Err(err) => {
                         tracing::warn!("could not get deposit - err {err}");
                         sleep(Duration::from_secs_f64(30.0)).await;
                     }
+                    _ => {}
                 }
             }
         };
