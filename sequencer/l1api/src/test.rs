@@ -330,19 +330,53 @@ async fn test_subscribe_new_batches() {
     let rolldown_handle = rolldown.clone();
     let dummy_hash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
 
+    let mut subscription = rolldown.subscribe_new_batch().await.unwrap().take(3);
+
+    for id in 1..=3 {
+        tracing::info!("sending merkle root");
+        rolldown_handle
+            .submit_merkle_root(dummy_hash, (id, id))
+            .await
+            .unwrap();
+    }
+
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (1u128, 1u128)))
+    );
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (2u128, 2u128)))
+    );
+    assert_eq!(
+        subscription.next().await,
+        Some((dummy_hash.into(), (3u128, 3u128)))
+    );
+    assert_eq!(subscription.next().await, None);
+}
+
+#[serial]
+#[traced_test]
+#[tokio::test]
+async fn test_subscribe_new_batches_polling() {
+    let provider = create_provider(WS_URI, ALICE_PKEY).await.unwrap();
+    let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
+
+    let rolldown_handle = rolldown.clone();
+    let dummy_hash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
+
+    let mut subscription = rolldown.subscribe_new_batch_polling(tokio::time::Duration::from_secs_f32(0.25)).await.unwrap().take(3).boxed();
+
     let _task = tokio::spawn(async move {
-        let mut id = 0u128;
-        loop {
-            id += 1;
-            tracing::info!("sending merkle root");
-            rolldown_handle
-                .submit_merkle_root(dummy_hash, (id, id))
-                .await
-                .unwrap();
-        }
+    for id in 1..=3 {
+        tracing::info!("sending merkle root");
+        rolldown_handle
+            .submit_merkle_root(dummy_hash, (id, id))
+            .await
+            .unwrap();
+    }
     });
 
-    let mut subscription = rolldown.subscribe_new_batch().await.unwrap().take(3);
     assert_eq!(
         subscription.next().await,
         Some((dummy_hash.into(), (1u128, 1u128)))

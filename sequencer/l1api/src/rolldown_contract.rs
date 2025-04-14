@@ -222,15 +222,24 @@ where
 
     #[tracing::instrument(skip(self))]
     #[allow(clippy::type_complexity)]
-    pub async fn get_latest_batch(&self) -> Result<Option<(H256, (u128, u128))>, L1Error> {
+    pub async fn get_latest_batch(&self) -> Result<Option<(H256, u128, (u128, u128))>, L1Error> {
         let amount = self.get_amount_of_merkle_roots().await?;
         if amount > 0 {
-            let root = self.get_merkle_root_by_id(amount - 1).await?;
-            let range = self.get_request_range_from_merkle_root(root).await?;
-            Ok(Some((root.into(), range)))
+            let batch_id = amount - 1;
+            self.get_batch(batch_id)
+                .await
+                .map(|elem| elem.map(|(merkle_root, range)| (merkle_root, batch_id, range)))
         } else {
             Ok(None)
         }
+    }
+
+    #[tracing::instrument(skip(self))]
+    #[allow(clippy::type_complexity)]
+    pub async fn get_batch(&self, batch_id: u128) -> Result<Option<(H256, (u128, u128))>, L1Error> {
+        let root = self.get_merkle_root_by_id(batch_id).await?;
+        let range = self.get_request_range_from_merkle_root(root).await?;
+        Ok(Some((root.into(), range)))
     }
 
     #[tracing::instrument(skip(self))]
@@ -289,21 +298,45 @@ where
         &'a self,
         timeout: Duration,
     ) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error> {
+
+        let batch = self.get_latest_batch().await?;
         let stream = stream! {
-            match self.get_latest_batch().await{
-                Ok(Some(batch)) => yield batch,
-                Err(err) => {
-                    tracing::warn!("could not get batch - err {err}");
+
+            let mut last_sent = None;
+            loop {
+                if let Some((root, batch_id ,range)) = batch{
+                    last_sent = Some(batch_id);
+                    yield (root, range);
                     sleep(timeout).await;
                 }
-                _ => {}
-            };
 
-            loop {
-                sleep(timeout).await;
-                match self.get_latest_batch().await{
-                    Ok(Some(batch)) => yield batch,
-                    Err(err) => {
+                match (self.get_latest_batch().await, last_sent){
+                    (Ok(Some((_, batch_id, _))), Some(start)) => {
+                        for batch_id in start..=batch_id{
+                            if batch_id > start{
+                                match self.get_batch(batch_id).await {
+                                    Ok(Some((root, range))) => {
+                                        last_sent = Some(batch_id);
+                                        yield (root, range);
+                                    }
+                                    Ok(None) => {
+                                        tracing::warn!("could not fetch batch, retrying");
+                                    }
+                                    Err(e) => {
+                                        tracing::warn!("could not fetch batch with err {e}");
+                                        break;
+                                    },
+                                }
+                            }
+                        }
+                    },
+                    (Ok(Some((root, batch_id, range))), None) => {
+                        for batch_id in 0..=batch_id{
+                            last_sent = Some(batch_id);
+                            yield (root, range);
+                        }
+                    },
+                    (Err(err), _) => {
                         tracing::warn!("could not get batch - err {err}");
                         sleep(timeout).await;
                     },
