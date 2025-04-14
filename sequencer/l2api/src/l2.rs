@@ -513,6 +513,7 @@ impl L2Interface for Gasp {
         }
     }
 
+    //TODO: add test
     async fn bisect_find_batch(
         &self,
         request_id: u128,
@@ -539,7 +540,7 @@ impl L2Interface for Gasp {
                         break Ok(Some(BatchInfo {
                             batch_id,
                             range,
-                            merkle_root: todo!(),
+                            merkle_root,
                         }));
                     } else if request_id > range_end {
                         mid = (mid + right) / 2;
