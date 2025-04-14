@@ -110,12 +110,13 @@ where
                 .map(|(w, _, _)| w.request_id.id.try_into().unwrap())
                 .collect();
 
-            tracing::info!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
-            self.l1
+            tracing::debug!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
+            let tx = self
+                .l1
                 .close_withdrawals_at_once(closable_withdrawals)
                 .await?;
 
-            tracing::info!("batch closing finished");
+            tracing::info!("batch closed successfully {tx}");
         } else {
             for w in withdrawals {
                 if self.is_pending(w).await? {
@@ -283,7 +284,7 @@ mod test {
             .with(eq(closable_withdrawals))
             .return_once(|_| {
                 signal.send(()).unwrap();
-                Ok(vec![H256::default(), H256::default()])
+                Ok(H256::default())
             });
 
         l2mock

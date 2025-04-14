@@ -41,7 +41,7 @@ mockall::mock! {
         async fn close_withdrawals_at_once(
             &self,
             withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
-        ) -> Result<Vec<H256>, L1Error>;
+        ) -> Result<H256, L1Error>;
 
     }
 }
