@@ -90,6 +90,7 @@ pub enum Subscription{
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
+    async fn subscribe_deposit(& self, subscription: Subscription) -> Result<BoxStream<u128>, L1Error>;
     async fn subscribe_new_batch(& self, subscription: Subscription) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>;
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
@@ -161,6 +162,19 @@ where
     N: Network,
 {
 
+
+    async fn subscribe_deposit(& self, subscription: Subscription) -> Result<BoxStream<u128>, L1Error>{
+        match subscription{
+            Subscription::Polling => {
+                Ok(self.rolldown_contract.subscribe_deposit_polling().await?.boxed())
+            },
+            Subscription::Subscription => {
+                Ok(self.rolldown_contract.subscribe_deposit().await?.boxed())
+            }
+        }
+    }
+
+
     async fn subscribe_new_batch(& self, subscription: Subscription) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>{
         match subscription{
             Subscription::Polling => {
@@ -223,13 +237,7 @@ where
 
     #[tracing::instrument(skip(self))]
     async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error> {
-        let next_request_id = self.rolldown_contract.get_next_request_id().await?;
-
-        if next_request_id == 1 {
-            Ok(None)
-        } else {
-            Ok(next_request_id.checked_sub(1u128))
-        }
+        self.rolldown_contract.get_latest_reqeust_id().await
     }
 
     #[tracing::instrument(skip(self))]

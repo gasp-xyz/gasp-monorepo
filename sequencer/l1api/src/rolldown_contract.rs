@@ -240,16 +240,52 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn get_latest_deposit(&self) -> Result<Option<(H256, (u128, u128))>, L1Error> {
-        let amount = self.get_amount_of_merkle_roots().await?;
-        if amount > 0 {
-            let root = self.get_merkle_root_by_id(amount - 1).await?;
-            let range = self.get_request_range_from_merkle_root(root).await?;
-            Ok(Some((root.into(), range)))
-        } else {
+    pub async fn get_deposit_if_exists(&self, request_id: u128) -> Result<Option<types::abi::Deposit>, L1Error> {
+        let deposit = self.contract_handle.deposits(gasp_types::into_l1_u256(request_id.into())).call().await?;
+        if deposit.requestId.id > gasp_types::into_l1_u256(0u128.into()) {
+            Ok(Some(types::abi::Deposit{ 
+                requestId: deposit.requestId, 
+                depositRecipient: deposit.depositRecipient, 
+                tokenAddress: deposit.tokenAddress, 
+                amount: deposit.amount, 
+                timeStamp: deposit.timeStamp, 
+                ferryTip: deposit.ferryTip
+            }
+            ))
+        }else{
             Ok(None)
         }
+
     }
+
+
+    #[tracing::instrument(skip(self))]
+    pub async fn get_latest_deposit(&self) -> Result<Option<types::abi::Deposit>, L1Error> {
+        match self.get_latest_reqeust_id().await?{
+            Some(mut id) => {
+                while id > 0u128 {
+                    if let Some(deposit) = self.get_deposit_if_exists(id).await?{
+                        return Ok(Some(deposit));
+                    }else{
+                        id -= 1;
+                    }
+                }
+                Ok(None)
+            },
+            None => Ok(None),
+        }
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error> {
+        let next_request_id = self.get_next_request_id().await?;
+        if next_request_id == 1 {
+            Ok(None)
+        } else {
+            Ok(next_request_id.checked_sub(1u128))
+        }
+    }
+
 
 
     #[tracing::instrument(skip(self))]
@@ -290,8 +326,7 @@ where
             .DepositAcceptedIntoQueue_filter()
             .filter;
         Ok(p.subscribe_logs(&filter)
-            .await
-            .unwrap()
+            .await?
             .into_stream()
             .map(|elem| {
                 let log = elem
@@ -300,8 +335,40 @@ where
                 gasp_types::from_l1_u256(log.data().requestId)
                     .try_into()
                     .unwrap()
-            }))
+            }).map(|request_id| request_id)
+        )
     }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_deposit_polling<'a>(
+        &'a self,
+    ) -> Result<impl Stream<Item = u128> + 'a, L1Error> {
+        let stream = stream! {
+            match self.get_latest_deposit().await{
+                Ok(Some(deposit)) => yield gasp_types::from_l1_u256(deposit.requestId.id).try_into().unwrap(),
+                Err(err) => {
+                    tracing::warn!("could not get deposit - err {err}");
+                    sleep(Duration::from_secs_f64(30.0)).await;
+                }
+                _ => {}
+            };
+
+            loop {
+                sleep(Duration::from_secs_f64(60.0)).await;
+                match self.get_latest_deposit().await{
+                    Ok(Some(deposit)) => yield gasp_types::from_l1_u256(deposit.requestId.id).try_into().unwrap(),
+                    _ => {}
+                    Err(err) => {
+                        tracing::warn!("could not get deposit - err {err}");
+                        sleep(Duration::from_secs_f64(30.0)).await;
+                    }
+                }
+            }
+        };
+
+        Ok(dedup_stream(stream.boxed()))
+    }
+
 
     pub fn address(&self) -> [u8; 20] {
         (*self.contract_handle.address()).into()
