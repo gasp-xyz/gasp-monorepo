@@ -11,10 +11,10 @@ use tokio::sync::mpsc;
 #[derive(thiserror::Error, Debug)]
 pub enum HunterError {
     #[error("L1Error `{0}`")]
-    L1Error(#[from] l1api::L1Error),
+    L1(#[from] l1api::L1Error),
 
     #[error("L2Error `{0}`")]
-    L2Error(#[from] l2api::L2Error),
+    L2(#[from] l2api::L2Error),
 
     #[error("Sink send error")]
     SinkSendError(#[from] tokio::sync::mpsc::error::SendError<Withdrawal>),

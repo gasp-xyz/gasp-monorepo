@@ -221,6 +221,7 @@ where
     }
 
     #[tracing::instrument(skip(self))]
+    #[allow(clippy::type_complexity)]
     pub async fn get_latest_batch(&self) -> Result<Option<(H256, (u128, u128))>, L1Error> {
         let amount = self.get_amount_of_merkle_roots().await?;
         if amount > 0 {

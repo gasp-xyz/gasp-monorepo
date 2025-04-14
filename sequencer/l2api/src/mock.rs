@@ -9,6 +9,7 @@ mockall::mock! {
     pub L2 {}
 
 
+#[allow(clippy::type_complexity)]
 impl crate::L2Interface for L2{
 
     async fn get_best_block(&self) -> Result<(u32, H256), L2Error>;

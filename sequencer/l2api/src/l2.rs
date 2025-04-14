@@ -467,6 +467,7 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(level = "trace", skip(self), ret)]
+    #[allow(clippy::type_complexity)]
     async fn get_latest_batch(
         &self,
         request_id: u128,
@@ -488,9 +489,7 @@ impl L2Interface for Gasp {
         Ok(last_batch
             .iter()
             .find(|(c, _)| *c == chain)
-            .map(|(_m, (_block, batch_id, range))| {
-                (*batch_id as u128, (range.0 as u128, range.1 as u128))
-            }))
+            .map(|(_m, (_block, batch_id, range))| (*batch_id, (range.0, range.1))))
     }
 
     async fn get_batch_range(
