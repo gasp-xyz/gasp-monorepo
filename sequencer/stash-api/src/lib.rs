@@ -45,19 +45,18 @@ pub trait StashInterface {
     ) -> Result<WithdrawalStatus, StashError>;
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone)]
 pub enum CreatedBy {
     Frontend,
     Other,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WithdrawalStatus {
     pub created_by: CreatedBy,
 }
 
-#[cfg(test)]
-mod mock {
+pub mod mock {
     use super::*;
     mockall::mock! {
 
