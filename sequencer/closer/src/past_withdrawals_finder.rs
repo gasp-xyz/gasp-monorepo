@@ -35,6 +35,7 @@ pub struct FerryHunter<L1, L2> {
     replica_count: u128,
 }
 
+#[allow(clippy::too_many_arguments)]
 impl<L1, L2> FerryHunter<L1, L2>
 where
     L1: L1Interface,
