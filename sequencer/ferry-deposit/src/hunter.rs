@@ -64,10 +64,10 @@ where
     }
 
     pub async fn run(&mut self) -> HunterResult<()> {
-        let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
-        //TODO replace with wait for the next block
+        let mut stream = self.l1.subscribe_deposit().await?;
         while let Some(elem) = stream.next().await {
-            let (block_nr, at) = elem?;
+
+            let (block_nr, at) = self.l2.get_best_block().await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
 
             let mut latest = self.latest_processed;

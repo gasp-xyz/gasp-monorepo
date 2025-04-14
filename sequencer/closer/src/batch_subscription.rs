@@ -63,8 +63,8 @@ where
         }
     }
 
-    pub async fn run(&mut self, subscription: Subscription) -> Result<(), Error> {
-        let mut subscription = self.l1.subscribe_new_batch(subscription).await?;
+    pub async fn run(&mut self) -> Result<(), Error> {
+        let mut subscription = self.l1.subscribe_new_batch().await?;
 
         loop {
             let elem = timeout(Duration::from_secs_f64(30.0), subscription.next()).await;

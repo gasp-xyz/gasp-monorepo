@@ -50,14 +50,14 @@ pub async fn main() -> Result {
     }else{
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
-    let l1 = L1::new(rolldown, provider);
+    let l1 = L1::new(rolldown, provider, subscription);
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
 
     let mut finder= past_withdrawals_finder::FerryHunter::new(chain, l1.clone(), l2.clone(), args.batch_size, args.offset, Duration::from_secs_f64(0.25), filter_input.clone());
     let finder_task: TaskHandle= tokio::spawn(async move{Ok(finder.run().await?)});
     let mut new_withdrawals_subscriber= batch_subscription::WithdrawalSubscriber::new(chain, l1.clone(), l2.clone(), filter_input.clone(), args.batch_size);
-    let new_withdrawals_subscriber_task:  TaskHandle= tokio::spawn(async move{Ok(new_withdrawals_subscriber.run(subscription).await?)});
+    let new_withdrawals_subscriber_task:  TaskHandle= tokio::spawn(async move{Ok(new_withdrawals_subscriber.run().await?)});
 
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {

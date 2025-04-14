@@ -18,6 +18,9 @@ pub struct Cli {
     #[arg(long, value_parser = common::parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
+    #[arg(long, default_value_t = false, env = "FORCE_POLLING")]
+    pub polling: bool,
+
     #[arg(long, default_value_t = 0, env = "OFFSET")]
     pub offset: u32,
 

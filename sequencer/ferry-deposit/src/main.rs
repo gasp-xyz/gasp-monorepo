@@ -1,7 +1,7 @@
 use clap::Parser;
 use ferry::FerryError;
 use hunter::HunterError;
-use l1api::L1;
+use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -46,6 +46,7 @@ pub async fn main() -> Result<(), Error> {
 
     tracing::info!("{args:?}");
 
+    let subscription = if args.polling { Subscription::Polling } else { Subscription::Subscription };
     let (hunter_to_filter, filter_input) = channel(1_000_000);
     let (to_executor, executor) = channel(1_000_000);
 
@@ -55,8 +56,9 @@ pub async fn main() -> Result<(), Error> {
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
 
+
     let mut hunter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
+        let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
         hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
     };
 

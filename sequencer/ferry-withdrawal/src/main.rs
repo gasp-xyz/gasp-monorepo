@@ -1,7 +1,7 @@
 use clap::Parser;
 use ferry::FerryError;
 use hunter::HunterError;
-use l1api::L1;
+use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -50,6 +50,7 @@ pub async fn main() -> Result<(), Error> {
 
     tracing::info!("{args:?}");
 
+    let subscription = if args.polling { Subscription::Polling } else { Subscription::Subscription };
     let (hunter_to_filter, filter_input) = channel(1_000_000);
     let (to_executor, executor) = channel(1_000_000);
 
@@ -58,12 +59,12 @@ pub async fn main() -> Result<(), Error> {
     let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+    let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
 
     let mut cleaner = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
         cleaner::FerryCleaner::new(
             chain,
-            l1,
+            l1.clone(),
             l2.clone(),
             sender,
             to_executor.clone(),
@@ -72,14 +73,12 @@ pub async fn main() -> Result<(), Error> {
     };
 
     let mut hunter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
-        hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
+        hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter)
     };
 
     let mut filter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
         filter::Filter::new(
-            l1,
+            l1.clone(),
             l2.clone(),
             filter_input,
             to_executor,
@@ -88,8 +87,7 @@ pub async fn main() -> Result<(), Error> {
     };
 
     let mut executor = {
-        let l1 = L1::new(rolldown, provider.clone());
-        ferry::Ferry::new(l1, l2.clone(), sender, chain, args.tx_cost, executor)
+        ferry::Ferry::new(l1.clone(), l2.clone(), sender, chain, args.tx_cost, executor)
     };
 
     if let Some(port) = args.prometheus_port {

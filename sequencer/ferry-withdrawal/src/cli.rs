@@ -29,4 +29,7 @@ pub struct Cli {
 
     #[arg(long, default_value_t = 1_000_000_000_000_000, env = "TX_COST")]
     pub tx_cost: u128,
+
+    #[arg(long, default_value_t = false, env = "FORCE_POLLING")]
+    pub polling: bool,
 }

@@ -1,7 +1,7 @@
 use alloy::{network::NetworkWallet, providers::WalletProvider};
 use envconfig::Envconfig;
 use hex::FromHex;
-use l1api::CachedL1Interface;
+use l1api::{CachedL1Interface, Subscription};
 use tracing::level_filters::LevelFilter;
 
 mod sequencer;
@@ -44,6 +44,9 @@ struct Config {
 
     #[envconfig(from = "METRICS_PORT", default = "8080")]
     pub metrics_port: u16,
+
+    #[envconfig(default = "false", from = "FORCE_POLLING")]
+    pub polling: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -69,6 +72,7 @@ pub async fn main() {
 
     let mut config = Config::init_from_env().unwrap();
 
+
     config.tx_cost = match config.tx_cost {
         Some(0u128) => None,
         Some(amount) => Some(amount),
@@ -91,6 +95,7 @@ fn strip_prefix(str: &String) -> &str {
 }
 
 async fn run(config: Config) -> Result<(), Error> {
+    let subscription = if config.polling { Subscription::Polling } else { Subscription::Subscription };
     let timeout = config.timeout;
     let duration = Duration::from_secs(timeout.try_into().expect("overflow"));
     let (tx, mut watchdog) = Watchdog::new(duration);
@@ -139,7 +144,7 @@ async fn run(config: Config) -> Result<(), Error> {
         .address()
         .into_inner();
 
-    let rolldown = l1api::L1::new(rolldown, provider.clone());
+    let rolldown = l1api::L1::new(rolldown, provider.clone(), subscription);
 
     let _balance_tracker = tokio::spawn(async move {
         common::report_account_balance(provider).await;
