@@ -105,7 +105,7 @@ where
                 tracing::debug!("found {count} withdrawals to close");
                 self.close_withdrawals(buffer.clone()).await?;
             }
-            if self.input.is_closed(){
+            if self.input.is_closed() {
                 break;
             }
         }
@@ -210,9 +210,9 @@ mod test {
         l2mock
             .expect_get_best_block()
             .returning(|| Ok((1, H256::zero())));
-        l2mock.expect_bisect_find_batch().returning(|_, _, _| {
-            Ok(None)
-        });
+        l2mock
+            .expect_bisect_find_batch()
+            .returning(|_, _, _| Ok(None));
         l2mock
             .expect_get_merkle_proof()
             .returning(|_, _, _, _| Ok(Default::default()));
@@ -221,7 +221,10 @@ mod test {
         sender.send(dummy_withdrawal(1u128)).await.unwrap();
 
         let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver);
-        assert!(matches!(closer.run().await, Err(Error::NoBatchForL2RequestId(1u128))));
+        assert!(matches!(
+            closer.run().await,
+            Err(Error::NoBatchForL2RequestId(1u128))
+        ));
     }
 
     #[tokio::test]
@@ -236,19 +239,21 @@ mod test {
             .expect_get_status()
             // .with(eq(withdrawal.withdrawal_hash()))
             .times(1)
-            .in_sequence(& mut seq)
+            .in_sequence(&mut seq)
             .returning(|_| Ok(RequestStatus::Pending));
 
         l1mock
             .expect_get_status()
             // .with(eq(withdrawal.withdrawal_hash()))
             .times(1)
-            .in_sequence(& mut seq)
+            .in_sequence(&mut seq)
             .return_once(|_| {
                 signal.send(()).unwrap();
                 Ok(RequestStatus::Closed)
             });
-        l1mock.expect_close_withdrawal().return_once(|_, _, _| Err(L1Error::TxReverted(H256::zero())));
+        l1mock
+            .expect_close_withdrawal()
+            .return_once(|_, _, _| Err(L1Error::TxReverted(H256::zero())));
 
         l2mock
             .expect_get_best_block()
