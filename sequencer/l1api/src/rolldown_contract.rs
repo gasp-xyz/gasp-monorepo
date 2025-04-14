@@ -298,7 +298,6 @@ where
         &'a self,
         timeout: Duration,
     ) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error> {
-
         let batch = self.get_latest_batch().await?;
         let stream = stream! {
 

@@ -365,16 +365,21 @@ async fn test_subscribe_new_batches_polling() {
     let rolldown_handle = rolldown.clone();
     let dummy_hash = hex!("0000000000000000000000000000000000000000000000000000000000000000");
 
-    let mut subscription = rolldown.subscribe_new_batch_polling(tokio::time::Duration::from_secs_f32(0.25)).await.unwrap().take(3).boxed();
+    let mut subscription = rolldown
+        .subscribe_new_batch_polling(tokio::time::Duration::from_secs_f32(0.25))
+        .await
+        .unwrap()
+        .take(3)
+        .boxed();
 
     let _task = tokio::spawn(async move {
-    for id in 1..=3 {
-        tracing::info!("sending merkle root");
-        rolldown_handle
-            .submit_merkle_root(dummy_hash, (id, id))
-            .await
-            .unwrap();
-    }
+        for id in 1..=3 {
+            tracing::info!("sending merkle root");
+            rolldown_handle
+                .submit_merkle_root(dummy_hash, (id, id))
+                .await
+                .unwrap();
+        }
     });
 
     assert_eq!(
