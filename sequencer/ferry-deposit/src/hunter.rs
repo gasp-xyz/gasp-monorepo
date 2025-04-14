@@ -109,10 +109,9 @@ mod test {
 
     use super::*;
     use futures::stream;
-    use gasp_types::{RequestId, U256};
+    use gasp_types::RequestId;
 
     use l1api::L1Error;
-    use l2api::L2Error;
     use mockall::{predicate::eq, Sequence};
     use test_case::test_case;
     use tracing_test::traced_test;
@@ -155,18 +154,11 @@ mod test {
     #[tokio::test]
     async fn test_ferry_services_when_no_requests_to_ferry() {
         let mut l1mock = l1api::mock::MockL1::default();
-        let mut l2mock = l2api::mock::MockL2::default();
-
-        l2mock
-            .expect_header_stream()
-            .return_once(|_| Ok(Box::pin(stream::iter(vec![Ok((1u32, [0u8; 32].into()))]))));
+        let l2mock = l2api::mock::MockL2::default();
 
         l1mock
-            .expect_get_latest_reqeust_id()
-            .return_once(move || Ok(None));
-        l2mock
-            .expect_get_latest_processed_request_id()
-            .return_once(move |_, _| Ok(0u128));
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(stream::pending().boxed()));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -176,7 +168,9 @@ mod test {
                 .unwrap();
         });
 
-        handle.await.unwrap();
+        tokio::time::timeout(tokio::time::Duration::from_secs_f32(0.1), handle)
+            .await
+            .unwrap_err();
     }
 
     fn deposit_stream() -> impl Iterator<Item = Deposit> {
@@ -201,26 +195,20 @@ mod test {
         Ok(Some(nth_deposit(id as usize)))
     }
 
-    fn block_hash(id: usize) -> H256 {
-        U256::from(id).to_big_endian().into()
-    }
-
-    fn header_stream() -> impl Iterator<Item = Result<(u32, H256), L2Error>> {
-        std::iter::repeat(())
-            .enumerate()
-            .skip(1)
-            .map(|(id, _)| Ok::<_, L2Error>((id as u32, block_hash(id))))
-    }
-
     #[tokio::test]
     #[traced_test]
     async fn test_fetches_single_request() {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
+        l1mock
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(futures::stream::iter(std::iter::once(1u128)).boxed()));
+
         l2mock
-            .expect_header_stream()
-            .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(1)))));
+            .expect_get_best_block()
+            .return_once(|| Ok((1, H256::default())));
+
         l1mock
             .expect_get_latest_reqeust_id()
             .returning(|| Ok(Some(1u128)));
@@ -255,9 +243,12 @@ mod test {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
+        l1mock
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(futures::stream::iter([1, 2, 3]).boxed()));
         l2mock
-            .expect_header_stream()
-            .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(3)))));
+            .expect_get_best_block()
+            .returning(|| Ok((1, H256::default())));
 
         l2mock
             .expect_get_latest_processed_request_id()

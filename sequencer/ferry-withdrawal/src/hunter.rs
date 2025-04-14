@@ -245,6 +245,7 @@ mod test {
         l2mock
             .expect_header_stream()
             .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(1)))));
+
         l1mock
             .expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
