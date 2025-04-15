@@ -191,149 +191,149 @@ try-runtime-cli = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "
 ver-api = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "eth-rollup-develop", default-features = false }
 pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "eth-rollup-develop", default-features = false }
 
-# [patch."https://github.com/paritytech/polkadot-sdk"]
-# # ... which satisfies git dependency `sp-crypto-ec-utils` of package `sp-ark-bls12-381 v0.4.2 (https://github.com/paritytech/arkworks-substrate#caa2eed7)`
-# sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "eth-rollup-develop" }
-
-#polkdadot sdk
-[patch."https://github.com/gasp-xyz/polkadot-sdk"]
-extrinsic-shuffler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-fork-tree = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-benchmarking-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-executive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-support-procedural = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-support-procedural-tools = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-support-procedural-tools-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-system = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-system-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-system-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-frame-try-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-mangata-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-mangata-types = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-authorship = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-balances = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-collective-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-identity = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-membership = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-proxy = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-sudo-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-transaction-payment = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-transaction-payment-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-treasury = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-utility = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-utility-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-vesting-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-allocator = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-basic-authorship-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-block-builder-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-chain-spec = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-chain-spec-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-client-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-client-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-executor = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-executor-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-executor-polkavm = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-executor-wasmtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-informant = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-bitswap = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-gossip = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-light = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-sync = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-network-transactions = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-proposer-metrics = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-rpc-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-rpc-server = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-rpc-spec-v2 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-service = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-state-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-sysinfo = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-telemetry = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-tracing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-transaction-pool-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sc-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-api-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-application-crypto = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-arithmetic = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-blockchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-consensus-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-core = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-crypto-hashing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-crypto-hashing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-database = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-debug-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-externalities = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-genesis-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-inherents = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-io = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-keyring = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-maybe-compressed-blob = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-metadata-ir = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-panic-handler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-runtime-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-runtime-interface-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-staking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-state-machine = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-statement-store = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-std = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-storage = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-transaction-storage-proof = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-trie = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-version = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-version-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-wasm-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-sp-weights = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-bip39 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-build-script-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-prometheus-endpoint = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-test-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-test-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-test-runtime-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-substrate-wasm-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-try-runtime-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-ver-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods"}
-
 [patch."https://github.com/paritytech/polkadot-sdk"]
 # ... which satisfies git dependency `sp-crypto-ec-utils` of package `sp-ark-bls12-381 v0.4.2 (https://github.com/paritytech/arkworks-substrate#caa2eed7)`
-sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "eth-rollup-develop" }
+
+# #polkdadot sdk
+# [patch."https://github.com/gasp-xyz/polkadot-sdk"]
+# extrinsic-shuffler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# fork-tree = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-benchmarking-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-executive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-support-procedural = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-support-procedural-tools = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-support-procedural-tools-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-system = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-system-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-system-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# frame-try-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# mangata-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# mangata-types = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-authorship = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-balances = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-collective-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-identity = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-membership = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-proxy = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-sudo-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-transaction-payment = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-transaction-payment-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-treasury = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-utility = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-utility-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-vesting-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-allocator = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-basic-authorship-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-block-builder-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-chain-spec = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-chain-spec-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-client-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-client-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-executor = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-executor-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-executor-polkavm = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-executor-wasmtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-informant = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-bitswap = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-gossip = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-light = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-sync = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-network-transactions = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-proposer-metrics = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-rpc-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-rpc-server = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-rpc-spec-v2 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-service = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-state-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-sysinfo = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-telemetry = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-tracing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-transaction-pool-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sc-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-api-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-application-crypto = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-arithmetic = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-blockchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-consensus-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-core = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-crypto-hashing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-crypto-hashing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-database = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-debug-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-externalities = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-genesis-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-inherents = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-io = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-keyring = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-maybe-compressed-blob = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-metadata-ir = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-panic-handler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-runtime-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-runtime-interface-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-staking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-state-machine = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-statement-store = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-std = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-storage = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-transaction-storage-proof = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-trie = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-version = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-version-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-wasm-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# sp-weights = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-bip39 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-build-script-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-prometheus-endpoint = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-test-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-test-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-test-runtime-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# substrate-wasm-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# try-runtime-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# ver-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+# pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods"}
+
+# [patch."https://github.com/paritytech/polkadot-sdk"]
+# # ... which satisfies git dependency `sp-crypto-ec-utils` of package `sp-ark-bls12-381 v0.4.2 (https://github.com/paritytech/arkworks-substrate#caa2eed7)`
+# sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
 
 # # patch generated by './scripts/dev_manifest.sh ../../open-runtime-module-library/'
 # [patch."https://github.com/gasp-xyz/open-runtime-module-library"]
