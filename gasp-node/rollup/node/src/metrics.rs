@@ -15,9 +15,9 @@ use rollup_runtime::runtime_config::{
 	types::{AccountId, Balance, TokenId},
 };
 
+use pallet_market::MarketRuntimeApi;
 use rolldown_runtime_api::RolldownRuntimeApi;
 use sp_runtime::SaturatedConversion;
-use xyk_runtime_api::XykRuntimeApi;
 
 use substrate_prometheus_endpoint::{
 	MetricSource, Opts, PrometheusError, Registry, SourcedCounter, SourcedGauge,
@@ -186,7 +186,7 @@ where
 	C: HeaderBackend<Block>,
 	// use the concrete type sp_runtime::AccountId20 here because whatever implements MetricSource needs to be
 	// Send + Sync + Clone and the AccountId abstraction we get from Signer and IdentifyAccount do not provide these bounds
-	C::Api: XykRuntimeApi<Block, Balance, TokenId, sp_runtime::AccountId20>,
+	C::Api: MarketRuntimeApi<Block, Balance, TokenId>,
 	C::Api: RolldownRuntimeApi<
 		Block,
 		pallet_rolldown::messages::L1Update,
@@ -214,7 +214,7 @@ where
 	C: HeaderBackend<Block>,
 	// use the concrete type sp_runtime::AccountId20 here because whatever implements MetricSource needs to be
 	// Send + Sync + Clone and the AccountId abstraction we get from Signer and IdentifyAccount do not provide these bounds
-	C::Api: XykRuntimeApi<Block, Balance, TokenId, sp_runtime::AccountId20>,
+	C::Api: MarketRuntimeApi<Block, Balance, TokenId>,
 	C::Api: RolldownRuntimeApi<
 		Block,
 		pallet_rolldown::messages::L1Update,

@@ -34,6 +34,7 @@ construct_runtime!(
 		Vesting: pallet_vesting_mangata,
 		StableSwap: pallet_stable_swap,
 		Xyk: pallet_xyk,
+		FeeLock: pallet_fee_lock,
 		Market: market,
 	}
 );
@@ -64,6 +65,7 @@ parameter_types! {
 	pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
 	pub const BnbTreasurySubAccDerive: [u8; 4] = *b"bnbt";
 	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
+	pub BnbAccount: AccountId = TreasuryPalletId::get().into_sub_account_truncating(BnbTreasurySubAccDerive::get());
 	pub const MaxLocks: u32 = 50;
 	pub const NativeCurrencyId: u32 = 0_u32;
 }
@@ -117,6 +119,8 @@ impl pallet_stable_swap::Config for Test {
 	type MaxApmCoeff = ConstU128<1_000_000>;
 	type DefaultApmCoeff = ConstU128<1_000>;
 	type MaxAssetsInPool = ConstU32<8>;
+	type NativeCurrencyId = NativeCurrencyId;
+	type MaxEqAssets = ConstU32<10>;
 	type WeightInfo = ();
 }
 
@@ -234,6 +238,38 @@ mod mocks {
 		impl ComputeIssuance for Issuance {
 			fn initialize() {}
 			fn compute_issuance(n: u32);
+		}
+	}
+
+	mockall::mock! {
+
+
+		pub FeeLock {}
+
+		impl FeeLockTriggerTrait<AccountId, Balance, TokenId> for FeeLock {
+
+			fn is_swap_tokens_lockless(
+				token_id: TokenId,
+				token_amount: Balance
+			) -> bool;
+
+			fn is_fee_lock_init() -> bool;
+
+			fn is_whitelisted(token_id: TokenId) -> bool;
+
+			fn get_swap_valuation_for_token(
+				valuating_token_id: TokenId,
+				valuating_token_amount: Balance,
+			) -> Option<Balance>;
+
+			// This function is not expected to fail unless fee_lock_metadata is uninit
+			fn get_fee_lock_amount(who: &AccountId) -> Result<Balance, DispatchError>;
+
+			fn process_fee_lock(who: &AccountId) -> DispatchResult;
+
+			fn can_unlock_fee(who: &AccountId) -> DispatchResult;
+
+			fn unlock_fee(who: &AccountId) -> DispatchResult;
 		}
 	}
 }
@@ -365,6 +401,46 @@ mod mocks {
 		}
 		fn compute_issuance(_: u32) {}
 	}
+
+	pub struct MockFeeLock;
+
+	impl FeeLockTriggerTrait<AccountId, Balance, TokenId> for MockFeeLock {
+		fn is_swap_tokens_lockless(token_id: TokenId, token_amount: Balance) -> bool {
+			false
+		}
+
+		fn is_fee_lock_init() -> bool {
+			true
+		}
+
+		fn is_whitelisted(token_id: TokenId) -> bool {
+			true
+		}
+
+		fn get_swap_valuation_for_token(
+			valuating_token_id: TokenId,
+			valuating_token_amount: Balance,
+		) -> Option<Balance> {
+			None
+		}
+
+		// This function is not expected to fail unless fee_lock_metadata is uninit
+		fn get_fee_lock_amount(who: &AccountId) -> Result<Balance, DispatchError> {
+			Ok(Default::default())
+		}
+
+		fn process_fee_lock(who: &AccountId) -> DispatchResult {
+			Ok(())
+		}
+
+		fn can_unlock_fee(who: &AccountId) -> DispatchResult {
+			Ok(())
+		}
+
+		fn unlock_fee(who: &AccountId) -> DispatchResult {
+			Ok(())
+		}
+	}
 }
 
 impl pallet_xyk::XykBenchmarkingConfig for Test {}
@@ -389,12 +465,30 @@ impl pallet_xyk::Config for Test {
 	type FeeLockWeight = ();
 }
 
+parameter_types! {
+	pub const MaxCuratedTokens: u32 = 100;
+}
+
+impl mangata_support::pools::ValuateFor<NativeCurrencyId> for Market {}
+
+impl pallet_fee_lock::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type MaxCuratedTokens = MaxCuratedTokens;
+	type Tokens = MultiTokenCurrencyAdapter<Test>;
+	type ValuateForNative = Market;
+	type NativeTokenId = NativeCurrencyId;
+	type WeightInfo = ();
+}
+
+impl market::MarketBenchmarkingConfig for Test {}
+
 impl market::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = MultiTokenCurrencyAdapter<Test>;
 	type Balance = Balance;
 	type CurrencyId = TokenId;
 	type NativeCurrencyId = NativeCurrencyId;
+	type MaxSwapListLength = ConstU32<10>;
 	type Xyk = Xyk;
 	type StableSwap = StableSwap;
 	type Rewards = mocks::MockRewardsApi;
@@ -409,6 +503,18 @@ impl market::Config for Test {
 	type NontransferableTokens = Nothing;
 	type FoundationAccountsProvider = GetDefault;
 	type ArbitrageBot = Nothing;
+
+	type PoolFeePercentage = ConstU128<20>;
+	type TreasuryFeePercentage = ConstU128<5>;
+	type BuyAndBurnFeePercentage = ConstU128<5>;
+	type FeeDenominator = ConstU128<10_000>;
+
+	type MinSwapFee = ConstU128<6>;
+
+	type TreasuryAccountId = TreasuryAccount;
+	type BnbAccountId = BnbAccount;
+
+	type FeeLock = mocks::MockFeeLock;
 }
 
 impl<T: Config> Pallet<T>
@@ -442,6 +548,10 @@ where
 
 	pub fn mint_token(token_id: TokenId, who: &AccountId, amount: Balance) {
 		<T as Config>::Currency::mint(token_id, who, amount).expect("Token minting failed")
+	}
+
+	pub fn get_next_currency_id() -> TokenId {
+		<T as Config>::Currency::get_next_currency_id()
 	}
 }
 
