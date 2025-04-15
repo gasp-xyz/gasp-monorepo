@@ -214,8 +214,10 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	if agg.startIdle {
 		// blocking wait for the run trigger
 		agg.logger.Infof("ALERT:INFO Aggregator awaiting run trigger.")
+		recordRunTriggerTimesEventMetric(true)
 		<- runTriggerC
 		agg.logger.Infof("ALERT:INFO Aggregator received run trigger. Continuing.")
+		recordRunTriggerTimesEventMetric(false)
 	}
 
 	err := agg.checkAndProcessPendingTasks()
@@ -552,6 +554,15 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 			}
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
+
+		if success {
+			recordLastTaskRespondedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+			recordLastTaskCompletedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+		} else {
+			recordRespondedButUncompletedTasksMetric()
+			recordLastTaskRespondedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+		}
+
 		return success, nil
 
 	} else if blsAggServiceResp.TaskId.TaskType == 1 {
@@ -582,6 +593,16 @@ func (agg *Aggregator) sendAggregatedResponseToContract(blsAggServiceResp blsagg
 			}
 		}
 		agg.logger.Debug("Aggreagted Response sent to contract", "receipt", r, "success", success)
+
+		if success {
+			recordLatestBatchProcessedOnL1PerL1Metric(rdTask.ChainId, rdTask.BatchId)
+			recordLastTaskRespondedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+			recordLastTaskCompletedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+		} else {
+			recordRespondedButUncompletedTasksMetric()
+			recordLastTaskRespondedMetric(blsAggServiceResp.TaskId.TaskType, blsAggServiceResp.TaskId.TaskIndex)
+		}
+
 		return success, nil
 
 	} else {
@@ -611,6 +632,9 @@ func (agg *Aggregator) createOpTask() (taskmanager.IFinalizerTaskManagerOpTask, 
 		TaskType:  sdktypes.TaskType(0),
 		TaskIndex: sdktypes.TaskIndex(taskIndex),
 	}
+
+	recordLastTaskCreatedMetric(taskId.TaskType, taskId.TaskIndex)
+
 	return newTask, taskId, nil
 }
 
@@ -678,6 +702,8 @@ func (agg *Aggregator) createRdTask(chainToUpdate uint8, chainBatchIdToUpdate ui
 		TaskType:  sdktypes.TaskType(1),
 		TaskIndex: sdktypes.TaskIndex(taskIndex),
 	}
+
+	recordLastTaskCreatedMetric(taskId.TaskType, taskId.TaskIndex)
 
 	return newTask, taskId, nil
 }
@@ -881,7 +907,7 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint8, ui
 		if err != nil {
 			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
 		}
-
+		recordLatestBatchOnL2PerL1Metric(uint8(lastBatchByL1.Key), uint32(lastBatchByL1.Value.BatchId.Int64()))
 		if uint64(lastBatchByL1.Value.BatchId.Int64()) >= uint64(chainRdBatchNonce) {
 			isUpdate = true
 			chainToUpdate = uint8(lastBatchByL1.Key)
