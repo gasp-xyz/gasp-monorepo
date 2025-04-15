@@ -13,7 +13,7 @@ lazy_static::lazy_static! {
     .unwrap();
 
     static ref LAST_TASK_SYNCED: GaugeVec = register_gauge_vec!(
-        opts!("last_task_synced", "Last task synced by the avs of each type"),
+        opts!("last_task_synced", "Last task synced by the updater of each type"),
         &["task_type"]
     )
     .unwrap();
