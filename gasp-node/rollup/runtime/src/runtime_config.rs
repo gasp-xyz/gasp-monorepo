@@ -662,7 +662,7 @@ pub mod config {
 									)
 								);
 								ensure!(
-									FeeLock::get_token_value_threshold(asset_id_in) >=
+									FeeLock::get_token_value_threshold(asset_id_in) <=
 										asset_amount_in,
 									TransactionValidityError::Invalid(
 										InvalidTransaction::SwapPrevalidation.into(),
