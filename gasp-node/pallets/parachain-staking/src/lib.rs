@@ -222,12 +222,6 @@ pub mod pallet {
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
-	#[derive(Eq, PartialEq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-	pub enum PairedOrLiquidityToken<CurrencyId> {
-		Paired(CurrencyId),
-		Liquidity(CurrencyId),
-	}
-
 	#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 	pub struct Bond<AccountId, Balance, CurrencyId> {
 		pub owner: AccountId,
@@ -1576,6 +1570,7 @@ pub mod pallet {
 		AggregatorLiquidityTokenTaken,
 		IncorrectRewardDelegatorCount,
 		MathError,
+		NoSuchPool,
 	}
 
 	#[pallet::event]
@@ -1850,7 +1845,7 @@ pub mod pallet {
 				if *liquidity_token != T::NativeTokenId::get() {
 					if let Err(error) = <Pallet<T>>::add_staking_liquidity_token(
 						RawOrigin::Root.into(),
-						PairedOrLiquidityToken::Liquidity(*liquidity_token),
+						*liquidity_token,
 						i as u32,
 					) {
 						log::warn!(
@@ -2547,19 +2542,10 @@ pub mod pallet {
 		/// liquidity token id itself. **Root only**
 		pub fn add_staking_liquidity_token(
 			origin: OriginFor<T>,
-			paired_or_liquidity_token: PairedOrLiquidityToken<CurrencyIdOf<T>>,
+			added_liquidity_token: CurrencyIdOf<T>,
 			current_liquidity_tokens: u32,
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
-
-			let added_liquidity_token: CurrencyIdOf<T> = match paired_or_liquidity_token {
-				PairedOrLiquidityToken::Paired(x) =>
-					T::ValuateForNative::find_paired_pool_for(x)?.0,
-				PairedOrLiquidityToken::Liquidity(x) => {
-					T::ValuateForNative::check_can_valuate_for(x)?;
-					x
-				},
-			};
 
 			StakingLiquidityTokens::<T>::try_mutate(
 				|staking_liquidity_tokens| -> DispatchResult {
@@ -2583,16 +2569,10 @@ pub mod pallet {
 		/// Removes previously added liquidity token
 		pub fn remove_staking_liquidity_token(
 			origin: OriginFor<T>,
-			paired_or_liquidity_token: PairedOrLiquidityToken<CurrencyIdOf<T>>,
+			removed_liquidity_token: CurrencyIdOf<T>,
 			current_liquidity_tokens: u32,
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
-
-			let removed_liquidity_token: CurrencyIdOf<T> = match paired_or_liquidity_token {
-				PairedOrLiquidityToken::Paired(x) =>
-					T::ValuateForNative::find_paired_pool_for(x)?.0,
-				PairedOrLiquidityToken::Liquidity(x) => x,
-			};
 
 			StakingLiquidityTokens::<T>::try_mutate(
 				|staking_liquidity_tokens| -> DispatchResult {
