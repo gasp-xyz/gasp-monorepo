@@ -58,14 +58,19 @@ pub async fn main() -> Result<(), Error> {
     let sender = l1api::address(provider.clone());
     let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
 
+    let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
-    let mut hunter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
-        hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
-    };
+    let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
-    let executor = ferry::Ferry::new(l2.clone(), sender, chain, args.tx_cost, executor);
+    let executor = ferry::Ferry::new(
+        l1.clone(),
+        l2.clone(),
+        sender,
+        chain,
+        args.tx_cost,
+        executor,
+    );
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {

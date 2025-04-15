@@ -1,5 +1,5 @@
-use futures::{FutureExt, StreamExt};
-use gasp_types::{Chain, Withdrawal, U256};
+use futures::FutureExt;
+use gasp_types::{Chain, Withdrawal, H256, U256};
 use l1api::{types::RequestStatus, L1Error, L1Interface};
 use l2api::L2Interface;
 use std::collections::{HashMap, VecDeque};
@@ -22,6 +22,9 @@ pub enum FerryError {
 
     #[error("L2 error: {0}")]
     L2Error(#[from] l2api::L2Error),
+
+    #[error("Withdrawal does not exists on l2 `{0}`")]
+    DoesntExistsOnL2(u128),
 }
 
 pub struct Ferry<L1, L2> {
@@ -62,6 +65,22 @@ where
         }
     }
 
+    async fn assert_exists(&self, withdrawal: Withdrawal, at: H256) -> Result<(), FerryError> {
+        let id = withdrawal.request_id.id.try_into().unwrap();
+        let hash = self
+            .l2
+            .get_l2_request_hash(id, self.chain, at)
+            .await?
+            .ok_or(FerryError::DoesntExistsOnL2(id))?;
+        let expected_hash = withdrawal.withdrawal_hash();
+        if expected_hash == hash {
+            Ok(())
+        } else {
+            tracing::error!("withdrawal_hash {hash} doesnt match expected one {expected_hash} - did reorg happend?");
+            Err(FerryError::DoesntExistsOnL2(id))
+        }
+    }
+
     pub async fn ferry_withdrawal(&mut self) -> Result<(), FerryError> {
         let balances = self.balances.clone();
         let latest_finalized = self
@@ -74,7 +93,7 @@ where
             .retain(|request_id, _| request_id > &latest_finalized.into());
 
         tracing::debug!(
-            "removed {n} withdrawals that are already finalized",
+            "removed {n} withdrawals that are already finalized (finalized: {latest_finalized})",
             n = len - self.ferryable_withdrawals.len()
         );
 
@@ -83,9 +102,9 @@ where
             .iter()
             .filter(|(_, (_, w))| {
                 let required_tokens_amount = if w.token_address == l1api::NATIVE_TOKEN_ADDRESS {
-                    w.amount - w.ferry_tip
-                } else {
                     (w.amount - w.ferry_tip).saturating_add(self.tx_cost)
+                } else {
+                    w.amount - w.ferry_tip
                 };
                 let balance = balances.get(&w.token_address).cloned().unwrap_or_default();
                 balance >= required_tokens_amount
@@ -94,6 +113,8 @@ where
             .map(|(_, (_, w))| *w);
 
         if let Some(w) = req_to_ferrry {
+            let (_, at) = self.l2.get_best_block().await?;
+            self.assert_exists(w, at).await?;
             if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
                 tracing::trace!("tracing withdrawal {w}");
                 let status = self.l1.ferry_withdrawal(w).await;
@@ -123,9 +144,8 @@ where
                 .get_merkle_root(req_id)
                 .await?
                 .ok_or(FerryError::UnknownMerkleRoot(withdrawal.request_id.id))?;
+            let (_, at) = self.l2.get_best_block().await?;
 
-            let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
-            let (_, at) = stream.next().await.expect("infinite stream")?;
             let proof = self
                 .l2
                 .get_merkle_proof(req_id, range, self.chain, at)
@@ -213,7 +233,7 @@ where
                 .await
                 {
                     Ok(Some(FerryAction::Ferry { withdrawal, prio })) => {
-                        tracing::info!("received fery request");
+                        tracing::info!("received ferry request {}", withdrawal.request_id.id);
                         self.track_balance(withdrawal.token_address).await?;
                         self.ferryable_withdrawals
                             .insert(withdrawal.request_id.id, (prio, withdrawal));
@@ -299,7 +319,7 @@ mod test {
 
     #[traced_test]
     #[tokio::test]
-    async fn test_ferry_ignores_requests_that_can_not_affort() {
+    async fn test_ferry_ignores_requests_that_can_not_afford() {
         let mut l1 = MockL1::new();
         let l2 = MockL2::new();
 
@@ -338,9 +358,9 @@ mod test {
 
     #[traced_test]
     #[tokio::test]
-    async fn test_ferry_ignores_native_requests_that_can_not_affort() {
+    async fn test_ferry_ignores_native_requests_that_can_not_afford() {
         let mut l1 = MockL1::new();
-        let l2 = MockL2::new();
+        let mut l2 = MockL2::new();
 
         let (signal, notify) = oneshot::channel();
         let (input, output) = mpsc::channel(100);
@@ -350,6 +370,9 @@ mod test {
 
         l1.expect_get_status()
             .returning(|_| Ok(RequestStatus::Pending));
+
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
 
         let high_prio_non_affordable = FerryAction::Ferry {
             withdrawal: Withdrawal {
@@ -365,19 +388,25 @@ mod test {
             prio: 100.into(),
         };
 
-        let low_prio_affordable = FerryAction::Ferry {
-            withdrawal: Withdrawal {
-                request_id: RequestId {
-                    id: 1.into(),
-                    origin: Origin::L2,
-                },
-                token_address: NATIVE_TOKEN,
-                amount: 99.into(),
-                ferry_tip: 10.into(),
-                recipient: RECIPIENT,
+        let withdrawal = Withdrawal {
+            request_id: RequestId {
+                id: 2.into(),
+                origin: Origin::L2,
             },
+            token_address: NATIVE_TOKEN,
+            amount: 99.into(),
+            ferry_tip: 10.into(),
+            recipient: RECIPIENT,
+        };
+        let withdrawal_hash = withdrawal.withdrawal_hash();
+        let low_prio_affordable = FerryAction::Ferry {
+            withdrawal,
             prio: 100.into(),
         };
+
+        l2.expect_get_l2_request_hash()
+            .with(eq(2u128), always(), always())
+            .returning(move |_, _, _| Ok(Some(withdrawal_hash)));
 
         input.send(high_prio_non_affordable).await.unwrap();
 
@@ -407,7 +436,7 @@ mod test {
     #[tokio::test]
     async fn test_ferry_acutally_ferries_withdrawal() {
         let mut l1 = MockL1::new();
-        let l2 = MockL2::new();
+        let mut l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
 
@@ -421,6 +450,12 @@ mod test {
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
         };
+        let withdrawal_hash = withdrawal.withdrawal_hash();
+
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+        l2.expect_get_l2_request_hash()
+            .returning(move |_, _, _| Ok(Some(withdrawal_hash)));
 
         l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
@@ -451,6 +486,56 @@ mod test {
         handle.await.unwrap();
     }
 
+    #[traced_test]
+    #[tokio::test]
+    async fn test_ferry_fails_on_inexisting_withdrawal() {
+        let mut l1 = MockL1::new();
+        let mut l2 = MockL2::new();
+
+        let (input, output) = mpsc::channel(100);
+
+        let withdrawal = Withdrawal {
+            request_id: RequestId {
+                id: 1.into(),
+                origin: Origin::L2,
+            },
+            token_address: ENABLED_TOKEN1,
+            amount: 100.into(),
+            ferry_tip: 10.into(),
+            recipient: RECIPIENT,
+        };
+
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+        l2.expect_get_l2_request_hash()
+            .returning(move |_, _, _| Ok(None));
+
+        l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
+        l1.expect_get_latest_finalized_request_id()
+            .returning(|| Ok(None));
+        l1.expect_get_status()
+            .returning(|_| Ok(RequestStatus::Pending));
+
+        input
+            .send(FerryAction::Ferry {
+                withdrawal,
+                prio: 10.into(),
+            })
+            .await
+            .unwrap();
+
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+
+        let handle = tokio::spawn(async move { ferry.run().await });
+
+        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+        drop(input);
+        assert!(matches!(
+            handle.await.unwrap(),
+            Err(FerryError::DoesntExistsOnL2(1u128))
+        ));
+    }
+
     pub async fn wait_for(mtx: Arc<AtomicBool>, duration: Duration) -> bool {
         let now = tokio::time::Instant::now();
         while !mtx.load(std::sync::atomic::Ordering::Relaxed) {
@@ -466,7 +551,7 @@ mod test {
     #[tokio::test]
     async fn test_ferry_withdrawals_by_priority() {
         let mut l1 = MockL1::new();
-        let l2 = MockL2::new();
+        let mut l2 = MockL2::new();
         let signal = Arc::new(AtomicBool::new(false));
         let (input, output) = mpsc::channel(100);
 
@@ -480,6 +565,7 @@ mod test {
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
         };
+        let low_prio_withdrawal_hash = low_prio_withdrawal.withdrawal_hash();
 
         let high_prio_withdrawal = Withdrawal {
             request_id: RequestId {
@@ -491,8 +577,17 @@ mod test {
             ferry_tip: 50.into(),
             recipient: RECIPIENT,
         };
+        let high_prio_withdrawal_hash = high_prio_withdrawal.withdrawal_hash();
 
-        tracing::info!("hello world");
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+        l2.expect_get_l2_request_hash()
+            .with(eq(2u128), always(), always())
+            .returning(move |_, _, _| Ok(Some(low_prio_withdrawal_hash)));
+        l2.expect_get_l2_request_hash()
+            .with(eq(3u128), always(), always())
+            .returning(move |_, _, _| Ok(Some(high_prio_withdrawal_hash)));
+
         l1.expect_erc20_balance().returning(|_, _| Ok(100u128));
         l1.expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
@@ -569,6 +664,7 @@ mod test {
             ferry_tip: 10.into(),
             recipient: RECIPIENT,
         };
+        let ferryable_withdrawal_hash = ferryable_withdrawal.withdrawal_hash();
 
         input
             .send(FerryAction::Ferry {
@@ -602,6 +698,10 @@ mod test {
             .returning(|_| Ok(Some(([0u8; 32], (1, 1)))));
         l2.expect_get_merkle_proof()
             .returning(|_, _, _, _| Ok(Vec::default()));
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+        l2.expect_get_l2_request_hash()
+            .returning(move |_, _, _| Ok(Some(ferryable_withdrawal_hash)));
 
         let notify = signal.clone();
         let mut seq = Sequence::new();

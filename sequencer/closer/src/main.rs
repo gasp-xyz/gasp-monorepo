@@ -9,6 +9,7 @@ use tokio::time::Duration;
 mod batch_subscription;
 mod cli;
 mod closer;
+mod delay;
 mod filter;
 mod past_withdrawals_finder;
 

@@ -15,6 +15,8 @@ pub enum Error {
     L2(#[from] L2Error),
     #[error("Could not find batch for request id `{0}`")]
     NoBatchForL2RequestId(u128),
+    #[error("Withdrawal does not exists on l2 `{0}`")]
+    DoesntExistsOnL2(u128),
 }
 
 pub type CloserResult<T> = Result<T, Error>;
@@ -84,8 +86,20 @@ where
         }
     }
 
+    async fn assert_withdrawals_exists(
+        &self,
+        withdrawals: &Vec<Withdrawal>,
+        at: H256,
+    ) -> Result<(), Error> {
+        futures::future::try_join_all(withdrawals.iter().map(|elem| self.check_exists(*elem, at)))
+            .await?;
+        Ok(())
+    }
+
     async fn close_withdrawals(&self, withdrawals: Vec<Withdrawal>) -> Result<(), Error> {
         let (_, at) = self.l2.get_best_block().await?;
+        self.assert_withdrawals_exists(&withdrawals, at).await?;
+
         if self.close_withdrawals_in_batches {
             let withdrawals_with_proofs = futures::future::try_join_all(
                 withdrawals
@@ -133,6 +147,22 @@ where
         } else {
             tracing::info!("skipping withdrawal id:{}", withdrawal.request_id.id);
             Ok(false)
+        }
+    }
+
+    async fn check_exists(&self, withdrawal: Withdrawal, at: H256) -> Result<(), Error> {
+        let id = withdrawal.request_id.id.try_into().unwrap();
+        let hash = self
+            .l2
+            .get_l2_request_hash(id, self.chain, at)
+            .await?
+            .ok_or(Error::DoesntExistsOnL2(id))?;
+        let expected_hash = withdrawal.withdrawal_hash();
+        if expected_hash == hash {
+            Ok(())
+        } else {
+            tracing::error!("withdrawal_hash {hash} doesnt match expected one {expected_hash} - did reorg happend?");
+            Err(Error::DoesntExistsOnL2(id))
         }
     }
 
@@ -214,6 +244,49 @@ mod test {
     }
 
     #[tokio::test]
+    async fn test_error_on_non_existing_withdrawal() {
+        let mut l1mock = MockL1::new();
+        let mut l2mock = MockL2::new();
+
+        l1mock
+            .expect_get_status()
+            .returning(|_| Ok(RequestStatus::Pending));
+        l1mock
+            .expect_close_withdrawal()
+            .return_once(|_, _, _| Ok(H256::default()));
+
+        l2mock
+            .expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+        l2mock
+            .expect_get_l2_request_hash()
+            .returning(|_, _, _| Ok(None));
+        l2mock.expect_bisect_find_batch().returning(|_, _, _| {
+            Ok(Some(BatchInfo {
+                batch_id: 1u128,
+                range: (1u128, 1u128),
+                merkle_root: H256::default(),
+            }))
+        });
+        l2mock
+            .expect_get_merkle_proof()
+            .returning(|_, _, _, _| Ok(Default::default()));
+
+        let (sender, receiver) = mpsc::channel(100);
+
+        let t = tokio::spawn(async move {
+            let mut closer = Closer::new(CHAIN, l1mock, l2mock, receiver, false);
+            closer.run().await
+        });
+
+        sender.send(dummy_withdrawal(1u128)).await.unwrap();
+        assert!(matches!(
+            t.await.unwrap(),
+            Err(Error::DoesntExistsOnL2(1u128))
+        ));
+    }
+
+    #[tokio::test]
     async fn test_close_withdrawal() {
         let (signal, is_closed) = oneshot::channel();
         let mut l1mock = MockL1::new();
@@ -230,6 +303,9 @@ mod test {
         l2mock
             .expect_get_best_block()
             .returning(|| Ok((1, H256::zero())));
+        l2mock
+            .expect_get_l2_request_hash()
+            .returning(|id, _, _| Ok(Some(dummy_withdrawal(id).withdrawal_hash())));
         l2mock.expect_bisect_find_batch().returning(|_, _, _| {
             Ok(Some(BatchInfo {
                 batch_id: 1u128,
@@ -290,6 +366,9 @@ mod test {
         l2mock
             .expect_get_best_block()
             .returning(|| Ok((1, H256::zero())));
+        l2mock
+            .expect_get_l2_request_hash()
+            .returning(|id, _, _| Ok(Some(dummy_withdrawal(id).withdrawal_hash())));
 
         l2mock.expect_bisect_find_batch().returning(move |_, _, _| {
             Ok(Some(BatchInfo {
@@ -334,6 +413,9 @@ mod test {
         l2mock
             .expect_get_merkle_proof()
             .returning(|_, _, _, _| Ok(Default::default()));
+        l2mock
+            .expect_get_l2_request_hash()
+            .returning(|id, _, _| Ok(Some(dummy_withdrawal(id).withdrawal_hash())));
 
         let (sender, receiver) = mpsc::channel(100);
         sender.send(dummy_withdrawal(1u128)).await.unwrap();
@@ -386,6 +468,9 @@ mod test {
         l2mock
             .expect_get_merkle_proof()
             .returning(|_, _, _, _| Ok(Default::default()));
+        l2mock
+            .expect_get_l2_request_hash()
+            .returning(|id, _, _| Ok(Some(dummy_withdrawal(id).withdrawal_hash())));
 
         let (sender, receiver) = mpsc::channel(100);
 

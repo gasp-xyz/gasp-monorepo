@@ -1,5 +1,6 @@
 use futures::FutureExt;
 use gasp_types::{Chain, Deposit, U256};
+use l1api::L1Interface;
 use l2api::L2Interface;
 use std::collections::HashMap;
 use tokio::sync::mpsc;
@@ -10,8 +11,8 @@ pub type DepositId = U256;
 
 #[derive(Debug, thiserror::Error)]
 pub enum FerryError {
-    #[error("Could not find merkle root for request id {0}")]
-    UnknownMerkleRoot(U256),
+    #[error("request does not exists on L1 {0}")]
+    DoesntExistsOnL1(u128),
 
     #[error("L1 error: {0}")]
     L1Error(#[from] l1api::L1Error),
@@ -20,7 +21,8 @@ pub enum FerryError {
     L2Error(#[from] l2api::L2Error),
 }
 
-pub struct Ferry<L2> {
+pub struct Ferry<L1, L2> {
+    l1: L1,
     l2: L2,
     chain: Chain,
     account: [u8; 20],
@@ -30,11 +32,13 @@ pub struct Ferry<L2> {
     tx_cost: U256,
 }
 
-impl<L2> Ferry<L2>
+impl<L1, L2> Ferry<L1, L2>
 where
+    L1: L1Interface,
     L2: L2Interface,
 {
     pub fn new(
+        l1: L1,
         l2: L2,
         account: [u8; 20],
         chain: Chain,
@@ -42,6 +46,7 @@ where
         input: mpsc::Receiver<(Priority, Deposit)>,
     ) -> Self {
         Self {
+            l1,
             l2,
             chain,
             input,
@@ -49,6 +54,20 @@ where
             balances: Default::default(),
             account,
             tx_cost: tx_cost.into(),
+        }
+    }
+
+    async fn assert_exists(&self, deposit: Deposit) -> Result<(), FerryError> {
+        let request_id = deposit.request_id.id.try_into().unwrap();
+        let d = self
+            .l1
+            .get_deposit(request_id)
+            .await?
+            .ok_or(FerryError::DoesntExistsOnL1(request_id))?;
+        if d == deposit {
+            Ok(())
+        } else {
+            Err(FerryError::DoesntExistsOnL1(request_id))
         }
     }
 
@@ -90,6 +109,7 @@ where
             .map(|(_, (_, w))| *w);
 
         if let Some(deposit) = req_to_ferrry {
+            self.assert_exists(deposit).await?;
             tracing::info!("ferry deposit {deposit}");
             self.l2.ferry_deposit(self.chain, deposit).await?;
             self.ferryable_deposits.remove(&deposit.request_id.id);
@@ -148,7 +168,7 @@ where
                 .await
                 {
                     Ok(Some((prio, deposit))) => {
-                        tracing::info!("received fery request");
+                        tracing::info!("received ferry request");
                         self.track_balance(deposit.token_address).await?;
                         self.ferryable_deposits
                             .insert(deposit.request_id.id, (prio, deposit));
@@ -184,6 +204,7 @@ mod test {
     use common::TryReceiveAsync;
 
     use gasp_types::{Origin, RequestId, H256};
+    use l1api::mock::MockL1;
     use l2api::mock::MockL2;
     use mockall::{
         predicate::{always, eq},
@@ -200,10 +221,11 @@ mod test {
     #[traced_test]
     #[tokio::test]
     async fn works_fine_when_there_is_nothing_to_process() {
+        let l1 = MockL1::new();
         let l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
-        let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -216,7 +238,49 @@ mod test {
 
     #[traced_test]
     #[tokio::test]
+    async fn test_error_on_inexisting_deposit() {
+        let mut l1 = MockL1::new();
+        let mut l2 = MockL2::new();
+        let (input, output) = mpsc::channel(100);
+
+        let deposit = Deposit {
+            request_id: RequestId {
+                id: 2.into(),
+                origin: Origin::L2,
+            },
+            token_address: ENABLED_TOKEN1,
+            amount: 100.into(),
+            ferry_tip: 10.into(),
+            recipient: RECIPIENT,
+            timestamp: 0.into(),
+        };
+
+        l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
+        l2.expect_get_latest_processed_request_id()
+            .returning(|_, _| Ok(0u128));
+        l2.expect_get_best_block()
+            .returning(|| Ok((1, H256::zero())));
+
+        l1.expect_get_deposit()
+            .with(eq(2u128))
+            .returning(move |_| Ok(None));
+
+        input.send((10.into(), deposit)).await.unwrap();
+
+        let handle = tokio::spawn(async move {
+            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+            ferry.run().await
+        });
+        assert!(matches!(
+            handle.await.unwrap(),
+            Err(FerryError::DoesntExistsOnL1(2u128))
+        ));
+    }
+
+    #[traced_test]
+    #[tokio::test]
     async fn test_ferry_withdrawal_that_can_afford() {
+        let mut l1 = MockL1::new();
         let mut l2 = MockL2::new();
         let (input, output) = mpsc::channel(100);
         let (signal, is_ferried) = oneshot::channel();
@@ -243,11 +307,14 @@ mod test {
             signal.send(()).unwrap();
             Ok(true)
         });
+        l1.expect_get_deposit()
+            .with(eq(2u128))
+            .returning(move |_| Ok(Some(deposit)));
 
         input.send((10.into(), deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -261,11 +328,12 @@ mod test {
     #[traced_test]
     #[tokio::test]
     async fn test_ferry_withdrawals_by_priority() {
+        let mut l1 = MockL1::new();
         let mut l2 = MockL2::new();
         let (input, output) = mpsc::channel(100);
         let (signal, is_ferried) = oneshot::channel();
 
-        let low_prio_withdrawal = Deposit {
+        let low_prio_deposit = Deposit {
             request_id: RequestId {
                 id: 2.into(),
                 origin: Origin::L2,
@@ -277,7 +345,7 @@ mod test {
             timestamp: 0.into(),
         };
 
-        let high_prio_withdrawal = Deposit {
+        let high_prio_deposit = Deposit {
             request_id: RequestId {
                 id: 3.into(),
                 origin: Origin::L2,
@@ -289,6 +357,13 @@ mod test {
             timestamp: 0.into(),
         };
 
+        l1.expect_get_deposit()
+            .with(eq(2u128))
+            .returning(move |_| Ok(Some(low_prio_deposit)));
+        l1.expect_get_deposit()
+            .with(eq(3u128))
+            .returning(move |_| Ok(Some(high_prio_deposit)));
+
         l2.expect_get_balance().returning(|_, _, _, _| Ok(100u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -299,26 +374,23 @@ mod test {
         l2.expect_ferry_deposit()
             .times(1)
             .in_sequence(&mut seq)
-            .with(always(), eq(high_prio_withdrawal))
+            .with(always(), eq(high_prio_deposit))
             .returning(|_, _| Ok(true));
 
         l2.expect_ferry_deposit()
             .times(1)
             .in_sequence(&mut seq)
-            .with(always(), eq(low_prio_withdrawal))
+            .with(always(), eq(low_prio_deposit))
             .return_once(move |_, _| {
                 signal.send(()).unwrap();
                 Ok(true)
             });
 
-        input.send((10.into(), low_prio_withdrawal)).await.unwrap();
-        input
-            .send((100.into(), high_prio_withdrawal))
-            .await
-            .unwrap();
+        input.send((10.into(), low_prio_deposit)).await.unwrap();
+        input.send((100.into(), high_prio_deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -332,6 +404,7 @@ mod test {
     #[traced_test]
     #[tokio::test]
     async fn test_ferry_ignores_requests_that_can_not_affort() {
+        let mut l1 = MockL1::new();
         let mut l2 = MockL2::new();
         let (input, output) = mpsc::channel(100);
         let (signal, is_ferried) = oneshot::channel();
@@ -362,6 +435,10 @@ mod test {
             recipient: RECIPIENT,
             timestamp: 0.into(),
         };
+
+        l1.expect_get_deposit()
+            .with(eq(2u128))
+            .returning(move |_| Ok(Some(affordable_deposit)));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN2), always(), always())
             .returning(|_, _, _, _| Ok(89u128));
@@ -386,7 +463,7 @@ mod test {
         input.send((10.into(), affordable_deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, 0, output);
+            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
             ferry.run().await.unwrap();
         });
         is_ferried
@@ -400,6 +477,7 @@ mod test {
     #[traced_test]
     #[tokio::test]
     async fn test_ferry_ignores_native_requests_that_can_not_affort_because_of_tx_cost() {
+        let mut l1 = MockL1::new();
         let mut l2 = MockL2::new();
         let (input, output) = mpsc::channel(100);
         let (signal, is_ferried) = oneshot::channel();
@@ -415,6 +493,10 @@ mod test {
             recipient: RECIPIENT,
             timestamp: 0.into(),
         };
+
+        l1.expect_get_deposit()
+            .with(eq(2u128))
+            .returning(move |_| Ok(Some(affordable_deposit)));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
             .returning(|_, _, _, _| Ok(90u128));
@@ -455,7 +537,7 @@ mod test {
         input.send((10.into(), affordable_deposit)).await.unwrap();
 
         let handle = tokio::spawn(async move {
-            let ferry = Ferry::new(l2, ACCOUNT, Chain::Ethereum, tx_cost, output);
+            let ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, tx_cost, output);
             ferry.run().await.unwrap();
         });
         is_ferried
