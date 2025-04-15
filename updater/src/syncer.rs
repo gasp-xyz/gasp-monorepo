@@ -34,7 +34,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
 use tracing::{debug, error, info, instrument, warn};
-use crate::metrics::record_last_task_synced_metrics;
+use crate::metrics::{record_last_task_synced_metrics, OP_TASK_TYPE_STR, RD_TASK_TYPE_STR};
 
 // TODO
 // In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response
@@ -46,9 +46,6 @@ use crate::metrics::record_last_task_synced_metrics;
 // Maybe also check logs.removed?
 
 type QuorumNum = u8;
-
-pub const OP_TASK_TYPE_STR: &str = &"op_task";
-pub const RD_TASK_TYPE_STR: &str = &"rd_task";
 
 #[derive(Clone)]
 pub struct CustomOperatorAvsState {

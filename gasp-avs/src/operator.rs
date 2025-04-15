@@ -31,10 +31,7 @@ use std::sync::Arc;
 use substrate_rpc_client::{rpc_params, ws_client, ClientT};
 use tokio::select;
 use tracing::{debug, error, info, instrument};
-use crate::metrics::{record_last_task_seen_metrics, record_last_task_responded_metrics};
-
-pub const OP_TASK_TYPE_STR: &str = &"op_task";
-pub const RD_TASK_TYPE_STR: &str = &"rd_task";
+use crate::metrics::{record_last_task_seen_metrics, record_last_task_responded_metrics, OP_TASK_TYPE_STR, RD_TASK_TYPE_STR};
 
 type QuorumNum = u8;
 

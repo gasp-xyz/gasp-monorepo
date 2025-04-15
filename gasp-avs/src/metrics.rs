@@ -5,6 +5,9 @@ use prometheus::{opts, register_gauge, register_gauge_vec, Encoder, Gauge, Gauge
 use sp_runtime::SaturatedConversion;
 use warp::Filter;
 
+pub const OP_TASK_TYPE_STR: &str = &"op_task";
+pub const RD_TASK_TYPE_STR: &str = &"rd_task";
+
 lazy_static::lazy_static! {
     static ref BALANCE: Gauge = register_gauge!(opts!(
         "account_balance",
