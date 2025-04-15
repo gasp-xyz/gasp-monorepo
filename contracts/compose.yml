@@ -1,8 +1,11 @@
+include:
+  - path: ./compose.anvil-stubs.yml
+  # - path: ./compose.reth-stubs.yml
+
 services:
   eth-contracts-deployment:
     build: .
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-local}
-    platform: linux/amd64
     depends_on:
       eth-stub:
         condition: service_healthy
@@ -27,7 +30,6 @@ services:
   arbitrum-contracts-deployment:
     build: .
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localarb}
-    platform: linux/amd64
     depends_on:
       arbitrum-stub:
         condition: service_healthy
@@ -46,7 +48,6 @@ services:
   base-contracts-deployment:
     build: .
     image: gaspxyz/gasp-contracts:${GASP_CONTRACTS_VERSION:-localbase}
-    platform: linux/amd64
     depends_on:
       base-stub:
         condition: service_healthy
