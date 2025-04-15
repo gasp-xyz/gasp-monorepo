@@ -46,7 +46,7 @@ var last_task_completed = promauto.NewGaugeVec(prometheus.GaugeOpts{
 }, []string{"task_type"})
 
 var aggregator_run_trigger = promauto.NewGaugeVec(prometheus.GaugeOpts{
-	Name: "aggregator_runt_trigger",
+	Name: "aggregator_run_trigger",
 	Help: "Timestamps for when the aggregator started and when it received the run trigger",
 }, []string{"event"})
 
