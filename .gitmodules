@@ -10,5 +10,5 @@
 	url = https://github.com/gasp-xyz/eigensdk-go
 [submodule "gasp-node/gasp-e2e"]
 	path = gasp-node/gasp-e2e
-	branch = feature/gasp-node-multiswap-mods
+	branch = eth-rollup-develop
 	url = https://github.com/gasp-xyz/gasp-e2e.git
