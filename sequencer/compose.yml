@@ -128,5 +128,5 @@ services:
       PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
       CHAIN: ${ETH_CLOSER_L1_CHAIN}
       RUST_LOG: ${ETH_CLOSER_LOG}
-      STASH_URL: http://stash-mock:8080
+      STASH_URI: http://stash-mock:8080
       SKIP_STASH: false

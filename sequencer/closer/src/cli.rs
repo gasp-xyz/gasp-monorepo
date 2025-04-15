@@ -1,5 +1,6 @@
 use clap::arg;
 use clap::Parser;
+use common::PKeyWrapper;
 use hex::FromHexError;
 
 #[derive(Parser, Debug)]
@@ -14,7 +15,7 @@ pub struct Cli {
     pub stash_uri: Option<String>,
 
     #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
-    pub private_key: [u8; 32],
+    pub private_key: PKeyWrapper,
 
     #[arg(long, env = "CHAIN")]
     pub chain_id: u32,
@@ -62,7 +63,7 @@ fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {
     Ok(result)
 }
 
-fn parse_pkey(s: &str) -> Result<[u8; 32], FromHexError> {
+fn parse_pkey(s: &str) -> Result<PKeyWrapper, FromHexError> {
     let mut result = [0u8; 32];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 66) => hex::decode(&s[2..]),
@@ -71,5 +72,5 @@ fn parse_pkey(s: &str) -> Result<[u8; 32], FromHexError> {
     }?;
 
     result.copy_from_slice(parse_result.as_ref());
-    Ok(result)
+    Ok(result.into())
 }

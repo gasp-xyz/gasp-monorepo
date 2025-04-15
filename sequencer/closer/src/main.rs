@@ -31,6 +31,8 @@ pub async fn main() -> Result {
     init_logger();
     let args = cli::Cli::parse();
 
+    tracing::info!("config: {args:#?}");
+
     let subscription = if args.polling {
         Subscription::Polling
     } else {
@@ -42,7 +44,7 @@ pub async fn main() -> Result {
 
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
 
-    let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
+    let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let rolldown = if args.dry_run {
         l1api::RolldownContract::new_dry_run(provider.clone(), args.rolldown_contract_address)
     } else {
@@ -50,7 +52,7 @@ pub async fn main() -> Result {
     };
     let l1 = L1::new(rolldown, provider, subscription);
 
-    let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+    let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
         chain,
@@ -93,7 +95,7 @@ pub async fn main() -> Result {
             })
         }
         (None, false) => {
-            panic!("stash uri not set");
+            panic!("!!! stash uri not set !!!");
         }
     };
 

@@ -44,7 +44,7 @@ pub async fn main() -> Result<(), Error> {
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
     init_logger();
 
-    tracing::info!("{args:?}");
+    tracing::info!("config: {args:#?}");
 
     let subscription = if args.polling {
         Subscription::Polling
@@ -54,11 +54,11 @@ pub async fn main() -> Result<(), Error> {
     let (hunter_to_filter, filter_input) = channel(1_000_000);
     let (to_executor, executor) = channel(1_000_000);
 
-    let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
+    let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let sender = l1api::address(provider.clone());
     let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
 
-    let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+    let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
     let mut hunter = {
         let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);

@@ -1,5 +1,6 @@
 use clap::arg;
 use clap::Parser;
+use common::PKeyWrapper;
 
 #[derive(Parser, Debug)]
 pub struct Cli {
@@ -10,7 +11,7 @@ pub struct Cli {
     pub l2_uri: String,
 
     #[arg(long, value_parser = common::parse_pkey, env = "PRIVATE_KEY")]
-    pub private_key: [u8; 32],
+    pub private_key: PKeyWrapper,
 
     #[arg(long, env = "CHAIN")]
     pub chain_id: u32,

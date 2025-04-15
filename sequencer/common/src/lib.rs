@@ -1,6 +1,28 @@
 mod metrics;
 use itertools::Itertools;
 pub use metrics::{report_account_balance, serve_metrics};
+
+#[derive(Clone, Copy)]
+pub struct PKeyWrapper(pub [u8; 32]);
+
+impl From<PKeyWrapper> for [u8; 32] {
+    fn from(val: PKeyWrapper) -> [u8; 32] {
+        val.0
+    }
+}
+
+impl From<[u8; 32]> for PKeyWrapper {
+    fn from(value: [u8; 32]) -> Self {
+        PKeyWrapper(value)
+    }
+}
+
+impl std::fmt::Debug for PKeyWrapper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "### SECRET ###")
+    }
+}
+
 pub fn get_chunks(start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
     (start..=end)
         .chunks(chunk_size)
