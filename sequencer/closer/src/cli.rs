@@ -34,7 +34,7 @@ pub struct Cli {
     #[arg(long, default_value_t = 0u128, env = "OFFSET")]
     pub offset: u128,
 
-    #[arg(long, default_value_t= 25, env = "BATCH_SIZE")]
+    #[arg(long, default_value_t = 25, env = "BATCH_SIZE")]
     pub batch_size: usize,
 
     #[arg(long, default_value_t = 1, env = "REPLICA_ID")]
