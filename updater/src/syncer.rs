@@ -34,6 +34,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
 use tracing::{debug, error, info, instrument, warn};
+use crate::metrics::record_last_task_synced_metrics;
 
 // TODO
 // In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response
@@ -45,6 +46,9 @@ use tracing::{debug, error, info, instrument, warn};
 // Maybe also check logs.removed?
 
 type QuorumNum = u8;
+
+pub const OP_TASK_TYPE_STR: &str = &"op_task";
+pub const RD_TASK_TYPE_STR: &str = &"rd_task";
 
 #[derive(Clone)]
 pub struct CustomOperatorAvsState {
@@ -316,6 +320,7 @@ impl Syncer {
                 info!("sucessfully synced op task - {:?}", call.task.clone());
                 *latest_completed_op_task_created_block = call.task.task_created_block;
                 *latest_completed_op_task_number = call.task.task_num;
+                record_last_task_synced_metrics(OP_TASK_TYPE_STR, call.task.task_num);
             }
             FinalizerTaskManagerEvents::RdTaskCompletedFilter(_event) => {
                 let txn_hash = log.transaction_hash;
@@ -423,6 +428,7 @@ impl Syncer {
                 info!("sucessfully synced rd task - {:?}", call.task.clone());
                 *latest_completed_rd_task_number = call.task.task_num;
                 *last_processed_rd_task_number = Some(call.task.task_num);
+                record_last_task_synced_metrics(RD_TASK_TYPE_STR, call.task.task_num);
             }
             _ => return Err(eyre!("Got unexpected stream event")),
         }
