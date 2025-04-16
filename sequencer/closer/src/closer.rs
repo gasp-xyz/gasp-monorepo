@@ -177,7 +177,7 @@ where
 
         loop {
             buffer.clear();
-            let queue_size= self.input.len();
+            let queue_size = self.input.len();
             crate::metrics::PENDING_WITHDRAWALS.set(queue_size as f64);
 
             let count = self.input.recv_many(&mut buffer, 25).await;

@@ -11,8 +11,8 @@ mod batch_subscription;
 mod cli;
 mod closer;
 mod filter;
-mod past_withdrawals_finder;
 mod metrics;
+mod past_withdrawals_finder;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()

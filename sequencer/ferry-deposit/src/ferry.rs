@@ -6,6 +6,8 @@ use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::time::timeout;
 
+use crate::metrics;
+
 pub type Priority = U256;
 pub type DepositId = U256;
 
@@ -110,8 +112,22 @@ where
 
         if let Some(deposit) = req_to_ferrry {
             self.assert_exists(deposit).await?;
+            let ferried_amount: u128 = (deposit.amount - deposit.ferry_tip).try_into().unwrap();
             tracing::info!("ferry deposit {deposit}");
-            self.l2.ferry_deposit(self.chain, deposit).await?;
+            if self.l2.ferry_deposit(self.chain, deposit).await? {
+                metrics::FERRIED
+                    .with_label_values(&[&hex::encode(deposit.token_address)])
+                    .inc();
+                metrics::FERRIED_VOLUME
+                    .with_label_values(&[&hex::encode(deposit.token_address)])
+                    .inc_by(ferried_amount as f64);
+                metrics::FERRIED.with_label_values(&["total"]).inc();
+                metrics::FERRIED_VOLUME
+                    .with_label_values(&["total"])
+                    .inc_by(ferried_amount as f64);
+            } else {
+                metrics::FAILED_FERRY_ATTEMPTS.inc();
+            }
             self.ferryable_deposits.remove(&deposit.request_id.id);
         }
 
@@ -139,6 +155,9 @@ where
             .collect::<Result<Vec<_>, _>>()?;
 
         for (token, balance) in balances {
+            metrics::TOKEN_BALANCE
+                .with_label_values(&[&hex::encode(token)])
+                .set(balance as f64);
             self.balances.insert(token, balance.into());
         }
 
