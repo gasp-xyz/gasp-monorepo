@@ -1,7 +1,6 @@
 use clap::arg;
 use clap::Parser;
 use common::PKeyWrapper;
-use hex::FromHexError;
 
 #[derive(Parser, Debug)]
 pub struct Cli {

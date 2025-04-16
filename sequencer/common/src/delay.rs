@@ -23,7 +23,6 @@ pub async fn delay_channel_impl<'a, T: Debug + Clone, E: Display>(
                 match elem{
                     Some(elem) => {
                         buffer.entry(current_block + delay).and_modify(|elems| elems.push(elem.clone())).or_insert(vec![elem]);
-                        // buffer.insert(current_block + delay, elem);
                     },
                     None => {
                         tracing::error!("input channel closed");
@@ -34,7 +33,7 @@ pub async fn delay_channel_impl<'a, T: Debug + Clone, E: Display>(
             block_nr = ticker.next().fuse() => {
                 match block_nr {
                     Some(Ok(block_nr)) => {
-                        tracing::info!("new block received {block_nr:?}");
+                        tracing::debug!("new block received {block_nr:?}");
                         let not_ready = buffer.split_off(&block_nr);
                         let ready = std::mem::replace(&mut buffer, not_ready);
                         for (id, elems) in ready {

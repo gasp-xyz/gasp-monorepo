@@ -242,13 +242,23 @@ impl Cancel {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct Withdrawal {
     pub request_id: RequestId,
     pub recipient: [u8; 20],
     pub token_address: [u8; 20],
     pub amount: U256,
     pub ferry_tip: U256,
+}
+
+impl std::fmt::Debug for Withdrawal {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Withdrawal{{request_id: {:?}, recipient: {}, token_address: {}, amount: {:?}, ferry_tip: {:?}}}",
+            self.request_id, hex::encode(self.recipient), hex::encode(self.token_address), self.amount, self.ferry_tip
+        )
+    }
 }
 
 impl Display for Withdrawal {
@@ -261,7 +271,7 @@ impl Display for Withdrawal {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone)]
 pub struct Deposit {
     pub request_id: RequestId,
     pub recipient: [u8; 20],
@@ -305,11 +315,21 @@ impl Deposit {
     }
 }
 
+impl std::fmt::Debug for Deposit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Deposit: request_id: {:?}, recipient: {}, token_address: {}, amount: {:?}, ferry_tip: {:?}",
+            self.request_id, hex::encode(self.recipient), hex::encode(self.token_address), self.amount, self.ferry_tip
+        )
+    }
+}
+
 impl Display for Deposit {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Withdrawal: request_id: {:?}, recipient: {}, token_address: {}, amount: {:?}, ferry_tip: {:?}",
+            "Deposit: request_id: {:?}, recipient: {}, token_address: {}, amount: {:?}, ferry_tip: {:?}",
             self.request_id, hex::encode(self.recipient), hex::encode(self.token_address), self.amount, self.ferry_tip
         )
     }

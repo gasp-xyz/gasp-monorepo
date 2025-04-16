@@ -209,7 +209,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         let deposit = self.rolldown_contract.get_deposit(request_id).await?;
         if deposit.timeStamp.is_zero() {

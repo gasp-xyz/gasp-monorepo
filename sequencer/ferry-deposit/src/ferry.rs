@@ -3,8 +3,9 @@ use gasp_types::{Chain, Deposit, U256};
 use l1api::L1Interface;
 use l2api::L2Interface;
 use std::collections::HashMap;
+use std::time::Duration;
 use tokio::sync::mpsc;
-use tokio::time::timeout;
+use tokio::time::{timeout, Instant};
 
 use crate::metrics;
 
@@ -81,16 +82,17 @@ where
             .get_latest_processed_request_id(self.chain, at)
             .await?;
 
-        let len = self.ferryable_deposits.len();
+        let ferryable_deposits_amount_before = self.ferryable_deposits.len();
         self.ferryable_deposits
             .retain(|request_id, _| *request_id > latest_finalized.into());
+        if ferryable_deposits_amount_before > self.ferryable_deposits.len() {
+            tracing::info!(
+                "removed {n} withdrawals that are already finalized",
+                n = ferryable_deposits_amount_before - self.ferryable_deposits.len()
+            );
+        }
 
-        tracing::debug!(
-            "removed {n} withdrawals that are already finalized",
-            n = len - self.ferryable_deposits.len()
-        );
-
-        let req_to_ferrry = self
+        let affordable_deposits = self
             .ferryable_deposits
             .iter()
             .filter(|(_, (_, deposit))| {
@@ -104,9 +106,18 @@ where
                     .get(&deposit.token_address)
                     .cloned()
                     .unwrap_or_default();
-                tracing::trace!("required balance {balance} available balance {required_tokens_amount} token {0:?}", deposit.token_address);
+                tracing::trace!("required balance {balance} available balance {required_tokens_amount} token {}", hex::encode(deposit.token_address));
                 balance >= required_tokens_amount
-            })
+            }).collect::<Vec<_>>();
+
+        tracing::debug!(
+            "{affordable} / {all} affordable ferries found",
+            affordable = affordable_deposits.len(),
+            all = self.ferryable_deposits.len()
+        );
+
+        let req_to_ferrry = affordable_deposits
+            .into_iter()
             .max_by_key(|(_, (prio, _))| prio)
             .map(|(_, (_, w))| *w);
 
@@ -177,6 +188,7 @@ where
     }
 
     pub async fn run(mut self) -> Result<(), FerryError> {
+        let mut now = Instant::now();
         loop {
             loop {
                 // fetch as many elemenets from queue at once as possible
@@ -187,13 +199,12 @@ where
                 .await
                 {
                     Ok(Some((prio, deposit))) => {
-                        tracing::info!("received ferry request");
+                        tracing::info!("pending deposit found {deposit}");
                         self.track_balance(deposit.token_address).await?;
                         self.ferryable_deposits
                             .insert(deposit.request_id.id, (prio, deposit));
                     }
                     Err(_elapsed) => {
-                        tracing::debug!("no new messages found yet");
                         break;
                     }
                     Ok(None) => {
@@ -203,12 +214,12 @@ where
                 }
             }
 
+            if Instant::now() - now > Duration::from_secs(30) {
+                now = Instant::now();
+                tracing::info!("keep alive");
+            }
+
             if !self.ferryable_deposits.is_empty() {
-                tracing::info!(
-                    "found {n} deposit ready to ferry",
-                    n = self.ferryable_deposits.len()
-                );
-                //TODO: should ferry as much as possible
                 self.refresh_balances().await?;
                 self.ferry_deposit().await?;
                 continue;
