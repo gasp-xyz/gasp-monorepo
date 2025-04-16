@@ -25,6 +25,7 @@ use ethers::{
     types::{Bytes, Filter},
 };
 
+use crate::metrics::{record_last_task_synced_metrics, OP_TASK_TYPE_STR, RD_TASK_TYPE_STR};
 use crate::ALERT_WARNING;
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
@@ -34,7 +35,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::select;
 use tracing::{debug, error, info, instrument, warn};
-use crate::metrics::{record_last_task_synced_metrics, OP_TASK_TYPE_STR, RD_TASK_TYPE_STR};
 
 // TODO
 // In addition to reinit we could also have a function in the syncer that would cherry pick the task and its response

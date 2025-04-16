@@ -22,11 +22,10 @@ lazy_static::lazy_static! {
     .unwrap();
 }
 
-pub fn record_last_task_synced_metrics(
-    task_type: &str,
-    task_index: u32,
-) {
-    LAST_TASK_SYNCED.with_label_values(&[task_type]).set(task_index.into())
+pub fn record_last_task_synced_metrics(task_type: &str, task_index: u32) {
+    LAST_TASK_SYNCED
+        .with_label_values(&[task_type])
+        .set(task_index.into())
 }
 
 pub async fn report_account_balance<P>(provider: Provider<P>, address: [u8; 20])
