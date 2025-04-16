@@ -7,6 +7,8 @@ use l2api::types::{BatchInfo, Chain, H256};
 use l2api::{L2Error, L2Interface};
 use tokio::sync::mpsc;
 
+use crate::closer_metrics;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("L1 error")]
@@ -70,6 +72,7 @@ where
                     request_id,
                     hash
                 );
+                closer_metrics::CLOSED_WITHDRAWAL.inc();
                 Ok(())
             }
             (Err(_), RequestStatus::Closed) => {
@@ -77,6 +80,7 @@ where
                     "failed to close withdrawal {} - someone else closed it ",
                     request_id,
                 );
+                closer_metrics::FAILED_CLOSE_ATTEMPTS.inc();
                 Ok(())
             }
             (Err(err), _) => {
@@ -125,10 +129,12 @@ where
                 .collect();
 
             tracing::debug!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
+            let amount = closable_withdrawals.len();
             let tx = self
                 .l1
                 .close_withdrawals_at_once(closable_withdrawals)
                 .await?;
+            closer_metrics::CLOSED_WITHDRAWAL.add(amount as f64);
 
             tracing::info!("batch closed successfully {tx}");
         } else {
@@ -171,6 +177,9 @@ where
 
         loop {
             buffer.clear();
+            let queue_size = self.input.len();
+            crate::closer_metrics::PENDING_WITHDRAWALS.set(queue_size as f64);
+
             let count = self.input.recv_many(&mut buffer, 25).await;
             if count > 0 {
                 tracing::debug!("found {count} withdrawals to close");
