@@ -1493,6 +1493,8 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "async-stream",
+ "futures",
  "hex",
  "hex-literal",
  "itertools 0.14.0",
@@ -1501,6 +1503,7 @@ dependencies = [
  "prometheus",
  "tokio",
  "tracing",
+ "tracing-test",
  "warp",
 ]
 
