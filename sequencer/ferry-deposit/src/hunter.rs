@@ -65,7 +65,6 @@ where
 
     pub async fn run(&mut self) -> HunterResult<()> {
         let mut stream = self.l1.subscribe_deposit().await?;
-        // while let Some(_elem) = stream.next().await
         loop {
             let (block_nr, at) = self.l2.get_best_block().await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
@@ -99,6 +98,7 @@ where
                 }
             }
             self.latest_processed = latest;
+
             // block until notified
             if stream.next().await.is_none() {
                 break;
