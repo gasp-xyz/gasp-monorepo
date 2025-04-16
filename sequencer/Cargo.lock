@@ -4638,8 +4638,8 @@ name = "sequencer"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "clap",
  "common",
- "envconfig",
  "futures",
  "gasp-types",
  "hex",

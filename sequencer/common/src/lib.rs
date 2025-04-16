@@ -49,7 +49,7 @@ pub fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
     Ok(result)
 }
 
-pub fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
+pub fn parse_pkey(s: &str) -> Result<PKeyWrapper, ::hex::FromHexError> {
     let mut result = [0u8; 32];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 66) => hex::decode(&s[2..]),
@@ -58,7 +58,7 @@ pub fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
     }?;
 
     result.copy_from_slice(parse_result.as_ref());
-    Ok(result)
+    Ok(result.into())
 }
 
 // mockall does not allow for async acion withing calls like `returning` or `return_once`

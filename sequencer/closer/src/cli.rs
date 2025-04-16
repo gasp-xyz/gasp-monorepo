@@ -14,7 +14,7 @@ pub struct Cli {
     #[arg(long, env = "STASH_URI")]
     pub stash_uri: Option<String>,
 
-    #[arg(long, value_parser = parse_pkey, env = "PRIVATE_KEY")]
+    #[arg(long, value_parser = common::parse_pkey, env = "PRIVATE_KEY")]
     pub private_key: PKeyWrapper,
 
     #[arg(long, env = "CHAIN")]
@@ -23,7 +23,7 @@ pub struct Cli {
     #[arg(long, env = "DRY_RUN")]
     pub dry_run: bool,
 
-    #[arg(long, value_parser = parse_addr, env = "ROLLDOWN_CONTRACT")]
+    #[arg(long, value_parser = common::parse_addr, env = "ROLLDOWN_CONTRACT")]
     pub rolldown_contract_address: [u8; 20],
 
     #[arg(long, default_value_t = false, env = "SKIP_STASH")]
@@ -52,28 +52,4 @@ pub struct Cli {
 
     #[arg(long, default_value_t = 0, env = "BLOCK_DELAY")]
     pub block_delay: usize,
-}
-
-fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {
-    let mut result = [0u8; 20];
-    let parse_result = match (s.starts_with("0x"), s.len()) {
-        (true, 42) => hex::decode(&s[2..]),
-        (false, 40) => hex::decode(s),
-        _ => Err(hex::FromHexError::InvalidStringLength),
-    }?;
-
-    result.copy_from_slice(parse_result.as_ref());
-    Ok(result)
-}
-
-fn parse_pkey(s: &str) -> Result<PKeyWrapper, FromHexError> {
-    let mut result = [0u8; 32];
-    let parse_result = match (s.starts_with("0x"), s.len()) {
-        (true, 66) => hex::decode(&s[2..]),
-        (false, 64) => hex::decode(s),
-        _ => Err(hex::FromHexError::InvalidStringLength),
-    }?;
-
-    result.copy_from_slice(parse_result.as_ref());
-    Ok(result.into())
 }
