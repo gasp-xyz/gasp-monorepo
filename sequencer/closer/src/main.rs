@@ -10,9 +10,9 @@ use tokio::time::Duration;
 mod batch_subscription;
 mod cli;
 mod closer;
-mod closer_metrics;
 mod filter;
 mod past_withdrawals_finder;
+mod metrics;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()
