@@ -170,7 +170,7 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
-    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error>{
+    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error> {
         match self.subscription {
             Subscription::Polling => Ok(self
                 .rolldown_contract

@@ -53,13 +53,14 @@ pub async fn main() -> Result {
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
     let (filter_input, filter) = mpsc::channel(1_000_000);
-    let header_stream = l2.header_stream(l2api::Finalization::Best).await?
+    let header_stream = l2
+        .header_stream(l2api::Finalization::Best)
+        .await?
         .map(|elem| elem.map(|(nr, _at)| nr as u128))
         .boxed();
-    let (closer_input, closer_sink, delay_fut) = common::delay::create_delay_channel(header_stream, 1u128);
-    let delay_task: TaskHandle = tokio::spawn(async move {
-        Ok(delay_fut.await?)
-    });
+    let (closer_input, closer_sink, delay_fut) =
+        common::delay::create_delay_channel(header_stream, 1u128);
+    let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
         chain,
@@ -85,7 +86,6 @@ pub async fn main() -> Result {
     let new_withdrawals_subscriber_task: TaskHandle =
         tokio::spawn(async move { Ok(new_withdrawals_subscriber.run().await?) });
 
-
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {
             tracing::info!("filtering withdrawals created by frontend");
@@ -106,7 +106,6 @@ pub async fn main() -> Result {
             panic!("!!! stash uri not set !!!");
         }
     };
-
 
     let closer_task: TaskHandle = tokio::spawn(async move {
         let mut closer = Closer::new(

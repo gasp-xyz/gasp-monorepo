@@ -88,7 +88,7 @@ where
 
     async fn assert_withdrawals_exists(
         &self,
-        withdrawals: &Vec<Withdrawal>,
+        withdrawals: &[Withdrawal],
         at: H256,
     ) -> Result<(), Error> {
         futures::future::try_join_all(withdrawals.iter().map(|elem| self.check_exists(*elem, at)))

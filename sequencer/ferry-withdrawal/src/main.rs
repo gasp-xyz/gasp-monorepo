@@ -1,7 +1,5 @@
 use clap::Parser;
-use ferry::FerryError;
 use futures::StreamExt;
-use hunter::HunterError;
 use l1api::{Subscription, L1};
 use l2api::{Gasp, L2Interface};
 use tokio::sync::mpsc::channel;
@@ -65,13 +63,14 @@ pub async fn main() -> Result<(), Error> {
     let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
 
     let (hunter_to_filter, filter_input) = channel(1_000_000);
-    let header_stream = l2.header_stream(l2api::Finalization::Best).await?
+    let header_stream = l2
+        .header_stream(l2api::Finalization::Best)
+        .await?
         .map(|elem| elem.map(|(nr, _at)| nr as u128))
         .boxed();
-    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(header_stream, args.block_delay);
-    let task_delay= tokio::spawn(async move {
-        Ok::<_, Error>(delay_fut.await?)
-    });
+    let (to_executor, executor, delay_fut) =
+        common::delay::create_delay_channel(header_stream, args.block_delay);
+    let task_delay = tokio::spawn(async move { Ok::<_, Error>(delay_fut.await?) });
 
     let mut cleaner = {
         cleaner::FerryCleaner::new(
@@ -116,29 +115,23 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle = tokio::spawn(async move {
-        Ok(hunter.run().await?)
-    });
+    let hunter_handle = tokio::spawn(async move { Ok(hunter.run().await?) });
 
     let filter_handle = tokio::spawn(async move {
-        Ok(filter.run().await)
+        filter.run().await;
+        Ok(())
     });
 
-    let executor_handle = tokio::spawn(async move {
-        Ok(executor.run().await?)
-    });
+    let executor_handle = tokio::spawn(async move { Ok(executor.run().await?) });
 
-    let cleaner_handle = tokio::spawn(async move {
-        Ok(cleaner.run().await?)
-    });
-
+    let cleaner_handle = tokio::spawn(async move { Ok(cleaner.run().await?) });
 
     if let Err(e) = futures::future::try_join_all([
         task_delay,
         hunter_handle,
         filter_handle,
         executor_handle,
-        cleaner_handle
+        cleaner_handle,
     ])
     .await
     {

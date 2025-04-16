@@ -1,8 +1,6 @@
 use clap::Parser;
-use ferry::FerryError;
-use futures::StreamExt;
-use hunter::HunterError;
-use l1api::{L1Interface, Subscription, L1};
+use futures::{stream::BoxStream, StreamExt};
+use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -60,14 +58,20 @@ pub async fn main() -> Result<(), Error> {
     let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
-
     let (hunter_to_filter, filter_input) = channel(1_000_000);
-    let x = l1.clone();
-    let header_stream = x.subscribe_header().await?.boxed();
-    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(header_stream, args.block_delay);
-    let task_delay= tokio::spawn(async move {
-        Ok::<_, Error>(delay_fut.await?)
-    });
+    let stream: BoxStream<'static, Result<u128, l1api::L1Error>> = if args.polling {
+        rolldown.subscribe_blocks().await?.boxed()
+    } else {
+        rolldown
+            .subscribe_blocks_polling(tokio::time::Duration::from_secs_f64(1.0))
+            .await?
+            .boxed()
+    };
+
+    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(stream, 10u128);
+
+    let delay_task = tokio::spawn(async move { Ok(delay_fut.await?) });
+
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
     let executor = ferry::Ferry::new(
@@ -88,10 +92,7 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle = tokio::spawn(async move {
-        hunter.run().await?;
-        Ok::<_, HunterError>(())
-    });
+    let hunter_handle = tokio::spawn(async move { Ok::<_, Error>(hunter.run().await?) });
 
     let filter_handle = tokio::spawn(async move {
         filter::filter_deposits(
@@ -99,18 +100,18 @@ pub async fn main() -> Result<(), Error> {
             to_executor,
             args.enabled.into_iter().collect(),
         )
-        .await
+        .await;
+        Ok(())
     });
 
-    let executor_handle = tokio::spawn(async move {
-        executor.run().await?;
-        Ok::<_, FerryError>(())
-    });
+    let executor_handle = tokio::spawn(async move { Ok::<_, Error>(executor.run().await?) });
 
-    let (hunter, _filter, executor) =
-        tokio::try_join!(hunter_handle, filter_handle, executor_handle,).expect("can join");
-    hunter?;
-    executor?;
+    if let Err(e) =
+        futures::future::try_join_all([hunter_handle, filter_handle, executor_handle, delay_task])
+            .await
+    {
+        tracing::error!("err : {e}");
+    }
 
     Ok(())
 }

@@ -1,5 +1,5 @@
-mod metrics;
 pub mod delay;
+mod metrics;
 use itertools::Itertools;
 pub use metrics::{report_account_balance, serve_metrics};
 
