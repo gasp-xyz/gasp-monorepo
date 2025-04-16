@@ -1,7 +1,8 @@
 use clap::Parser;
 use closer::Closer;
+use futures::StreamExt;
 use l1api::{Subscription, L1};
-use l2api::Gasp;
+use l2api::{Gasp, L2Interface};
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 use tokio::time::Duration;
@@ -9,7 +10,6 @@ use tokio::time::Duration;
 mod batch_subscription;
 mod cli;
 mod closer;
-mod delay;
 mod filter;
 mod past_withdrawals_finder;
 
@@ -40,8 +40,6 @@ pub async fn main() -> Result {
         Subscription::Subscription
     };
     tracing::info!("L1 subscription type {subscription:?}");
-    let (filter_input, filter) = mpsc::channel(1_000_000);
-    let (closer_input, closer_sink) = mpsc::channel(1_000_000);
 
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
 
@@ -52,8 +50,16 @@ pub async fn main() -> Result {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
     let l1 = L1::new(rolldown, provider, subscription);
-
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
+
+    let (filter_input, filter) = mpsc::channel(1_000_000);
+    let header_stream = l2.header_stream(l2api::Finalization::Best).await?
+        .map(|elem| elem.map(|(nr, _at)| nr as u128))
+        .boxed();
+    let (closer_input, closer_sink, delay_fut) = common::delay::create_delay_channel(header_stream, 1u128);
+    let delay_task: TaskHandle = tokio::spawn(async move {
+        Ok(delay_fut.await?)
+    });
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
         chain,
@@ -79,6 +85,7 @@ pub async fn main() -> Result {
     let new_withdrawals_subscriber_task: TaskHandle =
         tokio::spawn(async move { Ok(new_withdrawals_subscriber.run().await?) });
 
+
     let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {
             tracing::info!("filtering withdrawals created by frontend");
@@ -100,6 +107,7 @@ pub async fn main() -> Result {
         }
     };
 
+
     let closer_task: TaskHandle = tokio::spawn(async move {
         let mut closer = Closer::new(
             chain,
@@ -113,6 +121,7 @@ pub async fn main() -> Result {
 
     if let Err(e) = futures::future::try_join_all([
         finder_task,
+        delay_task,
         new_withdrawals_subscriber_task,
         filter_task,
         closer_task,

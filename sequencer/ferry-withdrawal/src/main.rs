@@ -1,8 +1,9 @@
 use clap::Parser;
 use ferry::FerryError;
+use futures::StreamExt;
 use hunter::HunterError;
 use l1api::{Subscription, L1};
-use l2api::Gasp;
+use l2api::{Gasp, L2Interface};
 use tokio::sync::mpsc::channel;
 
 mod cleaner;
@@ -55,8 +56,6 @@ pub async fn main() -> Result<(), Error> {
     } else {
         Subscription::Subscription
     };
-    let (hunter_to_filter, filter_input) = channel(1_000_000);
-    let (to_executor, executor) = channel(1_000_000);
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let sender = l1api::address(provider.clone());
@@ -64,6 +63,15 @@ pub async fn main() -> Result<(), Error> {
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
     let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
+
+    let (hunter_to_filter, filter_input) = channel(1_000_000);
+    let header_stream = l2.header_stream(l2api::Finalization::Best).await?
+        .map(|elem| elem.map(|(nr, _at)| nr as u128))
+        .boxed();
+    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(header_stream, args.block_delay);
+    let task_delay= tokio::spawn(async move {
+        Ok::<_, Error>(delay_fut.await?)
+    });
 
     let mut cleaner = {
         cleaner::FerryCleaner::new(
@@ -109,34 +117,33 @@ pub async fn main() -> Result<(), Error> {
     }
 
     let hunter_handle = tokio::spawn(async move {
-        hunter.run().await?;
-        Ok::<_, HunterError>(())
+        Ok(hunter.run().await?)
     });
 
     let filter_handle = tokio::spawn(async move {
-        filter.run().await;
+        Ok(filter.run().await)
     });
 
     let executor_handle = tokio::spawn(async move {
-        executor.run().await?;
-        Ok::<_, FerryError>(())
+        Ok(executor.run().await?)
     });
 
     let cleaner_handle = tokio::spawn(async move {
-        cleaner.run().await?;
-        Ok::<_, cleaner::CleanerError>(())
+        Ok(cleaner.run().await?)
     });
 
-    let (hunter, _filter, executor, cleaner) = tokio::try_join!(
+
+    if let Err(e) = futures::future::try_join_all([
+        task_delay,
         hunter_handle,
         filter_handle,
         executor_handle,
         cleaner_handle
-    )
-    .expect("can join");
-    hunter?;
-    executor?;
-    cleaner?;
+    ])
+    .await
+    {
+        tracing::error!("err : {e}");
+    }
 
     Ok(())
 }

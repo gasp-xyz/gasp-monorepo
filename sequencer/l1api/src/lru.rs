@@ -30,6 +30,10 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
+    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error>{
+        self.l1.subscribe_header().await
+    }
+
     async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error> {
         self.l1.subscribe_deposit().await
     }

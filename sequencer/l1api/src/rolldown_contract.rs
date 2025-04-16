@@ -1,6 +1,7 @@
 use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
+use alloy::consensus::BlockHeader;
 use alloy::contract::{CallBuilder, CallDecoder};
 use futures::{Stream, StreamExt};
 use lazy_static::lazy_static;
@@ -196,6 +197,55 @@ where
     P: Provider<T, N> + Clone,
     N: Network,
 {
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_blocks(
+        &self,
+    ) -> Result<impl Stream<Item = Result<u128,L1Error>>, L1Error> {
+        let p = self.contract_handle.provider();
+        let subscription = p.subscribe_blocks().await?;
+        Ok(subscription.into_stream().map(|elem| 
+            Ok(elem.number() as u128)
+        ))
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub async fn subscribe_blocks_polling(
+        & self,
+        timeout: Duration
+    ) -> Result<impl Stream<Item = Result<u128, L1Error>>+ 'static, L1Error> {
+
+        let p = self.contract_handle.provider();
+        let subscription = p.subscribe_blocks().await?;
+        Ok(subscription.into_stream().map(|elem| 
+            Ok(elem.number() as u128)
+        ))
+
+        // let p = self.contract_handle.provider().clone();
+        // let mut latest = p.get_block_number().await?;
+        //
+        // let stream = stream! {
+        //     loop {
+        //             tokio::time::sleep(timeout).await;
+        //             match p.get_block_number().await
+        //         {
+        //                 Ok(elem) if elem > latest => {
+        //                     for nr in (latest+1)..=elem{
+        //                         latest = nr;
+        //                         yield Ok(nr as u128);
+        //                     }
+        //                 },
+        //                 Err(err) => {
+        //                     tracing::error!("could not get latest block number {err}");
+        //                     yield Err(err.into());
+        //                 },
+        //                 _ => {}
+        //             }
+        //     }
+        // };
+        // Ok(stream)
+    }
+
+
     #[tracing::instrument(skip(self))]
     pub async fn subscribe_new_batch(
         &self,

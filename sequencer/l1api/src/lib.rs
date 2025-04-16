@@ -89,6 +89,7 @@ pub enum Subscription {
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
+    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error>;
     async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error>;
     async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error>;
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
@@ -169,6 +170,19 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error>{
+        match self.subscription {
+            Subscription::Polling => Ok(self
+                .rolldown_contract
+                .subscribe_blocks_polling(tokio::time::Duration::from_secs_f32(30.0))
+                .await?
+                .boxed()),
+            Subscription::Subscription => {
+                Ok(self.rolldown_contract.subscribe_blocks().await?.boxed())
+            }
+        }
+    }
+
     async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error> {
         match self.subscription {
             Subscription::Polling => Ok(self

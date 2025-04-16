@@ -1,22 +1,21 @@
-
 use std::collections::BTreeMap;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
+use std::future::Future;
 
 use futures::select;
 use futures::{stream::BoxStream, FutureExt, StreamExt};
 use tokio::sync::mpsc::{Receiver, Sender};
 
-
 #[tracing::instrument(skip_all)]
-async fn delay_channel_impl<'a, T: Debug + Clone>(
+async fn delay_channel_impl<'a, T: Debug + Clone, E : Display>(
     mut input: Receiver<T>,
     output: Sender<T>,
-    mut ticker: BoxStream<'a, u128>,
+    mut ticker: BoxStream<'a, Result<u128, E>>,
     delay: u128,
-) -> Result<(), ()> {
+) -> Result<(), E> {
     tracing::info!("delay stream started with delay = {delay}");
     let mut buffer: BTreeMap<u128, Vec<T>> = BTreeMap::new();
-    let current_block = ticker.next().await.expect("infinite stream");
+    let current_block = ticker.next().await.expect("infinite stream")?;
     loop {
         select! {
             elem = input.recv().fuse() => {
@@ -33,9 +32,9 @@ async fn delay_channel_impl<'a, T: Debug + Clone>(
                 }
             },
             block_nr = ticker.next().fuse() => {
-                tracing::info!("new block received {block_nr:?}");
                 match block_nr {
-                    Some(block_nr) => {
+                    Some(Ok(block_nr)) => {
+                        tracing::info!("new block received {block_nr:?}");
                         let not_ready = buffer.split_off(&block_nr);
                         let ready = std::mem::replace(&mut buffer, not_ready);
                         for (id, elems) in ready {
@@ -49,6 +48,9 @@ async fn delay_channel_impl<'a, T: Debug + Clone>(
                         tracing::error!("blocks channel closed");
                         break;
                     },
+                    Some(Err(e)) =>{
+                        tracing::error!("could not get block number err: {e} ... ignoring");
+                    }
                 }
             }
         }
@@ -58,12 +60,15 @@ async fn delay_channel_impl<'a, T: Debug + Clone>(
 }
 
 #[tracing::instrument(skip_all)]
-async fn delay_channel<'a, T: Debug + Clone>(
+pub async fn delay_channel<'a, T, E>(
     input: Receiver<T>,
     output: Sender<T>,
-    ticker: BoxStream<'a, u128>,
+    ticker: BoxStream<'a, Result<u128, E>>,
     delay: u128,
-) -> Result<(), ()> {
+) -> Result<(), E> where
+    T: Debug + Clone, 
+    E: Display
+{
     if delay > 0 {
         delay_channel_impl(input, output, ticker, delay).await?;
     } else {
@@ -72,15 +77,42 @@ async fn delay_channel<'a, T: Debug + Clone>(
     Ok(())
 }
 
-// pub fn create_delay_channel<T: Debug + Clone>(stream: BoxStream<u128>, delay: u128) -> (Sender<T>, Receiver<T>, JoinHandle<Result<(), ()>>) {
-//     let (input, receiver) = mpsc::channel(1_000_000);
-//     let (sender, output) = mpsc::channel(1_000_000);
-//     let task = tokio::spawn(delay_channel(receiver, sender, stream, delay));
-//     (input, output, task)
-// }
-//
+use futures::future::BoxFuture;
 #[tracing::instrument(skip_all)]
-async fn forward_channel<'a, T>(mut input: Receiver<T>, output: Sender<T>) -> Result<(), ()> {
+pub fn delay_channel2<'a, T, E>(
+    input: Receiver<T>,
+    output: Sender<T>,
+    ticker: BoxStream<'a, Result<u128, E>>,
+    delay: u128,
+) -> BoxFuture<Result<(), E>> where
+    T: Debug + Clone + Send + Sync + 'static, 
+    E: Display + Send + Sync + 'static,
+{
+    if delay > 0 {
+    tracing::info!("hello world1");
+        delay_channel_impl(input, output, ticker, delay).boxed()
+    } else {
+    tracing::info!("hello world2");
+        forward_channel(input, output).boxed()
+    }
+}
+
+pub fn create_delay_channel<T, E>(stream: BoxStream<'static, Result<u128, E>>, delay: u128) -> (Sender<T>, Receiver<T>, impl Future<Output = Result<(), E>>) where
+    T: Debug + Clone + Sync + Send + 'static, 
+    E: std::fmt::Display + Sync + Send + 'static,
+{
+    use tokio::sync::mpsc;
+    let (input, receiver) = mpsc::channel(1_000_000);
+    let (sender, output) = mpsc::channel(1_000_000);
+
+    tracing::info!("hello");
+    let task = delay_channel2(receiver, sender, stream, delay);
+    (input, output, task)
+}
+
+
+#[tracing::instrument(skip_all)]
+async fn forward_channel<'a, T, E>(mut input: Receiver<T>, output: Sender<T>) -> Result<(), E> {
     while let Some(elem) = input.recv().await {
         output.send(elem).await.expect("infinite");
     }
@@ -90,6 +122,8 @@ async fn forward_channel<'a, T>(mut input: Receiver<T>, output: Sender<T>) -> Re
 
 #[cfg(test)]
 pub mod test {
+    use std::convert::Infallible;
+
     use super::*;
     use async_stream::stream;
     use futures::Stream;
@@ -108,6 +142,18 @@ pub mod test {
     }};
     }
 
+
+    #[macro_export]
+    macro_rules! assert_resolves_within {
+        ($duration:expr, $future:expr) => {{
+            use tokio::time::{timeout, Duration};
+        match timeout(Duration::from_secs_f64($duration), $future).await {
+            Ok(_) => {},
+            Err(_) => panic!("assert_timeout!"),
+        }
+    }};
+    }
+
     fn into_stream<T>(mut receiver: Receiver<T>) -> impl Stream<Item = T> {
         stream! {
             while let Some(elem) = receiver.recv().await {
@@ -117,49 +163,41 @@ pub mod test {
     }
 
     #[tokio::test]
+    #[tracing_test::traced_test]
     async fn test_forward_blocks_when_no_delay() {
-        let (_block_sender, stream_receiver) = mpsc::channel(100);
-        let blocks_stream = into_stream(stream_receiver);
+        let (_block_sender, stream_receiver) = mpsc::channel::<Result<u128, Infallible>>(100);
+        let blocks_stream = into_stream(stream_receiver).boxed();
+        let (input, mut output, task) = create_delay_channel::<u128, Infallible>(blocks_stream, 0u128);
 
-        let (input, receiver) = mpsc::channel(100);
-        let (sender, mut output) = mpsc::channel(100);
 
-        let t = tokio::spawn(async move {
-            delay_channel(receiver, sender, blocks_stream.boxed(), 0)
-                .await
-                .unwrap();
+        let _t = tokio::spawn(async move {
+            task.await.unwrap();
         });
 
-        let elem = 1u128;
-        input.send(elem).await.unwrap();
-        assert_eq!(output.recv().await, Some(elem));
-
-        std::mem::drop(input);
-        t.await.unwrap()
+        assert_timeout!(0.1, output.recv());
+        assert_resolves_within!(0.1, input.send(1u128));
+        assert_resolves_within!(0.1, output.recv());
     }
 
     #[tokio::test]
     #[traced_test]
     async fn test_forward_elems_with_delay() {
-        let (block_sender, stream_receiver) = mpsc::channel(100);
-        let blocks_stream = into_stream(stream_receiver);
-        let (input, receiver) = mpsc::channel(100);
-        let (sender, mut output) = mpsc::channel(100);
+        let (block_sender, stream_receiver) = mpsc::channel::<Result<u128, Infallible>>(100);
+        let blocks_stream = into_stream(stream_receiver).boxed();
+        let (input, mut output, task) = create_delay_channel::<String, Infallible>(blocks_stream, 10u128);
 
         let t = tokio::spawn(async move {
-            delay_channel(receiver, sender, blocks_stream.boxed(), 10)
-                .await
-                .unwrap();
+            task.await.unwrap()
         });
 
         let elem = "A".to_string();
-        block_sender.send(1u128).await.unwrap();
+        block_sender.send(Ok(1u128)).await.unwrap();
         input.send("A".to_string()).await.unwrap();
 
-        block_sender.send(10u128).await.unwrap();
+        block_sender.send(Ok(10u128)).await.unwrap();
         assert_timeout!(0.01, output.recv());
 
-        block_sender.send(12u128).await.unwrap();
+        block_sender.send(Ok(12u128)).await.unwrap();
         assert_eq!(
             timeout(Duration::from_secs_f64(0.01), output.recv())
                 .await
@@ -178,26 +216,24 @@ pub mod test {
     #[tokio::test]
     #[traced_test]
     async fn test_forward_multiple_elems_with_delay_at_once() {
-        let (block_sender, stream_receiver) = mpsc::channel(100);
-        let blocks_stream = into_stream(stream_receiver);
-        let (input, receiver) = mpsc::channel(100);
-        let (sender, mut output) = mpsc::channel(100);
+        let (block_sender, stream_receiver) = mpsc::channel::<Result<u128, Infallible>>(100);
+        let blocks_stream = into_stream(stream_receiver).boxed();
+        let (input, mut output, task) = create_delay_channel::<String, Infallible>(blocks_stream, 10u128);
 
         let t = tokio::spawn(async move {
-            delay_channel(receiver, sender, blocks_stream.boxed(), 10)
-                .await
+                task.await
                 .unwrap();
         });
 
-        block_sender.send(1u128).await.unwrap();
+        block_sender.send(Ok(1u128)).await.unwrap();
         input.send("A".to_string()).await.unwrap();
 
-        block_sender.send(2u128).await.unwrap();
+        block_sender.send(Ok(2u128)).await.unwrap();
         input.send("B".to_string()).await.unwrap();
         input.send("C".to_string()).await.unwrap();
 
         assert_timeout!(0.01, output.recv());
-        block_sender.send(13u128).await.unwrap();
+        block_sender.send(Ok(13u128)).await.unwrap();
         assert_eq!(
             timeout(Duration::from_secs_f64(0.01), output.recv())
                 .await

@@ -49,6 +49,9 @@ pub struct Cli {
 
     #[arg(long, default_value_t = false, env = "CLOSE_WITHDRAWALS_IN_BATCHES")]
     pub close_withdrawals_in_batches: bool,
+
+    #[arg(long, default_value_t = 0, env = "BLOCK_DELAY")]
+    pub block_delay: usize,
 }
 
 fn parse_addr(s: &str) -> Result<[u8; 20], FromHexError> {

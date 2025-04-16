@@ -1,7 +1,8 @@
 use clap::Parser;
 use ferry::FerryError;
+use futures::StreamExt;
 use hunter::HunterError;
-use l1api::{Subscription, L1};
+use l1api::{L1Interface, Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -51,8 +52,6 @@ pub async fn main() -> Result<(), Error> {
     } else {
         Subscription::Subscription
     };
-    let (hunter_to_filter, filter_input) = channel(1_000_000);
-    let (to_executor, executor) = channel(1_000_000);
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let sender = l1api::address(provider.clone());
@@ -61,6 +60,14 @@ pub async fn main() -> Result<(), Error> {
     let l1 = L1::new(rolldown.clone(), provider.clone(), subscription);
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
+
+    let (hunter_to_filter, filter_input) = channel(1_000_000);
+    let x = l1.clone();
+    let header_stream = x.subscribe_header().await?.boxed();
+    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(header_stream, args.block_delay);
+    let task_delay= tokio::spawn(async move {
+        Ok::<_, Error>(delay_fut.await?)
+    });
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
     let executor = ferry::Ferry::new(

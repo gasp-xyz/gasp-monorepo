@@ -8,6 +8,7 @@ mockall::mock! {
 
     #[allow(clippy::type_complexity)]
     impl crate::L1Interface for L1{
+        async fn subscribe_header<'a>(&'a self) -> Result<BoxStream<'a, Result<u128, L1Error>>, L1Error>;
         async fn subscribe_deposit<'a>(&'a self) -> Result<BoxStream<'a, u128>, L1Error>;
         async fn subscribe_new_batch<'a>(&'a self) -> Result<BoxStream<'a, (H256, (u128, u128))>, L1Error>;
         async fn get_deposit(&self, request_id: u128) -> Result<Option<crate::types::Deposit>, L1Error>;
