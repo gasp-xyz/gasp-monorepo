@@ -1,6 +1,7 @@
 use crate::setup::*;
 
 use frame_support::dispatch::{DispatchInfo, PostDispatchInfo};
+pub use frame_support::unsigned::TransactionValidityError;
 use pallet_market::PoolKind;
 use rollup_runtime::{
 	config::{
@@ -8,8 +9,9 @@ use rollup_runtime::{
 		BnbAccountIdOf, TreasuryAccountIdOf,
 	},
 	fees::FEE_PRECISION,
-	OnChargeTransactionHandler,
+	FeeLockTriggerTrait, OnChargeTransactionHandler,
 };
+use sp_runtime::transaction_validity::InvalidTransaction;
 
 const ASSET_ID_1: u32 = 1;
 const ASSET_ID_2: u32 = 2;
@@ -20,13 +22,15 @@ const TRSY_FEE_P: u128 = FEE * 3_333_333_334 / FEE_PRECISION;
 const BNB_FEE: u128 = TRSY_FEE_P * 5_000_000_000 / FEE_PRECISION;
 const TRSY_FEE: u128 = TRSY_FEE_P - BNB_FEE;
 const POOL_FEE: u128 = FEE - TRSY_FEE - BNB_FEE;
+const FEE_LOCK_PERIOD_LENGTH: u32 = 10;
+const FEE_LOCK_AMOUNT: u128 = 10 * UNIT;
 
 type Market = pallet_market::Pallet<Runtime>;
 
 fn test_env() -> TestExternalities {
 	ExtBuilder {
 		balances: vec![
-			(AccountId::from(ALICE), NATIVE_ASSET_ID, 100 * UNIT),
+			(AccountId::from(ALICE), NATIVE_ASSET_ID, 1000 * UNIT),
 			(AccountId::from(ALICE), ASSET_ID_1, 100 * UNIT),
 			(AccountId::from(ALICE), ASSET_ID_2, 100 * UNIT),
 			(AccountId::from(BOB), ASSET_ID_2, 100 * UNIT),
@@ -54,8 +58,14 @@ fn root() -> RuntimeOrigin {
 }
 
 fn init_fee_lock(amount: Balance) {
-	FeeLock::update_fee_lock_metadata(root(), Some(10), Some(amount), Some(1), Some(vec![]))
-		.unwrap();
+	FeeLock::update_fee_lock_metadata(
+		root(),
+		Some(FEE_LOCK_PERIOD_LENGTH),
+		Some(amount),
+		Some(1),
+		Some(vec![]),
+	)
+	.unwrap();
 }
 
 pub(crate) fn events() -> Vec<RuntimeEvent> {
@@ -71,249 +81,279 @@ pub(crate) fn events() -> Vec<RuntimeEvent> {
 		.collect::<Vec<_>>()
 }
 
-fn settle_fee(
-	who: &AccountId,
-	fee: Balance,
-	assets: (TokenId, TokenId),
-	has_failed: bool,
-	multi: bool,
-) {
-	let swap_pool_list = if multi { vec![POOL_ID, 0] } else { vec![POOL_ID] };
-	let withdrawn = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
-		&who,
-		&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
-			swap_pool_list,
-			asset_id_in: assets.0,
-			asset_amount_in: UNIT,
-			asset_id_out: assets.1,
-			min_amount_out: UNIT,
-		}),
-		&DispatchInfo::default(),
-		fee,
-		0,
-	)
-	.unwrap();
-
-	let pays_fee = if has_failed { Pays::Yes } else { Pays::No };
-
-	let _ = <Handler as OnChargeTransaction<Runtime>>::correct_and_deposit_fee(
-		&who,
-		&DispatchInfo::default(),
-		&PostDispatchInfo { actual_weight: None, pays_fee },
-		fee,
-		0,
-		withdrawn,
-	);
-}
-
 #[test]
-fn high_value_swap_should_be_free() {
+fn unlock_fee_w_is_free() {
 	test_env().execute_with(|| {
-		init_fee_lock(UNIT);
-		Market::create_pool(origin(), PoolKind::Xyk, ASSET_ID_1, UNIT, NATIVE_ASSET_ID, UNIT)
-			.unwrap();
 		let who = AccountId::from(ALICE);
+		init_fee_lock(FEE_LOCK_AMOUNT);
 
-		let before = Tokens::accounts(who, NATIVE_ASSET_ID);
-		settle_fee(&who, 1000, (ASSET_ID_1, NATIVE_ASSET_ID), false, false);
-		let after = Tokens::accounts(who, NATIVE_ASSET_ID);
+		assert_ok!(pallet_fee_lock::Pallet::<Runtime>::process_fee_lock(&who));
 
-		assert_eq!(before.free, after.free);
-	})
-}
+		let current_block_number = System::block_number();
+		System::set_block_number(current_block_number.saturating_add(FEE_LOCK_PERIOD_LENGTH));
 
-#[test]
-fn high_value_swap_should_take_fees_from_input_xyk() {
-	test_env().execute_with(|| {
-		init_fee_lock(UNIT);
-		Market::create_pool(origin(), PoolKind::Xyk, ASSET_ID_2, UNIT, NATIVE_ASSET_ID, UNIT)
-			.unwrap();
-		let who = AccountId::from(ALICE);
-
-		let before_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let before_2 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_2);
-		settle_fee(&who, 1000, (ASSET_ID_2, NATIVE_ASSET_ID), true, false);
-		let after_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let after_2 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_2);
-
-		assert_eq!(before_0.free, after_0.free);
-		assert_eq!(before_2.free, after_2.free + FEE);
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: TreasuryAccountIdOf::<Runtime>::get(),
-			amount: TRSY_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: BnbAccountIdOf::<Runtime>::get(),
-			amount: BNB_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: Xyk::account_id(),
-			amount: POOL_FEE,
-		}));
-	})
-}
-
-#[test]
-fn high_value_swap_should_take_fees_from_input_ss() {
-	test_env().execute_with(|| {
-		init_fee_lock(UNIT);
-		Market::create_pool(
-			origin(),
-			PoolKind::StableSwap,
-			ASSET_ID_2,
-			UNIT,
-			NATIVE_ASSET_ID,
-			UNIT,
+		let liquidity_info = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
 		)
 		.unwrap();
-		let who = AccountId::from(ALICE);
 
-		let before_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let before_2 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_2);
-		settle_fee(&who, 1000, (ASSET_ID_2, NATIVE_ASSET_ID), true, false);
-		let after_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let after_2 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_2);
-
-		assert_eq!(before_0.free, after_0.free);
-		assert_eq!(before_2.free, after_2.free + FEE);
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: TreasuryAccountIdOf::<Runtime>::get(),
-			amount: TRSY_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: BnbAccountIdOf::<Runtime>::get(),
-			amount: BNB_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_2,
-			from: who,
-			to: StableSwap::get_pool_account(&POOL_ID),
-			amount: POOL_FEE,
-		}));
+		assert!(liquidity_info.is_none());
 	})
 }
 
 #[test]
-fn low_value_swap_should_lock_fees_in_native() {
+fn unlock_fee_not_w_is_blocked() {
 	test_env().execute_with(|| {
-		let fee_lock = 5 * UNIT;
-		init_fee_lock(fee_lock);
 		let who = AccountId::from(ALICE);
-		let fee = 1000;
+		assert!(pallet_fee_lock::FeeLockMetadata::<Runtime>::get().is_none());
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::FeeLock(pallet_fee_lock::Call::unlock_fee {}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::UnlockFee.into())
+		);
+	})
+}
+
+#[test]
+fn swap_on_uninit_fee_lock_metadata_is_charged() {
+	test_env().execute_with(|| {
+		let who = AccountId::from(ALICE);
+		assert!(pallet_fee_lock::FeeLockMetadata::<Runtime>::get().is_none());
 		Market::create_pool(origin(), PoolKind::Xyk, ASSET_ID_1, UNIT, ASSET_ID_2, UNIT).unwrap();
 
-		let before_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		settle_fee(&who, fee, (ASSET_ID_1, ASSET_ID_2), false, true);
-		let after_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-
-		assert_eq!(before_0.free, after_0.free + fee_lock);
-		assert_eq!(after_0.reserved, fee_lock);
-		// fees locked
-		System::assert_last_event(RuntimeEvent::FeeLock(pallet_fee_lock::Event::FeeLocked {
-			who,
-			lock_amount: fee_lock,
-			total_locked: fee_lock,
-		}));
+		let liquidity_info = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		)
+		.unwrap();
+		assert!(liquidity_info.is_some());
 	})
 }
 
 #[test]
-fn low_value_swap_should_lock_fees_in_native_and_take_fees_from_input_xyk() {
+fn swap_w_is_liquidity_info_is_none() {
 	test_env().execute_with(|| {
-		let fee_lock = 5 * UNIT;
-		init_fee_lock(fee_lock);
 		let who = AccountId::from(ALICE);
-		let fee = 1000;
+		init_fee_lock(FEE_LOCK_AMOUNT);
 		Market::create_pool(origin(), PoolKind::Xyk, ASSET_ID_1, UNIT, ASSET_ID_2, UNIT).unwrap();
 
-		let before_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let before_1 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_1);
-		settle_fee(&who, fee, (ASSET_ID_1, ASSET_ID_2), true, true);
-		let after_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let after_1 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_1);
-
-		assert_eq!(before_0.free, after_0.free + fee_lock);
-		assert_eq!(after_0.reserved, fee_lock);
-		assert_eq!(before_1.free, after_1.free + FEE);
-		// fees locked
-		System::assert_has_event(RuntimeEvent::FeeLock(pallet_fee_lock::Event::FeeLocked {
-			who,
-			lock_amount: fee_lock,
-			total_locked: fee_lock,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: TreasuryAccountIdOf::<Runtime>::get(),
-			amount: TRSY_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: BnbAccountIdOf::<Runtime>::get(),
-			amount: BNB_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: Xyk::account_id(),
-			amount: POOL_FEE,
-		}));
+		let liquidity_info = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		)
+		.unwrap();
+		assert!(liquidity_info.is_none());
 	})
 }
 
 #[test]
-fn low_value_swap_should_lock_fees_in_native_and_take_fees_from_input_ss() {
+fn swap_gasless_is_pre_validated() {
 	test_env().execute_with(|| {
-		let fee_lock = 5 * UNIT;
-		init_fee_lock(fee_lock);
 		let who = AccountId::from(ALICE);
-		let fee = 1000;
-		Market::create_pool(origin(), PoolKind::StableSwap, ASSET_ID_1, UNIT, ASSET_ID_2, UNIT)
-			.unwrap();
+		init_fee_lock(FEE_LOCK_AMOUNT);
+		Market::create_pool(origin(), PoolKind::Xyk, ASSET_ID_1, UNIT, ASSET_ID_2, UNIT).unwrap();
 
-		let before_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let before_1 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_1);
-		settle_fee(&who, fee, (ASSET_ID_1, ASSET_ID_2), true, true);
-		let after_0 = Tokens::accounts(AccountId::from(ALICE), NATIVE_ASSET_ID);
-		let after_1 = Tokens::accounts(AccountId::from(ALICE), ASSET_ID_1);
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			1000u32.into(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::TippingNotAllowedForSwaps.into())
+		);
 
-		assert_eq!(before_0.free, after_0.free + fee_lock);
-		assert_eq!(after_0.reserved, fee_lock);
-		assert_eq!(before_1.free, after_1.free + FEE);
-		// fees locked
-		System::assert_has_event(RuntimeEvent::FeeLock(pallet_fee_lock::Event::FeeLocked {
-			who,
-			lock_amount: fee_lock,
-			total_locked: fee_lock,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: TreasuryAccountIdOf::<Runtime>::get(),
-			amount: TRSY_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: BnbAccountIdOf::<Runtime>::get(),
-			amount: BNB_FEE,
-		}));
-		System::assert_has_event(RuntimeEvent::Tokens(orml_tokens::Event::Transfer {
-			currency_id: ASSET_ID_1,
-			from: who,
-			to: StableSwap::get_pool_account(&POOL_ID),
-			amount: POOL_FEE,
-		}));
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![
+					POOL_ID;
+					<Runtime as pallet_market::Config>::MaxSwapListLength::get()
+						.saturating_add(1)
+						.try_into()
+						.unwrap()
+				],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![77u32.into()],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: 77u32.into(),
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: 77u32.into(),
+				asset_amount_in: UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_in: ASSET_ID_1,
+				asset_amount_in: 1_000_000_000 * UNIT,
+				asset_id_out: ASSET_ID_2,
+				min_amount_out: UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
+
+		let res = <Handler as OnChargeTransaction<Runtime>>::withdraw_fee(
+			&who,
+			&RuntimeCall::Market(pallet_market::Call::multiswap_asset_buy {
+				swap_pool_list: vec![POOL_ID],
+				asset_id_out: ASSET_ID_2,
+				asset_amount_out: UNIT,
+				asset_id_in: ASSET_ID_1,
+				max_amount_in: 1_000_000_000 * UNIT,
+			}),
+			&DispatchInfo::default(),
+			// fee here is imp or LiquidityInfo will be None
+			// even if fee_lock_metadata is None
+			1000u32.into(),
+			Default::default(),
+		);
+		assert_eq!(
+			res.err().unwrap(),
+			TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
+		);
 	})
 }

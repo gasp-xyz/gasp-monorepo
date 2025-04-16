@@ -99,6 +99,8 @@ func (k *Kicker) CheckStateAndKick() error {
 	}
 	k.logger.Info("Operators ejected successfuly")
 
+	recordKickedOperatorMetric(uint32(len(addresses)))
+	
 	return nil
 }
 
