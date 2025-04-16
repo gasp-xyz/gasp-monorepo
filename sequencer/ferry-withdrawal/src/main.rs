@@ -9,6 +9,7 @@ mod cli;
 mod ferry;
 mod filter;
 mod hunter;
+mod metrics;
 
 fn init_logger() {
     let filter = tracing_subscriber::EnvFilter::builder()
