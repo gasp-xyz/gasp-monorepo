@@ -251,8 +251,8 @@ contract FinalizerTaskManager is
         require(lastCompletedOpTaskCreatedBlock != 0 && block.number != 0, "Op State uninit");
 
         require(
-            chainRdBatchNonce[uint8(taskResponse.chainId)] == 0
-                || taskResponse.batchId == chainRdBatchNonce[uint8(taskResponse.chainId)],
+            chainRdBatchNonce[uint8(chainId)] == 0
+                || batchId == chainRdBatchNonce[uint8(chainId)],
             "chainRdBatchNonce mismatch"
         );
 
