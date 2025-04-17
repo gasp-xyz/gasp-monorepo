@@ -1,7 +1,7 @@
 name: Pull Request
 on:
   pull_request:
-    types: [labeled, opened, synchronize, unlabeled, closed]
+    types: [labeled, opened, edited, synchronize, unlabeled, closed]
 
 permissions:
   contents: write
@@ -22,7 +22,13 @@ jobs:
   init:
     name: Set global version and check PR title format
     # Ignore pull requests from develop, release/next, or main branches
-    if: github.event.action != 'unlabeled' && github.event.action != 'closed' && !contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)
+    # And also rerun workflow when PR title gets changed
+    # Ref: https://github.com/orgs/community/discussions/101695
+    if: >
+      (github.event.action != 'unlabeled' && 
+      github.event.action != 'closed' && 
+      ! contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)) || 
+      (github.event.action == 'edited' && github.event.changes && github.event.changes.title && github.event.changes.title.from)
     runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
@@ -73,9 +79,7 @@ jobs:
               "",
               "### After fixing the title:",
               "1. Edit the PR title by clicking the pencil icon next to the title at the top of this page",
-              "2. Make a small change to your branch and push it, or use the 'Re-run all jobs' button in the Actions tab",
-              "3. Alternatively, you can push an empty commit to trigger CI: `git commit --allow-empty -m 'chore: trigger ci'`",
-              "4. This will trigger the workflow to run again with your corrected PR title"
+              "2. The workflow will automatically re-run when you change the title."
             ].join('\n');
 
             github.rest.issues.createComment({
@@ -86,7 +90,6 @@ jobs:
             });
             
             core.setFailed("PR title doesn't match conventional commit format");
-      
       # TODO: Uncomment this when we decide to enforce commitlint checks in CI
       # - uses: actions/checkout@v4
       #   with:
