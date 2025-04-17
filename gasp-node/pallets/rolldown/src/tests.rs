@@ -1044,10 +1044,10 @@ fn accept_update_without_new_updates() {
 		forward_to_block::<Test>(16);
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
-		assert_err!(Rolldown::update_l2_from_l1_unsafe(
-			RuntimeOrigin::signed(ALICE),
-			deposit_update
-		), Error::<Test>::WrongRequestId);
+		assert_err!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
+			Error::<Test>::WrongRequestId
+		);
 	});
 }
 
