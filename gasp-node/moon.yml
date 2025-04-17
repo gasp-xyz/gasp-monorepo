@@ -48,7 +48,7 @@ tasks:
       SCCACHE_GCS_KEY_PREFIX: gasp-node-release
 
   build-image-local:
-    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t ${DOCKERHUB_REPOSITORY}:local --load .'
+    script: 'docker buildx build --build-arg ENABLE_FAST_RUNTIME=true -t ${DOCKERHUB_REPOSITORY}:local -t ${DOCKERHUB_REPOSITORY}:local-fast --load .'
     inputs: ['@group(sources)', '@group(dockerBuildInputs)']
 
   buildkit-build-and-push-image-digests-standard-runtime:
@@ -1108,7 +1108,7 @@ tasks:
 
       # Also store last 1000 lines of logs to file for debugging
       mkdir -p $workspaceRoot/tmp/logs
-      cd $workspaceRoot/gasp-node && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
+      cd $workspaceRoot && docker compose logs --tail=1000 > $workspaceRoot/tmp/logs/$task-$(date +%Y-%m-%d--%H-%M-%S)-compose-logs.txt 2>&1
 
       if [ $TEST_EXIT_CODE -ne 0 ] || grep -q 'failures="[1-9]' reports/*.xml 2>/dev/null; then
         TEST_EXIT_CODE=1

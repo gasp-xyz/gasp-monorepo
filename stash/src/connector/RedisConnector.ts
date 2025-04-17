@@ -5,9 +5,24 @@ export class RedisClient {
   client: Redis
   lock: Redlock
   noRetryLock: Redlock
+  name: string
 
-  constructor(host: string, port: number, pass: string = '') {
+  constructor(name: string, host: string, port: number, pass: string = '') {
+    this.name = name
+    console.log(
+      `[${name}] Connecting to redis at ${host}:${port} ${
+        pass ? 'with password' : 'without password'
+      }`
+    )
+
     this.client = new IORedis({ host, port, password: pass })
+
+    this.client.on('connect', () => console.log(`[${name}] Connected to Redis`))
+    this.client.on('error', (err) =>
+      console.error(`[${name}] Redis connection error:`, err)
+    )
+    this.client.on('ready', () => console.log(`[${name}] Redis client ready`))
+
     this.lock = new Redlock([this.client], {
       driftFactor: 0.01,
       retryCount: 10,
@@ -23,11 +38,13 @@ export class RedisClient {
 }
 
 export const redis = new RedisClient(
+  'main',
   process.env.REDIS_HOST,
   parseInt(process.env.REDIS_PORT),
   process.env.REDIS_PASS
 )
 export const timeseries = new RedisClient(
+  'timeseries',
   process.env.TIMESERIES_HOST,
   parseInt(process.env.TIMESERIES_PORT),
   process.env.TIMESERIES_PASS
@@ -37,5 +54,5 @@ export function getTimeseriesUrl(): string {
   const host = process.env.TIMESERIES_HOST
   const port = parseInt(process.env.TIMESERIES_PORT)
   const pass = process.env.TIMESERIES_PASS
-  return `redis://:${pass}@${host}:${port}`
+  return pass ? `redis://:${pass}@${host}:${port}` : `redis://${host}:${port}`
 }

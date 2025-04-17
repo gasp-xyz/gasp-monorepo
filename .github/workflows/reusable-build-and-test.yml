@@ -96,7 +96,8 @@ jobs:
       #   uses: github/codeql-action/upload-sarif@v3
       #   with:
       #     sarif_file: ${{ steps.slither.outputs.sarif }}
-
+  
+  # TODO: This job should be removed once the unit tests are updated to not depend on the sensitive data for execution
   build-and-test-stash:
     name: '[stash] Build and test'
     runs-on: ubuntu-24.04
@@ -105,6 +106,7 @@ jobs:
         working-directory: stash
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'stash/.nvmrc'
@@ -299,7 +301,8 @@ jobs:
           echo "- gaspxyz/rollup-node:${{ inputs.version }}-fast" >> $GITHUB_STEP_SUMMARY
           echo "- gaspxyz/sequencer:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- gaspxyz/updater:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
-    
+          echo "- gaspxyz/stash:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          
       - uses: appthrust/moon-ci-retrospect@v1
         if: success() || failure()
       - uses: moonrepo/run-report-action@v1

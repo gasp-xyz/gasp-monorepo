@@ -17,7 +17,7 @@ use mangata_support::{
 use orml_tokens::{MultiTokenCurrencyExtended, MultiTokenReservableCurrency};
 
 use sp_runtime::{
-	traits::{CheckedAdd, Zero},
+	traits::{Bounded, CheckedAdd, Zero},
 	Saturating,
 };
 use sp_std::{convert::TryInto, prelude::*};
@@ -174,6 +174,15 @@ pub mod pallet {
 	#[pallet::storage]
 	pub type UnlockQueueEnd<T: Config> = StorageValue<_, u128, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn get_token_value_threshold)]
+	pub type TokenValueThreshold<T: Config> =
+		StorageMap<_, Twox64Concat, CurrencyIdOf<T>, BalanceOf<T>, ValueQuery, BalanceMaxValue<T>>;
+	#[pallet::type_value]
+	pub fn BalanceMaxValue<T: Config>() -> BalanceOf<T> {
+		BalanceOf::<T>::max_value()
+	}
+
 	#[derive(
 		Eq, PartialEq, Clone, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo, Default,
 	)]
@@ -198,6 +207,7 @@ pub mod pallet {
 		FeeLockMetadataUpdated,
 		FeeLockUnlocked(T::AccountId, BalanceOf<T>),
 		FeeLocked { who: T::AccountId, lock_amount: BalanceOf<T>, total_locked: BalanceOf<T> },
+		TokenValueThresholdsUpdated,
 	}
 
 	#[pallet::error]
@@ -356,6 +366,32 @@ pub mod pallet {
 
 			Ok(<Self as FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>>::unlock_fee(&who)?.into())
 		}
+
+		// The weight is calculated using MaxCuratedTokens so it is the worst case weight
+		#[pallet::call_index(2)]
+		#[transactional]
+		#[pallet::weight(T::DbWeight::get().writes(token_value_thresholds.len() as u64).saturating_add(Weight::from_parts(40_000_000, 0)))]
+		pub fn update_token_value_threshold(
+			origin: OriginFor<T>,
+			token_value_thresholds: Vec<(CurrencyIdOf<T>, Option<BalanceOf<T>>)>,
+		) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			for (token_id, maybe_set) in token_value_thresholds.iter() {
+				match maybe_set {
+					Some(v) => {
+						TokenValueThreshold::<T>::insert(token_id, v);
+					},
+					None => {
+						TokenValueThreshold::<T>::remove(token_id);
+					},
+				}
+			}
+
+			Pallet::<T>::deposit_event(Event::TokenValueThresholdsUpdated);
+
+			Ok(().into())
+		}
 	}
 }
 impl<T: Config> Pallet<T> {
@@ -381,6 +417,22 @@ impl<T: Config> Pallet<T> {
 }
 
 impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>> for Pallet<T> {
+	fn is_swap_tokens_lockless(token_id: CurrencyIdOf<T>, token_amount: BalanceOf<T>) -> bool {
+		if let Some(fee_lock_metadata) = Self::get_fee_lock_metadata() {
+			if fee_lock_metadata.is_whitelisted(token_id) {
+				if let Some(v) = Self::get_swap_valuation_for_token(token_id, token_amount) {
+					return v >= fee_lock_metadata.swap_value_threshold
+				}
+			}
+		}
+		// Default return false
+		false
+	}
+
+	fn is_fee_lock_init() -> bool {
+		Self::get_fee_lock_metadata().is_some()
+	}
+
 	fn is_whitelisted(token_id: CurrencyIdOf<T>) -> bool {
 		if let Some(fee_lock_metadata) = Self::get_fee_lock_metadata() {
 			fee_lock_metadata.is_whitelisted(token_id)
@@ -400,6 +452,31 @@ impl<T: Config> FeeLockTriggerTrait<T::AccountId, BalanceOf<T>, CurrencyIdOf<T>>
 			T::ValuateForNative::find_valuation_for(valuating_token_id, valuating_token_amount)
 				.ok()?;
 		Some(value)
+	}
+
+	// This function is not expected to fail unless fee_lock_metadata is uninit
+	fn get_fee_lock_amount(who: &T::AccountId) -> Result<BalanceOf<T>, DispatchError> {
+		let fee_lock_metadata =
+			Self::get_fee_lock_metadata().ok_or(Error::<T>::FeeLocksNotInitialized)?;
+		let mut account_fee_lock_data = Self::get_account_fee_lock_data(who);
+		let now = <frame_system::Pallet<T>>::block_number();
+
+		// This is cause now >= last_fee_lock_block
+		ensure!(now >= account_fee_lock_data.last_fee_lock_block, Error::<T>::UnexpectedFailure);
+
+		if now <
+			account_fee_lock_data
+				.last_fee_lock_block
+				.saturating_add(fee_lock_metadata.period_length)
+		{
+			Ok(fee_lock_metadata.fee_lock_amount)
+		} else {
+			// We must either reserve more or unreserve
+			match (fee_lock_metadata.fee_lock_amount, account_fee_lock_data.total_fee_lock_amount) {
+				(x, y) if x > y => Ok(x.saturating_sub(y)),
+				_ => Ok(Default::default()),
+			}
+		}
 	}
 
 	fn process_fee_lock(who: &T::AccountId) -> DispatchResult {

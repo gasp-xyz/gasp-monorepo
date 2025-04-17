@@ -1596,13 +1596,19 @@ impl<T: Config> Pallet<T> {
 		if let Some((native_reserves, _)) =
 			<T as Config>::ValuationApi::get_reserve_and_lp_supply_for(token_id)
 		{
-			return native_reserves.into() >= T::Min3rdPartyRewardVolume::get()
+			if native_reserves.into() >= T::Min3rdPartyRewardVolume::get() {
+				return true
+			}
 		}
 
-		if let Ok((_, ids, reserves)) = T::ValuationApi::find_paired_pool_for(token_id) {
-			let native_reserves =
-				if ids.0 == Self::native_token_id() { reserves.0 } else { reserves.1 };
-			return native_reserves.into() >= T::Min3rdPartyRewardVolume::get()
+		if let Ok(paired_pool_info) = T::ValuationApi::find_paired_pool_for(token_id) {
+			for (_, ids, reserves) in paired_pool_info {
+				let native_reserves =
+					if ids.0 == Self::native_token_id() { reserves.0 } else { reserves.1 };
+				if native_reserves.into() >= T::Min3rdPartyRewardVolume::get() {
+					return true
+				}
+			}
 		}
 
 		return false
