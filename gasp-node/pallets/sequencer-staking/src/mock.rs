@@ -158,6 +158,7 @@ mockall::mock! {
 		fn new_sequencer_active(chain: ChainId, sequencer: &AccountId);
 		fn sequencer_unstaking(chain: ChainId, sequencer: &AccountId)->DispatchResult;
 		fn handle_sequencer_deactivations(chain: ChainId, deactivated_sequencers: Vec<AccountId>);
+		fn get_dispute_period(chain: ChainId) -> Option<u128>;
 	}
 }
 
@@ -224,6 +225,8 @@ macro_rules! set_default_mocks {
 	() => {
 		let new_sequencer_active_mock = MockRolldownProviderApi::new_sequencer_active_context();
 		new_sequencer_active_mock.expect().times(2).returning(|_, _| ());
+		let get_dispute_period_mock = MockRolldownProviderApi::get_dispute_period_context();
+		get_dispute_period_mock.expect().returning(|_| (Some(Default::default())));
 	};
 }
 pub(crate) use set_default_mocks;
