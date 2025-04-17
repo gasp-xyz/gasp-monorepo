@@ -44,7 +44,7 @@ impl crate::L2Interface for L2{
         chain: Chain,
         at: H256,
     ) -> Result<u128, L2Error>;
-    
+
     async fn get_read_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
     async fn get_selected_sequencer(
         &self,
