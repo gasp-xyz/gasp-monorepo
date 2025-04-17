@@ -7,4 +7,3 @@ RUN forge build
 # RUN forge test
 
 ENTRYPOINT ["forge"]
-q
