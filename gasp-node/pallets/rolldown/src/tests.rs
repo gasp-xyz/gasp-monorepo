@@ -1028,7 +1028,7 @@ fn reject_update_with_invalid_too_high_request_id() {
 
 #[test]
 #[serial]
-fn accept_update_without_new_updates() {
+fn test_do_not_accept_update_without_new_updates_single() {
 	ExtBuilder::new().execute_with_default_mocks(|| {
 		forward_to_block::<Test>(10);
 
@@ -1039,14 +1039,195 @@ fn accept_update_without_new_updates() {
 
 		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
 			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
 
 		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 1u128.into());
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
 		assert_err!(
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
 			Error::<Test>::WrongRequestId
+		);
+	});
+}
+
+#[test]
+#[serial]
+fn test_do_not_accept_update_without_new_updates_multiple() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 10u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 2u128.into());
+
+		forward_to_block::<Test>(17);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 10u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 3u128.into());
+
+		forward_to_block::<Test>(18);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 10u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 4u128.into());
+
+		assert_err!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
+			Error::<Test>::WrongRequestId
+		);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 5])
+			.with_offset(1u128)
+			.build();
+
+		assert_err!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
+			Error::<Test>::WrongRequestId
+		);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 5])
+			.with_offset(6u128)
+			.build();
+
+		assert_err!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update),
+			Error::<Test>::WrongRequestId
+		);
+	});
+}
+
+#[test]
+#[serial]
+fn test_accept_update_with_new_updates_single() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 1u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
+
+		let deposit_update = L1UpdateBuilder::default()
+		.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+		.with_offset(2u128)
+		.build();
+
+		assert_ok!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
+		);
+	});
+}
+
+#[test]
+#[serial]
+fn test_accept_update_with_new_updates_multiple_only_new() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 1u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
+
+		let deposit_update = L1UpdateBuilder::default()
+		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
+		.with_offset(2u128)
+		.build();
+
+		assert_ok!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
+		);
+	});
+}
+
+#[test]
+#[serial]
+fn test_accept_update_with_new_updates_multiple_with_old() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 1u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
+
+		let deposit_update = L1UpdateBuilder::default()
+		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
+		.with_offset(1u128)
+		.build();
+
+		assert_ok!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
+		);
+	});
+}
+
+#[test]
+#[serial]
+fn test_accept_update_with_new_updates_multiple_with_one_new_one_old() {
+	ExtBuilder::new().execute_with_default_mocks(|| {
+		forward_to_block::<Test>(10);
+
+		let deposit_update = L1UpdateBuilder::default()
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(1u128)
+			.build();
+
+		Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update.clone())
+			.unwrap();
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 0u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 0u128.into());
+
+		forward_to_block::<Test>(16);
+		assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(consts::CHAIN), 1u128.into());
+		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
+
+		let deposit_update = L1UpdateBuilder::default()
+		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 2])
+		.with_offset(1u128)
+		.build();
+
+		assert_ok!(
+			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
 		);
 	});
 }
