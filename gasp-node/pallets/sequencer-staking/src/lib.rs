@@ -315,6 +315,7 @@ pub mod pallet {
 		AliasAccountIsActiveSequencer,
 		SequencerAccountIsActiveSequencerAlias,
 		SequencerRoundRewardsDNE,
+		UninitializedChainId,
 	}
 
 	#[pallet::config]
@@ -359,7 +360,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(5, 5.saturating_add(T::MaxSequencers::get().into())).saturating_add(Weight::from_parts(40_000_000, 0)))]
+		#[pallet::weight(T::DbWeight::get().reads_writes(6, 5.saturating_add(T::MaxSequencers::get().into())).saturating_add(Weight::from_parts(40_000_000, 0)))]
 		/// provides stake for the purpose of becoming sequencers
 		///
 		/// - `chain` - chain for which to assign stake_amount
@@ -405,6 +406,10 @@ pub mod pallet {
 				ensure!(
 					sequencer_stake >= MinimalStakeAmount::<T>::get(),
 					Error::<T>::NotEnoughSequencerStake
+				);
+				ensure!(
+					T::RolldownProvider::get_dispute_period(chain).is_some(),
+					Error::<T>::UninitializedChainId
 				);
 				ActiveSequencers::<T>::try_mutate(|active_sequencers| {
 					active_sequencers

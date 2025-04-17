@@ -30,6 +30,43 @@ fn test_genesis_build() {
 
 #[test]
 #[serial]
+fn test_provide_sequencer_stake_does_not_works_when_chain_id_is_uninit() {
+	let new_sequencer_active_mock = MockRolldownProviderApi::new_sequencer_active_context();
+	new_sequencer_active_mock.expect().times(2).return_const(());
+	ExtBuilder::new().build().execute_with(|| {
+		forward_to_block::<Test>(10);
+
+		let get_dispute_period_mock = MockRolldownProviderApi::get_dispute_period_context();
+		get_dispute_period_mock.expect().times(1).returning(|_| (None));
+
+		assert_err!(SequencerStaking::provide_sequencer_stake(
+			RuntimeOrigin::root(),
+			consts::DEFAULT_CHAIN_ID,
+			MINIMUM_STAKE,
+			None,
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
+		), Error::<Test>::UninitializedChainId);
+
+		let new_sequencer_active_mock = MockRolldownProviderApi::new_sequencer_active_context();
+		new_sequencer_active_mock.expect().times(1).return_const(());
+		let get_dispute_period_mock = MockRolldownProviderApi::get_dispute_period_context();
+		get_dispute_period_mock.expect().times(1).returning(|_| (Some(Default::default())));
+
+		assert_ok!(SequencerStaking::provide_sequencer_stake(
+			RuntimeOrigin::root(),
+			consts::DEFAULT_CHAIN_ID,
+			MINIMUM_STAKE,
+			None,
+			StakeAction::StakeAndJoinActiveSet,
+			CHARLIE
+		));
+
+	});
+}
+
+#[test]
+#[serial]
 fn test_provide_sequencer_stake_works_and_activates() {
 	set_default_mocks!();
 	ExtBuilder::new().build().execute_with(|| {

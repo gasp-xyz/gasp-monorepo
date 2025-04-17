@@ -1942,6 +1942,10 @@ impl<T: Config> RolldownProviderTrait<ChainIdOf<T>, AccountIdOf<T>> for Pallet<T
 			deactivated_sequencers.into_iter().collect(),
 		);
 	}
+
+	fn get_dispute_period(chain: <T as Config>::ChainId) -> Option<u128> {
+		Pallet::<T>::get_dispute_period(chain)
+	}
 }
 
 pub struct MultiEvmChainAddressConverter;
