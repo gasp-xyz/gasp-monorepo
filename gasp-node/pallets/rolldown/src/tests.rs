@@ -1129,13 +1129,14 @@ fn test_accept_update_with_new_updates_single() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
 		let deposit_update = L1UpdateBuilder::default()
-		.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
-		.with_offset(2u128)
-		.build();
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default())])
+			.with_offset(2u128)
+			.build();
 
-		assert_ok!(
-			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
-		);
+		assert_ok!(Rolldown::update_l2_from_l1_unsafe(
+			RuntimeOrigin::signed(ALICE),
+			deposit_update
+		));
 	});
 }
 
@@ -1160,13 +1161,14 @@ fn test_accept_update_with_new_updates_multiple_only_new() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
 		let deposit_update = L1UpdateBuilder::default()
-		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
-		.with_offset(2u128)
-		.build();
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
+			.with_offset(2u128)
+			.build();
 
-		assert_ok!(
-			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
-		);
+		assert_ok!(Rolldown::update_l2_from_l1_unsafe(
+			RuntimeOrigin::signed(ALICE),
+			deposit_update
+		));
 	});
 }
 
@@ -1191,13 +1193,14 @@ fn test_accept_update_with_new_updates_multiple_with_old() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
 		let deposit_update = L1UpdateBuilder::default()
-		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
-		.with_offset(1u128)
-		.build();
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 10])
+			.with_offset(1u128)
+			.build();
 
-		assert_ok!(
-			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
-		);
+		assert_ok!(Rolldown::update_l2_from_l1_unsafe(
+			RuntimeOrigin::signed(ALICE),
+			deposit_update
+		));
 	});
 }
 
@@ -1222,13 +1225,14 @@ fn test_accept_update_with_new_updates_multiple_with_one_new_one_old() {
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
 		let deposit_update = L1UpdateBuilder::default()
-		.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 2])
-		.with_offset(1u128)
-		.build();
+			.with_requests(vec![L1UpdateRequest::Deposit(Default::default()); 2])
+			.with_offset(1u128)
+			.build();
 
-		assert_ok!(
-			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
-		);
+		assert_ok!(Rolldown::update_l2_from_l1_unsafe(
+			RuntimeOrigin::signed(ALICE),
+			deposit_update
+		));
 	});
 }
 
