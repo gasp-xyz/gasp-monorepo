@@ -833,7 +833,7 @@ pub(crate) mod test {
 
         let mut l2mock = MockL2::new();
         l2mock
-            .expect_get_latest_processed_request_id()
+            .expect_get_latest_accepted_request_id()
             .return_once(|_, _| Ok(0u128));
 
         l1mock.expect_get_update().times(0);
@@ -861,7 +861,7 @@ pub(crate) mod test {
 
         let mut l2mock = MockL2::new();
         l2mock
-            .expect_get_latest_processed_request_id()
+            .expect_get_latest_accepted_request_id()
             .return_once(|_, _| Ok(0u128));
 
         let eth_update = l1api::types::abi::L1Update {
@@ -915,7 +915,7 @@ pub(crate) mod test {
 
         let mut l2mock = MockL2::new();
         l2mock
-            .expect_get_latest_processed_request_id()
+            .expect_get_latest_accepted_request_id()
             .return_once(|_, _| Ok(0u128));
 
         let eth_update = l1api::types::abi::L1Update {
