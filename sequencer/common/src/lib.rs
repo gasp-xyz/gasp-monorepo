@@ -111,15 +111,19 @@ pub fn parse_tokens_and_weight(input: &str) -> Result<([u8; 20], u128), ::hex::F
     }
 }
 
-
-pub async fn timeout_f64<F>(duration: f64, future: F) -> Result<<F as std::future::IntoFuture>::Output, Elapsed>
+pub async fn timeout_f64<F>(
+    duration: f64,
+    future: F,
+) -> Result<<F as std::future::IntoFuture>::Output, Elapsed>
 where
     F: IntoFuture,
 {
-    timeout(tokio::time::Duration::from_secs_f64(duration), future.into_future()).await
+    timeout(
+        tokio::time::Duration::from_secs_f64(duration),
+        future.into_future(),
+    )
+    .await
 }
-
-
 
 #[cfg(test)]
 mod test {

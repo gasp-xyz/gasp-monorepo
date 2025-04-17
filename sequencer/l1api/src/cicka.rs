@@ -57,7 +57,7 @@ impl<T, P, N> Cicka<T, P, N>
 where
     T: Transport + Clone,
     P: Provider<T, N> + WalletProvider<N>,
-    N: Network + 
+    N: Network,
 {
     pub async fn send_close_withdrawals(
         &self,
@@ -80,18 +80,23 @@ where
                 (withdrawals, roots, proofs)
             },
         );
-        let withdrawals = withdrawals.into_iter().collect::<Result<Vec<_>, _>>().map_err(|_| L1Error::DeserializationError)?;
+        let withdrawals = withdrawals
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|_| L1Error::DeserializationError)?;
         let call = self
             .contract_handle
             .closeWithdrawalBatch(withdrawals, roots, proofs);
 
-        simulate_send_and_wait_for_result::<T, P, _, N>(self.contract_handle.provider(), call)
-            .await
+        simulate_send_and_wait_for_result::<T, P, _, N>(self.contract_handle.provider(), call).await
     }
 
     pub fn new(provider: P, address: [u8; 20]) -> Self {
         Self {
-            contract_handle: abi::CickaContract::CickaContractInstance::new(address.into(), provider),
+            contract_handle: abi::CickaContract::CickaContractInstance::new(
+                address.into(),
+                provider,
+            ),
         }
     }
 }

@@ -12,11 +12,11 @@ use hex::encode as hex_encode;
 use hex_literal::hex;
 use primitive_types::H256;
 
+pub mod cicka;
 mod erc20;
 mod lru;
 mod rolldown_contract;
 mod utils;
-pub mod cicka;
 use erc20::Erc20Token;
 pub mod mock;
 #[cfg(test)]
@@ -157,7 +157,7 @@ pub struct L1<T, P, N> {
 impl<T, P, N> L1<T, P, N> {
     pub fn new(
         rolldown_contract: RolldownContract<T, P, N>,
-        cicka: Option<cicka::Cicka<T,P,N>>,
+        cicka: Option<cicka::Cicka<T, P, N>>,
         provider: P,
         subscription: Subscription,
     ) -> Self {
@@ -355,7 +355,7 @@ where
     ) -> Result<H256, L1Error> {
         if let Some(cicka) = &self.cicka {
             cicka.send_close_withdrawals(withdrawals).await
-        }else{
+        } else {
             tracing::error!("L1 Interface initialize without cicka contract address");
             panic!("L1 Interface initialize without cicka contract address");
         }

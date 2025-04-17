@@ -96,7 +96,7 @@ where
                         {
                             tracing::info!("world 5 {w:?}");
                             self.sink.send(w).await?;
-                            self.latest_processed = w.request_id.id.try_into().unwrap();;
+                            self.latest_processed = w.request_id.id.try_into().unwrap();
                         }
                     }
                 }
@@ -104,9 +104,9 @@ where
             }
 
             // block until notified
-            if let Some(elem) = stream.next().await{
+            if let Some(elem) = stream.next().await {
                 tracing::info!("new deposit {elem} found");
-            }else{
+            } else {
                 break;
             }
         }
@@ -175,9 +175,7 @@ mod test {
         l2mock
             .expect_get_best_block()
             .return_once(|| Ok((1, H256::default())));
-        l1mock
-            .expect_get_latest_reqeust_id()
-            .returning(|| Ok(None));
+        l1mock.expect_get_latest_reqeust_id().returning(|| Ok(None));
         l2mock
             .expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -251,7 +249,6 @@ mod test {
                 .run()
                 .await
         });
-
 
         assert!(timeout_f64(0.5, handle).await.is_ok());
         assert!(timeout_f64(0.5, receiver.recv()).await.unwrap().is_some());

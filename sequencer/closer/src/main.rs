@@ -51,7 +51,9 @@ pub async fn main() -> Result {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
 
-    let cicka = args.cicka_address.map(|addr| l1api::cicka::Cicka::new(provider.clone() ,addr));
+    let cicka = args
+        .cicka_address
+        .map(|addr| l1api::cicka::Cicka::new(provider.clone(), addr));
     let l1 = L1::new(rolldown, cicka.clone(), provider, subscription);
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
@@ -111,13 +113,7 @@ pub async fn main() -> Result {
     };
 
     let closer_task: TaskHandle = tokio::spawn(async move {
-        let mut closer = Closer::new(
-            chain,
-            l1,
-            l2,
-            closer_sink,
-            cicka.is_some(),
-        );
+        let mut closer = Closer::new(chain, l1, l2, closer_sink, cicka.is_some());
         Ok(closer.run().await?)
     });
 
