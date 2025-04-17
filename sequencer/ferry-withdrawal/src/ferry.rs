@@ -115,6 +115,12 @@ where
             .map(|(_, (_, w))| *w);
 
         if let Some(w) = req_to_ferrry {
+        }
+
+        Ok(())
+    }
+
+    pub async fn ferry_single_withdrawal(&mut self, w: Withdrawal) -> Result<(), FerryError> {
             let (_, at) = self.l2.get_best_block().await?;
             self.assert_exists(w, at).await?;
             if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
@@ -145,8 +151,6 @@ where
                 }
                 self.ferryable_withdrawals.remove(&w.request_id.id);
             }
-        }
-
         Ok(())
     }
 

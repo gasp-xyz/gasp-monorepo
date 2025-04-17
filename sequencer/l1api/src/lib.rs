@@ -238,9 +238,27 @@ where
     }
 
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
-        self.rolldown_contract
-            .send_ferry_withdrawal(withdrawal)
-            .await
+        let amount = (withdrawal.amount - withdrawal.ferry_tip).try_into().unwrap();
+
+        if withdrawal.token_address == NATIVE_TOKEN_ADDRESS {
+            self.rolldown_contract
+                .send_ferry_withdrawal(withdrawal)
+                .await
+        }else{
+            let p = self.provider.clone();
+            let me: [u8; 20] = p.wallet().default_signer_address().into();
+            let rolldown_address = self.rolldown_contract.address();
+            let token = Erc20Token::new(withdrawal.token_address, p);
+            let allowance = token.allowance(rolldown_address, me.into()).await?;
+            if allowance < amount {
+                let missing_allowance = amount - allowance;
+                token.approve(rolldown_address, missing_allowance).await
+            }else{
+                self.rolldown_contract
+                    .send_ferry_withdrawal(withdrawal)
+                    .await
+            }
+        }
     }
 
     #[allow(clippy::type_complexity)]

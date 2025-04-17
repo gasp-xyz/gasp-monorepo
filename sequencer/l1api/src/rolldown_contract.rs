@@ -1,6 +1,7 @@
 use super::{types, L1Error};
 use crate::types::RequestStatus;
 use crate::utils::simulate_send_and_wait_for_result;
+use crate::NATIVE_TOKEN_ADDRESS;
 use alloy::consensus::BlockHeader;
 use alloy::contract::{CallBuilder, CallDecoder};
 use futures::{Stream, StreamExt};
@@ -76,8 +77,13 @@ where
         &self,
         withdrawal: gasp_types::Withdrawal,
     ) -> Result<H256, L1Error> {
+        let amount = withdrawal.amount - withdrawal.ferry_tip;
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
-        self.execute_tx(call).await
+        if withdrawal.token_address == NATIVE_TOKEN_ADDRESS{
+            self.execute_tx(call.value(gasp_types::into_l1_u256(amount))).await
+        }else{
+            self.execute_tx(call).await
+        }
     }
 
     #[tracing::instrument(skip(self, request_id))]
