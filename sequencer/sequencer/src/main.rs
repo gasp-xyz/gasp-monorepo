@@ -104,7 +104,7 @@ async fn run(config: cli::Cli) -> Result<(), Error> {
         .address()
         .into_inner();
 
-    let rolldown = l1api::L1::new(rolldown, provider.clone(), subscription);
+    let rolldown = l1api::L1::new(rolldown, None, provider.clone(), subscription);
 
     let _balance_tracker = tokio::spawn(async move {
         common::report_account_balance(provider).await;

@@ -29,7 +29,7 @@ async fn test_can_deploy() {
 async fn test_get_request_status_pending() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
 
     assert_eq!(
         l1.get_status(
@@ -72,7 +72,7 @@ async fn test_ferry_withdrawal() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
     let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
 
     let withdrawal = gasp_types::Withdrawal {
         request_id: RequestId {
@@ -106,7 +106,7 @@ async fn test_close_withdrawal() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
     let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
 
     let withdrawal = gasp_types::Withdrawal {
         request_id: RequestId {
@@ -153,7 +153,7 @@ async fn test_close_withdrawal() {
 async fn test_close_cancel() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
 
     rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
 
@@ -194,7 +194,7 @@ async fn test_get_latest_request_id() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
 
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
     assert_eq!(l1.get_latest_reqeust_id().await.unwrap(), None);
 
     rolldown.deposit_native(1_000u128, 1u128).await.unwrap();
@@ -210,7 +210,7 @@ async fn test_get_latest_request_id() {
 async fn test_get_update_and_update_hash() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(),  None,  provider, SUB);
     assert!(matches!(
         l1.get_update(1u128, 1u128).await,
         Err(L1Error::InvalidRange)
@@ -235,7 +235,7 @@ const DUMMY_MERKLE_RANGE: (u128, u128) = (1u128, 170u128);
 async fn test_get_merkle_root() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(), None, provider, SUB);
 
     l1.get_merkle_root(DUMMY_MERKLE_RANGE.0).await.unwrap();
     assert!(l1
@@ -269,7 +269,7 @@ async fn test_get_merkle_root() {
 async fn test_get_latest_finalized_request_id() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(),None, provider, SUB);
 
     assert_eq!(l1.get_latest_finalized_request_id().await.unwrap(), None);
 
@@ -290,7 +290,7 @@ async fn test_get_latest_finalized_request_id() {
 async fn test_get_native_balance() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(),None, provider, SUB);
 
     assert!(l1.native_balance(ALICE_ADDRESS).await.unwrap() > 0u128);
 }
@@ -303,7 +303,7 @@ async fn test_get_erc20_balance() {
     let provider = create_provider(URI, ALICE_PKEY).await.unwrap();
     let dev_token = DevToken::deploy(provider.clone()).await.unwrap();
     let rolldown = RolldownContract::deploy(provider.clone()).await.unwrap();
-    let l1 = L1::new(rolldown.clone(), provider, SUB);
+    let l1 = L1::new(rolldown.clone(),None, provider, SUB);
 
     assert_eq!(
         l1.erc20_balance(dev_token.address(), dummy_address)

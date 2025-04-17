@@ -46,8 +46,8 @@ pub struct Cli {
     #[arg(long, default_value_t = 0.25, env = "DELAY_TIME_BETWEEN_QUERIES")]
     pub delay_between_queries: f64,
 
-    #[arg(long, default_value_t = false, env = "CLOSE_WITHDRAWALS_IN_BATCHES")]
-    pub close_withdrawals_in_batches: bool,
+    #[arg(long, value_parser= common::parse_addr, env = "CICKA_CONTRACT_ADDRESS")]
+    pub cicka_address: Option<[u8; 20]>,
 
     #[arg(long, default_value_t = 0, env = "BLOCK_DELAY")]
     pub block_delay: usize,

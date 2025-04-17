@@ -69,38 +69,44 @@ where
             let (block_nr, at) = self.l2.get_best_block().await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
 
-            let mut latest = self.latest_processed;
-            if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-                if end <= self.latest_processed {
-                    continue;
-                }
-                let chunks =
-                    common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
-                for (id, range) in chunks.iter().enumerate() {
-                    tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
-                    tracing::info!(
+            tracing::info!("hello");
+            match self.get_requests_to_ferry(at).await? {
+                Some((start, end)) if end > self.latest_processed => {
+                    let chunks = common::get_chunks(
+                        std::cmp::max(start, self.latest_processed + 1),
+                        end,
+                        25,
+                    );
+                    tracing::info!("world 4 {chunks:?}");
+                    for (id, range) in chunks.iter().enumerate() {
+                        tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
+                        tracing::info!(
                         "looking for pending deposit {range:?} batch {id} / {chunks_count} (last : {end})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
-                    let queries = (range.0..=range.1)
-                        .map(|elem| self.get_deposit(elem))
-                        .collect::<Vec<_>>();
+                        let queries = (range.0..=range.1)
+                            .map(|elem| self.get_deposit(elem))
+                            .collect::<Vec<_>>();
 
-                    for w in futures::future::try_join_all(queries)
-                        .await?
-                        .into_iter()
-                        .flatten()
-                    {
-                        self.sink.send(w).await?;
-                        latest = w.request_id.id.try_into().unwrap();
+                        for w in futures::future::try_join_all(queries)
+                            .await?
+                            .into_iter()
+                            .flatten()
+                        {
+                            tracing::info!("world 5 {w:?}");
+                            self.sink.send(w).await?;
+                            self.latest_processed = w.request_id.id.try_into().unwrap();;
+                        }
                     }
                 }
+                _ => {}
             }
-            self.latest_processed = latest;
 
             // block until notified
-            if stream.next().await.is_none() {
+            if let Some(elem) = stream.next().await{
+                tracing::info!("new deposit {elem} found");
+            }else{
                 break;
             }
         }
@@ -116,9 +122,11 @@ mod test {
     use futures::stream;
     use gasp_types::RequestId;
 
+    use common::timeout_f64;
     use l1api::L1Error;
     use mockall::{predicate::eq, Sequence};
     use test_case::test_case;
+    use tokio::time::timeout;
     use tracing_test::traced_test;
 
     #[test_case(100u128, None, None; "no l2 requests yet")]
@@ -159,11 +167,20 @@ mod test {
     #[tokio::test]
     async fn test_ferry_services_when_no_requests_to_ferry() {
         let mut l1mock = l1api::mock::MockL1::default();
-        let l2mock = l2api::mock::MockL2::default();
+        let mut l2mock = l2api::mock::MockL2::default();
 
         l1mock
             .expect_subscribe_deposit()
             .return_once(|| Ok(stream::pending().boxed()));
+        l2mock
+            .expect_get_best_block()
+            .return_once(|| Ok((1, H256::default())));
+        l1mock
+            .expect_get_latest_reqeust_id()
+            .returning(|| Ok(None));
+        l2mock
+            .expect_get_latest_processed_request_id()
+            .returning(|_, _| Ok(0u128));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -212,7 +229,7 @@ mod test {
 
         l2mock
             .expect_get_best_block()
-            .return_once(|| Ok((1, H256::default())));
+            .returning(|| Ok((1, H256::default())));
 
         l1mock
             .expect_get_latest_reqeust_id()
@@ -233,13 +250,12 @@ mod test {
             FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
                 .run()
                 .await
-                .unwrap();
         });
 
-        handle.await.unwrap();
 
-        receiver.recv().await.unwrap();
-        assert!(receiver.recv().await.is_none());
+        assert!(timeout_f64(0.5, handle).await.is_ok());
+        assert!(timeout_f64(0.5, receiver.recv()).await.unwrap().is_some());
+        assert!(timeout_f64(0.5, receiver.recv()).await.unwrap().is_none());
     }
 
     #[tokio::test]
@@ -251,6 +267,7 @@ mod test {
         l1mock
             .expect_subscribe_deposit()
             .return_once(|| Ok(futures::stream::iter([1, 2, 3]).boxed()));
+
         l2mock
             .expect_get_best_block()
             .returning(|| Ok((1, H256::default())));
@@ -268,7 +285,7 @@ mod test {
 
         l1mock
             .expect_get_latest_reqeust_id()
-            .times(2)
+            .times(3)
             .in_sequence(&mut seq)
             .returning(|| Ok(Some(2u128)));
 

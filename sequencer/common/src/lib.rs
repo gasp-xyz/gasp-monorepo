@@ -1,7 +1,10 @@
 pub mod delay;
 mod metrics;
+use std::future::IntoFuture;
+
 use itertools::Itertools;
 pub use metrics::{report_account_balance, serve_metrics};
+use tokio::time::{error::Elapsed, timeout};
 
 #[derive(Clone, Copy)]
 pub struct PKeyWrapper(pub [u8; 32]);
@@ -107,6 +110,16 @@ pub fn parse_tokens_and_weight(input: &str) -> Result<([u8; 20], u128), ::hex::F
         _ => Err(hex::FromHexError::InvalidStringLength),
     }
 }
+
+
+pub async fn timeout_f64<F>(duration: f64, future: F) -> Result<<F as std::future::IntoFuture>::Output, Elapsed>
+where
+    F: IntoFuture,
+{
+    timeout(tokio::time::Duration::from_secs_f64(duration), future.into_future()).await
+}
+
+
 
 #[cfg(test)]
 mod test {

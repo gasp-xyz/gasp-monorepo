@@ -50,7 +50,9 @@ pub async fn main() -> Result {
     } else {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
-    let l1 = L1::new(rolldown, provider, subscription);
+
+    let cicka = args.cicka_address.map(|addr| l1api::cicka::Cicka::new(provider.clone() ,addr));
+    let l1 = L1::new(rolldown, cicka.clone(), provider, subscription);
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
     let (filter_input, filter) = mpsc::channel(1_000_000);
@@ -114,7 +116,7 @@ pub async fn main() -> Result {
             l1,
             l2,
             closer_sink,
-            args.close_withdrawals_in_batches,
+            cicka.is_some(),
         );
         Ok(closer.run().await?)
     });

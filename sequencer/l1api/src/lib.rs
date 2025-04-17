@@ -16,6 +16,7 @@ mod erc20;
 mod lru;
 mod rolldown_contract;
 mod utils;
+pub mod cicka;
 use erc20::Erc20Token;
 pub mod mock;
 #[cfg(test)]
@@ -77,6 +78,8 @@ pub enum L1Error {
     TxReverted(H256),
     #[error("subscritption failed")]
     SubscriptionFailed,
+    #[error("Deserialization error")]
+    DeserializationError,
 }
 
 pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000001");
@@ -146,6 +149,7 @@ pub fn address(provider: impl Provider + WalletProvider + Clone) -> [u8; 20] {
 #[derive(Clone)]
 pub struct L1<T, P, N> {
     rolldown_contract: RolldownContract<T, P, N>,
+    cicka: Option<cicka::Cicka<T, P, N>>,
     provider: P,
     subscription: Subscription,
 }
@@ -153,11 +157,13 @@ pub struct L1<T, P, N> {
 impl<T, P, N> L1<T, P, N> {
     pub fn new(
         rolldown_contract: RolldownContract<T, P, N>,
+        cicka: Option<cicka::Cicka<T,P,N>>,
         provider: P,
         subscription: Subscription,
     ) -> Self {
         L1 {
             rolldown_contract,
+            cicka,
             provider,
             subscription,
         }
@@ -347,7 +353,12 @@ where
         &self,
         withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
     ) -> Result<H256, L1Error> {
-        unimplemented!()
+        if let Some(cicka) = &self.cicka {
+            cicka.send_close_withdrawals(withdrawals).await
+        }else{
+            tracing::error!("L1 Interface initialize without cicka contract address");
+            panic!("L1 Interface initialize without cicka contract address");
+        }
     }
 
     #[tracing::instrument(skip(self), ret)]
