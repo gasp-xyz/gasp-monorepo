@@ -101,6 +101,12 @@ pub trait L2Interface {
         at: H256,
     ) -> Result<u128, L2Error>;
 
+    async fn get_latest_accepted_request_id(
+        &self,
+        chain: Chain,
+        at: H256,
+    ) -> Result<u128, L2Error>;
+
     async fn get_read_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
 
     async fn get_selected_sequencer(

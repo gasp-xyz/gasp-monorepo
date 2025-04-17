@@ -444,21 +444,21 @@ where
         &self,
         at: H256,
     ) -> Result<Option<(H256, gasp_types::L1Update)>, Error> {
-        let latest_processed_on_l2 = self
+        let latest_accepted_on_l2 = self
             .l2
-            .get_latest_processed_request_id(self.chain, at)
+            .get_latest_accepted_request_id(self.chain, at)
             .await?;
         let latest_request_l1 = self.l1.get_latest_reqeust_id().await?;
 
         tracing::debug!(
-            "latest available on L1: {:?} latest processed on L2 {}",
+            "latest available on L1: {:?} latest accepted on L2 {}",
             latest_request_l1,
-            latest_processed_on_l2
+            latest_accepted_on_l2
         );
 
         match latest_request_l1 {
-            Some(latest_request_l1) if latest_request_l1 > latest_processed_on_l2 => {
-                let start = latest_processed_on_l2.saturating_add(1u128);
+            Some(latest_request_l1) if latest_request_l1 > latest_accepted_on_l2 => {
+                let start = latest_accepted_on_l2.saturating_add(1u128);
                 let end = std::cmp::min(latest_request_l1, start.saturating_add(self.limit));
                 tracing::info!("new requests availabla, fetching range {}..{}", start, end);
 
