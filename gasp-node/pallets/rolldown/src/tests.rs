@@ -1028,9 +1028,6 @@ fn reject_update_with_invalid_too_high_request_id() {
 
 #[test]
 #[serial]
-// changed to accept
-// seq gets the rights BEFORE LastProcessedRequestOnL2 is updated
-// a single request would be duplicated, extrinsic fail and break seq
 fn accept_update_without_new_updates() {
 	ExtBuilder::new().execute_with_default_mocks(|| {
 		forward_to_block::<Test>(10);
@@ -1047,10 +1044,10 @@ fn accept_update_without_new_updates() {
 		forward_to_block::<Test>(16);
 		assert_eq!(LastProcessedRequestOnL2::<Test>::get(consts::CHAIN), 1u128.into());
 
-		assert_ok!(Rolldown::update_l2_from_l1_unsafe(
+		assert_err!(Rolldown::update_l2_from_l1_unsafe(
 			RuntimeOrigin::signed(ALICE),
 			deposit_update
-		));
+		), Error::<Test>::WrongRequestId);
 	});
 }
 
@@ -2845,6 +2842,7 @@ fn test_sequencer_can_submit_update_with_remaining_elements() {
 				deposit_update.clone(),
 			)
 			.unwrap();
+			assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(Chain::Ethereum), 0u128.into());
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 0u128.into());
 
 			forward_to_block::<Test>(15);
@@ -2852,6 +2850,7 @@ fn test_sequencer_can_submit_update_with_remaining_elements() {
 				chain: consts::CHAIN,
 				hash: deposit_update.abi_encode_hash()
 			});
+			assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(Chain::Ethereum), 11u128.into());
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 
 			is_maintenance_mock.checkpoint();
@@ -2867,13 +2866,15 @@ fn test_sequencer_can_submit_update_with_remaining_elements() {
 			forward_to_block::<Test>(20);
 			let deposit_update = L1UpdateBuilder::default()
 				.with_requests(requests.into_iter().skip(10).collect())
-				.with_offset(11)
+				.with_offset(12)
 				.build();
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
 				.unwrap();
+			assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(Chain::Ethereum), 11u128.into());
 			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 10u128.into());
 			forward_to_block::<Test>(25);
-			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 11u128.into());
+			assert_eq!(MaxAcceptedRequestIdOnl2::<Test>::get(Chain::Ethereum), 12u128.into());
+			assert_eq!(LastProcessedRequestOnL2::<Test>::get(Chain::Ethereum), 12u128.into());
 		})
 }
 
