@@ -1,6 +1,8 @@
 name: rollup
 
 include:
+  - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
+  # - path: ./contracts/compose.reth-stubs.yml # reth stubs
   - path: ./avs-aggregator/compose.yml
   - path: ./gasp-avs/compose.yml
   - path: ./gasp-node/compose.yml

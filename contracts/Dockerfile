@@ -1,9 +1,10 @@
-FROM ghcr.io/foundry-rs/foundry:v1.0.0
+FROM ghcr.io/foundry-rs/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6
 
+# Copy our source code into the container
 WORKDIR /app
 
-COPY --chown=foundry:foundry . .
+# Build the source code
+COPY . .
 RUN forge build
-# RUN forge test
 
 ENTRYPOINT ["forge"]
