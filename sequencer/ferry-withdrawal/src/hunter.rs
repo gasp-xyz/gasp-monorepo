@@ -54,14 +54,24 @@ where
     }
 
     async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
         let latest_request_id_on_l2 = self
             .l2
             .get_latest_created_request_id(self.chain, l2_state)
             .await?;
+        match latest_request_id_on_l2 {
+            Some(id) if id <= self.latest_processed => {
+                return Ok(None);
+            }
+            None => {
+                return Ok(None);
+            }
+            _ => {}
+        };
+        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
+
         Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
             (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id + 1, l2_request_id))
+                Some((l1_request_id, l2_request_id))
             }
             (None, Some(l2_request_id)) => Some((1, l2_request_id)),
             _ => None,
@@ -92,11 +102,7 @@ where
             let (block_nr, at) = elem?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
 
-            let mut latest = self.latest_processed;
             if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-                if end <= self.latest_processed {
-                    continue;
-                }
                 let chunks =
                     common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
                 for (id, range) in chunks.iter().enumerate() {
@@ -115,11 +121,10 @@ where
                         .flatten()
                     {
                         self.sink.send(w).await?;
-                        latest = w.request_id.id.try_into().unwrap();
                     }
                 }
+                self.latest_processed = end;
             }
-            self.latest_processed = latest;
         }
         tracing::warn!("header stream ended");
         Ok(())

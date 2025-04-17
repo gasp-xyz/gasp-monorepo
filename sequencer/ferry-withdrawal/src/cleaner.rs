@@ -83,41 +83,47 @@ where
     }
 
     pub async fn run(&mut self) -> CleanerResult<()> {
-        let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
+        let mut stream = self.l1.subscribe_new_batch().await?;
 
-        while let Some(elem) = stream.next().await {
-            let (_nr, at) = elem?;
+        loop {
+            let (_nr, at) = self.l2.get_best_block().await?;
+            match self.l1.get_latest_finalized_request_id().await? {
+                Some(range_end) if range_end > self.latest_processed => {
+                    let range_start = std::cmp::min(self.latest_processed, range_end);
 
-            if let Some(range_end) = self.l1.get_latest_finalized_request_id().await? {
-                if range_end <= self.latest_processed {
-                    continue;
-                }
-                let mut latest = self.latest_processed;
-                let range_start = std::cmp::min(latest, range_end);
-
-                let chunks = common::get_chunks(range_start, range_end, 25);
-                for (id, range) in chunks.iter().enumerate() {
-                    tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
-                    tracing::info!(
-                        "looking for ferried withdrawals {range:?} batch {id} / {chunks_count} (last : {range_end})",
-                        id = id + 1,
-                        chunks_count = chunks.len()
-                    );
-                    let queries = (range.0..range.1)
-                        .map(|elem| self.get_ferried_withdrawal(elem, at))
-                        .collect::<Vec<_>>();
-                    for withdrawal in futures::future::try_join_all(queries)
-                        .await?
-                        .into_iter()
-                        .flatten()
-                    {
-                        self.sink
-                            .send(FerryAction::CloseFerriedWithdrawal { withdrawal })
-                            .await?;
-                        latest = withdrawal.request_id.id.try_into().unwrap();
+                    let chunks = common::get_chunks(range_start, range_end, 25);
+                    for (id, range) in chunks.iter().enumerate() {
+                        tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
+                        tracing::info!(
+                            "looking for ferried withdrawals {range:?} chunk {id} / {chunks_count}",
+                            id = id + 1,
+                            chunks_count = chunks.len()
+                        );
+                        let queries = (range.0..range.1)
+                            .map(|elem| self.get_ferried_withdrawal(elem, at))
+                            .collect::<Vec<_>>();
+                        for withdrawal in futures::future::try_join_all(queries)
+                            .await?
+                            .into_iter()
+                            .flatten()
+                        {
+                            tracing::info!(
+                                "found withdrawal ready to be closed rid: {}",
+                                withdrawal.request_id.id
+                            );
+                            self.sink
+                                .send(FerryAction::CloseFerriedWithdrawal { withdrawal })
+                                .await?;
+                        }
                     }
+                    self.latest_processed = range_end;
                 }
-                self.latest_processed = latest;
+                _ => {}
+            }
+            if let Some(elem) = stream.next().await {
+                tracing::info!("found new batch {elem:?}");
+            } else {
+                break;
             }
         }
         tracing::warn!("header stream ended");

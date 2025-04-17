@@ -254,7 +254,7 @@ where
                 .await
                 {
                     Ok(Some(FerryAction::Ferry { withdrawal, prio })) => {
-                        tracing::info!("received ferry request {}", withdrawal.request_id.id);
+                        tracing::info!("received ferry request {withdrawal}");
                         self.track_balance(withdrawal.token_address).await?;
                         self.ferryable_withdrawals
                             .insert(withdrawal.request_id.id, (prio, withdrawal));

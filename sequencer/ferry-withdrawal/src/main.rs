@@ -58,7 +58,11 @@ pub async fn main() -> Result<(), Error> {
 
     let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let sender = l1api::address(provider.clone());
-    let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
+    let rolldown = if args.dry_run {
+        l1api::RolldownContract::new_dry_run(provider.clone(), args.rolldown_contract_address)
+    }else{
+        l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
+    };
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
     let l1 = L1::new(rolldown.clone(), None, provider.clone(), subscription);

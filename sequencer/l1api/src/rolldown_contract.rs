@@ -262,8 +262,8 @@ where
             }))
     }
 
-    #[tracing::instrument(skip(self))]
     #[allow(clippy::type_complexity)]
+    #[tracing::instrument(level="debug", skip(self))]
     pub async fn get_latest_batch(&self) -> Result<Option<(H256, u128, (u128, u128))>, L1Error> {
         let amount = self.get_amount_of_merkle_roots().await?;
         if amount > 0 {
@@ -276,7 +276,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level="debug", skip(self), ret)]
     #[allow(clippy::type_complexity)]
     pub async fn get_batch(&self, batch_id: u128) -> Result<Option<(H256, (u128, u128))>, L1Error> {
         let root = self.get_merkle_root_by_id(batch_id).await?;
@@ -335,53 +335,69 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip(self, timeout))]
     pub async fn subscribe_new_batch_polling<'a>(
         &'a self,
         timeout: Duration,
     ) -> Result<impl Stream<Item = (H256, (u128, u128))> + 'a, L1Error> {
         let batch = self.get_latest_batch().await?;
+        tracing::info!("starting batch subscription - latest batch {batch:?}");
+
         let stream = stream! {
 
             let mut last_sent = None;
-            loop {
-                if let Some((root, batch_id ,range)) = batch{
-                    last_sent = Some(batch_id);
-                    yield (root, range);
-                    sleep(timeout).await;
-                }
 
+            if let Some((root, batch_id ,range)) = batch{
+                last_sent = Some(batch_id);
+                yield (root, range);
+            }
+
+            loop {
                 match (self.get_latest_batch().await, last_sent){
-                    (Ok(Some((_, batch_id, _))), Some(start)) => {
-                        for batch_id in start..=batch_id{
-                            if batch_id > start{
-                                match self.get_batch(batch_id).await {
-                                    Ok(Some((root, range))) => {
-                                        last_sent = Some(batch_id);
-                                        yield (root, range);
-                                    }
-                                    Ok(None) => {
-                                        tracing::warn!("could not fetch batch, retrying");
-                                    }
-                                    Err(e) => {
-                                        tracing::warn!("could not fetch batch with err {e}");
-                                        break;
-                                    },
+                    (Ok(Some((_, batch_id, range))), Some(start)) if batch_id > start=> {
+                        tracing::debug!("new batch found {batch_id} {range:?}");
+                        for id in start..=batch_id{
+                            match self.get_batch(id).await {
+                                Ok(Some((root, range))) => {
+                                    last_sent = Some(id);
+                                    yield (root, range);
                                 }
+                                Ok(None) => {
+                                    tracing::warn!("could not fetch batch, retrying");
+                                }
+                                Err(e) => {
+                                    tracing::warn!("could not fetch batch with err {e}");
+                                    break;
+                                },
                             }
                         }
                     },
                     (Ok(Some((root, batch_id, range))), None) => {
-                        for batch_id in 0..=batch_id{
-                            last_sent = Some(batch_id);
-                            yield (root, range);
+                        tracing::debug!("new batch found {batch_id} {range:?}");
+                        for id in 0..=batch_id{
+                            match self.get_batch(id).await {
+                                Ok(Some((root, range))) => {
+                                    last_sent = Some(batch_id);
+                                    yield (root, range);
+                                }
+                                Ok(None) => {
+                                    tracing::warn!("could not fetch batch, retrying");
+                                }
+                                Err(e) => {
+                                    tracing::warn!("could not fetch batch with err {e}");
+                                    break;
+                                },
+                            }
                         }
                     },
                     (Err(err), _) => {
                         tracing::warn!("could not get batch - err {err}");
                         sleep(timeout).await;
                     },
-                    _ => {}
+                    _ => {
+                        tracing::debug!("sleeping for {timeout:?}");
+                        sleep(timeout).await;
+                    }
                 }
             }
         };

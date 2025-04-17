@@ -225,7 +225,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level="debug", skip(self), ret)]
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
         let token = Erc20Token::new(token, self.provider.clone());
         token.balance_of(account).await
