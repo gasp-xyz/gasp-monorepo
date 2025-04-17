@@ -68,8 +68,6 @@ where
         loop {
             let (block_nr, at) = self.l2.get_best_block().await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
-
-            tracing::info!("hello");
             match self.get_requests_to_ferry(at).await? {
                 Some((start, end)) if end > self.latest_processed => {
                     let chunks = common::get_chunks(
@@ -77,7 +75,6 @@ where
                         end,
                         25,
                     );
-                    tracing::info!("world 4 {chunks:?}");
                     for (id, range) in chunks.iter().enumerate() {
                         tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                         tracing::info!(
@@ -94,7 +91,6 @@ where
                             .into_iter()
                             .flatten()
                         {
-                            tracing::info!("world 5 {w:?}");
                             self.sink.send(w).await?;
                             self.latest_processed = w.request_id.id.try_into().unwrap();
                         }
@@ -105,7 +101,7 @@ where
 
             // block until notified
             if let Some(elem) = stream.next().await {
-                tracing::info!("new deposit {elem} found");
+                tracing::info!("new deposit rid : {elem}");
             } else {
                 break;
             }

@@ -372,7 +372,7 @@ where
                             }
                         }
                     },
-                    (Ok(Some((root, batch_id, range))), None) => {
+                    (Ok(Some((_root, batch_id, range))), None) => {
                         tracing::debug!("new batch found {batch_id} {range:?}");
                         for id in 0..=batch_id{
                             match self.get_batch(id).await {

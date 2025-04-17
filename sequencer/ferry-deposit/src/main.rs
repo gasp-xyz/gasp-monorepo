@@ -64,12 +64,12 @@ pub async fn main() -> Result<(), Error> {
         rolldown.subscribe_blocks().await?.boxed()
     } else {
         rolldown
-            .subscribe_blocks_polling(tokio::time::Duration::from_secs_f64(1.0))
+            .subscribe_blocks_polling(tokio::time::Duration::from_secs_f64(60.0))
             .await?
             .boxed()
     };
 
-    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(stream, 10u128);
+    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(stream, args.block_delay);
 
     let delay_task = tokio::spawn(async move { Ok(delay_fut.await?) });
 

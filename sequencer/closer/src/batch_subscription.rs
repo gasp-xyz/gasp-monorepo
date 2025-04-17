@@ -85,7 +85,7 @@ where
                     return Err(Error::SubscriptionFailed);
                 }
                 Ok(Some((merkle_root, range))) => {
-                    tracing::info!("new batch found {merkle_root} with request {range:?}");
+                    tracing::info!("new batch found {merkle_root} with requests {range:?}");
                     let (_, at) = self.l2.get_best_block().await?;
                     for (start, end) in common::get_chunks(range.0, range.1, self.chunk_size) {
                         let queries = (start..=end)

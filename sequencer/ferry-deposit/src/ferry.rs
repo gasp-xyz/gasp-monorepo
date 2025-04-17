@@ -87,7 +87,7 @@ where
             .retain(|request_id, _| *request_id > latest_finalized.into());
         if ferryable_deposits_amount_before > self.ferryable_deposits.len() {
             tracing::info!(
-                "removed {n} withdrawals that are already finalized",
+                "removed {n} that are already finalized",
                 n = ferryable_deposits_amount_before - self.ferryable_deposits.len()
             );
         }
@@ -124,8 +124,8 @@ where
         if let Some(deposit) = req_to_ferrry {
             self.assert_exists(deposit).await?;
             let ferried_amount: u128 = (deposit.amount - deposit.ferry_tip).try_into().unwrap();
-            tracing::info!("ferry deposit {deposit}");
             if self.l2.ferry_deposit(self.chain, deposit).await? {
+                tracing::info!("deposit ferried successfully {deposit}");
                 metrics::FERRIED
                     .with_label_values(&[&hex::encode(deposit.token_address)])
                     .inc();
@@ -137,6 +137,7 @@ where
                     .with_label_values(&["total"])
                     .inc_by(ferried_amount as f64);
             } else {
+                tracing::warn!("failed to ferry deposit {deposit}");
                 metrics::FAILED_FERRY_ATTEMPTS.inc();
             }
             self.ferryable_deposits.remove(&deposit.request_id.id);
