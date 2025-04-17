@@ -27,19 +27,19 @@ export const summary = async () => {
       const baseTokenInfo = getTokenInfoBasedOnTheSymbol(assetsInfo, baseToken)
       const targetTokenInfo = getTokenInfoBasedOnTheSymbol(
         assetsInfo,
-        targetToken
+        targetToken,
       )
 
       const [baseTokenReserve, targetTokenReserve] =
         await MangataClient.query.getAmountOfTokensInPool(
           baseTokenInfo.id,
-          targetTokenInfo.id
+          targetTokenInfo.id,
         )
 
       const price = await calculatePrice(
         baseTokenReserve,
         targetTokenReserve,
-        baseTokenInfo.decimals
+        baseTokenInfo.decimals,
       )
 
       const current = moment.utc()
@@ -50,32 +50,32 @@ export const summary = async () => {
         pool.id,
         from,
         to,
-        matchInterval('minute')
+        matchInterval('minute'),
       )
       const baseTokenPrices = await getTokenPrices(
         baseTokenInfo.id,
         baseTokenInfo.decimals,
         from,
         to,
-        matchInterval('minute')
+        matchInterval('minute'),
       )
       const targetTokenPrices = await getTokenPrices(
         targetTokenInfo.id,
         targetTokenInfo.decimals,
         from,
         to,
-        matchInterval('minute')
+        matchInterval('minute'),
       )
 
       const lastPrice = fromBN(price, targetTokenInfo.decimals)
 
       const baseVolume = calculateVolumeForTheToken(
         poolTradeVolumeInUsd,
-        baseTokenPrices
+        baseTokenPrices,
       )
       const targetVolume = calculateVolumeForTheToken(
         poolTradeVolumeInUsd,
-        targetTokenPrices
+        targetTokenPrices,
       )
 
       summaryMap[pool.symbol.replace('-', '_')] = {
@@ -89,7 +89,7 @@ export const summary = async () => {
         base_volume: baseVolume.toString(),
         quote_volume: targetVolume.toString(),
       }
-    })
+    }),
   )
 
   return summaryMap

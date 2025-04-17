@@ -130,7 +130,7 @@ describe('MGX Airdrop', () => {
       ethereumAddress: 'eth',
     }
     const message = `0x${Buffer.from(JSON.stringify(signedData)).toString(
-      'hex'
+      'hex',
     )}`
 
     const signature = u8aToHex(pair.sign(message))
@@ -153,7 +153,7 @@ function provideTokensMock(tokens: Array<[string, [string, string]]>) {
           reserved: toBN(reserved),
         },
       ]
-    })
+    }),
   )
 }
 
@@ -168,7 +168,7 @@ function provideTotalIssuanceMock(totalIssuance: Array<[string, string]>) {
           toBn: () => toBN(totalIssuance),
         },
       ]
-    })
+    }),
   )
 }
 
@@ -183,7 +183,7 @@ function provideLiquidityPoolsMock(pools: Array<[string, [string, string]]>) {
           unwrap: () => [new BN(token1), new BN(token2)],
         },
       ]
-    })
+    }),
   )
 }
 

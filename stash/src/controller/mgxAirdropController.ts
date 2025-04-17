@@ -51,13 +51,13 @@ export async function checkEligibility(req: Request, res: Response) {
     ]).api()
 
     const snapshotPromises = SNAPSHOTS.map((snapshot) =>
-      getEligibilityAtBlockN(MANGATA_API, snapshot, address)
+      getEligibilityAtBlockN(MANGATA_API, snapshot, address),
     )
 
     const snapshots = await Promise.all(snapshotPromises)
     const weight = snapshots.reduce(
       (acc, snapshot) => acc.add(snapshot.weight),
-      BN_ZERO
+      BN_ZERO,
     )
 
     return res.json({
@@ -111,7 +111,7 @@ export async function linkAddress(req: Request, res: Response) {
 
     const isSignatureValid = verifySignature(
       { mangataXAddress, ethereumAddress },
-      signature
+      signature,
     )
 
     if (!isSignatureValid) {
@@ -139,7 +139,7 @@ export async function linkAddress(req: Request, res: Response) {
     ]).api()
 
     const snapshotPromises = SNAPSHOTS.map((snapshot) =>
-      getEligibilityAtBlockN(MANGATA_API, snapshot, mangataXAddress)
+      getEligibilityAtBlockN(MANGATA_API, snapshot, mangataXAddress),
     )
     const snapshots = await Promise.all(snapshotPromises)
 
@@ -155,7 +155,7 @@ export async function linkAddress(req: Request, res: Response) {
 
     const weight = snapshots.reduce(
       (acc, snapshot) => acc.add(snapshot.weight),
-      BN_ZERO
+      BN_ZERO,
     )
 
     const isEligible = weight.gtn(0)

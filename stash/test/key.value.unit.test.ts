@@ -22,7 +22,7 @@ describe('store', () => {
     expect(redis.client.hset).toHaveBeenCalledWith(
       `${key}:${value}`,
       'timestamp',
-      result.timestamp
+      result.timestamp,
     )
   })
 })
