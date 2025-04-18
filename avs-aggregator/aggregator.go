@@ -906,7 +906,7 @@ func (agg *Aggregator) getL1BatchUpdateInfo(blockNumber uint32) (bool, uint64, u
 		if err != nil {
 			return false, 0, 0, fmt.Errorf("Aggregator in maybeSendNewRdTask failed to ChainRdBatchNonce: err: %v", err)
 		}
-		recordLatestBatchOnL2PerL1Metric(uint8(lastBatchByL1.Key), uint32(lastBatchByL1.Value.BatchId.Int64()))
+		recordLatestBatchOnL2PerL1Metric(uint64(lastBatchByL1.Key), uint32(lastBatchByL1.Value.BatchId.Int64()))
 		if uint64(lastBatchByL1.Value.BatchId.Int64()) >= uint64(chainRdBatchNonce) {
 			isUpdate = true
 			chainToUpdate = uint64(lastBatchByL1.Key)

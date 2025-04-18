@@ -342,7 +342,7 @@ impl Syncer {
 
                 if call.task.chain_id != self.target_chain_id {
                     return Ok(());
-                }doc
+                }
 
                 if task_hash != call.task_response.reference_task_hash.into() {
                     return Err(eyre!("task_hash mismatch {:?}", task_hash));
