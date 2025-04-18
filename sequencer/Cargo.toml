@@ -16,7 +16,7 @@ members = [
   "closer",
   "ferry-withdrawal",
   "ferry-deposit",
-  "stash-api",
+  "stash-api", "l2cli",
 ]
 
 [profile.dev]

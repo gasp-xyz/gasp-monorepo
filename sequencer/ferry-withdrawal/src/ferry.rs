@@ -114,7 +114,9 @@ where
             .max_by_key(|(_, (prio, _))| prio)
             .map(|(_, (_, w))| *w);
 
-        if let Some(w) = req_to_ferrry {}
+        if let Some(w) = req_to_ferrry {
+            self.ferry_single_withdrawal(w).await?;
+        }
 
         Ok(())
     }
@@ -123,11 +125,11 @@ where
         let (_, at) = self.l2.get_best_block().await?;
         self.assert_exists(w, at).await?;
         if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
-            tracing::trace!("tracing withdrawal {w}");
             let ferried_amount: u128 = (w.amount - w.ferry_tip).try_into().unwrap();
+            let rid = w.request_id.id;
             match self.l1.ferry_withdrawal(w).await {
                 Ok(hash) => {
-                    tracing::info!("withdrawal ferried successfully {hash}");
+                    tracing::info!("withdrawal {rid} ferried successfully {}", hex::encode(hash));
 
                     metrics::FERRIED
                         .with_label_values(&[&hex::encode(w.token_address)])
@@ -141,7 +143,7 @@ where
                         .inc_by(ferried_amount as f64);
                 }
                 Err(L1Error::TxReverted(hash)) => {
-                    tracing::warn!("withdrawal ferried unsuccessfully {hash}");
+                    tracing::warn!("withdrawal {rid} ferried unsuccessfully {}", hex::encode(hash));
                     metrics::FAILED_FERRY_ATTEMPTS.inc();
                 }
                 Err(e) => {
@@ -167,10 +169,11 @@ where
                 .l2
                 .get_merkle_proof(req_id, range, self.chain, at)
                 .await?;
-            let _result = self
+            let result = self
                 .l1
                 .close_withdrawal(withdrawal, root.into(), proof)
                 .await?;
+            tracing::info!("withdrawal rid: {req_id} closed successfully {}", hex::encode(result));
             Ok(())
         } else {
             tracing::debug!("skipping already closed withdrawal {withdrawal}");

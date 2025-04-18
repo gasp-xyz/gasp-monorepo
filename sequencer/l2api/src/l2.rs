@@ -1,5 +1,4 @@
 use futures::future::join_all;
-use gasp_bindings::api::runtime_types::frame_system::extensions::check_nonce::CheckNonce;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
 use subxt::config::signed_extensions::ChargeTransactionPaymentParams;
@@ -161,7 +160,7 @@ impl Gasp {
         let nonce = self.fetch_nonce(self.keypair.address().into_inner()).await?;
         let nonce = CheckNonceParams(Some((nonce) as u64));
         let payment = ChargeTransactionPaymentParams::no_tip();
-        let mut params = ((), (), (), mortality, nonce, payment);
+        let params = ((), (), (), mortality, nonce, payment);
         let partial_signed = tx
             .create_partial_signed(&call, &self.keypair.address(), params)
             .await?;
@@ -210,7 +209,6 @@ impl Gasp {
             .ok_or(L2Error::HeaderSubscriptionFailed)?
     }
 
-    #[cfg(test)]
     pub async fn withdraw(
         &self,
         chain: gasp_types::Chain,

@@ -19,7 +19,7 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     pub async fn approve(&self, address: [u8; 20], amount: u128) -> Result<H256, L1Error> {
         let call = self
             .contract_handle

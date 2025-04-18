@@ -254,12 +254,11 @@ where
             let allowance = token.allowance(rolldown_address, me.into()).await?;
             if allowance < amount {
                 let missing_allowance = amount - allowance;
-                token.approve(rolldown_address, missing_allowance).await
-            } else {
-                self.rolldown_contract
-                    .send_ferry_withdrawal(withdrawal)
-                    .await
+                token.approve(rolldown_address, missing_allowance).await?;
             }
+            self.rolldown_contract
+                .send_ferry_withdrawal(withdrawal)
+            .await
         }
     }
 
