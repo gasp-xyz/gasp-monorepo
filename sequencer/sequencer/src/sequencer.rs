@@ -865,13 +865,13 @@ pub(crate) mod test {
             .return_once(|_, _| Ok(0u128));
 
         let eth_update = l1api::types::abi::L1Update {
-            chain: Into::<l1api::types::abi::ChainId>::into(ETHEREUM).into(),
+            chain: ETHEREUM,
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
 
         let gasp_update = gasp_types::L1Update {
-            chain: ETHEREUM.into(),
+            chain: ETHEREUM,
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
@@ -919,13 +919,13 @@ pub(crate) mod test {
             .return_once(|_, _| Ok(0u128));
 
         let eth_update = l1api::types::abi::L1Update {
-            chain: Into::<l1api::types::abi::ChainId>::into(ETHEREUM).into(),
+            chain: ETHEREUM,
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
 
         let gasp_update = gasp_types::L1Update {
-            chain: ETHEREUM.into(),
+            chain: ETHEREUM,
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
@@ -1090,7 +1090,7 @@ pub(crate) mod test {
         l2mock
             .expect_get_dispute_period()
             .times(1)
-            .with(eq(Chain::Ethereum), eq(H256::zero()))
+            .with(eq(ETHEREUM), eq(H256::zero()))
             .return_once(move |_, _| Ok(dispute_period));
 
         let sequencer = Sequencer::new(
@@ -1159,7 +1159,7 @@ pub(crate) mod test {
         l2mock
             .expect_get_dispute_period()
             .times(1)
-            .with(eq(Chain::Ethereum), eq(H256::zero()))
+            .with(eq(ETHEREUM), eq(H256::zero()))
             .return_once(move |_, _| Ok(dispute_period));
 
         let sequencer = Sequencer::new(

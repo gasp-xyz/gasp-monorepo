@@ -86,7 +86,10 @@ fn error_on_empty_update() {
 fn test_genesis() {
 	ExtBuilder::new().execute_with_default_mocks(|| {
 		assert_eq!(
-			SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&ALICE).unwrap().read_rights,
+			SequencersRights::<Test>::get(consts::CHAIN_ETH)
+				.get(&ALICE)
+				.unwrap()
+				.read_rights,
 			1
 		);
 	});
@@ -261,8 +264,12 @@ fn test_refund_of_failed_withdrawal() {
 				status: Err(L1RequestProcessingError::Overflow),
 			});
 
-			Rolldown::refund_failed_deposit(RuntimeOrigin::signed(CHARLIE), consts::CHAIN_ETH, 1u128)
-				.unwrap();
+			Rolldown::refund_failed_deposit(
+				RuntimeOrigin::signed(CHARLIE),
+				consts::CHAIN_ETH,
+				1u128,
+			)
+			.unwrap();
 
 			assert_event_emitted!(Event::DepositRefundCreated {
 				refunded_request_id: RequestId::new(Origin::L1, 1u128),
@@ -292,8 +299,12 @@ fn test_withdrawal_can_be_refunded_only_once() {
 
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), update).unwrap();
 			forward_to_block::<Test>(20);
-			Rolldown::refund_failed_deposit(RuntimeOrigin::signed(CHARLIE), consts::CHAIN_ETH, 1u128)
-				.unwrap();
+			Rolldown::refund_failed_deposit(
+				RuntimeOrigin::signed(CHARLIE),
+				consts::CHAIN_ETH,
+				1u128,
+			)
+			.unwrap();
 			assert_err!(
 				Rolldown::refund_failed_deposit(
 					RuntimeOrigin::signed(CHARLIE),
@@ -327,12 +338,20 @@ fn test_withdrawal_can_be_refunded_only_by_account_deposit_recipient() {
 			forward_to_block::<Test>(20);
 
 			assert_err!(
-				Rolldown::refund_failed_deposit(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, 1u128),
+				Rolldown::refund_failed_deposit(
+					RuntimeOrigin::signed(ALICE),
+					consts::CHAIN_ETH,
+					1u128
+				),
 				Error::<Test>::NotEligibleForRefund
 			);
 
-			Rolldown::refund_failed_deposit(RuntimeOrigin::signed(CHARLIE), consts::CHAIN_ETH, 1u128)
-				.unwrap();
+			Rolldown::refund_failed_deposit(
+				RuntimeOrigin::signed(CHARLIE),
+				consts::CHAIN_ETH,
+				1u128,
+			)
+			.unwrap();
 		});
 }
 
@@ -531,8 +550,12 @@ fn test_malicious_sequencer_is_slashed_when_honest_sequencer_cancels_malicious_r
 			);
 
 			forward_to_block::<Test>(11);
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(BOB),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			assert_eq!(
 				*SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&BOB).unwrap(),
@@ -612,8 +635,12 @@ fn test_malicious_canceler_is_slashed_when_honest_read_is_canceled() {
 				SequencerRights { read_rights: 0u128, cancel_rights: 2u128 }
 			);
 			forward_to_block::<Test>(11);
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(BOB),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			assert_eq!(
 				*SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&BOB).unwrap(),
@@ -1323,7 +1350,10 @@ fn test_reproduce_bug_with_incremental_updates() {
 				0u128.into(),
 			)
 			.unwrap();
-			assert_eq!(Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH), 2_u128.into());
+			assert_eq!(
+				Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH),
+				2_u128.into()
+			);
 			let withdrawal_update =
 				L2Requests::<Test>::get(consts::CHAIN_ETH, RequestId::new(Origin::L2, 1u128));
 			assert!(matches!(withdrawal_update, Some((L2Request::Withdrawal(_), _))));
@@ -1499,8 +1529,12 @@ fn test_cancel_resolution_updates_awaiting_cancel_resolution() {
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), deposit_update)
 				.unwrap();
 			forward_to_block::<Test>(11);
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(BOB),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 			forward_to_block::<Test>(12);
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), cancel_resolution)
 				.unwrap();
@@ -1723,8 +1757,12 @@ fn consider_awaiting_cancel_resolutions_and_cancel_disputes_when_assigning_initi
 			forward_to_block::<Test>(10);
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), honest_update.clone())
 				.unwrap();
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			forward_to_block::<Test>(11);
 			Rolldown::update_l2_from_l1_unsafe(
@@ -1732,8 +1770,12 @@ fn consider_awaiting_cancel_resolutions_and_cancel_disputes_when_assigning_initi
 				honest_update.clone(),
 			)
 			.unwrap();
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, 16u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				16u128,
+			)
+			.unwrap();
 
 			// lets pretned that alice misbehaved and got slashed, as a result her stake dropped below
 			// active sequencer threshold and she got immadietely removed from sequencers set
@@ -1784,7 +1826,9 @@ fn consider_awaiting_l1_sequencer_update_in_dispute_period_when_assigning_initia
 			let slash_sequencer_mock = MockSequencerStakingProviderApi::slash_sequencer_context();
 			slash_sequencer_mock
 				.expect()
-				.withf(|chain, a, b| *chain == consts::CHAIN_ETH && *a == ALICE && b.cloned() == None)
+				.withf(|chain, a, b| {
+					*chain == consts::CHAIN_ETH && *a == ALICE && b.cloned() == None
+				})
 				.times(1)
 				.return_const(Ok(().into()));
 
@@ -1797,8 +1841,12 @@ fn consider_awaiting_l1_sequencer_update_in_dispute_period_when_assigning_initia
 
 			// accidently canceling honest update
 			forward_to_block::<Test>(11);
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			forward_to_block::<Test>(12);
 			let honest_update = L1UpdateBuilder::default()
@@ -1870,8 +1918,12 @@ fn consider_awaiting_cancel_resolutions_and_cancel_disputes_when_assigning_initi
 			forward_to_block::<Test>(10);
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(BOB), honest_update.clone())
 				.unwrap();
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			forward_to_block::<Test>(15);
 			Rolldown::update_l2_from_l1_unsafe(RuntimeOrigin::signed(ALICE), honest_update.clone())
@@ -1957,7 +2009,8 @@ fn test_merkle_proof_works() {
 
 			let range = (1u128, 300u128);
 			let root_hash = Pallet::<Test>::get_merkle_root(consts::CHAIN_ETH, range);
-			let proof_hashes = Pallet::<Test>::get_merkle_proof_for_tx(consts::CHAIN_ETH, range, 257);
+			let proof_hashes =
+				Pallet::<Test>::get_merkle_proof_for_tx(consts::CHAIN_ETH, range, 257);
 			Pallet::<Test>::verify_merkle_proof_for_tx(
 				consts::CHAIN_ETH,
 				range,
@@ -2257,7 +2310,11 @@ fn test_create_manual_batch_works() {
 				0u128.into(),
 			)
 			.unwrap();
-			assert_ok!(Rolldown::create_batch(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, None));
+			assert_ok!(Rolldown::create_batch(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				None
+			));
 			assert_event_emitted!(Event::TxBatchCreated {
 				chain: consts::CHAIN_ETH,
 				source: BatchSource::Manual,
@@ -2276,7 +2333,11 @@ fn test_create_manual_batch_works() {
 			)
 			.unwrap();
 
-			assert_ok!(Rolldown::create_batch(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, None));
+			assert_ok!(Rolldown::create_batch(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				None
+			));
 			assert_event_emitted!(Event::TxBatchCreated {
 				chain: consts::CHAIN_ETH,
 				source: BatchSource::Manual,
@@ -2308,9 +2369,16 @@ fn test_size_of_manually_created_batch_is_limited() {
 				.unwrap();
 			}
 
-			assert_ok!(Rolldown::create_batch(RuntimeOrigin::signed(ALICE), consts::CHAIN_ETH, None));
+			assert_ok!(Rolldown::create_batch(
+				RuntimeOrigin::signed(ALICE),
+				consts::CHAIN_ETH,
+				None
+			));
 
-			assert_eq!(L2RequestsBatchLast::<Test>::get().get(&consts::CHAIN_ETH).unwrap().2 .0, 1u128);
+			assert_eq!(
+				L2RequestsBatchLast::<Test>::get().get(&consts::CHAIN_ETH).unwrap().2 .0,
+				1u128
+			);
 
 			assert_eq!(
 				L2RequestsBatchLast::<Test>::get().get(&consts::CHAIN_ETH).unwrap().2 .1,
@@ -2374,7 +2442,8 @@ fn test_create_manual_batch_work_for_alias_account() {
 			)
 			.unwrap();
 
-			Rolldown::create_batch(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, Some(ALICE)).unwrap();
+			Rolldown::create_batch(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, Some(ALICE))
+				.unwrap();
 			assert_event_emitted!(Event::TxBatchCreated {
 				chain: consts::CHAIN_ETH,
 				source: BatchSource::Manual,
@@ -2901,18 +2970,27 @@ fn test_sequencer_rights_are_returned_when_maintanance_mode_is_triggered_and_pen
 
 			forward_to_block::<Test>(14);
 			assert_eq!(
-				SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&ALICE).unwrap().read_rights,
+				SequencersRights::<Test>::get(consts::CHAIN_ETH)
+					.get(&ALICE)
+					.unwrap()
+					.read_rights,
 				0
 			);
 
 			forward_to_block::<Test>(15);
 			assert_eq!(
-				SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&ALICE).unwrap().read_rights,
+				SequencersRights::<Test>::get(consts::CHAIN_ETH)
+					.get(&ALICE)
+					.unwrap()
+					.read_rights,
 				1
 			);
 
 			forward_to_block::<Test>(20);
-			assert_eq!(Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH), 0_u128.into());
+			assert_eq!(
+				Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH),
+				0_u128.into()
+			);
 		})
 }
 
@@ -2939,7 +3017,10 @@ fn test_sequencer_rights_are_returned_when_maintanance_mode_is_turned_off_before
 
 			forward_to_block::<Test>(14);
 			assert_eq!(
-				SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&ALICE).unwrap().read_rights,
+				SequencersRights::<Test>::get(consts::CHAIN_ETH)
+					.get(&ALICE)
+					.unwrap()
+					.read_rights,
 				0
 			);
 
@@ -2949,12 +3030,18 @@ fn test_sequencer_rights_are_returned_when_maintanance_mode_is_turned_off_before
 
 			forward_to_block::<Test>(15);
 			assert_eq!(
-				SequencersRights::<Test>::get(consts::CHAIN_ETH).get(&ALICE).unwrap().read_rights,
+				SequencersRights::<Test>::get(consts::CHAIN_ETH)
+					.get(&ALICE)
+					.unwrap()
+					.read_rights,
 				1
 			);
 
 			forward_to_block::<Test>(20);
-			assert_eq!(Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH), 0_u128.into());
+			assert_eq!(
+				Rolldown::get_last_processed_request_on_l2(consts::CHAIN_ETH),
+				0_u128.into()
+			);
 		})
 }
 
@@ -2987,7 +3074,12 @@ fn test_force_create_batch_fails_for_invalid_range() {
 			forward_to_block::<Test>(10);
 
 			assert_err!(
-				Rolldown::force_create_batch(RuntimeOrigin::root(), consts::CHAIN_ETH, (10, 20), ALICE),
+				Rolldown::force_create_batch(
+					RuntimeOrigin::root(),
+					consts::CHAIN_ETH,
+					(10, 20),
+					ALICE
+				),
 				Error::<Test>::InvalidRange
 			);
 
@@ -3002,12 +3094,22 @@ fn test_force_create_batch_fails_for_invalid_range() {
 			.unwrap();
 
 			assert_err!(
-				Rolldown::force_create_batch(RuntimeOrigin::root(), consts::CHAIN_ETH, (1, 10), ALICE),
+				Rolldown::force_create_batch(
+					RuntimeOrigin::root(),
+					consts::CHAIN_ETH,
+					(1, 10),
+					ALICE
+				),
 				Error::<Test>::InvalidRange
 			);
 
 			assert_err!(
-				Rolldown::force_create_batch(RuntimeOrigin::root(), consts::CHAIN_ETH, (0, 1), ALICE),
+				Rolldown::force_create_batch(
+					RuntimeOrigin::root(),
+					consts::CHAIN_ETH,
+					(0, 1),
+					ALICE
+				),
 				Error::<Test>::InvalidRange
 			);
 		})
@@ -3318,8 +3420,12 @@ fn test_reproduce_bug_with_sequencer_being_able_to_get_more_cancel_rights_than_h
 
 			// accidently canceling honest update
 			forward_to_block::<Test>(11);
-			Rolldown::cancel_requests_from_l1(RuntimeOrigin::signed(BOB), consts::CHAIN_ETH, 15u128)
-				.unwrap();
+			Rolldown::cancel_requests_from_l1(
+				RuntimeOrigin::signed(BOB),
+				consts::CHAIN_ETH,
+				15u128,
+			)
+			.unwrap();
 
 			forward_to_block::<Test>(15);
 			let cancel_resolution = L1UpdateBuilder::default()

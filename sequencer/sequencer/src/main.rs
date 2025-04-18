@@ -1,4 +1,7 @@
-use alloy::{network::NetworkWallet, providers::{Provider, WalletProvider}};
+use alloy::{
+    network::NetworkWallet,
+    providers::{Provider, WalletProvider},
+};
 use envconfig::Envconfig;
 use hex::FromHex;
 use l1api::CachedL1Interface;
@@ -118,7 +121,10 @@ async fn run(config: Config) -> Result<(), Error> {
     tracing::info!("Connected to {}", config.l2_uri);
 
     let provider = l1api::create_provider(config.l1_uri.clone(), eth_secret_key).await?;
-    let chain = provider.get_chain_id().await.map_err(Into::<l1api::L1Error>::into)?;
+    let chain = provider
+        .get_chain_id()
+        .await
+        .map_err(Into::<l1api::L1Error>::into)?;
     let rolldown = l1api::RolldownContract::new(provider.clone(), rolldown_contract_address);
     tracing::info!("Connected to {}", config.l1_uri);
 

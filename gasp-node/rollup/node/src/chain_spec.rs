@@ -865,7 +865,10 @@ fn rollup_genesis(
 				(evm_chain_info.eth_chain_id, 200u128),
 				(evm_chain_info.alt1_chain_id, 200u128),
 				(evm_chain_info.alt2_chain_id, 200u128),
-			].iter().cloned().collect(),
+			]
+			.iter()
+			.cloned()
+			.collect(),
 		},
 		#[cfg(feature = "fast-runtime")]
 		rolldown: rollup_runtime::RolldownConfig {
@@ -874,7 +877,10 @@ fn rollup_genesis(
 				(evm_chain_info.eth_chain_id, 10u128),
 				(evm_chain_info.alt1_chain_id, 15u128),
 				(evm_chain_info.alt2_chain_id, 15u128),
-			].iter().cloned().collect(),
+			]
+			.iter()
+			.cloned()
+			.collect(),
 		},
 		metamask: rollup_runtime::MetamaskConfig {
 			name: "Gasp".to_string(),

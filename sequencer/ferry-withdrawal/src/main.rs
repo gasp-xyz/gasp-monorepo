@@ -73,7 +73,7 @@ pub async fn main() -> Result<(), Error> {
         let chain = l1.get_chain_id().await?;
         hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
     };
-    
+
     let mut filter = {
         let l1 = L1::new(rolldown.clone(), provider.clone());
         filter::Filter::new(
@@ -84,7 +84,7 @@ pub async fn main() -> Result<(), Error> {
             args.enabled.into_iter().collect(),
         )
     };
-    
+
     let mut executor = {
         let l1 = L1::new(rolldown, provider.clone());
         let chain = l1.get_chain_id().await?;

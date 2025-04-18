@@ -31,7 +31,7 @@ pub mod types {
         };
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
         pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
-        
+
         pub type Chain = gasp_types::Chain;
     }
 

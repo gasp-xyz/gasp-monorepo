@@ -31,9 +31,7 @@ impl From<crate::FailedDepositResolution> for FailedDepositResolution {
 	fn from(failed_deposit_resolution: crate::FailedDepositResolution) -> Self {
 		Self {
 			requestId: failed_deposit_resolution.requestId.into(),
-			originRequestId: to_eth_u256(
-				failed_deposit_resolution.originRequestId.into(),
-			),
+			originRequestId: to_eth_u256(failed_deposit_resolution.originRequestId.into()),
 			ferry: failed_deposit_resolution.ferry.into(),
 		}
 	}
