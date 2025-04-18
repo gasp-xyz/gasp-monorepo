@@ -76,7 +76,7 @@ where
 
     pub async fn ferry_deposit(&mut self) -> Result<(), FerryError> {
         let balances = self.balances.clone();
-        let (_, at) = self.l2.get_best_block().await?;
+        let (nr, at) = self.l2.get_best_block().await?;
         let latest_finalized = self
             .l2
             .get_latest_processed_request_id(self.chain, at)
@@ -124,7 +124,8 @@ where
         if let Some(deposit) = req_to_ferrry {
             self.assert_exists(deposit).await?;
             let ferried_amount: u128 = (deposit.amount - deposit.ferry_tip).try_into().unwrap();
-            tracing::info!("HEREEEEEEEEEEEEEEEEEEEEEEEEEE");
+
+            tracing::info!("#{nr} ferring {deposit}");
             if self.l2.ferry_deposit(self.chain, deposit).await? {
                 tracing::info!("deposit ferried successfully {deposit}");
                 metrics::FERRIED
