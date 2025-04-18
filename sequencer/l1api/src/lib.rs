@@ -225,7 +225,7 @@ where
         }
     }
 
-    #[tracing::instrument(level="debug", skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error> {
         let token = Erc20Token::new(token, self.provider.clone());
         token.balance_of(account).await
@@ -238,13 +238,15 @@ where
     }
 
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
-        let amount = (withdrawal.amount - withdrawal.ferry_tip).try_into().unwrap();
+        let amount = (withdrawal.amount - withdrawal.ferry_tip)
+            .try_into()
+            .unwrap();
 
         if withdrawal.token_address == NATIVE_TOKEN_ADDRESS {
             self.rolldown_contract
                 .send_ferry_withdrawal(withdrawal)
                 .await
-        }else{
+        } else {
             let p = self.provider.clone();
             let me: [u8; 20] = p.wallet().default_signer_address().into();
             let rolldown_address = self.rolldown_contract.address();
@@ -253,7 +255,7 @@ where
             if allowance < amount {
                 let missing_allowance = amount - allowance;
                 token.approve(rolldown_address, missing_allowance).await
-            }else{
+            } else {
                 self.rolldown_contract
                     .send_ferry_withdrawal(withdrawal)
                     .await

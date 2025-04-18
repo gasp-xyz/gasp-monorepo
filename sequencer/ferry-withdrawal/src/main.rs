@@ -60,7 +60,7 @@ pub async fn main() -> Result<(), Error> {
     let sender = l1api::address(provider.clone());
     let rolldown = if args.dry_run {
         l1api::RolldownContract::new_dry_run(provider.clone(), args.rolldown_contract_address)
-    }else{
+    } else {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
 

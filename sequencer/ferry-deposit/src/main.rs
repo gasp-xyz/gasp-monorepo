@@ -38,6 +38,7 @@ pub enum Error {
     L2Error(#[from] l2api::L2Error),
 }
 
+pub type TaskHandle = tokio::task::JoinHandle<Result<(), Error>>;
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
@@ -69,9 +70,10 @@ pub async fn main() -> Result<(), Error> {
             .boxed()
     };
 
-    let (to_executor, executor, delay_fut) = common::delay::create_delay_channel(stream, args.block_delay);
+    let (to_executor, executor, delay_fut) =
+        common::delay::create_delay_channel(stream, args.block_delay);
 
-    let delay_task = tokio::spawn(async move { Ok(delay_fut.await?) });
+    let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
 
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
@@ -93,9 +95,10 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle = tokio::spawn(async move { Ok::<_, Error>(hunter.run().await?) });
+    let hunter_handle: TaskHandle =
+        tokio::spawn(async move { Ok::<_, Error>(hunter.run().await?) });
 
-    let filter_handle = tokio::spawn(async move {
+    let filter_handle: TaskHandle = tokio::spawn(async move {
         filter::filter_deposits(
             filter_input,
             to_executor,
@@ -105,12 +108,10 @@ pub async fn main() -> Result<(), Error> {
         Ok(())
     });
 
-    let executor_handle = tokio::spawn(async move { Ok::<_, Error>(executor.run().await?) });
+    let executor_handle: TaskHandle =
+        tokio::spawn(async move { Ok::<_, Error>(executor.run().await?) });
 
-    if let Err(e) =
-        futures::future::try_join_all([hunter_handle, filter_handle, executor_handle, delay_task])
-            .await
-    {
+    if let Err(e) = tokio::try_join!(hunter_handle, filter_handle, executor_handle, delay_task) {
         tracing::error!("err : {e}");
     }
 

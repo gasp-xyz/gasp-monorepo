@@ -114,43 +114,42 @@ where
             .max_by_key(|(_, (prio, _))| prio)
             .map(|(_, (_, w))| *w);
 
-        if let Some(w) = req_to_ferrry {
-        }
+        if let Some(w) = req_to_ferrry {}
 
         Ok(())
     }
 
     pub async fn ferry_single_withdrawal(&mut self, w: Withdrawal) -> Result<(), FerryError> {
-            let (_, at) = self.l2.get_best_block().await?;
-            self.assert_exists(w, at).await?;
-            if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
-                tracing::trace!("tracing withdrawal {w}");
-                let ferried_amount: u128 = (w.amount - w.ferry_tip).try_into().unwrap();
-                match self.l1.ferry_withdrawal(w).await {
-                    Ok(hash) => {
-                        tracing::info!("withdrawal ferried successfully {hash}");
+        let (_, at) = self.l2.get_best_block().await?;
+        self.assert_exists(w, at).await?;
+        if let RequestStatus::Pending = self.l1.get_status(w.withdrawal_hash()).await? {
+            tracing::trace!("tracing withdrawal {w}");
+            let ferried_amount: u128 = (w.amount - w.ferry_tip).try_into().unwrap();
+            match self.l1.ferry_withdrawal(w).await {
+                Ok(hash) => {
+                    tracing::info!("withdrawal ferried successfully {hash}");
 
-                        metrics::FERRIED
-                            .with_label_values(&[&hex::encode(w.token_address)])
-                            .inc();
-                        metrics::FERRIED_VOLUME
-                            .with_label_values(&[&hex::encode(w.token_address)])
-                            .inc_by(ferried_amount as f64);
-                        metrics::FERRIED.with_label_values(&["total"]).inc();
-                        metrics::FERRIED_VOLUME
-                            .with_label_values(&["total"])
-                            .inc_by(ferried_amount as f64);
-                    }
-                    Err(L1Error::TxReverted(hash)) => {
-                        tracing::warn!("withdrawal ferried unsuccessfully {hash}");
-                        metrics::FAILED_FERRY_ATTEMPTS.inc();
-                    }
-                    Err(e) => {
-                        return Err(e.into());
-                    }
+                    metrics::FERRIED
+                        .with_label_values(&[&hex::encode(w.token_address)])
+                        .inc();
+                    metrics::FERRIED_VOLUME
+                        .with_label_values(&[&hex::encode(w.token_address)])
+                        .inc_by(ferried_amount as f64);
+                    metrics::FERRIED.with_label_values(&["total"]).inc();
+                    metrics::FERRIED_VOLUME
+                        .with_label_values(&["total"])
+                        .inc_by(ferried_amount as f64);
                 }
-                self.ferryable_withdrawals.remove(&w.request_id.id);
+                Err(L1Error::TxReverted(hash)) => {
+                    tracing::warn!("withdrawal ferried unsuccessfully {hash}");
+                    metrics::FAILED_FERRY_ATTEMPTS.inc();
+                }
+                Err(e) => {
+                    return Err(e.into());
+                }
             }
+            self.ferryable_withdrawals.remove(&w.request_id.id);
+        }
         Ok(())
     }
 

@@ -690,12 +690,8 @@ impl L2Interface for Gasp {
             })
             .unwrap_or_default();
         Ok(match latest.get(&chain) {
-            Some(elem) if  *elem > 1 => {
-                Some(elem - 1u128)
-            },
-            _ => {
-                None
-            }
+            Some(elem) if *elem > 1 => Some(elem - 1u128),
+            _ => None,
         })
     }
 

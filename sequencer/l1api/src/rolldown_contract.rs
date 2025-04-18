@@ -79,9 +79,10 @@ where
     ) -> Result<H256, L1Error> {
         let amount = withdrawal.amount - withdrawal.ferry_tip;
         let call = self.contract_handle.ferryWithdrawal(withdrawal.into());
-        if withdrawal.token_address == NATIVE_TOKEN_ADDRESS{
-            self.execute_tx(call.value(gasp_types::into_l1_u256(amount))).await
-        }else{
+        if withdrawal.token_address == NATIVE_TOKEN_ADDRESS {
+            self.execute_tx(call.value(gasp_types::into_l1_u256(amount)))
+                .await
+        } else {
             self.execute_tx(call).await
         }
     }
@@ -269,7 +270,7 @@ where
     }
 
     #[allow(clippy::type_complexity)]
-    #[tracing::instrument(level="debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     pub async fn get_latest_batch(&self) -> Result<Option<(H256, u128, (u128, u128))>, L1Error> {
         let amount = self.get_amount_of_merkle_roots().await?;
         if amount > 0 {
@@ -282,7 +283,7 @@ where
         }
     }
 
-    #[tracing::instrument(level="debug", skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     #[allow(clippy::type_complexity)]
     pub async fn get_batch(&self, batch_id: u128) -> Result<Option<(H256, (u128, u128))>, L1Error> {
         let root = self.get_merkle_root_by_id(batch_id).await?;
