@@ -6,7 +6,6 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {BaseDeployer} from "./BaseDeployer.s.sol";

@@ -12,7 +12,6 @@ import {Test} from "forge-std/Test.sol";
 import {FinalizerTaskManager} from "./../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "./../src/interfaces/IFinalizerTaskManager.sol";
 import {IRolldown} from "./../src/interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "./../src/interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManagerIntegrationTest is Test, BLSMockAVSDeployer {
     using BN254 for BN254.G1Point;

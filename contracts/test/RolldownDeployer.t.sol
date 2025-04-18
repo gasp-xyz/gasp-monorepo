@@ -6,7 +6,6 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
 import {RolldownDeployer} from "./../script/RolldownDeployer.s.sol";
-import {IRolldownPrimitives} from "./../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "./../src/Rolldown.sol";
 import {RollDownUpg} from "./utils/RollDownUpg.sol";
 import {MyERC20, Utilities} from "./utils/Utilities.sol";
@@ -57,9 +56,7 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, updaterAccount
-            )
+            abi.encodeWithSelector(rolldown.initialize.selector, owner, updaterAccount)
         );
 
         vm.stopBroadcast();
@@ -76,9 +73,7 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, updaterAccount
-            )
+            abi.encodeWithSelector(rolldown.initialize.selector, owner, updaterAccount)
         );
 
         rolldownImplementation = new Rolldown();
@@ -86,9 +81,7 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, updaterAccount
-            )
+            abi.encodeWithSelector(rolldown.initialize.selector, owner, updaterAccount)
         );
 
         vm.stopBroadcast();
@@ -109,9 +102,7 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, updaterAccount
-            )
+            abi.encodeWithSelector(rolldown.initialize.selector, owner, updaterAccount)
         );
 
         vm.stopBroadcast();
@@ -146,9 +137,7 @@ contract RolldownDeployerTest is Test {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, updaterAccount
-            )
+            abi.encodeWithSelector(rolldown.initialize.selector, owner, updaterAccount)
         );
 
         vm.stopBroadcast();

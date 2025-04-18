@@ -148,9 +148,7 @@ contract Deploy is RolldownTest {
 
         vm.expectRevert(ZeroUpdater.selector);
         new TransparentUpgradeableProxy(
-            address(implementation),
-            address(proxyAdmin),
-            abi.encodeCall(Rolldown.initialize, (users.admin, address(0)))
+            address(implementation), address(proxyAdmin), abi.encodeCall(Rolldown.initialize, (users.admin, address(0)))
         );
     }
 

@@ -9,7 +9,7 @@ import {AnvilSetup} from "../script/0_AnvilSetup.s.sol";
 import {FinalizerAVSDeployer, FinalizerTaskManager} from "../script/1_FinalizerAVSDeployer.s.sol";
 import {GaspMultiRollupService, GaspMultiRollupServiceDeployer} from "../script/GaspMultiRollupServiceDeployer.s.sol";
 import {M2Deployer} from "../script/M2_Deploy_From_Scratch.s.sol";
-import {IRolldownPrimitives, Rolldown, RolldownDeployer} from "../script/RolldownDeployer.s.sol";
+import {Rolldown, RolldownDeployer} from "../script/RolldownDeployer.s.sol";
 import {IRolldown} from "../src/interfaces/IRolldown.sol";
 import {Utils} from "./utils/Utils.sol";
 
@@ -36,7 +36,7 @@ contract MultiStage is Script, Utils {
                 finalizerAVSDeployer.run();
             }
 
-            rolldownDeployer.run( "ethereum-stub");
+            rolldownDeployer.run("ethereum-stub");
 
             _initializeRolldownAndTaskManager();
             return;

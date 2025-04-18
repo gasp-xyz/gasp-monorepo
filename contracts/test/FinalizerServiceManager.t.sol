@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {Test} from "forge-std/Test.sol";
-import {FinalizerServiceManager} from "../src/FinalizerServiceManager.sol";
+import {IStakeRegistry} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {IRegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
 import {IAVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
 import {IRewardsCoordinator} from "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
-import {IRegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import {IStakeRegistry} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {IFinalizerTaskManager} from "../src/interfaces/IFinalizerTaskManager.sol";
 import {ISignatureUtils} from "@eigenlayer/contracts/interfaces/ISignatureUtils.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {Test} from "forge-std/Test.sol";
+import {FinalizerServiceManager} from "./../src/FinalizerServiceManager.sol";
+import {IFinalizerTaskManager} from "./../src/interfaces/IFinalizerTaskManager.sol";
 
 contract FinalizerServiceManagerTest is Test {
     FinalizerServiceManager internal serviceManager;
@@ -24,7 +24,7 @@ contract FinalizerServiceManagerTest is Test {
     address internal operator;
     ISignatureUtils.SignatureWithSaltAndExpiry internal operatorSignature;
 
-    uint64 constant LIMIT = 100;
+    uint64 internal constant LIMIT = 100;
 
     function setUp() public {
         owner = makeAddr("owner");

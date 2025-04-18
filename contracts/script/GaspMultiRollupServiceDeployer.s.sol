@@ -7,7 +7,6 @@ import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/p
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {GaspMultiRollupService} from "../src/GaspMultiRollupService.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {BaseDeployer} from "./BaseDeployer.s.sol";
 
 contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
@@ -49,12 +48,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
             abi.encodeWithSelector(
-                gmrs.initialize.selector,
-                gmrsPauserReg,
-                owner,
-                gmrsUpdater,
-                allowNonRootInit,
-                dummyRolldownAddress
+                gmrs.initialize.selector, gmrsPauserReg, owner, gmrsUpdater, allowNonRootInit, dummyRolldownAddress
             )
         );
 

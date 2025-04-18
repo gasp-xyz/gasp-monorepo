@@ -282,7 +282,8 @@ contract FinalizerTaskManager is
         // TODO
         // Maybe this belongs in createNewRdTask
         require(
-            chainRdBatchNonce[taskResponse.chainId] == 0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId],
+            chainRdBatchNonce[taskResponse.chainId] == 0
+                || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId],
             "chainRdBatchNonce mismatch"
         );
 
