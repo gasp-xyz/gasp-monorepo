@@ -17,7 +17,6 @@ import {Initializable} from "@openzeppelin-upgrades/contracts/proxy/utils/Initia
 import {IFinalizerTaskManager} from "./interfaces/IFinalizerTaskManager.sol";
 import {IGaspMultiRollupServicePrimitives} from "./interfaces/IGaspMultiRollupServicePrimitives.sol";
 import {IRolldown} from "./interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "./interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManager is
     Initializable,
@@ -70,7 +69,7 @@ contract FinalizerTaskManager is
 
     bool public isTaskPending;
 
-    mapping(uint8 => uint32) public chainRdBatchNonce;
+    mapping(uint64 => uint32) public chainRdBatchNonce;
 
     // TODO
     // Maybe skip storing this
@@ -246,7 +245,7 @@ contract FinalizerTaskManager is
     }
 
     /* FUNCTIONS */
-    function createNewRdTask(IRolldown.ChainId chainId, uint32 batchId) external onlyTaskGenerator {
+    function createNewRdTask(uint64 chainId, uint32 batchId) external onlyTaskGenerator {
         require(isTaskPending == false, "Task already pending");
         require(lastCompletedOpTaskCreatedBlock != 0 && block.number != 0, "Op State uninit");
         uint32 latestRdTaskNumMem = latestRdTaskNum;
@@ -283,8 +282,7 @@ contract FinalizerTaskManager is
         // TODO
         // Maybe this belongs in createNewRdTask
         require(
-            chainRdBatchNonce[uint8(taskResponse.chainId)] == 0
-                || taskResponse.batchId == chainRdBatchNonce[uint8(taskResponse.chainId)],
+            chainRdBatchNonce[taskResponse.chainId] == 0 || taskResponse.batchId == chainRdBatchNonce[taskResponse.chainId],
             "chainRdBatchNonce mismatch"
         );
 
@@ -321,14 +319,13 @@ contract FinalizerTaskManager is
             return;
         }
 
-        IRolldown.ChainId ethChainId = IRolldownPrimitives.ChainId.Ethereum;
-        if (taskResponse.chainId == ethChainId) {
+        if (taskResponse.chainId == block.chainid) {
             IRolldown.Range memory range;
             range.start = taskResponse.rangeStart;
             range.end = taskResponse.rangeEnd;
             rolldown.update_l1_from_l2(taskResponse.rdUpdate, range);
         }
-        chainRdBatchNonce[uint8(taskResponse.chainId)] = taskResponse.batchId + 1;
+        chainRdBatchNonce[taskResponse.chainId] = taskResponse.batchId + 1;
 
         lastCompletedRdTaskNum = task.taskNum;
         lastCompletedRdTaskCreatedBlock = task.taskCreatedBlock;

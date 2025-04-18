@@ -36,29 +36,9 @@ contract MultiStage is Script, Utils {
                 finalizerAVSDeployer.run();
             }
 
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-stub");
+            rolldownDeployer.run( "ethereum-stub");
 
             _initializeRolldownAndTaskManager();
-            return;
-        }
-
-        if (envHash == _stringToHash("arbitrum-stub")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-stub");
-            return;
-        }
-
-        if (envHash == _stringToHash("base-stub")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-stub");
-            return;
-        }
-
-        if (envHash == _stringToHash("monad-stub")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-stub");
-            return;
-        }
-
-        if (envHash == _stringToHash("megaeth-stub")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-stub");
             return;
         }
 
@@ -68,33 +48,13 @@ contract MultiStage is Script, Utils {
             finalizerAVSDeployer.run();
 
             RolldownDeployer rolldownDeployer = new RolldownDeployer();
-            rolldownDeployer.run(IRolldownPrimitives.ChainId.Ethereum, "ethereum-holesky");
+            rolldownDeployer.run("ethereum-holesky");
 
             _initializeRolldownAndTaskManager();
             return;
         }
 
-        if (envHash == _stringToHash("arbitrum-sepolia")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Arbitrum, "arbitrum-sepolia");
-            return;
-        }
-
-        if (envHash == _stringToHash("base-sepolia")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Base, "base-sepolia");
-            return;
-        }
-
-        if (envHash == _stringToHash("monad-testnet")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.Monad, "monad-testnet");
-            return;
-        }
-
-        if (envHash == _stringToHash("megaeth-testnet")) {
-            _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId.MegaEth, "megaeth-testnet");
-            return;
-        }
-
-        revert(string.concat("Unsupported environment: ", vm.envString("ENV_SELECTOR")));
+        _runRolldownAndGMRSDeployers(vm.envString("ENV_SELECTOR"));
     }
 
     function _incrementAccountNonce() private {
@@ -103,18 +63,18 @@ contract MultiStage is Script, Utils {
         vm.stopBroadcast();
     }
 
-    function _runRolldownAndGMRSDeployers(IRolldownPrimitives.ChainId chainId, string memory chainName) private {
+    function _runRolldownAndGMRSDeployers(string memory chainName) private {
         _incrementAccountNonce();
 
         RolldownDeployer rolldownDeployer = new RolldownDeployer();
-        rolldownDeployer.run(chainId, chainName);
+        rolldownDeployer.run(chainName);
 
         string memory rolldownDeployedContracts = readOutput(rolldownDeployer.outputPath());
         address rolldownAddress = stdJson.readAddress(rolldownDeployedContracts, ".addresses.rolldown");
         Rolldown rolldown = Rolldown(payable(rolldownAddress));
 
         GaspMultiRollupServiceDeployer gaspMultiRollupServiceDeployer = new GaspMultiRollupServiceDeployer();
-        gaspMultiRollupServiceDeployer.run(chainId, chainName);
+        gaspMultiRollupServiceDeployer.run(chainName);
 
         string memory gmrsDeployedContracts = readOutput(gaspMultiRollupServiceDeployer.outputPath());
         address gmrsAddress = stdJson.readAddress(gmrsDeployedContracts, ".addresses.gmrs");

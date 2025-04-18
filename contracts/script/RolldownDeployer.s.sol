@@ -23,7 +23,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
     address public upgrader;
     address public rolldownUpdater;
 
-    function deploy(IRolldownPrimitives.ChainId chainId) public override {
+    function deploy() public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -43,7 +43,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (owner, chainId, rolldownUpdater))
+            abi.encodeCall(rolldown.initialize, (owner, rolldownUpdater))
         );
 
         vm.stopBroadcast();

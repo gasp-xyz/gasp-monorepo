@@ -2,18 +2,15 @@
 
 pub mod eth_abi;
 
-use core::fmt::Display;
-
-use self::eth_abi::to_eth_u256;
 use crate::L2Request;
 use alloy_sol_types::SolValue;
-use codec::{Decode, Encode, MaxEncodedLen};
+use codec::{Decode, Encode};
 use eth_abi::from_eth_u256;
 use scale_info::{
 	prelude::{format, string::String},
 	TypeInfo,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sp_core::{RuntimeDebug, H256, U256};
 use sp_crypto_hashing::keccak_256;
 use sp_std::{
@@ -83,45 +80,7 @@ impl<AccountId: Clone> EthAbi for L2Request<AccountId> {
 	}
 }
 
-#[repr(u8)]
-#[derive(
-	Default,
-	Copy,
-	Eq,
-	PartialEq,
-	RuntimeDebug,
-	Clone,
-	Encode,
-	Decode,
-	TypeInfo,
-	MaxEncodedLen,
-	Serialize,
-	Deserialize,
-	Ord,
-	PartialOrd,
-)]
-pub enum Chain {
-	#[default]
-	Ethereum,
-	Arbitrum,
-	Base,
-	Monad,
-	MegaEth,
-	Sonic,
-}
-
-impl AsRef<str> for Chain {
-	fn as_ref(&self) -> &'static str {
-		match self {
-			Chain::Ethereum => "Ethereum",
-			Chain::Arbitrum => "Arbitrum",
-			Chain::Base => "Base",
-			Chain::Monad => "Monad",
-			Chain::MegaEth => "MegaEth",
-			Chain::Sonic => "Sonic",
-		}
-	}
-}
+pub type Chain = u64;
 
 #[repr(u8)]
 #[derive(
@@ -404,7 +363,7 @@ impl TryFrom<eth_abi::L1Update> for L1Update {
 			update.pendingCancelResolutions.into_iter().map(|c| c.try_into()).collect();
 
 		Ok(Self {
-			chain: update.chain.try_into()?,
+			chain: update.chain,
 			pendingDeposits: pending_deposits
 				.map_err(|e| format!("Error converting pendingDeposits: {}", e))?,
 			pendingCancelResolutions: pending_cancel_resultions
@@ -434,22 +393,6 @@ impl TryFrom<eth_abi::Origin> for Origin {
 		match origin {
 			eth_abi::Origin::L1 => Ok(Origin::L1),
 			eth_abi::Origin::L2 => Ok(Origin::L2),
-			_ => Err(String::from("Invalid origin type")),
-		}
-	}
-}
-
-impl TryFrom<eth_abi::Chain> for Chain {
-	type Error = String;
-
-	fn try_from(origin: eth_abi::Chain) -> Result<Self, Self::Error> {
-		match origin {
-			eth_abi::Chain::Ethereum => Ok(Chain::Ethereum),
-			eth_abi::Chain::Arbitrum => Ok(Chain::Arbitrum),
-			eth_abi::Chain::Base => Ok(Chain::Base),
-			eth_abi::Chain::Monad => Ok(Chain::Monad),
-			eth_abi::Chain::MegaEth => Ok(Chain::MegaEth),
-			eth_abi::Chain::Sonic => Ok(Chain::Sonic),
 			_ => Err(String::from("Invalid origin type")),
 		}
 	}

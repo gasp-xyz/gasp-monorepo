@@ -39,9 +39,7 @@ pub(crate) async fn build_eth_client(
             let address = wallet.address();
             info!("Eth Wallet decrytped with address {:x}", address);
             let nonce = NonceManagerMiddleware::new(provider.clone(), wallet.address());
-            let client =
-                SignerClient::new_with_provider_chain(nonce, wallet.with_chain_id(cfg.chain_id))
-                    .await?;
+            let client = SignerClient::new_with_provider_chain(nonce, wallet).await?;
             Ok((address, Arc::new(provider), Some(Arc::new(client))))
         }
     }
@@ -64,10 +62,9 @@ pub(crate) async fn setup_deposits(
     registry_address: Address,
     stake: u32,
     operator: LocalWallet,
-    chain_id: u64,
 ) -> eyre::Result<()> {
     let op_address = operator.address();
-    set_balance(chain_id, eth_rpc_url.clone(), op_address, 100).await?;
+    set_balance(eth_rpc_url.clone(), op_address, 100).await?;
     debug!("set some ether to operator");
 
     let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
@@ -103,18 +100,12 @@ pub(crate) async fn setup_deposits(
     Ok(())
 }
 
-async fn set_balance(
-    chain_id: u64,
-    eth_rpc_url: String,
-    address: Address,
-    ether: u128,
-) -> eyre::Result<()> {
+async fn set_balance(eth_rpc_url: String, address: Address, ether: u128) -> eyre::Result<()> {
     // 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f
     let dev_wallet = "dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97"
-        .parse::<LocalWallet>()?
-        .with_chain_id(chain_id);
+        .parse::<LocalWallet>()?;
     let provider: Provider<Http> = Client::try_from(eth_rpc_url)?;
-    let client = provider.with_signer(dev_wallet);
+    let client = SignerMiddleware::new_with_provider_chain(provider, dev_wallet).await?;
     let tx = TransactionRequest::pay(address, parse_ether(ether).unwrap());
     let _ = client.send_transaction(tx, None).await?.await?;
     Ok(())

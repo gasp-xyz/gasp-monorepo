@@ -57,7 +57,7 @@ pub struct Syncer {
     pub source_client: Arc<SourceClient>,
     #[allow(dead_code)]
     pub target_client: Arc<TargetClient>,
-    pub target_chain_index: u8,
+    pub target_chain_id: u64,
     pub root_target_client: Option<Arc<TargetClient>>,
     avs_contracts: AvsContracts,
     gasp_service_contract: GaspMultiRollupService<TargetClient>,
@@ -99,26 +99,12 @@ impl Syncer {
         } else {
             None
         };
-        let target_chain_index = cfg.target_chain_index;
         let decoder = CallDecoder::new(avs_contracts.task_manager.address());
-
-        // TODO: maybe set this as an implicit cli arg that is set on build
-        // Also same for the root above
-        if !(cfg.only_reinit_eth
-            || cfg.reinit_eth_only_print_op_task_creation
-            || cfg.reinit_eth_only_print_op_task_response)
-        {
-            let gmrs_chain_id = gasp_service_contract.chain_id().await?;
-
-            if gmrs_chain_id != target_chain_index {
-                return Err(eyre!("target_chain_index and gmrs_chain_id mismatch"));
-            }
-        }
 
         Ok(Arc::new(Self {
             source_client,
             target_client,
-            target_chain_index,
+            target_chain_id: cfg.target_chain_id,
             root_target_client: maybe_arc_root_target_client,
             avs_contracts,
             gasp_service_contract,
@@ -352,9 +338,9 @@ impl Syncer {
                     task_hash == call.task_response.reference_task_hash.into()
                 );
 
-                if call.task.chain_id != self.target_chain_index {
+                if call.task.chain_id != self.target_chain_id {
                     return Ok(());
-                }
+                }doc
 
                 if task_hash != call.task_response.reference_task_hash.into() {
                     return Err(eyre!("task_hash mismatch {:?}", task_hash));
@@ -1223,7 +1209,7 @@ impl Syncer {
             }
 
             // Here expected_rd_task_number == event.task_response.reference_task_index
-            if event.task_response.chain_id == self.target_chain_index {
+            if event.task_response.chain_id == self.target_chain_id {
                 if *expected_batch_id != event.task_response.batch_id {
                     return Err(eyre!("missing expected_batch_id {:?}", expected_batch_id));
                 }

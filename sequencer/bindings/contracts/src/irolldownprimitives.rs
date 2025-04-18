@@ -8,6 +8,7 @@ interface IRolldownPrimitives {
         uint256 end;
     }
 
+    error BatchNotFound();
     error FerryTipExceedsAmount(uint256 ferryTip, uint256 amount);
     error InvalidFerriedAmount(uint256 actualAmount, uint256 expectedAmount);
     error InvalidRequestId(uint256 requestId);
@@ -24,7 +25,6 @@ interface IRolldownPrimitives {
     error ZeroAdmin();
     error ZeroAmount();
     error ZeroRecipient();
-    error ZeroRootCount();
     error ZeroToken();
     error ZeroTransferAmount();
     error ZeroUpdateRange();
@@ -298,6 +298,11 @@ interface IRolldownPrimitives {
   },
   {
     "type": "error",
+    "name": "BatchNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "FerryTipExceedsAmount",
     "inputs": [
       {
@@ -486,11 +491,6 @@ interface IRolldownPrimitives {
   {
     "type": "error",
     "name": "ZeroRecipient",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ZeroRootCount",
     "inputs": []
   },
   {
@@ -732,6 +732,66 @@ pub mod IRolldownPrimitives {
                 let mut out = alloy_sol_types::private::Vec::new();
                 <Self as alloy_sol_types::EventTopic>::encode_topic_preimage(rust, &mut out);
                 alloy_sol_types::abi::token::WordToken(alloy_sol_types::private::keccak256(out))
+            }
+        }
+    };
+    /**Custom error with signature `BatchNotFound()` and selector `0x9e15e1bc`.
+    ```solidity
+    error BatchNotFound();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct BatchNotFound {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<BatchNotFound> for UnderlyingRustTuple<'_> {
+            fn from(value: BatchNotFound) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for BatchNotFound {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self {}
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for BatchNotFound {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "BatchNotFound()";
+            const SELECTOR: [u8; 4] = [158u8, 21u8, 225u8, 188u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
             }
         }
     };
@@ -1859,66 +1919,6 @@ pub mod IRolldownPrimitives {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "ZeroRecipient()";
             const SELECTOR: [u8; 4] = [210u8, 123u8, 68u8, 67u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                ()
-            }
-        }
-    };
-    /**Custom error with signature `ZeroRootCount()` and selector `0x5d437075`.
-    ```solidity
-    error ZeroRootCount();
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct ZeroRootCount {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[doc(hidden)]
-        type UnderlyingSolTuple<'a> = ();
-        #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = ();
-        #[cfg(test)]
-        #[allow(dead_code, unreachable_patterns)]
-        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-            match _t {
-                alloy_sol_types::private::AssertTypeEq::<
-                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                >(_) => {}
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<ZeroRootCount> for UnderlyingRustTuple<'_> {
-            fn from(value: ZeroRootCount) -> Self {
-                ()
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for ZeroRootCount {
-            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                Self {}
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolError for ZeroRootCount {
-            type Parameters<'a> = UnderlyingSolTuple<'a>;
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "ZeroRootCount()";
-            const SELECTOR: [u8; 4] = [93u8, 67u8, 112u8, 117u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -3339,6 +3339,7 @@ pub mod IRolldownPrimitives {
     };
     ///Container for all the [`IRolldownPrimitives`](self) custom errors.
     pub enum IRolldownPrimitivesErrors {
+        BatchNotFound(BatchNotFound),
         FerryTipExceedsAmount(FerryTipExceedsAmount),
         InvalidFerriedAmount(InvalidFerriedAmount),
         InvalidRequestId(InvalidRequestId),
@@ -3355,7 +3356,6 @@ pub mod IRolldownPrimitives {
         ZeroAdmin(ZeroAdmin),
         ZeroAmount(ZeroAmount),
         ZeroRecipient(ZeroRecipient),
-        ZeroRootCount(ZeroRootCount),
         ZeroToken(ZeroToken),
         ZeroTransferAmount(ZeroTransferAmount),
         ZeroUpdateRange(ZeroUpdateRange),
@@ -3374,12 +3374,12 @@ pub mod IRolldownPrimitives {
             [41u8, 197u8, 68u8, 41u8],
             [77u8, 52u8, 110u8, 137u8],
             [80u8, 167u8, 146u8, 177u8],
-            [93u8, 67u8, 112u8, 117u8],
             [105u8, 241u8, 207u8, 239u8],
             [114u8, 137u8, 219u8, 14u8],
             [128u8, 172u8, 197u8, 164u8],
             [130u8, 86u8, 148u8, 244u8],
             [153u8, 213u8, 235u8, 166u8],
+            [158u8, 21u8, 225u8, 188u8],
             [169u8, 105u8, 44u8, 30u8],
             [173u8, 25u8, 145u8, 245u8],
             [201u8, 105u8, 224u8, 242u8],
@@ -3401,6 +3401,7 @@ pub mod IRolldownPrimitives {
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
+                Self::BatchNotFound(_) => <BatchNotFound as alloy_sol_types::SolError>::SELECTOR,
                 Self::FerryTipExceedsAmount(_) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -3443,7 +3444,6 @@ pub mod IRolldownPrimitives {
                 Self::ZeroAdmin(_) => <ZeroAdmin as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroAmount(_) => <ZeroAmount as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroRecipient(_) => <ZeroRecipient as alloy_sol_types::SolError>::SELECTOR,
-                Self::ZeroRootCount(_) => <ZeroRootCount as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroToken(_) => <ZeroToken as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroTransferAmount(_) => {
                     <ZeroTransferAmount as alloy_sol_types::SolError>::SELECTOR
@@ -3521,16 +3521,6 @@ pub mod IRolldownPrimitives {
                     UpdateAlreadyApplied
                 },
                 {
-                    fn ZeroRootCount(
-                        data: &[u8],
-                        validate: bool,
-                    ) -> alloy_sol_types::Result<IRolldownPrimitivesErrors> {
-                        <ZeroRootCount as alloy_sol_types::SolError>::abi_decode_raw(data, validate)
-                            .map(IRolldownPrimitivesErrors::ZeroRootCount)
-                    }
-                    ZeroRootCount
-                },
-                {
                     fn ZeroUpdateRange(
                         data: &[u8],
                         validate: bool,
@@ -3587,6 +3577,16 @@ pub mod IRolldownPrimitives {
                         .map(IRolldownPrimitivesErrors::InvalidFerriedAmount)
                     }
                     InvalidFerriedAmount
+                },
+                {
+                    fn BatchNotFound(
+                        data: &[u8],
+                        validate: bool,
+                    ) -> alloy_sol_types::Result<IRolldownPrimitivesErrors> {
+                        <BatchNotFound as alloy_sol_types::SolError>::abi_decode_raw(data, validate)
+                            .map(IRolldownPrimitivesErrors::BatchNotFound)
+                    }
+                    BatchNotFound
                 },
                 {
                     fn InvalidRequestRange(
@@ -3726,6 +3726,9 @@ pub mod IRolldownPrimitives {
         #[inline]
         fn abi_encoded_size(&self) -> usize {
             match self {
+                Self::BatchNotFound(inner) => {
+                    <BatchNotFound as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::FerryTipExceedsAmount(inner) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -3776,9 +3779,6 @@ pub mod IRolldownPrimitives {
                 Self::ZeroRecipient(inner) => {
                     <ZeroRecipient as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
-                Self::ZeroRootCount(inner) => {
-                    <ZeroRootCount as alloy_sol_types::SolError>::abi_encoded_size(inner)
-                }
                 Self::ZeroToken(inner) => {
                     <ZeroToken as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -3796,6 +3796,9 @@ pub mod IRolldownPrimitives {
         #[inline]
         fn abi_encode_raw(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
             match self {
+                Self::BatchNotFound(inner) => {
+                    <BatchNotFound as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::FerryTipExceedsAmount(inner) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
@@ -3847,9 +3850,6 @@ pub mod IRolldownPrimitives {
                 }
                 Self::ZeroRecipient(inner) => {
                     <ZeroRecipient as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
-                }
-                Self::ZeroRootCount(inner) => {
-                    <ZeroRootCount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
                 Self::ZeroToken(inner) => {
                     <ZeroToken as alloy_sol_types::SolError>::abi_encode_raw(inner, out)

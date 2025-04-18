@@ -26,16 +26,14 @@ function createBigIntArrayFromRange(start: bigint, end: bigint) {
 	return result;
 }
 
-function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
-	return api.createType("PalletRolldownMessagesChain", L2_CHAIN);
-}
-
 class L2Api implements L2Interface {
 	api!: ApiPromise;
 	keyring!: KeyringPair;
+	chainId: number;
 
-	constructor(api: ApiPromise) {
+	constructor(api: ApiPromise, chainId: number) {
 		this.api = api;
+		this.chainId = chainId;
 	}
 
 	async getMerkleProof(
@@ -43,9 +41,8 @@ class L2Api implements L2Interface {
 		endRange: bigint,
 		txId: bigint,
 	): Promise<Uint8Array[]> {
-		const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
 		const result = await this.api.rpc.rolldown.get_merkle_proof(
-			chain,
+			this.chainId,
 			[startRange, endRange],
 			txId,
 		);
@@ -59,7 +56,7 @@ class L2Api implements L2Interface {
 	}
 
 	parseLatestRequestId(
-		nextRequesId: BTreeMap<PalletRolldownMessagesChain, u128>,
+		nextRequesId: BTreeMap<bigint, u128>,
 	): bigint | null {
 		// NOTE: looks like === is not implemented for PalletRolldownMessagesChain
 		// therefore its not possible to query valu from map using .get(chain) query ;<

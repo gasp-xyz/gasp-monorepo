@@ -86,7 +86,7 @@ interface IFinalizerTaskManager {
     struct RdTask {
         // the task number
         uint32 taskNum;
-        IRolldown.ChainId chainId;
+        uint64 chainId;
         uint32 batchId;
         // used for expiration checks
         uint32 taskCreatedBlock;
@@ -105,7 +105,7 @@ interface IFinalizerTaskManager {
         // Can be obtained by the operator from the event NewTaskCreated.
         uint32 referenceTaskIndex;
         bytes32 referenceTaskHash;
-        IRolldown.ChainId chainId;
+        uint64 chainId;
         uint32 batchId;
         bytes32 rdUpdate;
         uint256 rangeStart;

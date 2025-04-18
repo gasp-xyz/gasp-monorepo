@@ -17,6 +17,14 @@ use sp_runtime::{
 };
 use sp_std::{convert::TryInto, str::FromStr};
 
+#[derive(Clone)]
+struct EvmChainInfo {
+	pub gasp_token_address: [u8; 20],
+	pub eth_chain_id: pallet_rolldown::messages::Chain,
+	pub alt1_chain_id: pallet_rolldown::messages::Chain,
+	pub alt2_chain_id: pallet_rolldown::messages::Chain,
+}
+
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -61,30 +69,39 @@ pub fn rollup_local_config(
 	randomize_chain_genesis_salt: bool,
 	chain_genesis_salt: Option<String>,
 	eth_sequencers: Vec<AccountId>,
-	arb_sequencers: Vec<AccountId>,
-	base_sequencers: Vec<AccountId>,
-	monad_sequencers: Vec<AccountId>,
-	megaeth_sequencers: Vec<AccountId>,
-	sonic_sequencers: Vec<AccountId>,
+	alt1_sequencers: Vec<AccountId>,
+	alt2_sequencers: Vec<AccountId>,
 	evm_chain: EvmChain,
 	decode_url: Option<String>,
 ) -> ChainSpec {
-	let (gasp_token_address, eth_chain_id) = match evm_chain {
-		EvmChain::Holesky => (
-			array_bytes::hex2array("0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3")
-				.expect("is correct address"),
-			17000u64,
-		),
-		EvmChain::Anvil => (
-			array_bytes::hex2array("0xc351628EB244ec633d5f21fBD6621e1a683B1181")
-				.expect("is correct address"),
-			31337u64,
-		),
-		EvmChain::Reth => (
-			array_bytes::hex2array("0xc351628EB244ec633d5f21fBD6621e1a683B1181")
-				.expect("is correct address"),
-			1337u64,
-		),
+	let evm_chain_info: EvmChainInfo = match evm_chain {
+		EvmChain::Holesky => EvmChainInfo {
+			gasp_token_address: array_bytes::hex2array(
+				"0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3",
+			)
+			.expect("is correct address"),
+			eth_chain_id: 17000,
+			alt1_chain_id: 421614, // ARB
+			alt2_chain_id: 84532,  // BASE
+		},
+		EvmChain::Anvil => EvmChainInfo {
+			gasp_token_address: array_bytes::hex2array(
+				"0xc351628EB244ec633d5f21fBD6621e1a683B1181",
+			)
+			.expect("is correct address"),
+			eth_chain_id: 31337,
+			alt1_chain_id: 31338,
+			alt2_chain_id: 31339,
+		},
+		EvmChain::Reth => EvmChainInfo {
+			gasp_token_address: array_bytes::hex2array(
+				"0xc351628EB244ec633d5f21fBD6621e1a683B1181",
+			)
+			.expect("is correct address"),
+			eth_chain_id: 1337,
+			alt1_chain_id: 1338,
+			alt2_chain_id: 1339,
+		},
 	};
 
 	let mut chain_genesis_salt_arr: [u8; 32] = [0u8; 32];
@@ -126,19 +143,13 @@ pub fn rollup_local_config(
 		ChainType::Local,
 		move || {
 			let eth = eth_sequencers.clone();
-			let arb = arb_sequencers.clone();
-			let base = base_sequencers.clone();
-			let monad = monad_sequencers.clone();
-			let megaeth = megaeth_sequencers.clone();
-			let sonic = sonic_sequencers.clone();
+			let alt1 = alt1_sequencers.clone();
+			let alt2 = alt2_sequencers.clone();
 
 			let tokens_endowment = [
 				eth_sequencers.clone(),
-				arb_sequencers.clone(),
-				base_sequencers.clone(),
-				monad_sequencers.clone(),
-				megaeth_sequencers.clone(),
-				sonic_sequencers.clone(),
+				alt1_sequencers.clone(),
+				alt2_sequencers.clone(),
 				vec![
 					get_account_id_from_seed::<ecdsa::Public>("Alith"),
 					get_account_id_from_seed::<ecdsa::Public>("Baltathar"),
@@ -210,7 +221,7 @@ pub fn rollup_local_config(
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(gasp_token_address)),
+						Some((evm_chain_info.eth_chain_id, evm_chain_info.gasp_token_address)),
 					),
 					(
 						1,
@@ -221,19 +232,17 @@ pub fn rollup_local_config(
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(
+						Some((
+							evm_chain_info.eth_chain_id,
 							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
 								.unwrap(),
 						)),
 					),
 				],
 				eth,
-				arb,
-				base,
-				monad,
-				megaeth,
-				sonic,
-				eth_chain_id,
+				alt1,
+				alt2,
+				evm_chain_info.clone(),
 				decode_url.clone(),
 				vec![],
 			)
@@ -256,7 +265,13 @@ pub fn rollup_local_config(
 }
 
 pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
-	let eth_chain_id = 17000u64;
+	let evm_chain_info = EvmChainInfo {
+		gasp_token_address: array_bytes::hex2array("0x5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3")
+			.expect("is correct address"),
+		eth_chain_id: 17000,
+		alt1_chain_id: 421614, // ARB
+		alt2_chain_id: 84532,  // BASE
+	};
 	let chain_genesis_salt_arr: [u8; 32] =
 		hex_literal::hex!("0022002200220022002200220022002200220022002200220022002200220022");
 
@@ -301,25 +316,16 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 				vec![hex_literal::hex!("798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc").into()];
 			let base_sequencers: Vec<AccountId> =
 				vec![hex_literal::hex!("773539d4Ac0e786233D90A233654ccEE26a613D9").into()];
-			let monad_sequencers: Vec<AccountId> = vec![];
-			let megaeth_sequencers: Vec<AccountId> = vec![];
-			let sonic_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![];
 
-			let sequencers_endownment = [
-				eth_sequencers.clone(),
-				arb_sequencers.clone(),
-				base_sequencers.clone(),
-				monad_sequencers.clone(),
-				megaeth_sequencers.clone(),
-				sonic_sequencers.clone(),
-			]
-			.iter()
-			.flatten()
-			.cloned()
-			.map(|account_id| (RX_TOKEN_ID, 1_000_100u128 * currency::DOLLARS, account_id))
-			.collect::<Vec<_>>();
+			let sequencers_endownment =
+				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone()]
+					.iter()
+					.flatten()
+					.cloned()
+					.map(|account_id| (RX_TOKEN_ID, 1_000_100u128 * currency::DOLLARS, account_id))
+					.collect::<Vec<_>>();
 
 			let mut tokens_endowment = sequencers_endownment;
 			tokens_endowment.push((RX_TOKEN_ID, 4_997_700u128 * currency::DOLLARS, sudo.into()));
@@ -397,9 +403,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(hex_literal::hex!(
-							"5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3"
-						))),
+						Some((evm_chain_info.eth_chain_id, evm_chain_info.gasp_token_address)),
 					),
 					(
 						1,
@@ -410,7 +414,8 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(
+						Some((
+							evm_chain_info.eth_chain_id,
 							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
 								.unwrap(),
 						)),
@@ -419,10 +424,7 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 				eth_sequencers,
 				arb_sequencers,
 				base_sequencers,
-				monad_sequencers,
-				megaeth_sequencers,
-				sonic_sequencers,
-				eth_chain_id,
+				evm_chain_info.clone(),
 				decode_url.clone(),
 				council_members,
 			)
@@ -445,7 +447,13 @@ pub fn holesky_testnet(decode_url: Option<String>) -> ChainSpec {
 }
 
 pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
-	let (_gasp_token_address, eth_chain_id) = ([0u8; 20], 1u64);
+	let evm_chain_info = EvmChainInfo {
+		gasp_token_address: [0u8; 20],
+		eth_chain_id: 1,
+		alt1_chain_id: 42161, // ARB
+		alt2_chain_id: 8453,  // BASE
+	};
+
 	let chain_genesis_salt_arr: [u8; 32] =
 		hex_literal::hex!("0011001100110011001100110011001100110011001100110011001100110011");
 
@@ -511,9 +519,6 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				hex_literal::hex!("6f52f2D60AdFC152ac561287b754A56A7933F1ae").into(),
 				hex_literal::hex!("a7196AF761942A10126165B2c727eFCD46c254e0").into(),
 			];
-			let monad_sequencers: Vec<AccountId> = vec![];
-			let megaeth_sequencers: Vec<AccountId> = vec![];
-			let sonic_sequencers: Vec<AccountId> = vec![];
 
 			let council_members = vec![
 				hex_literal::hex!("35dbD8Bd2c5617541bd9D9D8e065adf92275b83E").into(),
@@ -525,19 +530,13 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				hex_literal::hex!("8960911c51EaD00db4cCA88FAF395672458da676").into(),
 			];
 
-			let sequencers_endownment = [
-				eth_sequencers.clone(),
-				arb_sequencers.clone(),
-				base_sequencers.clone(),
-				monad_sequencers.clone(),
-				megaeth_sequencers.clone(),
-				sonic_sequencers.clone(),
-			]
-			.iter()
-			.flatten()
-			.cloned()
-			.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
-			.collect::<Vec<_>>();
+			let sequencers_endownment =
+				[eth_sequencers.clone(), arb_sequencers.clone(), base_sequencers.clone()]
+					.iter()
+					.flatten()
+					.cloned()
+					.map(|account_id| (RX_TOKEN_ID, 100u128 * currency::DOLLARS, account_id))
+					.collect::<Vec<_>>();
 
 			let mut tokens_endowment = sequencers_endownment;
 			tokens_endowment.push((RX_TOKEN_ID, 988_100_u128 * currency::DOLLARS, sudo.into()));
@@ -645,9 +644,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(hex_literal::hex!(
-							"0000000000000000000000000000000000000000"
-						))),
+						Some((evm_chain_info.eth_chain_id, evm_chain_info.gasp_token_address)),
 					),
 					(
 						1,
@@ -658,7 +655,8 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 							additional: Default::default(),
 							existential_deposit: Default::default(),
 						},
-						Some(L1Asset::Ethereum(
+						Some((
+							evm_chain_info.eth_chain_id,
 							array_bytes::hex2array("0x0000000000000000000000000000000000000001")
 								.unwrap(),
 						)),
@@ -667,10 +665,7 @@ pub fn ethereum_mainnet(decode_url: Option<String>) -> ChainSpec {
 				eth_sequencers,
 				arb_sequencers,
 				base_sequencers,
-				monad_sequencers,
-				megaeth_sequencers,
-				sonic_sequencers,
-				eth_chain_id,
+				evm_chain_info.clone(),
 				decode_url.clone(),
 				council_members,
 			)
@@ -704,12 +699,9 @@ fn rollup_genesis(
 	),
 	register_assets: Vec<(u32, AssetMetadataOf, Option<L1Asset>)>,
 	eth_initial_sequencers: Vec<AccountId>,
-	arb_initial_sequencers: Vec<AccountId>,
-	base_initial_sequencers: Vec<AccountId>,
-	monad_initial_sequencers: Vec<AccountId>,
-	megaeth_initial_sequencers: Vec<AccountId>,
-	sonic_initial_sequencers: Vec<AccountId>,
-	chain_id: u64,
+	alt1_initial_sequencers: Vec<AccountId>,
+	alt2_initial_sequencers: Vec<AccountId>,
+	evm_chain_info: EvmChainInfo,
 	decode_url: String,
 	council_members: Vec<AccountId>,
 ) -> rollup_runtime::RuntimeGenesisConfig {
@@ -850,51 +842,15 @@ fn rollup_genesis(
 			sequencers_stake: [
 				eth_initial_sequencers
 					.into_iter()
-					.map(|seq| {
-						(
-							seq,
-							pallet_rolldown::messages::Chain::Ethereum,
-							100u128 * currency::DOLLARS,
-						)
-					})
+					.map(|seq| (seq, evm_chain_info.eth_chain_id, 100u128 * currency::DOLLARS))
 					.collect::<Vec<_>>(),
-				arb_initial_sequencers
+				alt1_initial_sequencers
 					.into_iter()
-					.map(|seq| {
-						(
-							seq,
-							pallet_rolldown::messages::Chain::Arbitrum,
-							100u128 * currency::DOLLARS,
-						)
-					})
+					.map(|seq| (seq, evm_chain_info.alt1_chain_id, 100u128 * currency::DOLLARS))
 					.collect::<Vec<_>>(),
-				base_initial_sequencers
+				alt2_initial_sequencers
 					.into_iter()
-					.map(|seq| {
-						(seq, pallet_rolldown::messages::Chain::Base, 100u128 * currency::DOLLARS)
-					})
-					.collect::<Vec<_>>(),
-				monad_initial_sequencers
-					.into_iter()
-					.map(|seq| {
-						(seq, pallet_rolldown::messages::Chain::Monad, 100u128 * currency::DOLLARS)
-					})
-					.collect::<Vec<_>>(),
-				megaeth_initial_sequencers
-					.into_iter()
-					.map(|seq| {
-						(
-							seq,
-							pallet_rolldown::messages::Chain::MegaEth,
-							100u128 * currency::DOLLARS,
-						)
-					})
-					.collect::<Vec<_>>(),
-				sonic_initial_sequencers
-					.into_iter()
-					.map(|seq| {
-						(seq, pallet_rolldown::messages::Chain::Sonic, 100u128 * currency::DOLLARS)
-					})
+					.map(|seq| (seq, evm_chain_info.alt2_chain_id, 100u128 * currency::DOLLARS))
 					.collect::<Vec<_>>(),
 			]
 			.iter()
@@ -906,36 +862,24 @@ fn rollup_genesis(
 		rolldown: rollup_runtime::RolldownConfig {
 			_phantom: Default::default(),
 			dispute_periods: [
-				(pallet_rolldown::messages::Chain::Ethereum, 200u128),
-				(pallet_rolldown::messages::Chain::Arbitrum, 200u128),
-				(pallet_rolldown::messages::Chain::Base, 200u128),
-				(pallet_rolldown::messages::Chain::Monad, 200u128),
-				(pallet_rolldown::messages::Chain::MegaEth, 200u128),
-				(pallet_rolldown::messages::Chain::Sonic, 200u128),
-			]
-			.iter()
-			.cloned()
-			.collect(),
+				(evm_chain_info.eth_chain_id, 200u128),
+				(evm_chain_info.alt1_chain_id, 200u128),
+				(evm_chain_info.alt2_chain_id, 200u128),
+			].iter().cloned().collect(),
 		},
 		#[cfg(feature = "fast-runtime")]
 		rolldown: rollup_runtime::RolldownConfig {
 			_phantom: Default::default(),
 			dispute_periods: [
-				(pallet_rolldown::messages::Chain::Ethereum, 10u128),
-				(pallet_rolldown::messages::Chain::Arbitrum, 15u128),
-				(pallet_rolldown::messages::Chain::Base, 15u128),
-				(pallet_rolldown::messages::Chain::Monad, 10u128),
-				(pallet_rolldown::messages::Chain::MegaEth, 15u128),
-				(pallet_rolldown::messages::Chain::Sonic, 15u128),
-			]
-			.iter()
-			.cloned()
-			.collect(),
+				(evm_chain_info.eth_chain_id, 10u128),
+				(evm_chain_info.alt1_chain_id, 15u128),
+				(evm_chain_info.alt2_chain_id, 15u128),
+			].iter().cloned().collect(),
 		},
 		metamask: rollup_runtime::MetamaskConfig {
 			name: "Gasp".to_string(),
 			version: "0.0.1".to_string(),
-			chain_id,
+			chain_id: evm_chain_info.eth_chain_id.try_into().expect("Eth chain id should fit u64"),
 			decode_url,
 			_phantom: Default::default(),
 		},

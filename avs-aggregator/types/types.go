@@ -64,7 +64,7 @@ type QuorumStakeDiff struct{
 }
 
 type SubstrateL2RequestsBatchLastItem struct {
-	Key gsrpctypes.U8
+	Key gsrpctypes.U64
 	Value SubstrateL2RequestsBatchLastValue
 }
 

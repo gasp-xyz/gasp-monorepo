@@ -3,13 +3,12 @@
 
 ```solidity
 library IRolldownPrimitives {
-    type ChainId is uint8;
     type Origin is uint8;
     struct Cancel { RequestId requestId; Range range; bytes32 hash; }
     struct CancelResolution { RequestId requestId; uint256 l2RequestId; bool cancelJustified; uint256 timeStamp; }
     struct Deposit { RequestId requestId; address depositRecipient; address tokenAddress; uint256 amount; uint256 timeStamp; uint256 ferryTip; }
     struct FailedDepositResolution { RequestId requestId; uint256 originRequestId; address ferry; }
-    struct L1Update { ChainId chain; Deposit[] pendingDeposits; CancelResolution[] pendingCancelResolutions; }
+    struct L1Update { uint64 chain; Deposit[] pendingDeposits; CancelResolution[] pendingCancelResolutions; }
     struct Range { uint256 start; uint256 end; }
     struct RequestId { Origin origin; uint256 id; }
     struct Withdrawal { RequestId requestId; address recipient; address tokenAddress; uint256 amount; uint256 ferryTip; }
@@ -25,115 +24,6 @@ library IRolldownPrimitives {
 pub mod IRolldownPrimitives {
     use super::*;
     use alloy::sol_types as alloy_sol_types;
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct ChainId(u8);
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[automatically_derived]
-        impl alloy_sol_types::private::SolTypeValue<ChainId> for u8 {
-            #[inline]
-            fn stv_to_tokens(
-                &self,
-            ) -> <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::Token<'_>
-            {
-                alloy_sol_types::private::SolTypeValue::<
-                    alloy::sol_types::sol_data::Uint<8>,
-                >::stv_to_tokens(self)
-            }
-            #[inline]
-            fn stv_eip712_data_word(&self) -> alloy_sol_types::Word {
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::tokenize(self).0
-            }
-            #[inline]
-            fn stv_abi_encode_packed_to(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
-                <alloy::sol_types::sol_data::Uint<
-                    8,
-                > as alloy_sol_types::SolType>::abi_encode_packed_to(self, out)
-            }
-            #[inline]
-            fn stv_abi_packed_encoded_size(&self) -> usize {
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::abi_encoded_size(
-                    self,
-                )
-            }
-        }
-        #[automatically_derived]
-        impl ChainId {
-            /// The Solidity type name.
-            pub const NAME: &'static str = stringify!(@ name);
-            /// Convert from the underlying value type.
-            #[inline]
-            pub const fn from(value: u8) -> Self {
-                Self(value)
-            }
-            /// Return the underlying value.
-            #[inline]
-            pub const fn into(self) -> u8 {
-                self.0
-            }
-            /// Return the single encoding of this value, delegating to the
-            /// underlying type.
-            #[inline]
-            pub fn abi_encode(&self) -> alloy_sol_types::private::Vec<u8> {
-                <Self as alloy_sol_types::SolType>::abi_encode(&self.0)
-            }
-            /// Return the packed encoding of this value, delegating to the
-            /// underlying type.
-            #[inline]
-            pub fn abi_encode_packed(&self) -> alloy_sol_types::private::Vec<u8> {
-                <Self as alloy_sol_types::SolType>::abi_encode_packed(&self.0)
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolType for ChainId {
-            type RustType = u8;
-            type Token<'a> =
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::Token<'a>;
-            const SOL_NAME: &'static str = Self::NAME;
-            const ENCODED_SIZE: Option<usize> =
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::ENCODED_SIZE;
-            const PACKED_ENCODED_SIZE: Option<usize> = <alloy::sol_types::sol_data::Uint<
-                8,
-            > as alloy_sol_types::SolType>::PACKED_ENCODED_SIZE;
-            #[inline]
-            fn valid_token(token: &Self::Token<'_>) -> bool {
-                Self::type_check(token).is_ok()
-            }
-            #[inline]
-            fn type_check(token: &Self::Token<'_>) -> alloy_sol_types::Result<()> {
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::type_check(token)
-            }
-            #[inline]
-            fn detokenize(token: Self::Token<'_>) -> Self::RustType {
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::SolType>::detokenize(token)
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::EventTopic for ChainId {
-            #[inline]
-            fn topic_preimage_length(rust: &Self::RustType) -> usize {
-                <alloy::sol_types::sol_data::Uint<
-                    8,
-                > as alloy_sol_types::EventTopic>::topic_preimage_length(rust)
-            }
-            #[inline]
-            fn encode_topic_preimage(
-                rust: &Self::RustType,
-                out: &mut alloy_sol_types::private::Vec<u8>,
-            ) {
-                <alloy::sol_types::sol_data::Uint<
-                    8,
-                > as alloy_sol_types::EventTopic>::encode_topic_preimage(rust, out)
-            }
-            #[inline]
-            fn encode_topic(rust: &Self::RustType) -> alloy_sol_types::abi::token::WordToken {
-                <alloy::sol_types::sol_data::Uint<8> as alloy_sol_types::EventTopic>::encode_topic(
-                    rust,
-                )
-            }
-        }
-    };
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct Origin(u8);
@@ -1171,12 +1061,12 @@ pub mod IRolldownPrimitives {
         }
     };
     /**```solidity
-    struct L1Update { ChainId chain; Deposit[] pendingDeposits; CancelResolution[] pendingCancelResolutions; }
+    struct L1Update { uint64 chain; Deposit[] pendingDeposits; CancelResolution[] pendingCancelResolutions; }
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct L1Update {
-        pub chain: <ChainId as alloy::sol_types::SolType>::RustType,
+        pub chain: u64,
         pub pendingDeposits:
             alloy::sol_types::private::Vec<<Deposit as alloy::sol_types::SolType>::RustType>,
         pub pendingCancelResolutions: alloy::sol_types::private::Vec<
@@ -1193,13 +1083,13 @@ pub mod IRolldownPrimitives {
         use alloy::sol_types as alloy_sol_types;
         #[doc(hidden)]
         type UnderlyingSolTuple<'a> = (
-            ChainId,
+            alloy::sol_types::sol_data::Uint<64>,
             alloy::sol_types::sol_data::Array<Deposit>,
             alloy::sol_types::sol_data::Array<CancelResolution>,
         );
         #[doc(hidden)]
         type UnderlyingRustTuple<'a> = (
-            <ChainId as alloy::sol_types::SolType>::RustType,
+            u64,
             alloy::sol_types::private::Vec<<Deposit as alloy::sol_types::SolType>::RustType>,
             alloy::sol_types::private::Vec<
                 <CancelResolution as alloy::sol_types::SolType>::RustType,
@@ -1245,7 +1135,9 @@ pub mod IRolldownPrimitives {
             #[inline]
             fn stv_to_tokens(&self) -> <Self as alloy_sol_types::SolType>::Token<'_> {
                 (
-                    <ChainId as alloy_sol_types::SolType>::tokenize(&self.chain),
+                    <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::SolType>::tokenize(&self.chain),
                     <alloy::sol_types::sol_data::Array<
                         Deposit,
                     > as alloy_sol_types::SolType>::tokenize(&self.pendingDeposits),
@@ -1314,7 +1206,7 @@ pub mod IRolldownPrimitives {
             #[inline]
             fn eip712_root_type() -> alloy_sol_types::private::Cow<'static, str> {
                 alloy_sol_types::private::Cow::Borrowed(
-                    "L1Update(uint8 chain,Deposit[] pendingDeposits,CancelResolution[] pendingCancelResolutions)",
+                    "L1Update(uint64 chain,Deposit[] pendingDeposits,CancelResolution[] pendingCancelResolutions)",
                 )
             }
             #[inline]
@@ -1333,7 +1225,9 @@ pub mod IRolldownPrimitives {
             #[inline]
             fn eip712_encode_data(&self) -> alloy_sol_types::private::Vec<u8> {
                 [
-                    <ChainId as alloy_sol_types::SolType>::eip712_data_word(&self.chain)
+                    <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::SolType>::eip712_data_word(&self.chain)
                         .0,
                     <alloy::sol_types::sol_data::Array<
                         Deposit,
@@ -1356,9 +1250,9 @@ pub mod IRolldownPrimitives {
             #[inline]
             fn topic_preimage_length(rust: &Self::RustType) -> usize {
                 0usize
-                    + <ChainId as alloy_sol_types::EventTopic>::topic_preimage_length(
-                        &rust.chain,
-                    )
+                    + <alloy::sol_types::sol_data::Uint<
+                        64,
+                    > as alloy_sol_types::EventTopic>::topic_preimage_length(&rust.chain)
                     + <alloy::sol_types::sol_data::Array<
                         Deposit,
                     > as alloy_sol_types::EventTopic>::topic_preimage_length(
@@ -1376,7 +1270,12 @@ pub mod IRolldownPrimitives {
                 out: &mut alloy_sol_types::private::Vec<u8>,
             ) {
                 out.reserve(<Self as alloy_sol_types::EventTopic>::topic_preimage_length(rust));
-                <ChainId as alloy_sol_types::EventTopic>::encode_topic_preimage(&rust.chain, out);
+                <alloy::sol_types::sol_data::Uint<
+                    64,
+                > as alloy_sol_types::EventTopic>::encode_topic_preimage(
+                    &rust.chain,
+                    out,
+                );
                 <alloy::sol_types::sol_data::Array<
                     Deposit,
                 > as alloy_sol_types::EventTopic>::encode_topic_preimage(
@@ -2157,7 +2056,6 @@ pub mod IRolldownPrimitives {
 Generated by the following Solidity interface...
 ```solidity
 library IRolldownPrimitives {
-    type ChainId is uint8;
     type Origin is uint8;
     struct Cancel {
         RequestId requestId;
@@ -2184,7 +2082,7 @@ library IRolldownPrimitives {
         address ferry;
     }
     struct L1Update {
-        ChainId chain;
+        uint64 chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
     }
@@ -2206,6 +2104,7 @@ library IRolldownPrimitives {
 }
 
 interface IRolldown {
+    error BatchNotFound();
     error FerryTipExceedsAmount(uint256 ferryTip, uint256 amount);
     error InvalidFerriedAmount(uint256 actualAmount, uint256 expectedAmount);
     error InvalidRequestId(uint256 requestId);
@@ -2222,7 +2121,6 @@ interface IRolldown {
     error ZeroAdmin();
     error ZeroAmount();
     error ZeroRecipient();
-    error ZeroRootCount();
     error ZeroToken();
     error ZeroTransferAmount();
     error ZeroUpdateRange();
@@ -2245,7 +2143,7 @@ interface IRolldown {
     function CLOSED() external view returns (address);
     function NATIVE_TOKEN_ADDRESS() external view returns (address);
     function UPDATER_ROLE() external view returns (bytes32);
-    function chain() external view returns (IRolldownPrimitives.ChainId);
+    function chain() external view returns (uint8);
     function closeCancel(IRolldownPrimitives.Cancel memory cancel, bytes32 merkleRoot, bytes32[] memory proof) external;
     function closeDepositRefund(IRolldownPrimitives.FailedDepositResolution memory failedDeposit, bytes32 merkleRoot, bytes32[] memory proof) external;
     function closeWithdrawal(IRolldownPrimitives.Withdrawal memory withdrawal, bytes32 merkleRoot, bytes32[] memory proof) external;
@@ -2276,7 +2174,7 @@ interface IRolldown {
     function hashCancel(IRolldownPrimitives.Cancel memory cancel) external pure returns (bytes32);
     function hashFailedDepositResolution(IRolldownPrimitives.FailedDepositResolution memory failedDeposit) external pure returns (bytes32);
     function hashWithdrawal(IRolldownPrimitives.Withdrawal memory withdrawal) external pure returns (bytes32);
-    function initialize(address admin, IRolldownPrimitives.ChainId chainId, address updater) external;
+    function initialize(address admin, address updater) external;
     function lastProcessedUpdate_origin_l1() external view returns (uint256);
     function lastProcessedUpdate_origin_l2() external view returns (uint256);
     function pause() external;
@@ -2341,7 +2239,7 @@ interface IRolldown {
       {
         "name": "",
         "type": "uint8",
-        "internalType": "enum IRolldownPrimitives.ChainId"
+        "internalType": "uint8"
       }
     ],
     "stateMutability": "view"
@@ -3056,8 +2954,8 @@ interface IRolldown {
         "components": [
           {
             "name": "chain",
-            "type": "uint8",
-            "internalType": "enum IRolldownPrimitives.ChainId"
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
             "name": "pendingDeposits",
@@ -3183,8 +3081,8 @@ interface IRolldown {
         "components": [
           {
             "name": "chain",
-            "type": "uint8",
-            "internalType": "enum IRolldownPrimitives.ChainId"
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
             "name": "pendingDeposits",
@@ -3495,11 +3393,6 @@ interface IRolldown {
         "name": "admin",
         "type": "address",
         "internalType": "address"
-      },
-      {
-        "name": "chainId",
-        "type": "uint8",
-        "internalType": "enum IRolldownPrimitives.ChainId"
       },
       {
         "name": "updater",
@@ -4018,6 +3911,11 @@ interface IRolldown {
   },
   {
     "type": "error",
+    "name": "BatchNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "FerryTipExceedsAmount",
     "inputs": [
       {
@@ -4210,11 +4108,6 @@ interface IRolldown {
   },
   {
     "type": "error",
-    "name": "ZeroRootCount",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ZeroToken",
     "inputs": []
   },
@@ -4265,6 +4158,66 @@ pub mod IRolldown {
     pub static DEPLOYED_BYTECODE: alloy_sol_types::private::Bytes = alloy_sol_types::private::Bytes::from_static(
         b"",
     );
+    /**Custom error with signature `BatchNotFound()` and selector `0x9e15e1bc`.
+    ```solidity
+    error BatchNotFound();
+    ```*/
+    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
+    #[derive(Clone)]
+    pub struct BatchNotFound {}
+    #[allow(
+        non_camel_case_types,
+        non_snake_case,
+        clippy::pub_underscore_fields,
+        clippy::style
+    )]
+    const _: () = {
+        use alloy::sol_types as alloy_sol_types;
+        #[doc(hidden)]
+        type UnderlyingSolTuple<'a> = ();
+        #[doc(hidden)]
+        type UnderlyingRustTuple<'a> = ();
+        #[cfg(test)]
+        #[allow(dead_code, unreachable_patterns)]
+        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
+            match _t {
+                alloy_sol_types::private::AssertTypeEq::<
+                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
+                >(_) => {}
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<BatchNotFound> for UnderlyingRustTuple<'_> {
+            fn from(value: BatchNotFound) -> Self {
+                ()
+            }
+        }
+        #[automatically_derived]
+        #[doc(hidden)]
+        impl ::core::convert::From<UnderlyingRustTuple<'_>> for BatchNotFound {
+            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
+                Self {}
+            }
+        }
+        #[automatically_derived]
+        impl alloy_sol_types::SolError for BatchNotFound {
+            type Parameters<'a> = UnderlyingSolTuple<'a>;
+            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
+            const SIGNATURE: &'static str = "BatchNotFound()";
+            const SELECTOR: [u8; 4] = [158u8, 21u8, 225u8, 188u8];
+            #[inline]
+            fn new<'a>(
+                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
+            ) -> Self {
+                tuple.into()
+            }
+            #[inline]
+            fn tokenize(&self) -> Self::Token<'_> {
+                ()
+            }
+        }
+    };
     /**Custom error with signature `FerryTipExceedsAmount(uint256,uint256)` and selector `0x80acc5a4`.
     ```solidity
     error FerryTipExceedsAmount(uint256 ferryTip, uint256 amount);
@@ -5389,66 +5342,6 @@ pub mod IRolldown {
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "ZeroRecipient()";
             const SELECTOR: [u8; 4] = [210u8, 123u8, 68u8, 67u8];
-            #[inline]
-            fn new<'a>(
-                tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
-            ) -> Self {
-                tuple.into()
-            }
-            #[inline]
-            fn tokenize(&self) -> Self::Token<'_> {
-                ()
-            }
-        }
-    };
-    /**Custom error with signature `ZeroRootCount()` and selector `0x5d437075`.
-    ```solidity
-    error ZeroRootCount();
-    ```*/
-    #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
-    #[derive(Clone)]
-    pub struct ZeroRootCount {}
-    #[allow(
-        non_camel_case_types,
-        non_snake_case,
-        clippy::pub_underscore_fields,
-        clippy::style
-    )]
-    const _: () = {
-        use alloy::sol_types as alloy_sol_types;
-        #[doc(hidden)]
-        type UnderlyingSolTuple<'a> = ();
-        #[doc(hidden)]
-        type UnderlyingRustTuple<'a> = ();
-        #[cfg(test)]
-        #[allow(dead_code, unreachable_patterns)]
-        fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
-            match _t {
-                alloy_sol_types::private::AssertTypeEq::<
-                    <UnderlyingSolTuple as alloy_sol_types::SolType>::RustType,
-                >(_) => {}
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<ZeroRootCount> for UnderlyingRustTuple<'_> {
-            fn from(value: ZeroRootCount) -> Self {
-                ()
-            }
-        }
-        #[automatically_derived]
-        #[doc(hidden)]
-        impl ::core::convert::From<UnderlyingRustTuple<'_>> for ZeroRootCount {
-            fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
-                Self {}
-            }
-        }
-        #[automatically_derived]
-        impl alloy_sol_types::SolError for ZeroRootCount {
-            type Parameters<'a> = UnderlyingSolTuple<'a>;
-            type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "ZeroRootCount()";
-            const SELECTOR: [u8; 4] = [93u8, 67u8, 112u8, 117u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -7567,7 +7460,7 @@ pub mod IRolldown {
     };
     /**Function with signature `chain()` and selector `0xc763e5a1`.
     ```solidity
-    function chain() external view returns (IRolldownPrimitives.ChainId);
+    function chain() external view returns (uint8);
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
@@ -7576,7 +7469,7 @@ pub mod IRolldown {
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct chainReturn {
-        pub _0: <IRolldownPrimitives::ChainId as alloy::sol_types::SolType>::RustType,
+        pub _0: u8,
     }
     #[allow(
         non_camel_case_types,
@@ -7617,10 +7510,9 @@ pub mod IRolldown {
         }
         {
             #[doc(hidden)]
-            type UnderlyingSolTuple<'a> = (IRolldownPrimitives::ChainId,);
+            type UnderlyingSolTuple<'a> = (alloy::sol_types::sol_data::Uint<8>,);
             #[doc(hidden)]
-            type UnderlyingRustTuple<'a> =
-                (<IRolldownPrimitives::ChainId as alloy::sol_types::SolType>::RustType,);
+            type UnderlyingRustTuple<'a> = (u8,);
             #[cfg(test)]
             #[allow(dead_code, unreachable_patterns)]
             fn _type_assertion(_t: alloy_sol_types::private::AssertTypeEq<UnderlyingRustTuple>) {
@@ -7650,7 +7542,7 @@ pub mod IRolldown {
             type Parameters<'a> = ();
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = chainReturn;
-            type ReturnTuple<'a> = (IRolldownPrimitives::ChainId,);
+            type ReturnTuple<'a> = (alloy::sol_types::sol_data::Uint<8>,);
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
             const SIGNATURE: &'static str = "chain()";
             const SELECTOR: [u8; 4] = [199u8, 99u8, 229u8, 161u8];
@@ -11428,18 +11320,17 @@ pub mod IRolldown {
             }
         }
     };
-    /**Function with signature `initialize(address,uint8,address)` and selector `0xf35f9e45`.
+    /**Function with signature `initialize(address,address)` and selector `0x485cc955`.
     ```solidity
-    function initialize(address admin, IRolldownPrimitives.ChainId chainId, address updater) external;
+    function initialize(address admin, address updater) external;
     ```*/
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct initializeCall {
         pub admin: alloy::sol_types::private::Address,
-        pub chainId: <IRolldownPrimitives::ChainId as alloy::sol_types::SolType>::RustType,
         pub updater: alloy::sol_types::private::Address,
     }
-    ///Container type for the return parameters of the [`initialize(address,uint8,address)`](initializeCall) function.
+    ///Container type for the return parameters of the [`initialize(address,address)`](initializeCall) function.
     #[allow(non_camel_case_types, non_snake_case, clippy::pub_underscore_fields)]
     #[derive(Clone)]
     pub struct initializeReturn {}
@@ -11455,13 +11346,11 @@ pub mod IRolldown {
             #[doc(hidden)]
             type UnderlyingSolTuple<'a> = (
                 alloy::sol_types::sol_data::Address,
-                IRolldownPrimitives::ChainId,
                 alloy::sol_types::sol_data::Address,
             );
             #[doc(hidden)]
             type UnderlyingRustTuple<'a> = (
                 alloy::sol_types::private::Address,
-                <IRolldownPrimitives::ChainId as alloy::sol_types::SolType>::RustType,
                 alloy::sol_types::private::Address,
             );
             #[cfg(test)]
@@ -11477,7 +11366,7 @@ pub mod IRolldown {
             #[doc(hidden)]
             impl ::core::convert::From<initializeCall> for UnderlyingRustTuple<'_> {
                 fn from(value: initializeCall) -> Self {
-                    (value.admin, value.chainId, value.updater)
+                    (value.admin, value.updater)
                 }
             }
             #[automatically_derived]
@@ -11486,8 +11375,7 @@ pub mod IRolldown {
                 fn from(tuple: UnderlyingRustTuple<'_>) -> Self {
                     Self {
                         admin: tuple.0,
-                        chainId: tuple.1,
-                        updater: tuple.2,
+                        updater: tuple.1,
                     }
                 }
             }
@@ -11525,15 +11413,14 @@ pub mod IRolldown {
         impl alloy_sol_types::SolCall for initializeCall {
             type Parameters<'a> = (
                 alloy::sol_types::sol_data::Address,
-                IRolldownPrimitives::ChainId,
                 alloy::sol_types::sol_data::Address,
             );
             type Token<'a> = <Self::Parameters<'a> as alloy_sol_types::SolType>::Token<'a>;
             type Return = initializeReturn;
             type ReturnTuple<'a> = ();
             type ReturnToken<'a> = <Self::ReturnTuple<'a> as alloy_sol_types::SolType>::Token<'a>;
-            const SIGNATURE: &'static str = "initialize(address,uint8,address)";
-            const SELECTOR: [u8; 4] = [243u8, 95u8, 158u8, 69u8];
+            const SIGNATURE: &'static str = "initialize(address,address)";
+            const SELECTOR: [u8; 4] = [72u8, 92u8, 201u8, 85u8];
             #[inline]
             fn new<'a>(
                 tuple: <Self::Parameters<'a> as alloy_sol_types::SolType>::RustType,
@@ -11545,9 +11432,6 @@ pub mod IRolldown {
                 (
                     <alloy::sol_types::sol_data::Address as alloy_sol_types::SolType>::tokenize(
                         &self.admin,
-                    ),
-                    <IRolldownPrimitives::ChainId as alloy_sol_types::SolType>::tokenize(
-                        &self.chainId,
                     ),
                     <alloy::sol_types::sol_data::Address as alloy_sol_types::SolType>::tokenize(
                         &self.updater,
@@ -12935,6 +12819,7 @@ pub mod IRolldown {
             [63u8, 75u8, 168u8, 58u8],
             [71u8, 230u8, 51u8, 128u8],
             [71u8, 231u8, 239u8, 36u8],
+            [72u8, 92u8, 201u8, 85u8],
             [75u8, 245u8, 254u8, 195u8],
             [96u8, 143u8, 195u8, 122u8],
             [97u8, 188u8, 34u8, 26u8],
@@ -12963,7 +12848,6 @@ pub mod IRolldown {
             [223u8, 46u8, 189u8, 187u8],
             [223u8, 251u8, 221u8, 159u8],
             [242u8, 110u8, 233u8, 208u8],
-            [243u8, 95u8, 158u8, 69u8],
             [249u8, 236u8, 208u8, 30u8],
             [255u8, 43u8, 174u8, 134u8],
         ];
@@ -13261,6 +13145,16 @@ pub mod IRolldown {
                             .map(IRolldownCalls::deposit_1)
                     }
                     deposit_1
+                },
+                {
+                    fn initialize(
+                        data: &[u8],
+                        validate: bool,
+                    ) -> alloy_sol_types::Result<IRolldownCalls> {
+                        <initializeCall as alloy_sol_types::SolCall>::abi_decode_raw(data, validate)
+                            .map(IRolldownCalls::initialize)
+                    }
+                    initialize
                 },
                 {
                     fn close_withdrawal(
@@ -13586,16 +13480,6 @@ pub mod IRolldown {
                             .map(IRolldownCalls::lastProcessedUpdate_origin_l2)
                     }
                     lastProcessedUpdate_origin_l2
-                },
-                {
-                    fn initialize(
-                        data: &[u8],
-                        validate: bool,
-                    ) -> alloy_sol_types::Result<IRolldownCalls> {
-                        <initializeCall as alloy_sol_types::SolCall>::abi_decode_raw(data, validate)
-                            .map(IRolldownCalls::initialize)
-                    }
-                    initialize
                 },
                 {
                     fn find_l2_batch(
@@ -13999,6 +13883,7 @@ pub mod IRolldown {
     }
     ///Container for all the [`IRolldown`](self) custom errors.
     pub enum IRolldownErrors {
+        BatchNotFound(BatchNotFound),
         FerryTipExceedsAmount(FerryTipExceedsAmount),
         InvalidFerriedAmount(InvalidFerriedAmount),
         InvalidRequestId(InvalidRequestId),
@@ -14015,7 +13900,6 @@ pub mod IRolldown {
         ZeroAdmin(ZeroAdmin),
         ZeroAmount(ZeroAmount),
         ZeroRecipient(ZeroRecipient),
-        ZeroRootCount(ZeroRootCount),
         ZeroToken(ZeroToken),
         ZeroTransferAmount(ZeroTransferAmount),
         ZeroUpdateRange(ZeroUpdateRange),
@@ -14034,12 +13918,12 @@ pub mod IRolldown {
             [41u8, 197u8, 68u8, 41u8],
             [77u8, 52u8, 110u8, 137u8],
             [80u8, 167u8, 146u8, 177u8],
-            [93u8, 67u8, 112u8, 117u8],
             [105u8, 241u8, 207u8, 239u8],
             [114u8, 137u8, 219u8, 14u8],
             [128u8, 172u8, 197u8, 164u8],
             [130u8, 86u8, 148u8, 244u8],
             [153u8, 213u8, 235u8, 166u8],
+            [158u8, 21u8, 225u8, 188u8],
             [169u8, 105u8, 44u8, 30u8],
             [173u8, 25u8, 145u8, 245u8],
             [201u8, 105u8, 224u8, 242u8],
@@ -14061,6 +13945,7 @@ pub mod IRolldown {
         #[inline]
         fn selector(&self) -> [u8; 4] {
             match self {
+                Self::BatchNotFound(_) => <BatchNotFound as alloy_sol_types::SolError>::SELECTOR,
                 Self::FerryTipExceedsAmount(_) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::SELECTOR
                 }
@@ -14103,7 +13988,6 @@ pub mod IRolldown {
                 Self::ZeroAdmin(_) => <ZeroAdmin as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroAmount(_) => <ZeroAmount as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroRecipient(_) => <ZeroRecipient as alloy_sol_types::SolError>::SELECTOR,
-                Self::ZeroRootCount(_) => <ZeroRootCount as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroToken(_) => <ZeroToken as alloy_sol_types::SolError>::SELECTOR,
                 Self::ZeroTransferAmount(_) => {
                     <ZeroTransferAmount as alloy_sol_types::SolError>::SELECTOR
@@ -14177,16 +14061,6 @@ pub mod IRolldown {
                     UpdateAlreadyApplied
                 },
                 {
-                    fn ZeroRootCount(
-                        data: &[u8],
-                        validate: bool,
-                    ) -> alloy_sol_types::Result<IRolldownErrors> {
-                        <ZeroRootCount as alloy_sol_types::SolError>::abi_decode_raw(data, validate)
-                            .map(IRolldownErrors::ZeroRootCount)
-                    }
-                    ZeroRootCount
-                },
-                {
                     fn ZeroUpdateRange(
                         data: &[u8],
                         validate: bool,
@@ -14243,6 +14117,16 @@ pub mod IRolldown {
                         .map(IRolldownErrors::InvalidFerriedAmount)
                     }
                     InvalidFerriedAmount
+                },
+                {
+                    fn BatchNotFound(
+                        data: &[u8],
+                        validate: bool,
+                    ) -> alloy_sol_types::Result<IRolldownErrors> {
+                        <BatchNotFound as alloy_sol_types::SolError>::abi_decode_raw(data, validate)
+                            .map(IRolldownErrors::BatchNotFound)
+                    }
+                    BatchNotFound
                 },
                 {
                     fn InvalidRequestRange(
@@ -14382,6 +14266,9 @@ pub mod IRolldown {
         #[inline]
         fn abi_encoded_size(&self) -> usize {
             match self {
+                Self::BatchNotFound(inner) => {
+                    <BatchNotFound as alloy_sol_types::SolError>::abi_encoded_size(inner)
+                }
                 Self::FerryTipExceedsAmount(inner) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -14432,9 +14319,6 @@ pub mod IRolldown {
                 Self::ZeroRecipient(inner) => {
                     <ZeroRecipient as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
-                Self::ZeroRootCount(inner) => {
-                    <ZeroRootCount as alloy_sol_types::SolError>::abi_encoded_size(inner)
-                }
                 Self::ZeroToken(inner) => {
                     <ZeroToken as alloy_sol_types::SolError>::abi_encoded_size(inner)
                 }
@@ -14452,6 +14336,9 @@ pub mod IRolldown {
         #[inline]
         fn abi_encode_raw(&self, out: &mut alloy_sol_types::private::Vec<u8>) {
             match self {
+                Self::BatchNotFound(inner) => {
+                    <BatchNotFound as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
+                }
                 Self::FerryTipExceedsAmount(inner) => {
                     <FerryTipExceedsAmount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
@@ -14503,9 +14390,6 @@ pub mod IRolldown {
                 }
                 Self::ZeroRecipient(inner) => {
                     <ZeroRecipient as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
-                }
-                Self::ZeroRootCount(inner) => {
-                    <ZeroRootCount as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
                 }
                 Self::ZeroToken(inner) => {
                     <ZeroToken as alloy_sol_types::SolError>::abi_encode_raw(inner, out)
@@ -15303,14 +15187,9 @@ pub mod IRolldown {
         pub fn initialize(
             &self,
             admin: alloy::sol_types::private::Address,
-            chainId: <IRolldownPrimitives::ChainId as alloy::sol_types::SolType>::RustType,
             updater: alloy::sol_types::private::Address,
         ) -> alloy_contract::SolCallBuilder<T, &P, initializeCall, N> {
-            self.call_builder(&initializeCall {
-                admin,
-                chainId,
-                updater,
-            })
+            self.call_builder(&initializeCall { admin, updater })
         }
         ///Creates a new call builder for the [`lastProcessedUpdate_origin_l1`] function.
         pub fn lastProcessedUpdate_origin_l1(

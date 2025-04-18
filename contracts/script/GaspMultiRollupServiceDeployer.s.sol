@@ -21,7 +21,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
     address public gmrsUpdater;
     bool public allowNonRootInit;
 
-    function deploy(IRolldownPrimitives.ChainId chainId) public override {
+    function deploy() public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -54,8 +54,7 @@ contract GaspMultiRollupServiceDeployer is BaseDeployer("gmrs") {
                 owner,
                 gmrsUpdater,
                 allowNonRootInit,
-                dummyRolldownAddress,
-                chainId
+                dummyRolldownAddress
             )
         );
 

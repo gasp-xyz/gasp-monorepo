@@ -57,7 +57,7 @@ contract RolldownTest is Test, IRolldownPrimitives {
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(implementation),
             address(proxyAdmin),
-            abi.encodeCall(Rolldown.initialize, (users.admin, ChainId.Ethereum, users.updater))
+            abi.encodeCall(Rolldown.initialize, (users.admin, users.updater))
         );
         rolldown = Rolldown(payable(address(proxy)));
 
@@ -110,10 +110,6 @@ contract Deploy is RolldownTest {
         assertEq(rolldown.lastProcessedUpdate_origin_l2(), 0);
     }
 
-    function test_GetChainId() public view {
-        assertEq(uint256(rolldown.chain()), uint256(ChainId.Ethereum));
-    }
-
     function test_GetUpdaterAccount() public view {
         assertEq(rolldown.updaterAccount(), users.updater);
     }
@@ -124,14 +120,14 @@ contract Deploy is RolldownTest {
 
     function test_GetPendingRequests() public view {
         L1Update memory l1Update = rolldown.getPendingRequests(0, 0);
-        assertEq(uint256(l1Update.chain), uint256(ChainId.Ethereum));
+        assertEq(l1Update.chain, block.chainid);
         assertEq(l1Update.pendingDeposits.length, 0);
         assertEq(l1Update.pendingCancelResolutions.length, 0);
     }
 
     function test_RevertIf_AlreadyInitialized() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        rolldown.initialize(users.admin, ChainId.Ethereum, users.updater);
+        rolldown.initialize(users.admin, users.updater);
     }
 
     function test_RevertIf_ZeroAdmin() public {
@@ -142,7 +138,7 @@ contract Deploy is RolldownTest {
         new TransparentUpgradeableProxy(
             address(implementation),
             address(proxyAdmin),
-            abi.encodeCall(Rolldown.initialize, (address(0), ChainId.Ethereum, users.updater))
+            abi.encodeCall(Rolldown.initialize, (address(0), users.updater))
         );
     }
 
@@ -154,7 +150,7 @@ contract Deploy is RolldownTest {
         new TransparentUpgradeableProxy(
             address(implementation),
             address(proxyAdmin),
-            abi.encodeCall(Rolldown.initialize, (users.admin, ChainId.Ethereum, address(0)))
+            abi.encodeCall(Rolldown.initialize, (users.admin, address(0)))
         );
     }
 

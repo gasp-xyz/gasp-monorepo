@@ -5,7 +5,7 @@ import {IAccessControlUpgradeable} from "@openzeppelin-upgrades/contracts/access
 import {IRolldownPrimitives} from "./IRolldownPrimitives.sol";
 
 interface IRolldown is IAccessControlUpgradeable, IRolldownPrimitives {
-    function initialize(address admin, ChainId chainId, address updater) external;
+    function initialize(address admin, address updater) external;
 
     function pause() external;
 
@@ -86,7 +86,7 @@ interface IRolldown is IAccessControlUpgradeable, IRolldownPrimitives {
 
     function lastProcessedUpdate_origin_l2() external view returns (uint256);
 
-    function chain() external view returns (ChainId);
+    function chain() external view returns (uint8);
 
     function updaterAccount() external view returns (address);
 

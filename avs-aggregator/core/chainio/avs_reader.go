@@ -3,9 +3,9 @@ package chainio
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -21,8 +21,8 @@ import (
 	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
 )
 
 type AvsReaderer interface {
@@ -33,7 +33,7 @@ type AvsReaderer interface {
 	GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 
 	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error)
-	
+
 	IsTaskPending(ctx context.Context) (bool, error)
 	LastCompletedOpTaskCreatedBlock(ctx context.Context) (uint32, error)
 	LatestOpTaskNum(ctx context.Context) (uint32, error)
@@ -41,7 +41,7 @@ type AvsReaderer interface {
 	LastOpTaskCreatedBlock(ctx context.Context) (uint32, error)
 	LastRdTaskCreatedBlock(ctx context.Context) (uint32, error)
 	IdToTaskStatus(ctx context.Context, taskType uint8, taskIndex uint32) (uint8, error)
-	ChainRdBatchNonce(ctx context.Context, chainIndex uint8) (uint32, error)
+	ChainRdBatchNonce(ctx context.Context, chainId uint64) (uint32, error)
 	LastCompletedOpTaskCreatedBlockAtBlock(ctx context.Context, atBlock uint64) (uint32, error)
 	GetOperatorsFromIds(opts *bind.CallOpts, registryCoordinatorAddr common.Address, operatorIds []sdktypes.OperatorId) ([]common.Address, error)
 	GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, operatorAddr []common.Address, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error)
@@ -58,14 +58,14 @@ type AvsReaderer interface {
 	ParseRdTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskCompleted, error)
 	BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error)
 
-	TaskManagerAddress() common.Address	
-	StakeRegistryAddress() common.Address	
-	DelegationManagerAddress() common.Address	
-	RegistryCoordinatorAddress() common.Address	
-	ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error)	
-	ParseOperatorSharesIncreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesIncreased, error)	
-	ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesDecreased, error)	
-	ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error)	
+	TaskManagerAddress() common.Address
+	StakeRegistryAddress() common.Address
+	DelegationManagerAddress() common.Address
+	RegistryCoordinatorAddress() common.Address
+	ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error)
+	ParseOperatorSharesIncreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesIncreased, error)
+	ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesDecreased, error)
+	ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error)
 	ParseMinimumStakeForQuorumUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryMinimumStakeForQuorumUpdated, error)
 }
 
@@ -180,7 +180,6 @@ func (r *AvsReader) LastRdTaskCreatedBlock(
 	return v, nil
 }
 
-
 func (r *AvsReader) IdToTaskStatus(
 	ctx context.Context,
 	taskType uint8,
@@ -199,11 +198,11 @@ func (r *AvsReader) IdToTaskStatus(
 
 func (r *AvsReader) ChainRdBatchNonce(
 	ctx context.Context,
-	chainIndex uint8,
+	chainId uint64,
 ) (uint32, error) {
 	v, err := r.AvsServiceBindings.TaskManager.ChainRdBatchNonce(
 		&bind.CallOpts{},
-		chainIndex,
+		chainId,
 	)
 	if err != nil {
 		return uint32(0), err
@@ -276,7 +275,7 @@ func (r *AvsReader) GetNonSigningOperatorPubKeys(event taskmanager.ContractFinal
 		r.logger.Error("Error getting method", "err", err)
 		return nil, err
 	}
-	
+
 	inputs, err := method.Inputs.Unpack(calldata[4:])
 	if err != nil {
 		r.logger.Error("Error unpacking calldata", "err", err)
@@ -333,7 +332,6 @@ func (r *AvsReader) GetOperatorsFromIds(
 	return operators, nil
 }
 
-
 // func (r *AvsReader) GetOperatorsStakesForQuorum(
 // 	opts *bind.CallOpts,
 // 	registryCoordinatorAddr common.Address,
@@ -370,7 +368,7 @@ func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context,
 				stakePerQuorum := make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
 				operatorsAvsState[operator.OperatorId] = types.OperatorAvsState{
 					OperatorId:     operator.OperatorId,
-					Operator:   operator.Operator,
+					Operator:       operator.Operator,
 					StakePerQuorum: stakePerQuorum,
 				}
 				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
@@ -380,7 +378,6 @@ func (r *AvsReader) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context,
 
 	return operatorsAvsState, nil
 }
-
 
 func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error) {
 	operatorsAvsState := make(map[sdktypes.OperatorId]types.OperatorAvsState)
@@ -402,7 +399,7 @@ func (r *AvsReader) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoo
 				stakePerQuorum := make(map[sdktypes.QuorumNum]sdktypes.StakeAmount)
 				operatorsAvsState[operator.OperatorId] = types.OperatorAvsState{
 					OperatorId:     operator.OperatorId,
-					Operator:   operator.Operator,
+					Operator:       operator.Operator,
 					StakePerQuorum: stakePerQuorum,
 				}
 				operatorsAvsState[operator.OperatorId].StakePerQuorum[quorumNum] = operator.Stake
@@ -432,14 +429,14 @@ func (r *AvsReader) GetOperatorIdList(
 
 func (r *AvsReader) ChainID(ctx context.Context) (*big.Int, error) {
 	chainId, err := r.AvsServiceBindings.EthClient.ChainID(ctx)
-	return chainId, err 
+	return chainId, err
 }
 
 func (r *AvsReader) FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewOpTaskCreatedIterator, error) {
 	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
 		opts, taskIndex,
 	)
-	return eventIter, err 
+	return eventIter, err
 }
 
 func (r *AvsReader) GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerOpTask, error) {
@@ -454,8 +451,8 @@ func (r *AvsReader) GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIn
 	if eventIterBool == false {
 		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to find the opTask via FilterNewOpTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
 	}
-	
-	return eventIter.Event.Task, err 
+
+	return eventIter.Event.Task, err
 }
 
 func (r *AvsReader) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error) {
@@ -463,7 +460,7 @@ func (r *AvsReader) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []ui
 	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
 		opts, taskIndex,
 	)
-	return eventIter, err 
+	return eventIter, err
 }
 
 func (r *AvsReader) GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerRdTask, error) {
@@ -479,19 +476,19 @@ func (r *AvsReader) GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIn
 	if eventIterBool == false {
 		return taskmanager.IFinalizerTaskManagerRdTask{}, fmt.Errorf("Aggregator failed to find the rdTask via FilterNewRdTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
 	}
-	
-	return eventIter.Event.Task, err 
+
+	return eventIter.Event.Task, err
 }
 
 func (r *AvsReader) TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
-	
+
 	taskResponseWindowBlock, err := r.AvsServiceBindings.TaskManager.TaskResponseWindowBlock(opts)
 	return taskResponseWindowBlock, err
 
 }
 
 func (r *AvsReader) ParseOpTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerOpTaskCompleted, error) {
-	
+
 	v, err := r.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(log)
 	return v, err
 }
@@ -523,7 +520,7 @@ func (r *AvsReader) RegistryCoordinatorAddress() common.Address {
 }
 
 func (r *AvsReader) ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error) {
-	
+
 	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseOperatorStakeUpdate(log)
 	return event, err
 }
@@ -539,13 +536,13 @@ func (r *AvsReader) ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationM
 }
 
 func (r *AvsReader) ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error) {
-	
+
 	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseStrategyMultiplierUpdated(log)
 	return event, err
 }
 
 func (r *AvsReader) ParseMinimumStakeForQuorumUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryMinimumStakeForQuorumUpdated, error) {
-	
+
 	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseMinimumStakeForQuorumUpdated(log)
 	return event, err
 }

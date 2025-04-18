@@ -35,7 +35,7 @@ interface IRolldownPrimitives {
     }
 
     struct L1Update {
-        ChainId chain;
+        uint64 chain;
         Deposit[] pendingDeposits;
         CancelResolution[] pendingCancelResolutions;
     }
@@ -63,15 +63,6 @@ interface IRolldownPrimitives {
     enum Origin {
         L1,
         L2
-    }
-
-    enum ChainId {
-        Ethereum,
-        Arbitrum,
-        Base,
-        Monad,
-        MegaEth,
-        Sonic
     }
 
     enum L2RequestType {

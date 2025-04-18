@@ -207,7 +207,7 @@ pub struct OpTaskResponse {
     pub reference_task_hash: [u8; 32],
     pub operators_state_info_hash: [u8; 32],
 }
-///`RdTask(uint32,uint8,uint32,uint32,uint32,uint32,bytes,uint32)`
+///`RdTask(uint32,uint64,uint32,uint32,uint32,uint32,bytes,uint32)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -222,7 +222,7 @@ pub struct OpTaskResponse {
 )]
 pub struct RdTask {
     pub task_num: u32,
-    pub chain_id: u8,
+    pub chain_id: u64,
     pub batch_id: u32,
     pub task_created_block: u32,
     pub last_completed_op_task_num: u32,
@@ -230,7 +230,7 @@ pub struct RdTask {
     pub last_completed_op_task_quorum_numbers: ::ethers::core::types::Bytes,
     pub last_completed_op_task_quorum_threshold_percentage: u32,
 }
-///`RdTaskResponse(uint32,bytes32,uint8,uint32,bytes32,uint256,uint256,address)`
+///`RdTaskResponse(uint32,bytes32,uint64,uint32,bytes32,uint256,uint256,address)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -246,7 +246,7 @@ pub struct RdTask {
 pub struct RdTaskResponse {
     pub reference_task_index: u32,
     pub reference_task_hash: [u8; 32],
-    pub chain_id: u8,
+    pub chain_id: u64,
     pub batch_id: u32,
     pub rd_update: [u8; 32],
     pub range_start: ::ethers::core::types::U256,
@@ -524,55 +524,4 @@ pub struct StakeUpdate {
 pub struct StrategyParams {
     pub strategy: ::ethers::core::types::Address,
     pub multiplier: u128,
-}
-///`FuzzArtifactSelector(string,bytes4[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct FuzzArtifactSelector {
-    pub artifact: ::std::string::String,
-    pub selectors: ::std::vec::Vec<[u8; 4]>,
-}
-///`FuzzInterface(address,string[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct FuzzInterface {
-    pub addr: ::ethers::core::types::Address,
-    pub artifacts: ::std::vec::Vec<::std::string::String>,
-}
-///`FuzzSelector(address,bytes4[])`
-#[derive(
-    Clone,
-    ::ethers::contract::EthAbiType,
-    ::ethers::contract::EthAbiCodec,
-    serde::Serialize,
-    serde::Deserialize,
-    Default,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-)]
-pub struct FuzzSelector {
-    pub addr: ::ethers::core::types::Address,
-    pub selectors: ::std::vec::Vec<[u8; 4]>,
 }

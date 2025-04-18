@@ -262,11 +262,11 @@ contract Deployer is Script, Utils, Test {
         );
 
         rolldownImplementation = new Rolldown();
-        rolldownImplementation.initialize(avsOwner, IRolldownPrimitives.ChainId.Ethereum, address(taskManager));
+        rolldownImplementation.initialize(avsOwner, address(taskManager));
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (avsOwner, IRolldownPrimitives.ChainId.Ethereum, address(taskManager)))
+            abi.encodeCall(rolldown.initialize, (avsOwner, address(taskManager)))
         );
 
         // transfer ownership of proxy admin to upgrader

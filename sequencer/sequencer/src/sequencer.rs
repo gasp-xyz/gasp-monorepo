@@ -538,8 +538,8 @@ pub(crate) mod test {
     use primitive_types::H256;
 
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");
-    const ETHEREUM: Chain = Chain::Ethereum;
-    const ARBITRUM: Chain = Chain::Arbitrum;
+    const ETHEREUM: Chain = 31337_u64;
+    const ARBITRUM: Chain = 31338_u64;
 
     #[tokio::test]
     async fn test_find_malicious_update_ignores_valid_updates() {

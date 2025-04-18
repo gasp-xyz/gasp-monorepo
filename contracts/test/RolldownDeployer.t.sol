@@ -58,7 +58,7 @@ contract RolldownDeployerTest is Test {
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
             abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, IRolldownPrimitives.ChainId.Ethereum, updaterAccount
+                rolldown.initialize.selector, owner, updaterAccount
             )
         );
 
@@ -77,7 +77,7 @@ contract RolldownDeployerTest is Test {
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
             abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, IRolldownPrimitives.ChainId.Ethereum, updaterAccount
+                rolldown.initialize.selector, owner, updaterAccount
             )
         );
 
@@ -87,7 +87,7 @@ contract RolldownDeployerTest is Test {
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
             abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, IRolldownPrimitives.ChainId.Ethereum, updaterAccount
+                rolldown.initialize.selector, owner, updaterAccount
             )
         );
 
@@ -110,7 +110,7 @@ contract RolldownDeployerTest is Test {
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
             abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, IRolldownPrimitives.ChainId.Ethereum, updaterAccount
+                rolldown.initialize.selector, owner, updaterAccount
             )
         );
 
@@ -147,7 +147,7 @@ contract RolldownDeployerTest is Test {
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
             abi.encodeWithSelector(
-                rolldown.initialize.selector, owner, IRolldownPrimitives.ChainId.Ethereum, updaterAccount
+                rolldown.initialize.selector, owner, updaterAccount
             )
         );
 

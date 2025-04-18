@@ -91,7 +91,7 @@ where
 
 		for c in chains {
 			set(
-				&[c.as_ref()],
+				&[&c.to_string()],
 				self.0
 					.runtime_api()
 					.get_last_processed_request_on_l2(at, c)
@@ -159,7 +159,7 @@ where
 
 		for c in chains {
 			set(
-				&[c.as_ref()],
+				&[&c.to_string()],
 				self.0
 					.runtime_api()
 					.get_number_of_pending_requests(at, c)

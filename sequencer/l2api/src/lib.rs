@@ -27,10 +27,12 @@ pub mod types {
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
         #[allow(unused_imports)]
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::{
-            CancelResolution, Chain, Deposit, Origin, RequestId,
+            CancelResolution, Deposit, Origin, RequestId,
         };
         pub use gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata;
         pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
+        
+        pub type Chain = gasp_types::Chain;
     }
 
     pub use gasp_types::{Chain, L2Request};

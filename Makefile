@@ -4,7 +4,7 @@
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-CONTRACTS_REGEX="FinalizerServiceManager|FinalizerTaskManager|AVSDirectory|BLSApkRegistry|RegistryCoordinator|DelegationManager|ERC20Mock|StrategyManager|IStrategy|StakeRegistry|GaspMultiRollupService"
+CONTRACTS_REGEX="FinalizerServiceManager\b|FinalizerTaskManager\b|AVSDirectory\b|BLSApkRegistry\b|RegistryCoordinator\b|DelegationManager\b|ERC20Mock\b|StrategyManager\b|IStrategy\b|StakeRegistry\b|GaspMultiRollupService\b"
 # CONTRACTS_REGEX=".+"
 
 -----------------------------: ## 
@@ -60,15 +60,15 @@ bindings-go: ## generates contract bindings
 	cd contracts && ./generate-go-bindings.sh
 
 bindings-rs: ## generates rust bindings
-	forge bind --bindings-path ./gasp-avs/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
+	forge bind --ethers --bindings-path ./gasp-avs/bindings --root ./contracts --crate-name bindings --overwrite --select ${CONTRACTS_REGEX}
 	cd ./gasp-avs && cargo fmt
-	cd ./updater && cargo fmt
 	cp -rf ./gasp-avs/bindings ./updater/
+	cd ./updater && cargo fmt
 
 bindings-rs-alloy: ## generates rust alloy bindings
 	forge --version | grep "forge 0.3.0"
-	forge bind --alloy --bindings-path ./sequencer/bindings/contracts/ --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$' --select 'IERC20$$' --select 'GaspTestToken$$'
-	cd ./sequencer/bindings && cargo fmt
+	forge bind --alloy --alloy-version v0.8.3 --bindings-path ./sequencer/bindings/contracts/ --root ./contracts --crate-name contract-bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$' --select 'IERC20$$' --select 'GaspTestToken$$'
+	cd ./sequencer/bindings/contracts && cargo fmt
 
 bindings-json: ## generate JS bindings
 	forge build --root ./contracts 

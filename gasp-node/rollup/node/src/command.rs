@@ -76,53 +76,32 @@ impl SubstrateCli for Cli {
 			self.override_eth_sequencers.iter().map(parse_accounts).collect()
 		};
 
-		let arb_sequencers = if self.override_arb_sequencers.is_empty() {
+		let alt1_sequencers = if self.override_alt1_sequencers.is_empty() {
 			[crate::chain_spec::get_account_id_from_seed::<sp_core::ecdsa::Public>("Charleth")]
 				.to_vec()
 		} else {
-			self.override_arb_sequencers.iter().map(parse_accounts).collect()
+			self.override_alt1_sequencers.iter().map(parse_accounts).collect()
 		};
 
-		let base_sequencers = if self.override_base_sequencers.is_empty() {
+		let alt2_sequencers = if self.override_alt2_sequencers.is_empty() {
 			[crate::chain_spec::get_account_id_from_seed::<sp_core::ecdsa::Public>("Dorothy")]
 				.to_vec()
 		} else {
-			self.override_base_sequencers.iter().map(parse_accounts).collect()
-		};
-
-		let monad_sequencers = if self.override_monad_sequencers.is_empty() {
-			[crate::chain_spec::get_account_id_from_seed::<sp_core::ecdsa::Public>("Ethan")]
-				.to_vec()
-		} else {
-			self.override_monad_sequencers.iter().map(parse_accounts).collect()
-		};
-
-		let megaeth_sequencers = if self.override_megaeth_sequencers.is_empty() {
-			[crate::chain_spec::get_account_id_from_seed::<sp_core::ecdsa::Public>("Faith")]
-				.to_vec()
-		} else {
-			self.override_megaeth_sequencers.iter().map(parse_accounts).collect()
-		};
-
-		let sonic_sequencers = if self.override_sonic_sequencers.is_empty() {
-			[crate::chain_spec::get_account_id_from_seed::<sp_core::ecdsa::Public>("Getafix")]
-				.to_vec()
-		} else {
-			self.override_sonic_sequencers.iter().map(parse_accounts).collect()
+			self.override_alt2_sequencers.iter().map(parse_accounts).collect()
 		};
 
 		Ok(match id {
 			"" | "rollup-local" =>
-				Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, arb_sequencers, base_sequencers, monad_sequencers, megaeth_sequencers, sonic_sequencers, EvmChain::Anvil,
+				Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, alt1_sequencers, alt2_sequencers, EvmChain::Anvil,
 				None
 				)),
-			"rollup-local-seq" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, arb_sequencers, base_sequencers, monad_sequencers, megaeth_sequencers, sonic_sequencers, EvmChain::Anvil,
+			"rollup-local-seq" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, alt1_sequencers, alt2_sequencers, EvmChain::Anvil,
 				None
 			)),
-			"anvil" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, arb_sequencers, base_sequencers, monad_sequencers, megaeth_sequencers, sonic_sequencers, EvmChain::Anvil,
+			"anvil" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, alt1_sequencers, alt2_sequencers, EvmChain::Anvil,
 				None
 			)),
-			"reth" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, arb_sequencers, base_sequencers, monad_sequencers, megaeth_sequencers, sonic_sequencers, EvmChain::Reth,
+			"reth" => Box::new(chain_spec::rollup_local_config(self.randomize_chain_genesis_salt, self.chain_genesis_salt.clone(), eth_sequencers, alt1_sequencers, alt2_sequencers, EvmChain::Reth,
 				None
 			)),
 			"holesky" => Box::new(chain_spec::holesky_testnet( Some(String::from("https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frollup-holesky-rpc.gasp.xyz#/extrinsics/decode/")))),

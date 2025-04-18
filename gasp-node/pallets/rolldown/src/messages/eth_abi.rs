@@ -31,7 +31,7 @@ impl From<crate::FailedDepositResolution> for FailedDepositResolution {
 	fn from(failed_deposit_resolution: crate::FailedDepositResolution) -> Self {
 		Self {
 			requestId: failed_deposit_resolution.requestId.into(),
-			originRequestId: crate::messages::to_eth_u256(
+			originRequestId: to_eth_u256(
 				failed_deposit_resolution.originRequestId.into(),
 			),
 			ferry: failed_deposit_resolution.ferry.into(),
@@ -45,21 +45,8 @@ impl From<crate::Withdrawal> for Withdrawal {
 			requestId: withdrawal.requestId.into(),
 			withdrawalRecipient: withdrawal.withdrawalRecipient.into(),
 			tokenAddress: withdrawal.tokenAddress.into(),
-			amount: crate::messages::to_eth_u256(withdrawal.amount.into()),
-			ferryTip: crate::messages::to_eth_u256(withdrawal.ferryTip.into()),
-		}
-	}
-}
-
-impl From<crate::messages::Chain> for Chain {
-	fn from(c: crate::messages::Chain) -> Chain {
-		match c {
-			crate::messages::Chain::Ethereum => Chain::Ethereum,
-			crate::messages::Chain::Arbitrum => Chain::Arbitrum,
-			crate::messages::Chain::Base => Chain::Base,
-			crate::messages::Chain::Monad => Chain::Monad,
-			crate::messages::Chain::MegaEth => Chain::MegaEth,
-			crate::messages::Chain::Sonic => Chain::Sonic,
+			amount: to_eth_u256(withdrawal.amount.into()),
+			ferryTip: to_eth_u256(withdrawal.ferryTip.into()),
 		}
 	}
 }
@@ -99,7 +86,7 @@ impl From<crate::messages::CancelResolution> for CancelResolution {
 impl From<crate::messages::L1Update> for L1Update {
 	fn from(update: crate::messages::L1Update) -> L1Update {
 		L1Update {
-			chain: update.chain.into(),
+			chain: update.chain,
 			pendingDeposits: update.pendingDeposits.into_iter().map(Into::into).collect::<Vec<_>>(),
 			pendingCancelResolutions: update
 				.pendingCancelResolutions
@@ -135,7 +122,6 @@ sol! {
 		uint256 ferryTip;
 	}
 
-
 	#[derive(Debug)]
 	struct CancelResolution {
 		RequestId requestId;
@@ -145,14 +131,11 @@ sol! {
 	}
 
 	#[derive(Debug, Eq, PartialEq, Encode, Decode, TypeInfo)]
-	enum Chain{ Ethereum, Arbitrum, Base, Monad, MegaEth, Sonic}
-
-	#[derive(Debug, Eq, PartialEq, Encode, Decode, TypeInfo)]
 	enum L2RequestType{ Withdrawal, Cancel, FailedDepositResolution }
 
 	#[derive(Debug)]
 	struct L1Update {
-		Chain chain;
+		uint64 chain;
 		Deposit[] pendingDeposits;
 		CancelResolution[] pendingCancelResolutions;
 	}
@@ -241,7 +224,7 @@ mod test {
 	fn test_l1_update_hash_compare_with_solidty() {
 		assert_eq!(
 			L1Update {
-				chain: Chain::Ethereum,
+				chain: 1u64.into(),
 				pendingDeposits: vec![Deposit {
 					requestId: RequestId {
 						origin: Origin::L1,
@@ -264,21 +247,7 @@ mod test {
 				}],
 			}
 			.keccak256_hash(),
-			hex!("663fa3ddfe64659f67b2728637936fa8d21f18ef96c07dec110cdd8f45be6fee"),
-		);
-	}
-
-	#[test]
-	#[serial]
-	fn test_calculate_chain_hash() {
-		assert_eq!(
-			Chain::Ethereum.keccak256_hash(),
-			hex!("290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563"),
-		);
-
-		assert_eq!(
-			Chain::Arbitrum.keccak256_hash(),
-			hex!("b10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6"),
+			hex!("2355707d066d6ebb03e442a6fd83a12e427d5b1cbf688b121307e35202242ef2"),
 		);
 	}
 

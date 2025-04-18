@@ -655,21 +655,11 @@ impl L2Interface for Gasp {
         account: [u8; 20],
         at: H256,
     ) -> Result<u128, L2Error> {
-        use gasp_bindings::api::runtime_types::mangata_types::assets::L1Asset;
         use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
-
-        let asset = match chain {
-            gasp_types::Chain::Ethereum => L1Asset::Ethereum(token),
-            gasp_types::Chain::Arbitrum => L1Asset::Arbitrum(token),
-            gasp_types::Chain::Base => L1Asset::Base(token),
-            gasp_types::Chain::Monad => L1Asset::Monad(token),
-            gasp_types::Chain::MegaEth => L1Asset::MegaEth(token),
-            gasp_types::Chain::Sonic => L1Asset::Sonic(token),
-        };
 
         let storage = gasp_bindings::api::storage()
             .asset_registry()
-            .l1_asset_to_id(asset);
+            .l1_asset_to_id(chain, token);
         if let Some(token_id) = self.client.storage().at(at).fetch(&storage).await? {
             let storage = gasp_bindings::api::storage()
                 .tokens()

@@ -1,4 +1,4 @@
-use alloy::{network::NetworkWallet, providers::WalletProvider};
+use alloy::{network::NetworkWallet, providers::{Provider, WalletProvider}};
 use envconfig::Envconfig;
 use hex::FromHex;
 use l1api::CachedL1Interface;
@@ -6,7 +6,6 @@ use tracing::level_filters::LevelFilter;
 
 mod sequencer;
 mod watchdog;
-use gasp_types::Chain;
 use l2api::Gasp;
 use tokio::time::Duration;
 use watchdog::Watchdog;
@@ -26,9 +25,6 @@ struct Config {
 
     #[envconfig(from = "MNEMONIC")]
     pub l2_mnemonic: String,
-
-    #[envconfig(from = "L1_CHAIN")]
-    pub chain: String,
 
     #[envconfig(from = "MANGATA_CONTRACT_ADDRESS")]
     pub rolldown_contract_address: String,
@@ -114,15 +110,6 @@ async fn run(config: Config) -> Result<(), Error> {
     let gasp_secret_key = <[u8; 32]>::from_hex(strip_prefix(&config.l2_mnemonic))?;
     let rolldown_contract_address =
         <[u8; 20]>::from_hex(strip_prefix(&config.rolldown_contract_address))?;
-    let chain = match config.chain.to_lowercase().as_ref() {
-        "ethereum" => Ok(Chain::Ethereum),
-        "arbitrum" => Ok(Chain::Arbitrum),
-        "base" => Ok(Chain::Base),
-        "monad" => Ok(Chain::Monad),
-        "megaeth" => Ok(Chain::MegaEth),
-        "sonic" => Ok(Chain::Sonic),
-        _ => Err(Error::UnsupportedChain(config.chain.clone())),
-    }?;
 
     tracing::trace!("Initiating connection to {}", config.l1_uri);
     let gasp = Gasp::new(&config.l2_uri, gasp_secret_key)
@@ -131,6 +118,7 @@ async fn run(config: Config) -> Result<(), Error> {
     tracing::info!("Connected to {}", config.l2_uri);
 
     let provider = l1api::create_provider(config.l1_uri.clone(), eth_secret_key).await?;
+    let chain = provider.get_chain_id().await.map_err(Into::<l1api::L1Error>::into)?;
     let rolldown = l1api::RolldownContract::new(provider.clone(), rolldown_contract_address);
     tracing::info!("Connected to {}", config.l1_uri);
 

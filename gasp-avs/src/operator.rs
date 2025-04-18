@@ -171,7 +171,7 @@ impl Operator {
     ) -> eyre::Result<RdTaskResponse> {
         use codec::{Decode, Encode};
         #[derive(Debug, codec::Encode, codec::Decode)]
-        struct StorageItemKeyType(u8, u128);
+        struct StorageItemKeyType(u64, u128);
         #[derive(Debug, codec::Encode, codec::Decode)]
         struct StorageItemDataType(u32, (u128, u128), [u8; 20]);
 
@@ -242,18 +242,7 @@ impl Operator {
             (created_block_number, (range_start, range_end), updater)
         );
 
-        // TODO
-        // Properly solve this hack
-        let chain_as_string = match rd_task.chain_id {
-            0 => String::from("Ethereum"),
-            1 => String::from("Arbitrum"),
-            2 => String::from("Base"),
-            3 => String::from("Monad"),
-            4 => String::from("MegaEth"),
-            5 => String::from("Sonic"),
-            _ => return Err(eyre!("Unexpected chain in task")),
-        };
-        let params = rpc_params!(chain_as_string, (range_start, range_end));
+        let params = rpc_params!(rd_task.chain_id, (range_start, range_end));
         let rd_update: H256 = rpc
             .request("rolldown_get_merkle_root", params.clone())
             .await?;

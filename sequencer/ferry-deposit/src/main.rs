@@ -1,7 +1,7 @@
 use clap::Parser;
 use ferry::FerryError;
 use hunter::HunterError;
-use l1api::L1;
+use l1api::{L1Interface, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -22,9 +22,6 @@ fn init_logger() {
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Unsupported chain id {0:?}")]
-    InvalidChainId(#[from] gasp_types::ChainParseError),
-
     #[error("Hunter error `{0}`")]
     HunterError(#[from] hunter::HunterError),
 
@@ -41,7 +38,6 @@ pub enum Error {
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
-    let chain: gasp_types::Chain = args.chain_id.try_into()?;
     init_logger();
 
     tracing::info!("{args:?}");
@@ -55,10 +51,10 @@ pub async fn main() -> Result<(), Error> {
 
     let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
 
-    let mut hunter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
-        hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
-    };
+    let l1 = L1::new(rolldown.clone(), provider.clone());
+    let chain = l1.get_chain_id().await?;
+
+    let mut hunter = { hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter) };
 
     let executor = ferry::Ferry::new(l2.clone(), sender, chain, args.tx_cost, executor);
 

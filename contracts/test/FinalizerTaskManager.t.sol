@@ -1,362 +1,267 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import {IBLSSignatureChecker} from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
-import {IPauserRegistry} from "@eigenlayer/contracts/permissions/Pausable.sol";
-import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {Test} from "forge-std/Test.sol";
-import {FinalizerTaskManager} from "./../src/FinalizerTaskManager.sol";
-import {IFinalizerTaskManager} from "./../src/interfaces/IFinalizerTaskManager.sol";
-import {IRolldown} from "./../src/interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "./../src/interfaces/IRolldownPrimitives.sol";
-
-contract FinalizerTaskManagerTest is Test {
-    FinalizerTaskManager internal taskManager;
-
-    address internal owner;
-    address internal aggregator;
-    address internal generator;
-    address internal blsSignatureChecker;
-    address internal operatorStateRetrieverExtended;
-    address internal pauserRegistry;
-    address internal rolldown;
-
-    uint32 internal constant TASK_RESPONSE_WINDOW_BLOCK = 100;
-
-    function setUp() public {
-        owner = makeAddr("owner");
-        aggregator = makeAddr("aggregator");
-        generator = makeAddr("generator");
-        blsSignatureChecker = makeAddr("blsSignatureChecker");
-        operatorStateRetrieverExtended = makeAddr("operatorStateRetrieverExtended");
-        pauserRegistry = makeAddr("pauserRegistry");
-        rolldown = makeAddr("rolldown");
-
-        FinalizerTaskManager impl = new FinalizerTaskManager();
-        ProxyAdmin proxyAdmin = new ProxyAdmin();
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            address(impl),
-            address(proxyAdmin),
-            abi.encodeCall(
-                FinalizerTaskManager.initialize,
-                (
-                    IPauserRegistry(pauserRegistry),
-                    owner,
-                    aggregator,
-                    generator,
-                    true, // allowNonRootInit
-                    blsSignatureChecker,
-                    TASK_RESPONSE_WINDOW_BLOCK,
-                    operatorStateRetrieverExtended,
-                    IRolldown(rolldown)
-                )
-            )
-        );
-        taskManager = FinalizerTaskManager(payable(address(proxy)));
-    }
-
-    function test_SetAggregator() public {
-        address newAggregator = makeAddr("newAggregator");
-
-        vm.prank(owner);
-        taskManager.setAggregator(newAggregator);
-
-        assertEq(taskManager.aggregator(), newAggregator);
-    }
-
-    function test_RevertIf_NotOwner_SetAggregator() public {
-        address newAggregator = makeAddr("newAggregator");
-
-        vm.prank(aggregator);
-        vm.expectRevert("Ownable: caller is not the owner");
-        taskManager.setAggregator(newAggregator);
-    }
-
-    function test_CreateNewOpTask() public {
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.expectCall(
-            address(taskManager),
-            abi.encodeWithSelector(
-                FinalizerTaskManager.createNewOpTask.selector, quorumThresholdPercentage, quorumNumbers
-            )
-        );
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        assertEq(taskManager.latestOpTaskNum(), 1);
-        assertEq(taskManager.isTaskPending(), true);
-    }
-
-    function test_RespondToOpTask() public {
-        // First create a task
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        // Setup task response data
-        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
-            taskNum: 0,
-            quorumNumbers: quorumNumbers,
-            quorumThresholdPercentage: quorumThresholdPercentage,
-            taskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskNum: 0,
-            lastCompletedOpTaskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
-            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
-        });
-
-        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
-            referenceTaskIndex: 0,
-            referenceTaskHash: bytes32(0),
-            operatorsStateInfoHash: bytes32(0)
-        });
-
-        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
-
-        vm.mockCall(
-            address(blsSignatureChecker),
-            abi.encodeWithSelector(BLSSignatureChecker.checkSignatures.selector),
-            abi.encode(
-                IBLSSignatureChecker.QuorumStakeTotals({
-                    totalStakeForQuorum: new uint96[](1),
-                    signedStakeForQuorum: new uint96[](1)
-                }),
-                bytes32(0)
-            )
-        );
-
-        vm.prank(aggregator);
-        taskManager.respondToOpTask(task, taskResponse, nonSignerStakesAndSignature);
-
-        assertEq(taskManager.isTaskPending(), false);
-    }
-
-    function test_CancelPendingTasks() public {
-        // Create task first
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        vm.prank(generator);
-        taskManager.cancelPendingTasks();
-
-        assertEq(taskManager.isTaskPending(), false);
-    }
-
-    function test_CreateNewRdTask() public {
-        // First complete an op task to initialize op state
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
-            taskNum: 0,
-            quorumNumbers: quorumNumbers,
-            quorumThresholdPercentage: quorumThresholdPercentage,
-            taskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskNum: 0,
-            lastCompletedOpTaskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
-            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
-        });
-
-        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
-            referenceTaskIndex: 0,
-            referenceTaskHash: bytes32(0),
-            operatorsStateInfoHash: bytes32(0)
-        });
-
-        vm.prank(owner);
-        taskManager.forceRespondToOpTask(task, taskResponse);
-
-        // Now create RD task
-        vm.prank(generator);
-        taskManager.createNewRdTask(IRolldownPrimitives.ChainId.Ethereum, 1);
-
-        assertEq(taskManager.latestRdTaskNum(), 1);
-        assertEq(taskManager.isTaskPending(), true);
-    }
-
-    function test_RespondToRdTask() public {
-        // Create and complete op task first
-        test_CreateNewRdTask();
-
-        // Setup RD task response
-        FinalizerTaskManager.RdTask memory task = IFinalizerTaskManager.RdTask({
-            taskNum: 0,
-            chainId: IRolldownPrimitives.ChainId.Ethereum,
-            batchId: 1,
-            taskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskNum: 0,
-            lastCompletedOpTaskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskQuorumNumbers: abi.encodePacked(uint8(1)),
-            lastCompletedOpTaskQuorumThresholdPercentage: 100
-        });
-
-        FinalizerTaskManager.RdTaskResponse memory taskResponse = IFinalizerTaskManager.RdTaskResponse({
-            referenceTaskIndex: 0,
-            referenceTaskHash: bytes32(0),
-            chainId: IRolldownPrimitives.ChainId.Ethereum,
-            batchId: 1,
-            rdUpdate: bytes32(0),
-            rangeStart: 0,
-            rangeEnd: 1,
-            updater: rolldown
-        });
-
-        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
-
-        vm.mockCall(
-            address(blsSignatureChecker),
-            abi.encodeWithSelector(BLSSignatureChecker.checkSignatures.selector),
-            abi.encode(
-                IBLSSignatureChecker.QuorumStakeTotals({
-                    totalStakeForQuorum: new uint96[](1),
-                    signedStakeForQuorum: new uint96[](1)
-                }),
-                bytes32(0)
-            )
-        );
-
-        vm.mockCall(address(rolldown), abi.encodeWithSelector(IRolldown.update_l1_from_l2.selector), abi.encode());
-
-        vm.prank(aggregator);
-        taskManager.respondToRdTask(task, taskResponse, nonSignerStakesAndSignature);
-
-        assertEq(taskManager.isTaskPending(), false);
-    }
-
-    function test_ForceCancelPendingTasks() public {
-        // Create task first
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        vm.prank(owner);
-        taskManager.forceCancelPendingTasks();
-
-        assertEq(taskManager.isTaskPending(), false);
-    }
-
-    function test_CheckSignatures() public {
-        bytes32 msgHash = keccak256("test");
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-        uint32 referenceBlockNumber = uint32(block.number);
-        BLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
-
-        vm.mockCall(
-            address(blsSignatureChecker),
-            abi.encodeWithSelector(BLSSignatureChecker.checkSignatures.selector),
-            abi.encode(
-                IBLSSignatureChecker.QuorumStakeTotals({
-                    totalStakeForQuorum: new uint96[](1),
-                    signedStakeForQuorum: new uint96[](1)
-                }),
-                bytes32(0)
-            )
-        );
-
-        (BLSSignatureChecker.QuorumStakeTotals memory stakeTotals, bytes32 hashOfNonSigners) =
-            taskManager.checkSignatures(msgHash, quorumNumbers, referenceBlockNumber, nonSignerStakesAndSignature);
-
-        assertEq(stakeTotals.totalStakeForQuorum.length, 1);
-        assertEq(stakeTotals.signedStakeForQuorum.length, 1);
-        assertEq(hashOfNonSigners, bytes32(0));
-    }
-
-    function test_ForceCreateNewOpTask() public {
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(owner);
-        taskManager.forceCreateNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        assertEq(taskManager.latestOpTaskNum(), 1);
-        assertEq(taskManager.isTaskPending(), true);
-    }
-
-    function test_RevertIf_NotOwner_ForceCreateNewOpTask() public {
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(aggregator);
-        vm.expectRevert("Ownable: caller is not the owner");
-        taskManager.forceCreateNewOpTask(quorumThresholdPercentage, quorumNumbers);
-    }
-
-    function test_ForceRespondToOpTask() public {
-        // First create a task
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        // Setup task response data
-        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
-            taskNum: 0,
-            quorumNumbers: quorumNumbers,
-            quorumThresholdPercentage: quorumThresholdPercentage,
-            taskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskNum: 0,
-            lastCompletedOpTaskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
-            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
-        });
-
-        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
-            referenceTaskIndex: 0,
-            referenceTaskHash: bytes32(0),
-            operatorsStateInfoHash: bytes32(0)
-        });
-
-        vm.prank(owner);
-        taskManager.forceRespondToOpTask(task, taskResponse);
-
-        assertEq(taskManager.isTaskPending(), false);
-    }
-
-    function test_RevertIf_NotOwner_ForceRespondToOpTask() public {
-        // First create a task
-        uint32 quorumThresholdPercentage = 100;
-        bytes memory quorumNumbers = abi.encodePacked(uint8(1));
-
-        vm.prank(generator);
-        taskManager.createNewOpTask(quorumThresholdPercentage, quorumNumbers);
-
-        // Setup task response data
-        FinalizerTaskManager.OpTask memory task = IFinalizerTaskManager.OpTask({
-            taskNum: 0,
-            quorumNumbers: quorumNumbers,
-            quorumThresholdPercentage: quorumThresholdPercentage,
-            taskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskNum: 0,
-            lastCompletedOpTaskCreatedBlock: uint32(block.number),
-            lastCompletedOpTaskQuorumNumbers: quorumNumbers,
-            lastCompletedOpTaskQuorumThresholdPercentage: quorumThresholdPercentage
-        });
-
-        FinalizerTaskManager.OpTaskResponse memory taskResponse = IFinalizerTaskManager.OpTaskResponse({
-            referenceTaskIndex: 0,
-            referenceTaskHash: bytes32(0),
-            operatorsStateInfoHash: bytes32(0)
-        });
-
-        vm.prank(aggregator);
-        vm.expectRevert("Ownable: caller is not the owner");
-        taskManager.forceRespondToOpTask(task, taskResponse);
-    }
-}
+// import "../src/FinalizerServiceManager.sol" as msm;
+// import {FinalizerTaskManager} from "../src/FinalizerTaskManager.sol";
+// import {BLSMockAVSDeployer} from "@eigenlayer-middleware/test/utils/BLSMockAVSDeployer.sol";
+// import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+// import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+// import {BitmapUtils} from "@eigenlayer-middleware/src/libraries/BitmapUtils.sol";
+// import { FinalizerTaskManager } from "../src/FinalizerTaskManager.sol";
+// import { IFinalizerTaskManager } from "../src/IFinalizerTaskManager.sol";
+// import { IGaspMultiRollupServicePrimitives } from "../src/IGaspMultiRollupServicePrimitives.sol";
+
+// import { IBLSSignatureChecker  } from "@eigenlayer-middleware/src/interfaces/IBLSSignatureChecker.sol";
+
+// contract FinalizerTaskManagerTest is BLSMockAVSDeployer {
+//     msm.FinalizerServiceManager sm;
+//     msm.FinalizerServiceManager smImplementation;
+//     FinalizerTaskManager tm;
+//     FinalizerTaskManager tmImplementation;
+
+//     event NewOpTaskCreated(uint32 indexed taskIndex, FinalizerTaskManager.OpTask task);
+
+//     uint32 public constant TASK_RESPONSE_WINDOW_BLOCK = 30;
+//     address aggregator =
+//         address(uint160(uint256(keccak256(abi.encodePacked("aggregator")))));
+//     address generator =
+//         address(uint160(uint256(keccak256(abi.encodePacked("generator")))));
+
+//     function setUp() public {
+//         _setUpBLSMockAVSDeployer();
+
+//         blsSignatureChecker = new BLSSignatureChecker(registryCoordinator);
+//         // This is a hack to set BlsSignatureChecker's staleStakesForbidden flag
+//         // We do it this way to avoid forking it...
+//         // This hack depends on avsOwner being the same as the deployer...
+//         blsSignatureChecker.setStaleStakesForbidden(false);
+
+//         tmImplementation = new FinalizerTaskManager(
+//         );
+
+//         // Third, upgrade the proxy contracts to use the correct implementation contracts and initialize them.
+//         tm = FinalizerTaskManager(
+//             address(
+//                 new TransparentUpgradeableProxy(
+//                     address(tmImplementation),
+//                     address(proxyAdmin),
+//                     abi.encodeWithSelector(
+//                         tm.initialize.selector,
+//                         pauserRegistry,
+//                         registryCoordinatorOwner,
+//                         aggregator,
+//                         generator,
+//                         true,
+//                         blsSignatureChecker, TASK_RESPONSE_WINDOW_BLOCK, TASK_RESPONSE_WINDOW_BLOCK
+//                     )
+//                 )
+//             )
+//         );
+//     }
+
+//     function testCreateNewTask() public {
+//         bytes memory quorumNumbers = new bytes(0);
+//         cheats.prank(generator, generator);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+//         vm.expectEmit(true, true, false, true);
+//         emit NewTaskCreated( 0, newTask);
+//         tm.createNewTask(2, 100, quorumNumbers);
+//         assertEq(tm.latestTaskNum(), 1);
+
+//     }
+//     function testCreateNewTaskOnlyGenerator() public {
+//         bytes memory quorumNumbers = new bytes(0);
+//         cheats.prank(aggregator, aggregator);
+//         vm.expectRevert("Task generator must be the caller");
+//         tm.createNewTask(2, 100, quorumNumbers);
+//     }
+//     function testCreateNewTaskTwiceSameBlock() public {
+//         bytes memory quorumNumbers = new bytes(0);
+//         cheats.prank(generator, generator);
+//         tm.createNewTask(2, 100, quorumNumbers);
+//         assertEq(tm.latestTaskNum(), 1);
+
+//         cheats.prank(generator, generator);
+//         tm.createNewTask(2, 100, quorumNumbers);
+//         assertEq(tm.latestTaskNum(), 2);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+
+//         //Validate that the two last tasks correspond with the latest tasks in the storage.
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -2 ));
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//     }
+//     function testCreateAndRespondOnlyAggregator() public {
+
+//         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(generator, generator);
+//         vm.expectEmit(true, true, false, true);
+//         emit NewTaskCreated( 0, newTask);
+//         tm.createNewTask(2, 100, quorumNumbers);
+
+//         IFinalizerTaskManager.TaskResponse memory taskResponse;
+//         taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
+//         taskResponse.blockHash = keccak256(abi.encode(newTask));
+//         taskResponse.storageProofHash = keccak256(abi.encodePacked("storageProofHash"));
+//         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
+
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+//         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
+
+//         IFinalizerTaskManager.Task memory newTaskResponse;
+//         newTaskResponse.blockNumber = 2;
+//         newTaskResponse.taskCreatedBlock = 1;
+//         newTaskResponse.quorumThresholdPercentage = 100;
+//         newTaskResponse.quorumNumbers = quorumNumbers;
+
+//         assertEq(keccak256(abi.encode(newTaskResponse)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         cheats.prank(generator, generator);
+//         vm.expectRevert("Aggregator must be the caller");
+//         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
+
+//     }
+//     function testCreateAndRespondTaskValidation() public {
+
+//         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(generator, generator);
+//         vm.expectEmit(true, true, false, true);
+//         emit NewTaskCreated( 0, newTask);
+//         tm.createNewTask(2, 100, quorumNumbers);
+
+//         IFinalizerTaskManager.TaskResponse memory taskResponse;
+//         taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
+//         taskResponse.blockHash = keccak256(abi.encode(newTask));
+//         taskResponse.storageProofHash = keccak256(abi.encodePacked("storageProofHash"));
+//         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
+
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+//         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
+
+//         IFinalizerTaskManager.Task memory newTaskResponse;
+//         newTaskResponse.blockNumber = 2;
+//         newTaskResponse.taskCreatedBlock = 6666;
+//         newTaskResponse.quorumThresholdPercentage = 101;
+//         newTaskResponse.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(aggregator, aggregator);
+//         vm.expectRevert("supplied task does not match the one recorded in the contract");
+//         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
+
+//     }
+//     function getwindowBock() public {
+
+//         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(generator, generator);
+//         vm.expectEmit(true, true, false, true);
+//         emit NewTaskCreated( 0, newTask);
+//         tm.createNewTask(2, 100, quorumNumbers);
+
+//         IFinalizerTaskManager.TaskResponse memory taskResponse;
+//         taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
+//         taskResponse.blockHash = keccak256(abi.encode(newTask));
+//         taskResponse.storageProofHash = keccak256(abi.encodePacked("storageProofHash"));
+//         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
+
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+//         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
+
+//         IFinalizerTaskManager.Task memory newTaskResponse;
+//         newTaskResponse.blockNumber = 2;
+//         newTaskResponse.taskCreatedBlock = 1;
+//         newTaskResponse.quorumThresholdPercentage = 100;
+//         newTaskResponse.quorumNumbers = quorumNumbers;
+
+//         assertEq(keccak256(abi.encode(newTaskResponse)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         cheats.prank(aggregator, aggregator);
+//         vm.expectRevert("BLSSignatureChecker.checkSignatures: empty quorum input");
+//         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
+
+//     }
+//     function testGetTimeWindow() public {
+//         uint32 timeWindow = tm.getTaskResponseWindowBlock();
+//         assertEq(timeWindow, TASK_RESPONSE_WINDOW_BLOCK);
+//     }
+//     function testCreateAndRespondTaskTimeWindow() public {
+
+//         bytes memory quorumNumbers = BitmapUtils.bitmapToBytesArray(0);
+
+//         FinalizerTaskManager.Task memory newTask;
+//         newTask.blockNumber = 2;
+//         newTask.taskCreatedBlock = 1;
+//         newTask.quorumThresholdPercentage = 100;
+//         newTask.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(generator, generator);
+//         vm.expectEmit(true, true, false, true);
+//         emit NewTaskCreated( 0, newTask);
+//         tm.createNewTask(2, 100, quorumNumbers);
+
+//         vm.roll( block.number + tm.getTaskResponseWindowBlock() + 1);
+//         IFinalizerTaskManager.TaskResponse memory taskResponse;
+//         taskResponse.referenceTaskIndex = tm.latestTaskNum() -1;
+//         taskResponse.blockHash = keccak256(abi.encode(newTask));
+//         taskResponse.storageProofHash = keccak256(abi.encodePacked("storageProofHash"));
+//         taskResponse.pendingStateHash = keccak256(abi.encodePacked("pendingStateHash"));
+
+//         assertEq(keccak256(abi.encode(newTask)), tm.allTaskHashes(tm.latestTaskNum() -1 ));
+
+//         IBLSSignatureChecker.NonSignerStakesAndSignature memory nonSignerStakesAndSignature;
+//         IGaspMultiRollupServicePrimitives.NonSignerStakesAndSignatureForOldState memory NonSignerStakesAndSignatureForOldState;
+
+//         IFinalizerTaskManager.Task memory newTaskResponse;
+//         newTaskResponse.blockNumber = 2;
+//         newTaskResponse.taskCreatedBlock = 1;
+//         newTaskResponse.quorumThresholdPercentage = 100;
+//         newTaskResponse.quorumNumbers = quorumNumbers;
+
+//         cheats.prank(aggregator, aggregator);
+//         vm.expectRevert("Aggregator has responded to the task too late");
+//         tm.respondToTask(newTaskResponse, taskResponse, nonSignerStakesAndSignature, NonSignerStakesAndSignatureForOldState);
+
+//     }
+//     //TODO: Create test for
+//     // respondToTask -> happy path
+//     // respondToTask -> alreadyResponded
+//     // respondToTask -> Threshold not reached ( validate storage value )
+//     // respondToTask -> Threshold reached ( validate storage value )
+//     // respondToTask -> getLatestStateHash
+// }

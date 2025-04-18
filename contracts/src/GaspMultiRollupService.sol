@@ -21,15 +21,13 @@ contract GaspMultiRollupService is Initializable, OwnableUpgradeable, Pausable, 
         address initialOwner,
         address _updater,
         bool _allowNonRootInit,
-        IRolldown _rolldown,
-        IRolldown.ChainId _chainId
+        IRolldown _rolldown
     ) external initializer {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
         updater = _updater;
         allowNonRootInit = _allowNonRootInit;
         rolldown = _rolldown;
-        chainId = _chainId;
         chainRdBatchNonce = 1;
     }
 
@@ -142,7 +140,7 @@ contract GaspMultiRollupService is Initializable, OwnableUpgradeable, Pausable, 
     ) public whenNotPaused onlyUpdater {
         require(taskResponse.batchId == chainRdBatchNonce, "chainRdBatchNonce mismatch");
 
-        require(chainId == task.chainId, "Wrong chainId");
+        require(block.chainid == task.chainId, "Wrong chainId");
         require(latestCompletedRdTaskNumber == 0 || latestCompletedRdTaskNumber < task.taskNum, "Stale RdTask");
         require(latestCompletedOpTaskCreatedBlock != 0, "Op state uninit");
         require(
