@@ -231,7 +231,7 @@ where
         token.balance_of(account).await
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error> {
         let result = self.provider.get_balance(account.into()).await?;
         result.try_into().map_err(|_| L1Error::OverflowError)
@@ -343,7 +343,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn close_cancel(
         &self,
         cancel: gasp_types::Cancel,
@@ -355,7 +355,7 @@ where
             .await
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn close_withdrawal(
         &self,
         withdrawal: gasp_types::Withdrawal,
@@ -367,7 +367,7 @@ where
             .await
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn close_withdrawals_at_once(
         &self,
         withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
@@ -380,7 +380,7 @@ where
         }
     }
 
-    #[tracing::instrument(skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn get_update_hash(&self, start: u128, end: u128) -> Result<H256, L1Error> {
         let pending_update = self.get_update(start, end).await?;
         let x: [u8; 32] = Keccak256::digest(&pending_update.abi_encode()[..]).into();

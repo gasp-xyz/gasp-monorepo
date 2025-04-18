@@ -39,4 +39,7 @@ pub struct Cli {
 
     #[arg(long, default_value_t = false, env = "DRY_RUN")]
     pub dry_run: bool,
+
+    #[arg(long, default_value_t = false, env = "COLORS")]
+    pub colors: bool,
 }

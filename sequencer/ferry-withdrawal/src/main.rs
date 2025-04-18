@@ -11,13 +11,13 @@ mod filter;
 mod hunter;
 mod metrics;
 
-fn init_logger() {
+fn init_logger(with_colors: bool) {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env_lossy();
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .with_ansi(false)
+        .with_ansi(with_colors)
         .init();
 }
 
@@ -46,7 +46,7 @@ pub enum Error {
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
-    init_logger();
+    init_logger(args.colors);
 
     tracing::info!("config: {args:#?}");
 

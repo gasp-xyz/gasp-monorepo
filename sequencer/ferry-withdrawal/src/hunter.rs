@@ -100,7 +100,12 @@ where
         //TODO replace with wait for the next block
         while let Some(elem) = stream.next().await {
             let (block_nr, at) = elem?;
-            tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
+
+            let latest_request_id_on_l2 = self
+                .l2
+                .get_latest_created_request_id(self.chain, at)
+                .await?;
+            tracing::info!("#{block_nr} Looking for ferry requests at block {at} - latest rid : {latest_request_id_on_l2:?}");
 
             if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
                 let chunks =
@@ -108,7 +113,7 @@ where
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
-                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count} (last : {end})",
+                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
@@ -120,6 +125,7 @@ where
                         .into_iter()
                         .flatten()
                     {
+                        tracing::info!("found pending withdrawal: {w}");
                         self.sink.send(w).await?;
                     }
                 }

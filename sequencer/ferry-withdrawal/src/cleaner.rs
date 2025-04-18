@@ -107,10 +107,7 @@ where
                             .into_iter()
                             .flatten()
                         {
-                            tracing::info!(
-                                "found withdrawal ready to be closed rid: {}",
-                                withdrawal.request_id.id
-                            );
+                            tracing::info!("found withdrawal ready to be closed {withdrawal}",);
                             self.sink
                                 .send(FerryAction::CloseFerriedWithdrawal { withdrawal })
                                 .await?;
@@ -121,7 +118,7 @@ where
                 _ => {}
             }
             if let Some(elem) = stream.next().await {
-                tracing::info!("found new batch {elem:?}");
+                tracing::info!("New batch found {elem:?}");
             } else {
                 break;
             }
