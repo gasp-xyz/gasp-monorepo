@@ -1,6 +1,10 @@
 use futures::future::join_all;
+use gasp_bindings::api::runtime_types::frame_system::extensions::check_nonce::CheckNonce;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
+use subxt::config::signed_extensions::ChargeTransactionPaymentParams;
+use subxt::config::signed_extensions::CheckMortalityParams;
+use subxt::config::signed_extensions::CheckNonceParams;
 use std::collections::HashMap;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
@@ -54,7 +58,7 @@ impl Gasp {
 
     #[tracing::instrument(skip(self))]
     async fn wait_for_tx_execution(&self, tx_hash: HashOf<GaspConfig>) -> Result<bool, L2Error> {
-        let mut stream = self.header_stream(Finalization::Finalized).await?;
+        let mut stream = self.header_stream(Finalization::Best).await?;
 
         while let Some(header) = stream.next().await {
             let (number, hash) = header?;
@@ -109,11 +113,57 @@ impl Gasp {
         Err(L2Error::UnknownTxStatus)
     }
 
+
+
+    async fn best_header_stream(&self) -> Result<HeaderStream, L2Error> {
+        Ok(self
+            .client
+            .backend()
+            .stream_best_block_headers()
+            .await?
+            .map(|elem| {
+                elem.map(|(header, hash)| (header.number, hash.hash()))
+                    .map_err(L2Error::from)
+            })
+            .boxed())
+    }
+
+    async fn best_block(&self) -> Result<(u32, HashOf<GaspConfig>), L2Error> {
+        self.best_header_stream()
+            .await?
+            .next()
+            .await
+            .expect("infinite stream")
+    }
+
+
+    async fn fetch_nonce(&self, who: [u8; 20]) -> Result<u32, L2Error> {
+        let at = self.best_block().await?.1;
+
+        let query = gasp_bindings::api::storage()
+            .system()
+            .account(gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20(who));
+
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&query)
+            .await?
+            .map(|elem| elem.nonce)
+            .unwrap_or_default())
+    }
+
     async fn sign_and_send(&self, call: impl subxt::tx::Payload) -> Result<bool, L2Error> {
         let tx = self.client.tx();
 
+        let mortality = CheckMortalityParams::default();
+        let nonce = self.fetch_nonce(self.keypair.address().into_inner()).await?;
+        let nonce = CheckNonceParams(Some((nonce) as u64));
+        let payment = ChargeTransactionPaymentParams::no_tip();
+        let mut params = ((), (), (), mortality, nonce, payment);
         let partial_signed = tx
-            .create_partial_signed(&call, &self.keypair.address(), Default::default())
+            .create_partial_signed(&call, &self.keypair.address(), params)
             .await?;
 
         tracing::trace!("tx: {}", hex_encode(partial_signed.signer_payload()));

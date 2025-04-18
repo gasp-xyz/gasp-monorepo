@@ -109,9 +109,9 @@ pub async fn main() -> Result<(), Error> {
     });
 
     let executor_handle: TaskHandle =
-        tokio::spawn(async move { Ok::<_, Error>(executor.run().await?) });
+        tokio::spawn(async move { Ok::<_, Error>(executor.run().await.inspect_err(|e| tracing::error!("Err: {e}"))?) });
 
-    if let Err(e) = tokio::try_join!(hunter_handle, filter_handle, executor_handle, delay_task) {
+    if let Err(e) = tokio::try_join!(executor_handle, filter_handle, hunter_handle, delay_task) {
         tracing::error!("err : {e}");
     }
 
