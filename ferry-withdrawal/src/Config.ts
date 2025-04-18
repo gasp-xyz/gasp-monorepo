@@ -69,6 +69,7 @@ const cliConfigSchemat = z.object({
 	REPLICA_ID: z.bigint().default(0n),
 	MIN_REQUEST_ID: z.bigint().default(0n),
 	SKIP_STASH: z.boolean().default(false),
+	METRICS_PORT: z.number().default(8080),
 });
 
 function createCliConfig() {
@@ -101,11 +102,15 @@ function createCliConfig() {
 		SKIP_STASH: process.env.SKIP_STASH
 			? Boolean(process.env.SKIP_STASH)
 			: undefined,
+		METRICS_PORT: process.env.METRICS_PORT
+			? parseInt(process.env.METRICS_PORT)
+			: undefined,
 	});
 }
 
 const configuration = createCliConfig();
 
+export const METRICS_PORT = configuration.METRICS_PORT;
 export const MANGATA_CONTRACT_ADDRESS =
 	configuration.MANGATA_CONTRACT_ADDRESS as `0x${string}`;
 export const ETH_CHAIN_URL = configuration.ETH_CHAIN_URL;

@@ -1155,12 +1155,12 @@ contract UpdateL1FromL2 is RolldownTest {
         assertEq(l2Batch, merkleRoot);
     }
 
-    function test_RevertIf_ZeroRootCount() public {
+    function test_RevertIf_BatchNotFound() public {
         vm.prank(users.updater);
 
         uint256 requestId = rolldown.lastProcessedUpdate_origin_l2();
 
-        vm.expectRevert(ZeroRootCount.selector);
+        vm.expectRevert(BatchNotFound.selector);
         rolldown.findL2Batch(requestId);
     }
 

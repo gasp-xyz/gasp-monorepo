@@ -1,14 +1,17 @@
 use std::time::Duration;
 
 use alloy::sol_types::SolValue;
-use futures::StreamExt;
+use futures::{FutureExt, StreamExt};
+use gasp_types::PendingUpdate;
 use hex::encode as hex_encode;
 use primitive_types::H256;
 use tokio::sync::mpsc::Sender;
 use tokio::time::timeout;
 
-use crate::l1::{types as l1types, L1Error, L1Interface};
-use crate::l2::{types as l2types, HeaderStream, L2Error, L2Interface, PendingUpdate};
+use l1api::{types::RequestStatus, L1Error, L1Interface};
+use l2api::{HeaderStream, L2Error, L2Interface};
+// use crate::l1::{types as l1types, L1Error, L1Interface};
+// use crate::l2::{types as l2types, HeaderStream, L2Error, L2Interface, PendingUpdate};
 
 const ALERT_ERROR: &str = "ALERT::ERROR";
 const ALERT_WARNING: &str = "ALERT::WARNING";
@@ -27,7 +30,7 @@ lazy_static::lazy_static! {
 pub struct Sequencer<L1, L2> {
     l1: L1,
     l2: L2,
-    chain: l2types::Chain,
+    chain: gasp_types::Chain,
     limit: u128,
     l1_account_address: [u8; 20],
     l2_account_address: [u8; 20],
@@ -57,6 +60,13 @@ pub enum Error {
     NotASequencer,
     #[error("Account balance dropped below required minimum")]
     NotEnoughtBalance,
+    #[error("Unknown merkle root")]
+    UnknownMerkleRoot,
+    #[error("Reqeust `{request_id:?}` not found for chain `{chain:?}`")]
+    CancelIdDoesNotExistsOnL2 {
+        request_id: gasp_types::U256,
+        chain: gasp_types::Chain,
+    },
 }
 
 impl<L1, L2> Sequencer<L1, L2>
@@ -64,16 +74,23 @@ where
     L1: L1Interface,
     L2: L2Interface,
 {
-    pub fn new(l1: L1, l2: L2, chain: l2types::Chain, limit: u128, tx_cost: Option<u128>) -> Self {
-        let l1_account_address = l1.account_address();
-        let l2_account_address = l2.account_address();
+    pub fn new(
+        l1: L1,
+        l2: L2,
+        chain: gasp_types::Chain,
+        l1_account: [u8; 20],
+        l2_account: [u8; 20],
+        limit: u128,
+        tx_cost: Option<u128>,
+    ) -> Self {
+        // TODO: pass addresses in ctor
         Self {
             l1,
             l2,
             chain,
             limit,
-            l1_account_address,
-            l2_account_address,
+            l1_account_address: l1_account,
+            l2_account_address: l2_account,
             tx_cost,
         }
     }
@@ -165,12 +182,8 @@ where
             return Ok(ActionStatus::Skipped);
         }
 
-        let dispute_period = self.l2.get_dispute_period(self.chain.clone(), at).await?;
-        let sequencers_count = self
-            .l2
-            .get_active_sequencers(self.chain.clone(), at)
-            .await?
-            .len();
+        let dispute_period = self.l2.get_dispute_period(self.chain, at).await?;
+        let sequencers_count = self.l2.get_active_sequencers(self.chain, at).await?.len();
         let latest_update_block_time = self.find_latest_correct_update_block_submission(at).await?;
 
         let should_send_update = self
@@ -232,7 +245,10 @@ where
     }
 
     pub async fn run(&self, sender: Sender<()>) -> Result<(), Error> {
-        let mut stream = self.l2.finalized_header_stream().await?;
+        let mut stream = self
+            .l2
+            .header_stream(l2api::Finalization::Finalized)
+            .await?;
         loop {
             sender.send(()).await.expect("send error");
             let (number, block_hash) = stream.next().await.expect("infinite stream")?;
@@ -267,17 +283,29 @@ where
     }
 
     pub async fn close_cancel(&self, request_id: u128, at: H256) -> Result<(), Error> {
-        let (merkle_root, range) = self.l1.get_merkle_root(request_id).await?;
+        let chain = self.chain;
+        let (merkle_root, range) = self
+            .l1
+            .get_merkle_root(request_id)
+            .await?
+            .ok_or(Error::UnknownMerkleRoot)?;
         let proof = self
             .l2
-            .get_merkle_proof(request_id, range, self.chain.clone(), at)
+            .get_merkle_proof(request_id, range, self.chain, at)
             .await?;
-        let cancel_bytes = self
+
+        let cancel = self
             .l2
-            .get_abi_encoded_request(request_id, self.chain.clone(), at)
-            .await?;
-        let cancel = l1types::Cancel::abi_decode(cancel_bytes.as_ref(), true)
-            .map_err(|_| Error::CancelDeserializationFailure)?;
+            .get_l2_request(self.chain, request_id, at)
+            .await?
+            .and_then(|elem| match elem {
+                gasp_types::L2Request::Cancel(cancel) => Some(cancel),
+                _ => None,
+            })
+            .ok_or(Error::CancelIdDoesNotExistsOnL2 {
+                request_id: request_id.into(),
+                chain,
+            })?;
         self.l1
             .close_cancel(cancel, merkle_root.into(), proof)
             .await?;
@@ -288,14 +316,6 @@ where
         let updates = self.l2.get_pending_updates(at).await?;
         let mut updates = updates
             .into_iter()
-            .map(|(update_id, chain, metadata)| -> PendingUpdate {
-                PendingUpdate {
-                    update_id,
-                    chain,
-                    range: (metadata.min_id, metadata.max_id),
-                    hash: metadata.update_hash,
-                }
-            })
             .filter(|update| update.chain == self.chain)
             .collect::<Vec<_>>();
         updates.sort_by_key(|update| update.update_id);
@@ -332,7 +352,7 @@ where
         at: H256,
     ) -> Result<Option<u128>, Error> {
         let updates = self.get_pending_updates(at).await?;
-        let dispute_period_length = self.l2.get_dispute_period(self.chain.clone(), at).await?;
+        let dispute_period_length = self.l2.get_dispute_period(self.chain, at).await?;
         let l1handle = &self.l1;
 
         let mut verified = futures::stream::iter(updates.into_iter().rev()).map(|update| async {
@@ -357,14 +377,14 @@ where
     pub async fn cancel_update(&self, update_id: u128) -> Result<bool, Error> {
         Ok(self
             .l2
-            .cancel_pending_request(update_id, self.chain.clone())
+            .cancel_pending_request(update_id, self.chain)
             .await?)
     }
 
     #[tracing::instrument(skip(self))]
     pub async fn has_read_rights_available(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let read_rights = self.l2.get_read_rights(self.chain.clone(), at).await?;
+        let read_rights = self.l2.get_read_rights(self.chain, at).await?;
         tracing::trace!("read rights: {}", read_rights);
         Ok(read_rights > 0)
     }
@@ -372,11 +392,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn is_selected_sequencer(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        match self
-            .l2
-            .get_selected_sequencer(self.chain.clone(), at)
-            .await?
-        {
+        match self.l2.get_selected_sequencer(self.chain, at).await? {
             Some(selected) if selected == self.l2_account_address => {
                 tracing::debug!("i am selected");
                 Ok(true)
@@ -399,7 +415,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn has_cancel_rights_available(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let cancel_rights = self.l2.get_cancel_rights(self.chain.clone(), at).await?;
+        let cancel_rights = self.l2.get_cancel_rights(self.chain, at).await?;
         tracing::trace!("cancel rights: {}", cancel_rights);
         Ok(cancel_rights > 0)
     }
@@ -407,10 +423,7 @@ where
     #[tracing::instrument(skip(self))]
     pub async fn is_active_sequencer(&self) -> Result<bool, Error> {
         let at = self.get_latest_block_hash().await?;
-        let active = self
-            .l2
-            .get_active_sequencers(self.chain.clone(), at)
-            .await?;
+        let active = self.l2.get_active_sequencers(self.chain, at).await?;
 
         Ok(active.iter().any(|e| e == &(self.l2_account_address)))
     }
@@ -418,7 +431,7 @@ where
     pub async fn get_latest_block_hash(&self) -> Result<H256, Error> {
         Ok(self
             .l2
-            .header_stream()
+            .header_stream(l2api::Finalization::Finalized)
             .await?
             .next()
             .await
@@ -430,10 +443,10 @@ where
     pub async fn get_pending_update(
         &self,
         at: H256,
-    ) -> Result<Option<(H256, l2types::L1Update)>, Error> {
+    ) -> Result<Option<(H256, gasp_types::L1Update)>, Error> {
         let latest_processed_on_l2 = self
             .l2
-            .get_latest_processed_request_id(self.chain.clone(), at)
+            .get_latest_processed_request_id(self.chain, at)
             .await?;
         let latest_request_l1 = self.l1.get_latest_reqeust_id().await?;
 
@@ -473,7 +486,7 @@ where
         if let Some(latest_closable_request_id) = latest_closable_request_id {
             let cancels = self
                 .l2
-                .get_pending_cancels(self.chain.clone(), at)
+                .get_pending_cancels(self.chain, at)
                 .await?
                 .into_iter()
                 .filter(|&cancel_request_id| cancel_request_id <= latest_closable_request_id)
@@ -483,10 +496,13 @@ where
                 .map(|cancel_request_id: u128| async move {
                     let hash = self
                         .l2
-                        .get_l2_request_hash(cancel_request_id, self.chain.clone(), at)
+                        .get_l2_request_hash(cancel_request_id, self.chain, at)
                         .await?
                         .ok_or(Error::L2RequestDoesNotExists(cancel_request_id))?;
-                    Ok::<_, Error>((self.l1.is_closed(hash).await?, cancel_request_id))
+                    let status = self.l1.get_status(hash).map(|e| {
+                        e.map(|elem| (matches!(elem, RequestStatus::Closed), cancel_request_id))
+                    });
+                    Ok::<_, Error>(status.await?)
                 })
                 .collect::<Vec<_>>()
                 .await;
@@ -505,155 +521,39 @@ where
     }
 
     pub async fn get_my_balance(&self) -> Result<u128, Error> {
-        Ok(self.l1.get_native_balance(self.l1_account_address).await?)
+        Ok(self.l1.native_balance(self.l1_account_address).await?)
     }
 }
 
 #[cfg(test)]
 pub(crate) mod test {
     use super::*;
-    use crate::l1::types as l1types;
-    use crate::l2::{types as l2types, HeaderStream, PendingUpdateWithKeys};
     use hex_literal::hex;
 
+    use gasp_types::{Chain, PendingUpdate};
+    use l1api::mock::MockL1;
+    use l2api::mock::MockL2;
     use mockall::predicate::eq;
-    use parity_scale_codec::Decode;
+
     use primitive_types::H256;
 
-    mockall::mock! {
-        pub L1 {}
-
-        impl L1Interface for L1{
-            fn account_address(&self) -> [u8; 20];
-            async fn get_latest_reqeust_id(&self) -> Result<Option<u128>, L1Error>;
-            async fn get_update(&self, start: u128, end: u128) ->  Result<l1types::L1Update, L1Error>;
-            async fn get_update_hash(&self, start: u128, end: u128) ->  Result<H256, L1Error>;
-            async fn close_cancel(&self, cancel: l1types::Cancel, merkle_root:H256, proof: Vec<H256>) -> Result<H256, L1Error>;
-            async fn get_latest_finalized_request_id(&self) -> Result<Option<u128>, L1Error>;
-            async fn get_merkle_root(&self, request_id: u128) -> Result<([u8; 32], (u128, u128)), L1Error>;
-            async fn is_closed(&self, request_hash: H256) -> Result<bool, L1Error>;
-            async fn get_native_balance(&self, address: [u8; 20]) -> Result<u128, L1Error>;
-            async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error>;
-        }
-    }
-
-    mockall::mock! {
-        pub L2 {}
-
-        impl L2Interface for L2{
-            fn account_address(&self) -> [u8; 20];
-            async fn get_latest_processed_request_id(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
-            async fn get_read_rights(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
-            async fn get_cancel_rights(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
-            async fn get_pending_updates(&self, at: H256) -> Result<Vec<PendingUpdateWithKeys>, L2Error>;
-            async fn deserialize_sequencer_update(&self, data: Vec<u8>) -> Result<l2types::L1Update, L2Error>;
-            async fn cancel_pending_request(&self, request_id: u128, chain: l2types::Chain) -> Result<bool, L2Error>;
-            async fn update_l1_from_l2(&self, update: l2types::L1Update, hash: H256) -> Result<bool, L2Error>;
-            async fn get_pending_cancels( &self, chain: l2types::Chain, at: H256) -> Result<Vec<u128>, L2Error>;
-            async fn get_merkle_proof( &self, request_id: u128, range : (u128, u128), chain: l2types::Chain, at: H256) -> Result<Vec<H256>, L2Error>;
-            async fn get_l2_request_hash( &self, request_id: u128, chain: l2types::Chain, at: H256) -> Result<Option<H256>, L2Error>;
-            async fn header_stream( &self) -> Result<HeaderStream, L2Error>;
-            async fn finalized_header_stream( &self) -> Result<HeaderStream, L2Error>;
-            async fn get_selected_sequencer( &self, chain: l2types::Chain, at: H256) -> Result<Option<[u8; 20]>, L2Error>;
-            async fn get_abi_encoded_request( &self, request_id : u128, chain: l2types::Chain, at: H256) -> Result<Vec<u8>, L2Error>;
-            async fn get_active_sequencers(&self, chain: l2types::Chain, at: H256) -> Result<Vec<[u8; 20]>, L2Error>;
-            async fn get_dispute_period(&self, chain: l2types::Chain, at: H256) -> Result<u128, L2Error>;
-        }
-    }
-
     const DUMMY_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000000000000");
-    const ETHEREUM: l2types::Chain = l2types::Chain::Ethereum;
-    const ARBITRUM: l2types::Chain = l2types::Chain::Arbitrum;
-    #[allow(dead_code)]
-    const BASE: l2types::Chain = l2types::Chain::Base;
-
-    #[allow(dead_code)]
-    pub enum Request {
-        Deposit(l2types::Deposit),
-        Cancel(l2types::CancelResolution),
-    }
-
-    impl From<l2types::Deposit> for Request {
-        fn from(d: l2types::Deposit) -> Self {
-            Self::Deposit(d)
-        }
-    }
-
-    pub struct UpdateBuilder(Vec<Request>);
-
-    pub fn to_u256(value: u128) -> l2types::bindings::runtime_types::primitive_types::U256 {
-        let x = primitive_types::U256::from(value);
-        let data = x.to_big_endian();
-        l2types::bindings::runtime_types::primitive_types::U256::decode(&mut &data[..]).unwrap()
-    }
-
-    #[allow(dead_code)]
-    impl UpdateBuilder {
-        pub fn new() -> Self {
-            Self(vec![])
-        }
-
-        pub fn with_dummy_deposit(self, rid: u128) -> Self {
-            self.with_request(
-                l2types::Deposit {
-                    requestId: l2types::RequestId {
-                        origin: l2types::Origin::L1,
-                        id: rid,
-                    },
-                    depositRecipient: DUMMY_ADDRESS,
-                    tokenAddress: DUMMY_ADDRESS,
-                    amount: to_u256(100u128),
-                    timeStamp: to_u256(0u128),
-                    ferryTip: to_u256(0u128),
-                }
-                .into(),
-            )
-        }
-
-        pub fn with_request(mut self, r: Request) -> Self {
-            self.0.push(r);
-            self
-        }
-
-        pub fn build(self, chain: l2types::Chain) -> l2types::L1Update {
-            let mut result = l2types::L1Update {
-                chain,
-                pendingDeposits: vec![],
-                pendingCancelResolutions: vec![],
-            };
-
-            for elem in self.0.into_iter() {
-                match elem {
-                    Request::Deposit(d) => {
-                        result.pendingDeposits.push(d);
-                    }
-                    Request::Cancel(c) => {
-                        result.pendingCancelResolutions.push(c);
-                    }
-                }
-            }
-
-            result
-        }
-    }
+    const ETHEREUM: Chain = Chain::Ethereum;
+    const ARBITRUM: Chain = Chain::Arbitrum;
 
     #[tokio::test]
     async fn test_find_malicious_update_ignores_valid_updates() {
         let update_hash = H256::zero();
         let correct_hash = update_hash;
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: 1u128,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
 
-        let pending: PendingUpdateWithKeys = (1u128, ETHEREUM, metadata);
-
-        let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
+        let mut l1mock = l1api::mock::MockL1::new();
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -661,13 +561,20 @@ pub(crate) mod test {
             .returning(move |_, _| Ok(correct_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -679,27 +586,31 @@ pub(crate) mod test {
     async fn test_find_malicious_update_ignores_updates_from_other_chains() {
         let update_hash = H256::zero();
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let pending = PendingUpdate {
+            chain: ARBITRUM,
+            update_id: 1u128,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let pending: PendingUpdateWithKeys = (1u128, ARBITRUM, metadata);
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock.expect_get_update_hash().times(0);
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -709,22 +620,20 @@ pub(crate) mod test {
 
     #[tokio::test]
     async fn test_find_malicious_update_works() {
-        let update_hash = H256::from(hex!(
-            "1111111111111111111111111111111111111111111111111111111111111111"
-        ));
+        let update_hash = H256::from_slice(
+            &hex::decode("1111111111111111111111111111111111111111111111111111111111111111")
+                .unwrap(),
+        );
         let correct_hash = H256::zero();
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: 1u128,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let pending: PendingUpdateWithKeys = (1u128, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -732,13 +641,20 @@ pub(crate) mod test {
             .returning(move |_, _| Ok(correct_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -749,14 +665,14 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(1u128)));
-        l1mock.expect_is_closed().returning(|_| Ok(false));
+        l1mock
+            .expect_get_status()
+            .returning(|_| Ok(RequestStatus::Pending));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(vec![1u128, 2u128]));
@@ -764,7 +680,15 @@ pub(crate) mod test {
             .expect_get_l2_request_hash()
             .returning(|_, _, _| Ok(Some(H256::zero())));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -775,17 +699,17 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close2() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(10u128)));
-        l1mock.expect_is_closed().returning(|_| Ok(false));
+        l1mock
+            .expect_get_status()
+            .returning(|_| Ok(RequestStatus::Pending));
 
         let pending_cancels = vec![1u128, 2u128, 10u128];
         let cancels = pending_cancels.clone();
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_l2_request_hash()
             .returning(|_, _, _| Ok(Some(H256::zero())));
@@ -793,7 +717,15 @@ pub(crate) mod test {
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(cancels));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -815,28 +747,26 @@ pub(crate) mod test {
         ));
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(Some(10u128)));
         l1mock
-            .expect_is_closed()
+            .expect_get_status()
             .with(eq(first_request_hash))
-            .returning(|_| Ok(true));
+            .returning(|_| Ok(RequestStatus::Closed));
         l1mock
-            .expect_is_closed()
+            .expect_get_status()
             .with(eq(second_request_hash))
-            .returning(|_| Ok(false));
+            .returning(|_| Ok(RequestStatus::Pending));
         l1mock
-            .expect_is_closed()
+            .expect_get_status()
             .with(eq(third_request_hash))
-            .returning(|_| Ok(true));
+            .returning(|_| Ok(RequestStatus::Closed));
 
         let pending_cancels = vec![1u128, 2u128, 10u128];
         let cancels = pending_cancels.clone();
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_l2_request_hash()
             .with(eq(pending_cancels[0]), eq(ETHEREUM), eq(at))
@@ -854,7 +784,15 @@ pub(crate) mod test {
             .expect_get_pending_cancels()
             .return_once(|_, _| Ok(cancels));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
         let result = sequencer.find_closable_cancel_resolutions(at).await;
 
         assert_eq!(result.unwrap(), vec![2u128]);
@@ -863,16 +801,22 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_find_pending_cancels_to_close_when_there_is_no_merkle_root_provided_to_l1() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_finalized_request_id()
             .return_once(|| Ok(None));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock.expect_get_pending_cancels().times(0);
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
         let result = sequencer
             .find_closable_cancel_resolutions(H256::zero())
             .await;
@@ -883,20 +827,26 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_no_requests() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(None));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
 
         l1mock.expect_get_update().times(0);
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         let update = sequencer.get_pending_update(H256::zero()).await;
         assert!(matches!(update, Ok(None)));
@@ -905,19 +855,23 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_requests() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(Some(10u128)));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
 
-        let update = l1types::L1Update {
-            chain: Default::default(),
+        let eth_update = l1api::types::abi::L1Update {
+            chain: Into::<l1api::types::abi::ChainId>::into(ETHEREUM).into(),
+            pendingDeposits: vec![],
+            pendingCancelResolutions: vec![],
+        };
+
+        let gasp_update = gasp_types::L1Update {
+            chain: ETHEREUM.into(),
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
@@ -926,7 +880,7 @@ pub(crate) mod test {
             .expect_get_update()
             .times(1)
             .with(eq(1u128), eq(10u128))
-            .return_once(|_, _| Ok(update));
+            .return_once(|_, _| Ok(eth_update));
 
         l1mock
             .expect_get_update_hash()
@@ -937,9 +891,17 @@ pub(crate) mod test {
         l2mock
             .expect_deserialize_sequencer_update()
             .times(1)
-            .return_once(|_| Ok(UpdateBuilder::new().build(ETHEREUM)));
+            .return_once(|_| Ok(gasp_update));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         sequencer.get_pending_update(H256::zero()).await.unwrap();
     }
@@ -947,19 +909,23 @@ pub(crate) mod test {
     #[tokio::test]
     async fn test_get_pending_update_when_there_are_too_many_requests_for_single_update() {
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_latest_reqeust_id()
             .return_once(|| Ok(Some(1000u128)));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_latest_processed_request_id()
             .return_once(|_, _| Ok(0u128));
 
-        let update = l1types::L1Update {
-            chain: Default::default(),
+        let eth_update = l1api::types::abi::L1Update {
+            chain: Into::<l1api::types::abi::ChainId>::into(ETHEREUM).into(),
+            pendingDeposits: vec![],
+            pendingCancelResolutions: vec![],
+        };
+
+        let gasp_update = gasp_types::L1Update {
+            chain: ETHEREUM.into(),
             pendingDeposits: vec![],
             pendingCancelResolutions: vec![],
         };
@@ -968,7 +934,7 @@ pub(crate) mod test {
             .expect_get_update()
             .times(1)
             .with(eq(1u128), eq(101u128))
-            .return_once(|_, _| Ok(update));
+            .return_once(|_, _| Ok(eth_update));
 
         l1mock
             .expect_get_update_hash()
@@ -979,9 +945,17 @@ pub(crate) mod test {
         l2mock
             .expect_deserialize_sequencer_update()
             .times(1)
-            .return_once(|_| Ok(UpdateBuilder::new().build(ETHEREUM)));
+            .return_once(|_| Ok(gasp_update));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         sequencer.get_pending_update(H256::zero()).await.unwrap();
     }
@@ -992,17 +966,14 @@ pub(crate) mod test {
             "1111111111111111111111111111111111111111111111111111111111111111"
         ));
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: 33u128,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let pending: PendingUpdateWithKeys = (33u128, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .with(eq(1u128), eq(1u128))
@@ -1010,13 +981,20 @@ pub(crate) mod test {
             .returning(move |_, _| Err(L1Error::InvalidRange));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
             .return_once(move |_| Ok(vec![pending]));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer.find_malicious_update(H256::zero()).await.unwrap(),
@@ -1030,17 +1008,14 @@ pub(crate) mod test {
         let update_executed_at = 33u128;
         let update_hash = H256::zero();
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: update_executed_at,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let pending: PendingUpdateWithKeys = (update_executed_at, ETHEREUM, metadata);
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -1048,7 +1023,6 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(update_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -1057,10 +1031,18 @@ pub(crate) mod test {
         l2mock
             .expect_get_dispute_period()
             .times(1)
-            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .with(eq(ETHEREUM), eq(H256::zero()))
             .return_once(move |_, _| Ok(dispute_period));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer
@@ -1078,20 +1060,21 @@ pub(crate) mod test {
         let old_update_executed_at = 23u128;
         let update_hash = H256::zero();
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let latest_pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: latest_update_executed_at,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let latest_pending: PendingUpdateWithKeys =
-            (latest_update_executed_at, ETHEREUM, metadata.clone());
 
-        let old_pending: PendingUpdateWithKeys = (old_update_executed_at, ETHEREUM, metadata);
+        let old_pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: old_update_executed_at,
+            range: (1u128, 1u128),
+            hash: update_hash,
+        };
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -1099,7 +1082,6 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(update_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -1108,10 +1090,18 @@ pub(crate) mod test {
         l2mock
             .expect_get_dispute_period()
             .times(1)
-            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .with(eq(Chain::Ethereum), eq(H256::zero()))
             .return_once(move |_, _| Ok(dispute_period));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer
@@ -1134,28 +1124,21 @@ pub(crate) mod test {
             "2222222222222222222222222222222222222222222222222222222222222222"
         ));
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 1u128,
-            update_size: 1u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let valid_pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: valid_update_executed_at,
+            range: (1u128, 1u128),
+            hash: update_hash,
         };
-        let valid_pending: PendingUpdateWithKeys =
-            (valid_update_executed_at, ETHEREUM, metadata.clone());
 
-        let metadata = l2types::PendingUpdateMetadata {
-            min_id: 1u128,
-            max_id: 3u128,
-            update_size: 3u128,
-            sequencer: l2types::AccountId20(DUMMY_ADDRESS),
-            update_hash: update_hash.clone(),
+        let invalid_pending = PendingUpdate {
+            chain: ETHEREUM,
+            update_id: invalid_update_executed_at,
+            range: (1u128, 3u128),
+            hash: update_hash,
         };
-        let invalid_pending: PendingUpdateWithKeys =
-            (invalid_update_executed_at, ETHEREUM, metadata.clone());
 
         let mut l1mock = MockL1::new();
-        l1mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l1mock
             .expect_get_update_hash()
             .times(1)
@@ -1168,7 +1151,6 @@ pub(crate) mod test {
             .return_once(move |_, _| Ok(invalid_hash));
 
         let mut l2mock = MockL2::new();
-        l2mock.expect_account_address().return_const(DUMMY_ADDRESS);
         l2mock
             .expect_get_pending_updates()
             .times(1)
@@ -1177,10 +1159,18 @@ pub(crate) mod test {
         l2mock
             .expect_get_dispute_period()
             .times(1)
-            .with(eq(l2types::Chain::Ethereum), eq(H256::zero()))
+            .with(eq(Chain::Ethereum), eq(H256::zero()))
             .return_once(move |_, _| Ok(dispute_period));
 
-        let sequencer = Sequencer::new(l1mock, l2mock, ETHEREUM, 100u128, None);
+        let sequencer = Sequencer::new(
+            l1mock,
+            l2mock,
+            ETHEREUM,
+            DUMMY_ADDRESS,
+            DUMMY_ADDRESS,
+            100u128,
+            None,
+        );
 
         assert_eq!(
             sequencer

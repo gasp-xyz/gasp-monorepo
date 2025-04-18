@@ -21,6 +21,10 @@ use ethers::{
     types::{Address, Bytes},
 };
 
+use crate::metrics::{
+    record_last_task_responded_metrics, record_last_task_seen_metrics, OP_TASK_TYPE_STR,
+    RD_TASK_TYPE_STR,
+};
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
 use serde::Serialize;
@@ -112,6 +116,7 @@ impl Operator {
                         PendingTransaction::new(log.transaction_hash, self.clone().client.provider()).await?;
                         let mut op_payload: Option<OpTaskResponse> = None;
                         let mut rd_payload: Option<RdTaskResponse> = None;
+                        let (task_type, task_index): (&str, u32);
                         match stream_event {
                             FinalizerTaskManagerEvents::NewOpTaskCreatedFilter(event) => {
                                 let operators_state_info_hash = self.clone().get_operators_state_info_hash(event.task.clone()).await?;
@@ -125,6 +130,8 @@ impl Operator {
                                         .as_ref()).into(),
                                     operators_state_info_hash,
                                 });
+                                (task_type, task_index) = (OP_TASK_TYPE_STR, event.task_index);
+                                record_last_task_seen_metrics(task_type, task_index);
                             },
                             FinalizerTaskManagerEvents::NewRdTaskCreatedFilter(event) => {
                                 let mut rd_payload_tmp = self.clone().get_rd_update(event.task.clone()).await?;
@@ -136,6 +143,8 @@ impl Operator {
                                     .as_ref()).into();
                                 debug!("rd_payload_tmp: {:?}", rd_payload_tmp);
                                 rd_payload = Some(rd_payload_tmp);
+                                (task_type, task_index) = (RD_TASK_TYPE_STR, event.task_index);
+                                record_last_task_seen_metrics(task_type, task_index);
                             },
                             _ => return Err(eyre!("Got unexpected stream event"))
                         }
@@ -146,7 +155,10 @@ impl Operator {
                         match response {
                             Ok(r) => match r.error_for_status_ref() {
                                 Err(e) => error!("{} - {}", e, r.text().await?),
-                                Ok(_) => info!("Task finished successfuly and sent to AVS service"),
+                                Ok(_) => {
+                                    info!("Task finished successfuly and sent to AVS service");
+                                    record_last_task_responded_metrics(task_type, task_index);
+                                },
                             },
                             Err(e) => error!("send_task_response failed with error: {:?}", e),
                         }

@@ -150,7 +150,7 @@ mockall::mock! {
 		type CurrencyId = TokenId;
 		type Balance = Balance;
 
-		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<PoolInfo<TokenId, Balance>, DispatchError>;
+		fn find_paired_pool(base_id: TokenId, asset_id: TokenId) -> Result<Vec<PoolInfo<TokenId, Balance>>, DispatchError>;
 
 		fn check_can_valuate(base_id: TokenId, pool_id: TokenId) -> Result<(), DispatchError>;
 

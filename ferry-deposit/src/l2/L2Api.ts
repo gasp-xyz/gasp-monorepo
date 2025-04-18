@@ -55,19 +55,21 @@ class L2Api implements L2Interface {
 			return 0n;
 		}
 
-		if (tokenId.unwrap().toNumber() == 0) {
-			return amount;
-		} else {
-			return BigInt(
-				(
-					await this.api.rpc.xyk.calculate_sell_price(
-						tokenId.unwrap(),
-						0,
-						amount,
-					)
-				).toString(),
-			);
-		}
+    if (tokenId.unwrap().toNumber() == 0) {
+      return amount;
+    } else {
+      //TODO : not used, and no point of aligning since we are moving to rust impl
+      throw new Error('unimplemented');
+      // return BigInt(
+      // 	(
+      // 		await this.api.rpc.xyk.calculate_sell_price(
+      // 			tokenId.unwrap(),
+      // 			0,
+      // 			amount,
+      // 		)
+      // 	).toString(),
+      // );
+    }
 	}
 
 	async getNativeTokenAddress(): Promise<Uint8Array> {

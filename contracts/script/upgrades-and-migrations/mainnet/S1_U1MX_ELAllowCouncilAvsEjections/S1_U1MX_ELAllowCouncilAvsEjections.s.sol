@@ -24,10 +24,10 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Test} from "forge-std/Test.sol";
-import { FinalizerServiceManager } from "./../../../../src/FinalizerServiceManager.sol";
-import { FinalizerTaskManager } from "./../../../../src/FinalizerTaskManager.sol";
-import { IFinalizerTaskManager } from "./../../../../src/interfaces/IFinalizerTaskManager.sol";
-import { Utils } from "./../../../utils/Utils.sol";
+import {FinalizerServiceManager} from "../../../../src/FinalizerServiceManager.sol";
+import {FinalizerTaskManager} from "../../../../src/FinalizerTaskManager.sol";
+import {IFinalizerTaskManager} from "../../../../src/interfaces/IFinalizerTaskManager.sol";
+import {Utils} from "../../../utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/Alpha_init_deploy.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $ETHERSCAN_API_KEY --resume
@@ -36,7 +36,8 @@ import { Utils } from "./../../../utils/Utils.sol";
 // Deploys finalizer contracts
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
-    string internal constant _OUTPUT_PATH = "./script/upgrades-and-migrations/mainnet/S1_U1MX_ELAllowCouncilAvsEjections/upgrade_output.json";
+    string internal constant _OUTPUT_PATH =
+        "./script/upgrades-and-migrations/mainnet/S1_U1MX_ELAllowCouncilAvsEjections/upgrade_output.json";
 
     ProxyAdmin public avsProxyAdmin;
     address public avsOwner;
@@ -59,7 +60,6 @@ contract Deployer is Script, Utils, Test {
     uint64 public recurrentRegistrationLimit;
 
     function run() external {
-
         require(!vm.exists(_OUTPUT_PATH), "Output already exists!");
 
         _loadData();
@@ -95,16 +95,10 @@ contract Deployer is Script, Utils, Test {
             RewardsCoordinator(stdJson.readAddress(eigenlayerDeployedContracts, ".addresses.rewardsCoordinator"));
 
         // READ JSON CONFIG DATA
-        path = string.concat(
-            vm.projectRoot(),
-            "/script/config/eth_main/deploy_init.config.json"
-        );
+        path = string.concat(vm.projectRoot(), "/script/config/eth_main/deploy_init.config.json");
         string memory configData = vm.readFile(path);
 
-        path = string.concat(
-            vm.projectRoot(),
-            "/script/output/1/avs_deployment_output.json"
-        );
+        path = string.concat(vm.projectRoot(), "/script/output/1/avs_deployment_output.json");
         string memory avsDeploymentData = vm.readFile(path);
 
         // check that the chainID matches the one in the config
@@ -114,53 +108,44 @@ contract Deployer is Script, Utils, Test {
 
         avsOwner = stdJson.readAddress(configData, ".permissions.owner");
         ejector = stdJson.readAddress(configData, ".permissions.ejector");
-        recurrentRegistrationLimit =
-            uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
+        recurrentRegistrationLimit = uint64(stdJson.readUint(configData, ".registryParams.recurrentRegistrationLimit"));
 
         serviceManager = FinalizerServiceManager(stdJson.readAddress(avsDeploymentData, ".addresses.serviceManager"));
-        registryCoordinator = RegistryCoordinator(stdJson.readAddress(avsDeploymentData, ".addresses.registryCoordinator"));
-        registryCoordinatorImplementation = RegistryCoordinator(stdJson.readAddress(avsDeploymentData, ".addresses.registryCoordinatorImplementation"));
+        registryCoordinator =
+            RegistryCoordinator(stdJson.readAddress(avsDeploymentData, ".addresses.registryCoordinator"));
+        registryCoordinatorImplementation =
+            RegistryCoordinator(stdJson.readAddress(avsDeploymentData, ".addresses.registryCoordinatorImplementation"));
         stakeRegistry = StakeRegistry(stdJson.readAddress(avsDeploymentData, ".addresses.stakeRegistry"));
         taskManager = FinalizerTaskManager(stdJson.readAddress(avsDeploymentData, ".addresses.taskManager"));
-
     }
 
     function verify() external {
         _loadData();
 
-        string memory path = string.concat(
-            vm.projectRoot(),
-            "./upgrade_output.json"
-        );
+        string memory path = string.concat(vm.projectRoot(), "./upgrade_output.json");
         string memory upgradeData = vm.readFile(path);
-        serviceManagerImplementation = FinalizerServiceManager(stdJson.readAddress(upgradeData, ".addresses.serviceManagerImplementation"));
+        serviceManagerImplementation =
+            FinalizerServiceManager(stdJson.readAddress(upgradeData, ".addresses.serviceManagerImplementation"));
 
         // sanity checks
-        _verifyContractPointers(
-            serviceManager, registryCoordinator
-        );
+        _verifyContractPointers(serviceManager, registryCoordinator);
 
-        _verifyContractPointers(
-            serviceManagerImplementation,
-            registryCoordinatorImplementation
-        );
+        _verifyContractPointers(serviceManagerImplementation, registryCoordinatorImplementation);
 
         _verifyImplementations();
-        _verifyInitalizations(
-        );
+        _verifyInitalizations();
     }
 
-    function _verifyContractPointers(
-        FinalizerServiceManager _serviceManager,
-        RegistryCoordinator _registryCoordinator
-    ) internal view {
+    function _verifyContractPointers(FinalizerServiceManager _serviceManager, RegistryCoordinator _registryCoordinator)
+        internal
+        view
+    {
         require(_serviceManager.taskManager() == taskManager, "serviceManager.taskManager() != taskManager");
 
         require(
             address(_registryCoordinator.serviceManager()) == address(serviceManager),
             "registryCoordinator.serviceManager() != serviceManager"
         );
-
     }
 
     function _verifyImplementations() internal view {
@@ -171,8 +156,7 @@ contract Deployer is Script, Utils, Test {
         );
     }
 
-    function _verifyInitalizations(
-    ) internal view {
+    function _verifyInitalizations() internal view {
         require(serviceManager.owner() == avsOwner, "serviceManager.owner() != avsOwner");
         require(serviceManager.ejector() == ejector, "serviceManager.ejector() != ejector");
         require(
@@ -180,14 +164,14 @@ contract Deployer is Script, Utils, Test {
         );
     }
 
-
     function _writeOutput() internal {
         string memory parent_object = "parent object";
 
         string memory deployed_addresses = "addresses";
         vm.serializeAddress(deployed_addresses, "serviceManager", address(serviceManager));
-        string memory deployed_addresses_output =
-        vm.serializeAddress(deployed_addresses, "serviceManagerImplementation", address(serviceManagerImplementation));
+        string memory deployed_addresses_output = vm.serializeAddress(
+            deployed_addresses, "serviceManagerImplementation", address(serviceManagerImplementation)
+        );
 
         string memory chain_info = "chainInfo";
         vm.serializeUint(chain_info, "lastUpgradeImplDeployBlock", block.number);
@@ -199,9 +183,7 @@ contract Deployer is Script, Utils, Test {
         _writeOutputLocal(finalJson);
     }
 
-    function _writeOutputLocal(
-        string memory outputJson
-    ) internal {
+    function _writeOutputLocal(string memory outputJson) internal {
         vm.writeJson(outputJson, getOutputPath());
     }
 

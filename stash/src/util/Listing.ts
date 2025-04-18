@@ -1,11 +1,12 @@
 import { BN } from '@polkadot/util'
-import * as tradesStore from '../repository/TradeVolumeRepository.js'
-import * as priceStore from '../repository/PriceRepository.js'
-import { TimestampedAmount } from '../schema/Models.js'
 import { Decimal } from 'decimal.js'
-import * as volumeStore from '../repository/VolumeRepository.js'
-import MangataClient from '../connector/MangataNode.js'
 import { MainTokens } from 'gasp-sdk'
+
+import MangataClient from '../connector/MangataNode.js'
+import * as priceStore from '../repository/PriceRepository.js'
+import * as tradesStore from '../repository/TradeVolumeRepository.js'
+import * as volumeStore from '../repository/VolumeRepository.js'
+import { TimestampedAmount } from '../schema/Models.js'
 
 const LAST_INDEX = -1
 const SECOND_ELEMENT_INDEX = 1

@@ -133,14 +133,6 @@ contract FinalizerTaskManager is
         emit RolldownTargetUpdated(address(_rolldown));
     }
 
-    function pauseTrackingOpState() public onlyOwner {
-        emit PauseTrackingOpState();
-    }
-
-    function resumeTrackingQuorums(bool resetTrackedQuorums) public onlyOwner {
-        emit ResumeTrackingOpState(resetTrackedQuorums);
-    }
-
     function updateBlsSignatureCheckerAddress(address _blsSignatureCheckerAddress) external onlyOwner {
         blsSignatureChecker = BLSSignatureChecker(_blsSignatureCheckerAddress);
         emit BLSSignatureCheckerAddressUpdated(_blsSignatureCheckerAddress);

@@ -12,7 +12,29 @@ import (
 
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
+
+	"context"
+	"github.com/ethereum/go-ethereum"
+	chain "github.com/ethereum/go-ethereum/core/types"
 )
+
+type AvsSubscriberer interface {
+	StreamQueryWithHistory(ctx context.Context, q *ethereum.FilterQuery) (chan chain.Log, ethereum.Subscription, error)
+	
+	SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription
+	
+	SubscribeToRdTaskResponses(taskResponseLogs chan *taskmanager.ContractFinalizerTaskManagerRdTaskResponded) event.Subscription
+	
+	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error)
+	
+	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error)
+	
+	SubscribeToOperatorStakeUpdate(updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error)
+	
+	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
+}
+
+var _ AvsSubscriberer = (*AvsSubscriber)(nil)
 
 // Subscribers use a ws connection instead of http connection like Readers
 // kind of stupid that the geth client doesn't have a unified interface for both...
@@ -39,6 +61,11 @@ func NewAvsSubscriber(registryAddr gethcommon.Address, ethclient *ethclient.Clie
 		StreamSubscriber:  &streamSubscriber,
 		logger:              logger,
 	}, nil
+}
+
+func (s *AvsSubscriber) StreamQueryWithHistory(ctx context.Context, q *ethereum.FilterQuery) (chan chain.Log, ethereum.Subscription, error) {
+	rawLogsC, sub, err := s.StreamSubscriber.StreamQueryWithHistory(ctx, q)
+	return rawLogsC, sub, err
 }
 
 func (s *AvsSubscriber) SubscribeToNewRdTasks(newTaskCreatedChan chan *taskmanager.ContractFinalizerTaskManagerNewRdTaskCreated) event.Subscription {

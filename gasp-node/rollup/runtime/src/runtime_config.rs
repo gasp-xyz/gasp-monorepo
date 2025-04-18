@@ -59,18 +59,30 @@ pub mod tokens {
 
 pub mod fees {
 	use super::*;
-	// xyk uses 10_000 as fee multiplier
-	pub type PoolFeePercentage = frame_support::traits::ConstU128<20>;
-	pub type TreasuryFeePercentage = frame_support::traits::ConstU128<5>;
-	pub type BuyAndBurnFeePercentage = frame_support::traits::ConstU128<5>;
 
+	pub type MarketPoolFeePercentage = frame_support::traits::ConstU128<20>;
+	pub type MarketTreasuryFeePercentage = frame_support::traits::ConstU128<5>;
+	pub type MarketBuyAndBurnFeePercentage = frame_support::traits::ConstU128<5>;
+	pub type MarketFeeDenominator = ConstU128<10_000>;
+
+	pub type MinSwapFee = ConstU128<6>;
+
+	// We set these to 0 to not have the stable swap pallet charge any exchange commission fees
+	// We charge commission in the market pallet on the input assetof the first atomic swap
+	// xyk uses 10_000 as fee multiplier
+	pub type PoolFeePercentage = frame_support::traits::ConstU128<0>;
+	pub type TreasuryFeePercentage = frame_support::traits::ConstU128<0>;
+	pub type BuyAndBurnFeePercentage = frame_support::traits::ConstU128<0>;
+
+	// We set these to 0 to not have the stable swap pallet charge any exchange commission fees
+	// We charge commission in the market pallet on the input assetof the first atomic swap
 	// market & stableswap uses 1e10 precision; 1*1e10 == 100%
 	// 0.3%, sum of above fees
-	pub type MarketTotalFee = ConstU128<30_000_000>;
+	pub type SSwapTotalFee = ConstU128<0>;
 	// 33% of total fee goes to treasury
-	pub type MarketTreasuryFeePart = ConstU128<3_333_333_334>;
+	pub type SSwapTreasuryFeePart = ConstU128<0>;
 	// 50% of treasury fee gets to burn
-	pub type MarketBnBFeePart = ConstU128<5_000_000_000>;
+	pub type SSwapBnBFeePart = ConstU128<0>;
 
 	pub const FEE_PRECISION: u128 = pallet_stable_swap::Pallet::<Runtime>::FEE_DENOMINATOR;
 }
@@ -155,6 +167,7 @@ pub mod consts {
 		Weight::from_parts(WEIGHT_REF_TIME_PER_SECOND, u64::MAX);
 }
 
+#[derive(Eq, PartialEq, Encode, Decode, Clone)]
 pub enum CallType {
 	UnlockFee,
 	UtilityInnerCall,
@@ -370,6 +383,14 @@ pub mod config {
 		}
 	}
 
+	pub mod pallet_stable_swap {
+		use super::*;
+
+		parameter_types! {
+			pub const MaxEqAssets: u32 = 10;
+		}
+	}
+
 	pub mod pallet_bootstrap {
 		use super::*;
 
@@ -477,8 +498,6 @@ pub mod config {
 		#[derive(Encode, Decode, TypeInfo)]
 		pub enum LiquidityInfoEnum<C: MultiTokenCurrency<T::AccountId>, T: frame_system::Config> {
 			Imbalance((C::CurrencyId, NegativeImbalanceOf<C, T>)),
-			FeeLock,
-			FeeLockSwap((pallet_market::PoolInfo<TokenId>, C::CurrencyId, C::Balance)),
 		}
 
 		pub struct FeeHelpers<T, Currency, FeeLock>(PhantomData<(T, Currency, FeeLock)>);
@@ -490,154 +509,22 @@ pub mod config {
 			FeeLock: FeeLockTriggerTrait<T::AccountId, Balance, TokenId>,
 			sp_runtime::AccountId20: From<T::AccountId> + Into<T::AccountId>,
 		{
-			pub fn is_high_value_swap(
-				fee_lock_metadata: &pallet_fee_lock::FeeLockMetadataInfo<T>,
-				asset_id: u32,
-				asset_amount: u128,
-			) -> bool {
-				if let (true, Some(valuation)) = (
-					fee_lock_metadata.is_whitelisted(asset_id),
-					FeeLock::get_swap_valuation_for_token(asset_id, asset_amount),
-				) {
-					valuation >= fee_lock_metadata.swap_value_threshold
-				} else {
-					false
-				}
-			}
-
-			pub fn can_withdraw_fee(
+			pub fn can_withdraw_amount_in(
 				who: &<T>::AccountId,
-				fee_lock_metadata: pallet_fee_lock::FeeLockMetadataInfo<T>,
-				swap_pool_list: Vec<TokenId>,
 				asset_id_in: TokenId,
 				asset_amount_in: Balance,
-				asset_id_out: TokenId,
-				asset_amount_out: Balance,
-			) -> Result<Option<LiquidityInfoEnum<Currency, T>>, TransactionValidityError> {
-				if swap_pool_list.len() == 0 {
-					return Err(TransactionValidityError::Invalid(
-						InvalidTransaction::SwapPrevalidation.into(),
-					));
-				}
-				let fee_pool = Market::get_pool_info(swap_pool_list[0]).map_err(|_| {
+			) -> Result<(), TransactionValidityError> {
+				Currency::ensure_can_withdraw(
+					asset_id_in,
+					who,
+					asset_amount_in,
+					// Last two args are ignored by orml_tokens
+					WithdrawReasons::all(),
+					Default::default(),
+				)
+				.map_err(|_| {
 					TransactionValidityError::Invalid(InvalidTransaction::SwapPrevalidation.into())
 				})?;
-
-				if fee_pool.pool.0 != asset_id_in && fee_pool.pool.1 != asset_id_in {
-					return Err(TransactionValidityError::Invalid(
-						InvalidTransaction::SwapPrevalidation.into(),
-					));
-				}
-
-				// all swaps pay the trade commision, check balance in case of failure
-				// min fee is 3, trsy, bnb & pool
-				let fee = sp_runtime::helpers_128bit::multiply_by_rational_with_rounding(
-					asset_amount_in,
-					fees::MarketTotalFee::get(),
-					fees::FEE_PRECISION,
-					sp_runtime::Rounding::Down,
-				)
-				.map(|f| f.max(3));
-				let balance = Currency::available_balance(asset_id_in, &who.clone());
-				if fee.map_or(true, |f| f > balance) {
-					return Err(TransactionValidityError::Invalid(
-						InvalidTransaction::SwapPrevalidation.into(),
-					));
-				}
-
-				// no fee lock for allowed high value single pool swap, for both sold & bought asset
-				if swap_pool_list.len() == 1 &&
-					(Self::is_high_value_swap(&fee_lock_metadata, asset_id_in, asset_amount_in) ||
-						Self::is_high_value_swap(
-							&fee_lock_metadata,
-							asset_id_out,
-							asset_amount_out,
-						)) {
-					let _ = FeeLock::unlock_fee(who);
-				// fee lock for multiswap
-				} else {
-					FeeLock::process_fee_lock(who).map_err(|_| {
-						TransactionValidityError::Invalid(InvalidTransaction::ProcessFeeLock.into())
-					})?;
-				}
-
-				// unwrap ok due above map_or check
-				Ok(Some(LiquidityInfoEnum::FeeLockSwap((fee_pool, asset_id_in, fee.unwrap()))))
-			}
-
-			pub fn settle_fees(
-				who: &<T>::AccountId,
-				pool: pallet_market::PoolInfo<TokenId>,
-				fee_asset: TokenId,
-				fee: Balance,
-			) -> Result<(), TransactionValidityError> {
-				let trsy_account = config::TreasuryAccountIdOf::<Runtime>::get().into();
-				let bnb_account = config::BnbAccountIdOf::<Runtime>::get().into();
-
-				let to_trsy = sp_runtime::helpers_128bit::multiply_by_rational_with_rounding(
-					fee,
-					fees::MarketTreasuryFeePart::get(),
-					fees::FEE_PRECISION,
-					sp_runtime::Rounding::Down,
-				)
-				.ok_or(TransactionValidityError::Invalid(InvalidTransaction::Payment.into()))?;
-
-				let to_bnb = sp_runtime::helpers_128bit::multiply_by_rational_with_rounding(
-					to_trsy,
-					fees::MarketBnBFeePart::get(),
-					fees::FEE_PRECISION,
-					sp_runtime::Rounding::Down,
-				)
-				.ok_or(TransactionValidityError::Invalid(InvalidTransaction::Payment.into()))?;
-
-				Currency::transfer(
-					fee_asset,
-					who,
-					&trsy_account,
-					to_trsy - to_bnb,
-					ExistenceRequirement::AllowDeath,
-				)
-				.map_err(|_| {
-					TransactionValidityError::Invalid(InvalidTransaction::Payment.into())
-				})?;
-
-				Currency::transfer(
-					fee_asset,
-					who,
-					&bnb_account,
-					to_bnb,
-					ExistenceRequirement::AllowDeath,
-				)
-				.map_err(|_| {
-					TransactionValidityError::Invalid(InvalidTransaction::Payment.into())
-				})?;
-
-				//
-				match pool.kind {
-					pallet_market::PoolKind::StableSwap => {
-						StableSwap::settle_pool_fees(
-							&who.clone().into(),
-							pool.pool_id,
-							fee_asset,
-							fee - to_trsy,
-						)
-						.map_err(|_| {
-							TransactionValidityError::Invalid(InvalidTransaction::Payment.into())
-						})?;
-					},
-					pallet_market::PoolKind::Xyk => {
-						Xyk::settle_pool_fees(
-							&who.clone().into(),
-							pool.pool_id,
-							fee_asset,
-							fee - to_trsy,
-						)
-						.map_err(|_| {
-							TransactionValidityError::Invalid(InvalidTransaction::Payment.into())
-						})?;
-					},
-				}
-
 				Ok(())
 			}
 		}
@@ -653,10 +540,15 @@ pub mod config {
 		where
 			T: pallet_transaction_payment::Config
 				+ pallet_treasury::Config
-				+ pallet_fee_lock::Config<Tokens = C>,
+				+ pallet_fee_lock::Config<Tokens = C>
+				+ frame_system::Config<RuntimeCall = RuntimeCall, AccountId = sp_runtime::AccountId20>,
 			<T as frame_system::Config>::RuntimeCall:
 				Into<crate::CallType> + Dispatchable<PostInfo = PostDispatchInfo>,
-			C: MultiTokenCurrencyExtended<T::AccountId, Balance = Balance, CurrencyId = TokenId>,
+			C: MultiTokenCurrencyExtended<
+				sp_runtime::AccountId20,
+				Balance = Balance,
+				CurrencyId = TokenId,
+			>,
 			OU: OnMultiTokenUnbalanced<TokenId, NegativeImbalanceOf<C, T>>,
 			OCA: OnChargeTransaction<
 				T,
@@ -681,20 +573,117 @@ pub mod config {
 			) -> Result<Self::LiquidityInfo, TransactionValidityError> {
 				let call_type: crate::CallType = (*call).clone().into();
 
-				match call_type {
-					crate::CallType::Swap { .. } => {
+				match call_type.clone() {
+					CallType::Swap {
+						swap_pool_list,
+						asset_id_in,
+						asset_amount_in,
+						asset_id_out,
+						asset_amount_out,
+					} => {
 						ensure!(
 							tip.is_zero(),
 							TransactionValidityError::Invalid(
 								InvalidTransaction::TippingNotAllowedForSwaps.into(),
 							)
 						);
+						ensure!(
+							!swap_pool_list.len().is_zero(),
+							TransactionValidityError::Invalid(
+								InvalidTransaction::SwapPrevalidation.into(),
+							)
+						);
+						ensure!(
+							swap_pool_list.len() <=
+								<Runtime as pallet_market::Config>::MaxSwapListLength::get()
+									as usize,
+							TransactionValidityError::Invalid(
+								InvalidTransaction::SwapPrevalidation.into(),
+							)
+						);
+						let first_pool_info =
+							Market::get_pool_info(swap_pool_list[0]).map_err(|_| {
+								TransactionValidityError::Invalid(
+									InvalidTransaction::SwapPrevalidation.into(),
+								)
+							})?;
+						ensure!(
+							first_pool_info.pool.0 == asset_id_in ||
+								first_pool_info.pool.1 == asset_id_in,
+							TransactionValidityError::Invalid(
+								InvalidTransaction::SwapPrevalidation.into(),
+							)
+						);
+						let check_amount = asset_amount_in
+							.max(<Runtime as pallet_market::Config>::MinSwapFee::get());
+						FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
+							who,
+							asset_id_in,
+							check_amount,
+						)?;
+
+						let is_sell_swap = match *call {
+							RuntimeCall::Market(pallet_market::Call::multiswap_asset {
+								..
+							}) => true,
+							_ => false,
+						};
+
+						let native_token_id = tokens::RxTokenId::get();
+						// This should only fail if the fee_lock_metadata is uninit
+						// And if it is uninit then we use fee_lock_amount as zero to trivially pass these checks here
+						// because later on fee lock metadata being uninit we are going to charge normal fees anyway
+						let fee_lock_amount = FeeLock::get_fee_lock_amount(who).unwrap_or_default();
+						let user_has_fee_lock_amount = match (asset_id_in, native_token_id) {
+							(a, b) if a == b => FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
+								who,
+								native_token_id,
+								check_amount.checked_add(fee_lock_amount).ok_or(
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									),
+								)?,
+							)
+							.is_ok(),
+							_ => FeeHelpers::<T, C, OFLA>::can_withdraw_amount_in(
+								who,
+								native_token_id,
+								fee_lock_amount,
+							)
+							.is_ok(),
+						};
+						match (user_has_fee_lock_amount, is_sell_swap) {
+							(true, _) => {},
+							(false, true) => {
+								ensure!(
+									FeeLock::is_whitelisted(asset_id_in),
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+								ensure!(
+									FeeLock::get_token_value_threshold(asset_id_in) <=
+										asset_amount_in,
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+								ensure!(
+									native_token_id == asset_id_out,
+									TransactionValidityError::Invalid(
+										InvalidTransaction::SwapPrevalidation.into(),
+									)
+								);
+							},
+							(false, false) =>
+								return Err(TransactionValidityError::Invalid(
+									InvalidTransaction::SwapPrevalidation.into(),
+								)),
+						}
 					},
 					_ => {},
 				};
 
-				// THIS IS NOT PROXY PALLET COMPATIBLE, YET
-				// Also ugly implementation to keep it maleable for now
 				match (call_type, pallet_fee_lock::FeeLockMetadata::<T>::get()) {
 					(crate::CallType::UnlockFee, _) => {
 						let imb = C::withdraw(
@@ -712,26 +701,14 @@ pub mod config {
 						OFLA::can_unlock_fee(who).map_err(|_| {
 							TransactionValidityError::Invalid(InvalidTransaction::UnlockFee.into())
 						})?;
-						Ok(Some(LiquidityInfoEnum::FeeLock))
+						Ok(None)
 					},
-					(
-						CallType::Swap {
-							swap_pool_list,
-							asset_id_in,
-							asset_amount_in,
-							asset_id_out,
-							asset_amount_out,
-						},
-						Some(fee_lock_metadata),
-					) => FeeHelpers::<T, C, OFLA>::can_withdraw_fee(
-						who,
-						fee_lock_metadata,
-						swap_pool_list,
-						asset_id_in,
-						asset_amount_in,
-						asset_id_out,
-						asset_amount_out,
-					),
+					(CallType::Swap { .. }, Some(fee_lock_metadata)) => Ok(None),
+					// TODO - very low priority
+					// Ideally there should be another arm here for swap but no fee_lock_metadata
+					// So that Gasp and Eth swap inputs both can be checked as total to avoid
+					// Too little assets for both fees together...
+					// But too niche a problem for how annoying the solution is
 					(CallType::CouncilCall, _) if Council::is_member(&who.clone().into()) =>
 						Ok(None),
 					_ => OCA::withdraw_fee(who, call, info, fee, tip),
@@ -760,18 +737,6 @@ pub mod config {
 						tip,
 						already_withdrawn,
 					),
-					Some(LiquidityInfoEnum::FeeLock) => Ok(()),
-					Some(LiquidityInfoEnum::FeeLockSwap((pool, fee_asset, fee))) => {
-						if post_info.pays_fee == Pays::Yes {
-							FeeHelpers::<T, C, OFLA>::settle_fees(who, pool, fee_asset, fee)
-								.map_err(|_| {
-									TransactionValidityError::Invalid(
-										InvalidTransaction::Payment.into(),
-									)
-								})?;
-						}
-						Ok(())
-					},
 					None => Ok(()),
 				}
 			}
@@ -1029,7 +994,7 @@ pub mod config {
 			pub const SequencerIssuanceVaultId: PalletId = PalletId(*b"py/seqiv");
 			pub SequencerIssuanceVault: AccountId = SequencerIssuanceVaultId::get().into_account_truncating();
 
-			pub const TotalCrowdloanAllocation: Balance = 0 * DOLLARS;
+			pub const TotalCrowdloanAllocation: Balance = 0;
 			pub const LinearIssuanceAmount: Balance = 10_200_000 * DOLLARS; // LinearIssuanceAmount/(LinearIssuanceBlocks/BlocksPerRound) is the value that is issued every session indefintely FOREVER!
 			pub const LinearIssuanceBlocks: u32 = 10_512_000u32; // 2 years
 			pub const LiquidityMiningSplit: Perbill = Perbill::from_parts(686000000); // 6_997_200
@@ -1381,5 +1346,16 @@ pub mod config {
 		// that impl the ValuateFor trait and delegates to Market for Valuate impl
 		// use such struct in pallet configs instead of Market
 		impl ValuateFor<tokens::RxTokenId> for Market {}
+
+		parameter_types! {
+
+			pub const MaxSwapListLength: u32 = if cfg!(feature = "runtime-benchmarks") {
+				// For benchmarking
+				1000
+			} else {
+				// ACTUAL
+				10
+			};
+		}
 	}
 }

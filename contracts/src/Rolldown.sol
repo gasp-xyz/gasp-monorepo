@@ -179,9 +179,10 @@ contract Rolldown is
             revert ZeroToken();
         }
 
+        address sender = _msgSender();
         Deposit memory depositRequest = Deposit({
             requestId: _createRequestId(Origin.L1),
-            depositRecipient: _msgSender(),
+            depositRecipient: sender,
             tokenAddress: tokenAddress,
             amount: amount,
             timeStamp: block.timestamp,
@@ -189,9 +190,9 @@ contract Rolldown is
         });
         deposits[depositRequest.requestId.id] = depositRequest;
 
-        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, _msgSender(), tokenAddress, amount, ferryTip);
+        emit DepositAcceptedIntoQueue(depositRequest.requestId.id, sender, tokenAddress, amount, ferryTip);
 
-        IERC20(tokenAddress).safeTransferFrom(_msgSender(), address(this), amount);
+        IERC20(tokenAddress).safeTransferFrom(sender, address(this), amount);
     }
 
     function ferry_withdrawal(Withdrawal calldata withdrawal) external payable override nonReentrant whenNotPaused {
@@ -303,25 +304,24 @@ contract Rolldown is
             revert InvalidRequestId(requestId);
         }
 
-        uint256 rootCount = roots.length;
-        if (rootCount == 0) {
-            revert ZeroRootCount();
-        }
+        uint256 left = 0;
+        uint256 right = roots.length;
 
-        for (uint256 i = rootCount; i > 0;) {
-            bytes32 root = roots[i - 1];
+        while (left < right) {
+            uint256 mid = left + (right - left) / 2;
+            bytes32 root = roots[mid];
             Range memory range = merkleRootRange[root];
 
-            if (requestId >= range.start && requestId <= range.end) {
+            if (requestId < range.start) {
+                right = mid;
+            } else if (requestId > range.end) {
+                left = mid + 1;
+            } else {
                 return root;
-            }
-
-            unchecked {
-                --i;
             }
         }
 
-        revert("Batch with request not found");
+        revert BatchNotFound();
     }
 
     function _verifyRequestProof(uint256 requestId, bytes32 requestHash, bytes32 merkleRoot, bytes32[] calldata proof)
