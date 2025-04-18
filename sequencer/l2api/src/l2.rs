@@ -607,33 +607,33 @@ impl L2Interface for Gasp {
             if request_id > lastest_request_id {
                 Ok(None)
             } else {
-                let left = 1u128;
-                let right = batch_id;
-                let mut mid = (left + right) / 2;
-                loop {
+                let mut left = 1u128;
+                let mut right = batch_id;
+                while left <= right {
+                    let mid = (left + right) / 2;
                     let (range_start, range_end) = self
                         .get_batch_range(mid, chain, at)
                         .await?
                         .ok_or(L2Error::MissingBatch(mid))?;
 
-                    tracing::info!("SEARCHED: #{request_id}(left, mid, right) ({left}, {mid}, {right})     {mid} => {range_start} .. {range_end}");
                     if request_id >= range_start && request_id <= range_end {
                         let merkle_root = self
                             .get_merkle_root((range_start, range_end), chain, at)
                             .await?;
-                        break Ok(Some(BatchInfo {
+                        return Ok(Some(BatchInfo {
                             batch_id: mid,
                             range: (range_start, range_end),
                             merkle_root,
                         }));
                     } else if request_id > range_end {
-                        mid = (mid + right) / 2;
+                        left = mid + 1;
                     } else if request_id < range_start {
-                        mid = (mid + left) / 2;
+                        right = mid - 1;
                     } else {
-                        break Ok(None);
+                        return Ok(None);
                     }
                 }
+                Ok(None)
             }
         } else {
             Ok(None)
