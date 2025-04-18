@@ -101,7 +101,7 @@ where
 
             // block until notified
             if let Some(elem) = stream.next().await {
-                tracing::info!("new deposit rid : {elem}");
+                tracing::info!("Deposit happend on L1 : {elem}");
             } else {
                 break;
             }

@@ -54,7 +54,7 @@ where
         }
     }
 
-    #[tracing::instrument(level = "debug", skip(self, at), ret)]
+    #[tracing::instrument(level = "debug", skip(self, at))]
     pub async fn get_pending_withdrawal(
         &self,
         id: u128,
@@ -62,7 +62,8 @@ where
     ) -> Result<Option<Withdrawal>, Error> {
         match self.l2.get_l2_request(self.chain, id, at).await? {
             Some(L2Request::Withdrawal(w)) => {
-                match self.l1.get_status(w.withdrawal_hash()).await? {
+                match self.l1.get_status(w.withdrawal_hash()).await
+                    .inspect(|s| tracing::debug!("withdrawal rid:{id} - {s}"))? {
                     RequestStatus::Pending => Ok::<_, Error>(Some(w)),
                     _ => Ok(None),
                 }
@@ -89,7 +90,7 @@ where
                     let (_, at) = self.l2.get_best_block().await?;
                     for (start, end) in common::get_chunks(range.0, range.1, self.chunk_size) {
                         let queries = (start..=end)
-                            .filter(|id| id % self.replica_count == self.replica_id)
+                            .filter(|id| id % self.replica_count == self.replica_id - 1)
                             .map(|elem| self.get_pending_withdrawal(elem, at))
                             .collect::<Vec<_>>();
                         for w in futures::future::try_join_all(queries)
@@ -97,6 +98,7 @@ where
                             .into_iter()
                             .flatten()
                         {
+                            tracing::info!("pending withdrawal found {w}");
                             self.sink.send(w).await?;
                         }
                     }

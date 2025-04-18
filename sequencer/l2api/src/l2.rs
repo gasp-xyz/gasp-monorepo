@@ -4,9 +4,11 @@ use gasp_types::PendingUpdate;
 use subxt::config::signed_extensions::ChargeTransactionPaymentParams;
 use subxt::config::signed_extensions::CheckMortalityParams;
 use subxt::config::signed_extensions::CheckNonceParams;
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
+use subxt::dynamic::{At, Value};
 
 use hex::encode as hex_encode;
 
@@ -540,6 +542,7 @@ impl L2Interface for Gasp {
             .map(|(_m, (_block, batch_id, range))| (*batch_id, (range.0, range.1))))
     }
 
+    #[tracing::instrument(level="debug",skip(self,at),ret)]
     async fn get_batch_range(
         &self,
         batch_id: u128,
@@ -547,11 +550,44 @@ impl L2Interface for Gasp {
         at: H256,
     ) -> Result<Option<(u128, u128)>, L2Error> {
         let gasp_chain: crate::types::subxt::Chain = chain.into();
-        let storage = gasp_bindings::api::storage()
-            .rolldown()
-            .l2_requests_batch(gasp_chain, batch_id);
 
-        if let Some((_, range, _)) = self.client.storage().at(at).fetch(&storage).await? {
+        #[derive(
+            :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+            :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+            :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+            :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+            Clone,
+            Debug,
+            PartialEq,
+        )]
+        #[allow(non_snake_case)]
+        # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+        #[codec(dumb_trait_bound)]
+        #[decode_as_type(
+            crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+        )]
+        #[encode_as_type(
+            crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+        )]
+        pub struct TupleWrapper(pub (crate::types::subxt::Chain, ::core::primitive::u128));
+
+        let x : ::subxt::ext::subxt_core::storage::address::StaticAddress<
+        ::subxt::ext::subxt_core::storage::address::StaticStorageKey< TupleWrapper, >,
+        gasp_bindings::api::rolldown::storage::types::l2_requests_batch::L2RequestsBatch,
+        ::subxt::ext::subxt_core::utils::Yes,
+        (),
+        (),
+        > =
+        ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+            "Rolldown",
+            "L2RequestsBatch",
+
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(&TupleWrapper((gasp_chain ,batch_id)))
+            ,
+            [0u8; 32],
+        );
+
+        if let Some((_, range, _)) = self.client.storage().at(at).fetch(&x.unvalidated()).await? {
             Ok(Some(range))
         } else {
             Ok(None)
@@ -559,6 +595,7 @@ impl L2Interface for Gasp {
     }
 
     //TODO: add test
+    #[tracing::instrument(level="debug",skip(self),ret)]
     async fn bisect_find_batch(
         &self,
         request_id: u128,
@@ -578,13 +615,15 @@ impl L2Interface for Gasp {
                         .get_batch_range(mid, chain, at)
                         .await?
                         .ok_or(L2Error::MissingBatch(mid))?;
+
+                    tracing::info!("SEARCHED: #{request_id}(left, mid, right) ({left}, {mid}, {right})     {mid} => {range_start} .. {range_end}");
                     if request_id >= range_start && request_id <= range_end {
                         let merkle_root = self
                             .get_merkle_root((range_start, range_end), chain, at)
                             .await?;
                         break Ok(Some(BatchInfo {
-                            batch_id,
-                            range,
+                            batch_id: mid,
+                            range: (range_start, range_end),
                             merkle_root,
                         }));
                     } else if request_id > range_end {

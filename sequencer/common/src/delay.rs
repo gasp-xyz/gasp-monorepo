@@ -19,7 +19,6 @@ pub async fn delay_channel_impl<'a, T: Debug + Clone, E: Display>(
     loop {
         select! {
             elem = input.recv().fuse() => {
-                tracing::debug!("elem received from input stream {elem:?}");
                 match elem{
                     Some(elem) => {
                         buffer.entry(current_block + delay).and_modify(|elems| elems.push(elem.clone())).or_insert(vec![elem]);
@@ -33,11 +32,10 @@ pub async fn delay_channel_impl<'a, T: Debug + Clone, E: Display>(
             block_nr = ticker.next().fuse() => {
                 match block_nr {
                     Some(Ok(block_nr)) => {
-                        tracing::debug!("new block received {block_nr:?}");
                         let not_ready = buffer.split_off(&block_nr);
                         let ready = std::mem::replace(&mut buffer, not_ready);
                         for (id, elems) in ready {
-                            tracing::debug!("found {} elems scheduled at {id}", elems.len());
+                            tracing::debug!("forwarding {} elems from delay queue", elems.len());
                             for e in  elems{
                                 output.send(e).await.expect("infinite");
                             }

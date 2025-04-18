@@ -387,7 +387,7 @@ where
         Ok(x.into())
     }
 
-    #[tracing::instrument(level = "trace", skip(self), ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn get_status(&self, request_hash: H256) -> Result<types::RequestStatus, L1Error> {
         self.rolldown_contract
             .get_request_status(request_hash)

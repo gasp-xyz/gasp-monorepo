@@ -125,9 +125,9 @@ where
             self.assert_exists(deposit).await?;
             let ferried_amount: u128 = (deposit.amount - deposit.ferry_tip).try_into().unwrap();
 
-            tracing::info!("#{nr} ferring {deposit}");
+            tracing::info!("#{nr} ferring deposit {}", deposit.request_id.id);
             if self.l2.ferry_deposit(self.chain, deposit).await? {
-                tracing::info!("deposit ferried successfully {deposit}");
+                tracing::info!("deposit ferried successfully {}", deposit.request_id.id);
                 metrics::FERRIED
                     .with_label_values(&[&hex::encode(deposit.token_address)])
                     .inc();
@@ -139,7 +139,7 @@ where
                     .with_label_values(&["total"])
                     .inc_by(ferried_amount as f64);
             } else {
-                tracing::warn!("failed to ferry deposit {deposit}");
+                tracing::warn!("failed to ferry deposit {}", deposit.request_id.id);
                 metrics::FAILED_FERRY_ATTEMPTS.inc();
             }
             self.ferryable_deposits.remove(&deposit.request_id.id);
@@ -202,7 +202,7 @@ where
                 .await
                 {
                     Ok(Some((prio, deposit))) => {
-                        tracing::info!("pending deposit found {deposit}");
+                        tracing::info!("pending deposit received rid : {}", deposit.request_id.id);
                         self.track_balance(deposit.token_address).await?;
                         self.ferryable_deposits
                             .insert(deposit.request_id.id, (prio, deposit));

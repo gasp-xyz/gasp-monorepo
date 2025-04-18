@@ -14,14 +14,14 @@ mod filter;
 mod metrics;
 mod past_withdrawals_finder;
 
-fn init_logger() {
+fn init_logger(enable_colors: bool) {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env_lossy();
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .with_ansi(false)
+        .with_ansi(enable_colors)
         .init();
 }
 
@@ -30,8 +30,9 @@ pub type TaskHandle = JoinHandle<Result>;
 
 #[tokio::main]
 pub async fn main() -> Result {
-    init_logger();
     let args = cli::Cli::parse();
+
+    init_logger(args.colors);
 
     tracing::info!("config: {args:#?}");
 
@@ -64,7 +65,7 @@ pub async fn main() -> Result {
         .map(|elem| elem.map(|(nr, _at)| nr as u128))
         .boxed();
     let (closer_input, closer_sink, delay_fut) =
-        common::delay::create_delay_channel(header_stream, 1u128);
+        common::delay::create_delay_channel(header_stream, args.block_delay as u128);
     let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
@@ -118,11 +119,11 @@ pub async fn main() -> Result {
     });
 
     if let Err(e) = futures::future::try_join_all([
+        closer_task,
         finder_task,
         delay_task,
         new_withdrawals_subscriber_task,
         filter_task,
-        closer_task,
     ])
     .await
     {

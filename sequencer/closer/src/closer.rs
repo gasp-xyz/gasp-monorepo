@@ -128,7 +128,7 @@ where
                 .map(|(w, _, _)| w.request_id.id.try_into().unwrap())
                 .collect();
 
-            tracing::debug!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
+            tracing::info!("closing withdrawals with ids : {closable_withdrawals_ids:?}");
             let amount = closable_withdrawals.len();
             let tx = self
                 .l1
@@ -151,7 +151,7 @@ where
         if let RequestStatus::Pending = self.l1.get_status(withdrawal.withdrawal_hash()).await? {
             Ok(true)
         } else {
-            tracing::info!("skipping withdrawal id:{}", withdrawal.request_id.id);
+            tracing::info!("skipping withdrawal id:{} - its not pending anymore", withdrawal.request_id.id);
             Ok(false)
         }
     }
@@ -204,6 +204,7 @@ where
         Ok((withdrawal, status, batch, range))
     }
 
+    #[tracing::instrument(level="debug", skip(self, at), ret)]
     async fn get_batch_and_proof(
         &self,
         l2_request_id: u128,
