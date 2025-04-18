@@ -36,4 +36,7 @@ pub struct Cli {
 
     #[arg(long, default_value_t = 0, env = "BLOCK_DELAY")]
     pub block_delay: u128,
+
+    #[arg(long, default_value_t = false, env = "COLORS")]
+    pub colors: bool,
 }

@@ -13,11 +13,17 @@ pub async fn filter_deposits_created_by_frontend(
             .await
         {
             Ok(status) if status.created_by == CreatedBy::Frontend => {
-                tracing::debug!("withdrawal rid : {} was created by frontend", withdrawal.request_id.id);
+                tracing::debug!(
+                    "withdrawal rid : {} was created by frontend",
+                    withdrawal.request_id.id
+                );
                 output.send(withdrawal).await.expect("infinite");
             }
             Ok(_) => {
-                tracing::warn!("ignoring withdrawal rid : {} - not initated by frontend", withdrawal.request_id.id);
+                tracing::warn!(
+                    "ignoring withdrawal rid : {} - not initated by frontend",
+                    withdrawal.request_id.id
+                );
             }
             Err(e) => {
                 tracing::warn!("err {e}, ignoring withdrawal {}", withdrawal.request_id.id);
@@ -36,7 +42,7 @@ pub async fn filter_deposits_without_fee(
         if withdrawal.ferry_tip > 0u128.into() {
             tracing::debug!("withdrawal {rid} meets ferry criteria");
             output.send(withdrawal).await.expect("infinite");
-        }else{
+        } else {
             tracing::debug!("withdrawal {rid} meets ferry criteria");
         }
     }

@@ -62,8 +62,12 @@ where
     ) -> Result<Option<Withdrawal>, Error> {
         match self.l2.get_l2_request(self.chain, id, at).await? {
             Some(L2Request::Withdrawal(w)) => {
-                match self.l1.get_status(w.withdrawal_hash()).await
-                    .inspect(|s| tracing::debug!("withdrawal rid:{id} - {s}"))? {
+                match self
+                    .l1
+                    .get_status(w.withdrawal_hash())
+                    .await
+                    .inspect(|s| tracing::debug!("withdrawal rid:{id} - {s}"))?
+                {
                     RequestStatus::Pending => Ok::<_, Error>(Some(w)),
                     _ => Ok(None),
                 }

@@ -34,7 +34,7 @@ pub async fn delay_channel_impl<'a, T: Debug + Clone, E: Display>(
                     Some(Ok(block_nr)) => {
                         let not_ready = buffer.split_off(&block_nr);
                         let ready = std::mem::replace(&mut buffer, not_ready);
-                        for (id, elems) in ready {
+                        for (_id, elems) in ready {
                             tracing::debug!("forwarding {} elems from delay queue", elems.len());
                             for e in  elems{
                                 output.send(e).await.expect("infinite");

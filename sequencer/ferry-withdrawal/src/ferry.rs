@@ -129,7 +129,10 @@ where
             let rid = w.request_id.id;
             match self.l1.ferry_withdrawal(w).await {
                 Ok(hash) => {
-                    tracing::info!("withdrawal {rid} ferried successfully {}", hex::encode(hash));
+                    tracing::info!(
+                        "withdrawal {rid} ferried successfully {}",
+                        hex::encode(hash)
+                    );
 
                     metrics::FERRIED
                         .with_label_values(&[&hex::encode(w.token_address)])
@@ -143,7 +146,10 @@ where
                         .inc_by(ferried_amount as f64);
                 }
                 Err(L1Error::TxReverted(hash)) => {
-                    tracing::warn!("withdrawal {rid} ferried unsuccessfully {}", hex::encode(hash));
+                    tracing::warn!(
+                        "withdrawal {rid} ferried unsuccessfully {}",
+                        hex::encode(hash)
+                    );
                     metrics::FAILED_FERRY_ATTEMPTS.inc();
                 }
                 Err(e) => {
@@ -173,7 +179,10 @@ where
                 .l1
                 .close_withdrawal(withdrawal, root.into(), proof)
                 .await?;
-            tracing::info!("withdrawal rid: {req_id} closed successfully {}", hex::encode(result));
+            tracing::info!(
+                "withdrawal rid: {req_id} closed successfully {}",
+                hex::encode(result)
+            );
             Ok(())
         } else {
             tracing::debug!("skipping already closed withdrawal {withdrawal}");

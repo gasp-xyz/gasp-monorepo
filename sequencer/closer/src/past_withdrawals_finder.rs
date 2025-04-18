@@ -73,8 +73,10 @@ where
     ) -> HunterResult<Option<Withdrawal>> {
         match self.l2.get_l2_request(self.chain, id, at).await? {
             Some(L2Request::Withdrawal(w)) => {
-                let status = self.l1.get_status(w.withdrawal_hash()).await
-                .inspect(|s| tracing::debug!("withdrawal rid : {} - {}", w.request_id.id, s))?;
+                let status =
+                    self.l1.get_status(w.withdrawal_hash()).await.inspect(|s| {
+                        tracing::debug!("withdrawal rid : {} - {}", w.request_id.id, s)
+                    })?;
                 match status {
                     RequestStatus::Pending => Ok::<_, HunterError>(Some(w)),
                     _ => Ok(None),

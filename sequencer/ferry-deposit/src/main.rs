@@ -10,13 +10,13 @@ mod filter;
 mod hunter;
 mod metrics;
 
-fn init_logger() {
+fn init_logger(with_colors: bool) {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env_lossy();
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .with_ansi(false)
+        .with_ansi(with_colors)
         .init();
 }
 
@@ -42,8 +42,8 @@ pub type TaskHandle = tokio::task::JoinHandle<Result<(), Error>>;
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
+    init_logger(args.colors);
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
-    init_logger();
 
     tracing::info!("config: {args:#?}");
 
@@ -108,8 +108,14 @@ pub async fn main() -> Result<(), Error> {
         Ok(())
     });
 
-    let executor_handle: TaskHandle =
-        tokio::spawn(async move { Ok::<_, Error>(executor.run().await.inspect_err(|e| tracing::error!("Err: {e}"))?) });
+    let executor_handle: TaskHandle = tokio::spawn(async move {
+        Ok::<_, Error>(
+            executor
+                .run()
+                .await
+                .inspect_err(|e| tracing::error!("Err: {e}"))?,
+        )
+    });
 
     if let Err(e) = tokio::try_join!(executor_handle, filter_handle, hunter_handle, delay_task) {
         tracing::error!("err : {e}");

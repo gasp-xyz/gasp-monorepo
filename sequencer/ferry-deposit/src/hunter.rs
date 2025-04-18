@@ -86,13 +86,14 @@ where
                             .map(|elem| self.get_deposit(elem))
                             .collect::<Vec<_>>();
 
-                        for w in futures::future::try_join_all(queries)
+                        for d in futures::future::try_join_all(queries)
                             .await?
                             .into_iter()
                             .flatten()
                         {
-                            self.sink.send(w).await?;
-                            self.latest_processed = w.request_id.id.try_into().unwrap();
+                            tracing::info!("Deposit found {d}");
+                            self.sink.send(d).await?;
+                            self.latest_processed = d.request_id.id.try_into().unwrap();
                         }
                     }
                 }
@@ -101,7 +102,7 @@ where
 
             // block until notified
             if let Some(elem) = stream.next().await {
-                tracing::info!("Deposit happend on L1 : {elem}");
+                tracing::info!("Deposit rid : {elem} happend on L1");
             } else {
                 break;
             }

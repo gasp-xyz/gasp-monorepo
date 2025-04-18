@@ -1,14 +1,12 @@
 use futures::future::join_all;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
+use std::collections::HashMap;
 use subxt::config::signed_extensions::ChargeTransactionPaymentParams;
 use subxt::config::signed_extensions::CheckMortalityParams;
 use subxt::config::signed_extensions::CheckNonceParams;
-use std::borrow::Borrow;
-use std::collections::HashMap;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
-use subxt::dynamic::{At, Value};
 
 use hex::encode as hex_encode;
 
@@ -114,8 +112,6 @@ impl Gasp {
         Err(L2Error::UnknownTxStatus)
     }
 
-
-
     async fn best_header_stream(&self) -> Result<HeaderStream, L2Error> {
         Ok(self
             .client
@@ -136,7 +132,6 @@ impl Gasp {
             .await
             .expect("infinite stream")
     }
-
 
     async fn fetch_nonce(&self, who: [u8; 20]) -> Result<u32, L2Error> {
         let at = self.best_block().await?.1;
@@ -159,7 +154,9 @@ impl Gasp {
         let tx = self.client.tx();
 
         let mortality = CheckMortalityParams::default();
-        let nonce = self.fetch_nonce(self.keypair.address().into_inner()).await?;
+        let nonce = self
+            .fetch_nonce(self.keypair.address().into_inner())
+            .await?;
         let nonce = CheckNonceParams(Some((nonce) as u64));
         let payment = ChargeTransactionPaymentParams::no_tip();
         let params = ((), (), (), mortality, nonce, payment);
@@ -542,7 +539,7 @@ impl L2Interface for Gasp {
             .map(|(_m, (_block, batch_id, range))| (*batch_id, (range.0, range.1))))
     }
 
-    #[tracing::instrument(level="debug",skip(self,at),ret)]
+    #[tracing::instrument(level = "debug", skip(self, at), ret)]
     async fn get_batch_range(
         &self,
         batch_id: u128,
@@ -563,27 +560,22 @@ impl L2Interface for Gasp {
         #[allow(non_snake_case)]
         # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
         #[codec(dumb_trait_bound)]
-        #[decode_as_type(
-            crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-        )]
-        #[encode_as_type(
-            crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-        )]
+        #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+        #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
         pub struct TupleWrapper(pub (crate::types::subxt::Chain, ::core::primitive::u128));
 
-        let x : ::subxt::ext::subxt_core::storage::address::StaticAddress<
-        ::subxt::ext::subxt_core::storage::address::StaticStorageKey< TupleWrapper, >,
-        gasp_bindings::api::rolldown::storage::types::l2_requests_batch::L2RequestsBatch,
-        ::subxt::ext::subxt_core::utils::Yes,
-        (),
-        (),
-        > =
-        ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+        let x: ::subxt::ext::subxt_core::storage::address::StaticAddress<
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey<TupleWrapper>,
+            gasp_bindings::api::rolldown::storage::types::l2_requests_batch::L2RequestsBatch,
+            ::subxt::ext::subxt_core::utils::Yes,
+            (),
+            (),
+        > = ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
             "Rolldown",
             "L2RequestsBatch",
-
-            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(&TupleWrapper((gasp_chain ,batch_id)))
-            ,
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(&TupleWrapper((
+                gasp_chain, batch_id,
+            ))),
             [0u8; 32],
         );
 
@@ -595,7 +587,7 @@ impl L2Interface for Gasp {
     }
 
     //TODO: add test
-    #[tracing::instrument(level="debug",skip(self),ret)]
+    #[tracing::instrument(level = "debug", skip(self), ret)]
     async fn bisect_find_batch(
         &self,
         request_id: u128,

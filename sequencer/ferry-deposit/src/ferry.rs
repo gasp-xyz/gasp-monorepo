@@ -125,7 +125,7 @@ where
             self.assert_exists(deposit).await?;
             let ferried_amount: u128 = (deposit.amount - deposit.ferry_tip).try_into().unwrap();
 
-            tracing::info!("#{nr} ferring deposit {}", deposit.request_id.id);
+            tracing::info!("#{nr} ferring deposit rid : {}", deposit.request_id.id);
             if self.l2.ferry_deposit(self.chain, deposit).await? {
                 tracing::info!("deposit ferried successfully {}", deposit.request_id.id);
                 metrics::FERRIED
