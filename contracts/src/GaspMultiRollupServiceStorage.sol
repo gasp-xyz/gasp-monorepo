@@ -8,7 +8,8 @@ import {IRolldown} from "./interfaces/IRolldown.sol";
 abstract contract GaspMultiRollupServiceStorage is IGaspMultiRollupService {
     IRolldown public rolldown;
     uint32 public chainRdBatchNonce;
-    IRolldown.ChainId public chainId;
+    // DEPRECATED
+    uint8 public chainId;
     address public updater;
     bool public stalled;
     bool public allowNonRootInit;

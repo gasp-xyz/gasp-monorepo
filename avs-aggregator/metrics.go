@@ -92,11 +92,11 @@ func recordMetrics(logger sdklogging.Logger, rpc *chainio.EthRpc) {
 	}()
 }
 
-func recordLatestBatchOnL2PerL1Metric(chainId uint8, BatchId uint32) {
+func recordLatestBatchOnL2PerL1Metric(chainId uint64, BatchId uint32) {
 	latest_batch_on_l2_per_l1.WithLabelValues(fmt.Sprintf("%v", chainId)).Set(float64(BatchId))
 }
 
-func recordLatestBatchProcessedOnL1PerL1Metric(chainId uint8, BatchId uint32) {
+func recordLatestBatchProcessedOnL1PerL1Metric(chainId uint64, BatchId uint32) {
 	latest_batch_processed_on_l1_per_l1.WithLabelValues(fmt.Sprintf("%v", chainId)).Set(float64(BatchId))
 }
 

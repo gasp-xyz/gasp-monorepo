@@ -33,8 +33,8 @@ contract Rolldown is
     uint256 public override lastProcessedUpdate_origin_l1;
     // Counter for last processed updates comming from l2 to ensure not reading and processing already processed
     uint256 public override lastProcessedUpdate_origin_l2;
-    // Chain identificator
-    ChainId public override chain;
+    // DEPRECATED Chain identificator
+    uint8 public override chain;
     // Updater account address
     address public override updaterAccount;
     mapping(uint256 => CancelResolution) public cancelResolutions;
@@ -55,7 +55,7 @@ contract Rolldown is
         _;
     }
 
-    function initialize(address admin, ChainId chainId, address updater) external override initializer {
+    function initialize(address admin, address updater) external override initializer {
         ContextUpgradeable.__Context_init();
         AccessControlUpgradeable.__AccessControl_init();
         PausableUpgradeable.__Pausable_init();
@@ -75,7 +75,6 @@ contract Rolldown is
         counter = 1;
         lastProcessedUpdate_origin_l1 = 0;
         lastProcessedUpdate_origin_l2 = 0;
-        chain = chainId;
     }
 
     receive() external payable {}
@@ -535,7 +534,7 @@ contract Rolldown is
 
     function getPendingRequests(uint256 start, uint256 end) public view override returns (L1Update memory) {
         L1Update memory result = L1Update({
-            chain: chain,
+            chain: uint64(block.chainid),
             pendingDeposits: new Deposit[](0),
             pendingCancelResolutions: new CancelResolution[](0)
         });

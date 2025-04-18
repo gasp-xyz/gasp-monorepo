@@ -84,18 +84,18 @@ func (mr *MockAvsReadererMockRecorder) ChainID(ctx any) *gomock.Call {
 }
 
 // ChainRdBatchNonce mocks base method.
-func (m *MockAvsReaderer) ChainRdBatchNonce(ctx context.Context, chainIndex uint8) (uint32, error) {
+func (m *MockAvsReaderer) ChainRdBatchNonce(ctx context.Context, chainId uint64) (uint32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChainRdBatchNonce", ctx, chainIndex)
+	ret := m.ctrl.Call(m, "ChainRdBatchNonce", ctx, chainId)
 	ret0, _ := ret[0].(uint32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ChainRdBatchNonce indicates an expected call of ChainRdBatchNonce.
-func (mr *MockAvsReadererMockRecorder) ChainRdBatchNonce(ctx, chainIndex any) *gomock.Call {
+func (mr *MockAvsReadererMockRecorder) ChainRdBatchNonce(ctx, chainId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChainRdBatchNonce", reflect.TypeOf((*MockAvsReaderer)(nil).ChainRdBatchNonce), ctx, chainIndex)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChainRdBatchNonce", reflect.TypeOf((*MockAvsReaderer)(nil).ChainRdBatchNonce), ctx, chainId)
 }
 
 // CheckSignatures mocks base method.
@@ -188,25 +188,25 @@ func (mr *MockAvsReadererMockRecorder) GetFirstFilterNewRdTaskCreated(opts, task
 }
 
 // GetNonSigningOperatorPubKeys mocks base method.
-func (m *MockAvsReaderer) GetNonSigningOperatorPubKeys(event contractFinalizerTaskManager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error) {
+func (m *MockAvsReaderer) GetNonSigningOperatorPubKeys(arg0 contractFinalizerTaskManager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNonSigningOperatorPubKeys", event)
+	ret := m.ctrl.Call(m, "GetNonSigningOperatorPubKeys", arg0)
 	ret0, _ := ret[0].([]*bls.G1Point)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetNonSigningOperatorPubKeys indicates an expected call of GetNonSigningOperatorPubKeys.
-func (mr *MockAvsReadererMockRecorder) GetNonSigningOperatorPubKeys(event any) *gomock.Call {
+func (mr *MockAvsReadererMockRecorder) GetNonSigningOperatorPubKeys(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNonSigningOperatorPubKeys", reflect.TypeOf((*MockAvsReaderer)(nil).GetNonSigningOperatorPubKeys), event)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNonSigningOperatorPubKeys", reflect.TypeOf((*MockAvsReaderer)(nil).GetNonSigningOperatorPubKeys), arg0)
 }
 
 // GetOperatorIdList mocks base method.
-func (m *MockAvsReaderer) GetOperatorIdList(opts *bind.CallOpts, quorum types.QuorumNum, blockNumber uint32) ([]types.Bytes32, error) {
+func (m *MockAvsReaderer) GetOperatorIdList(opts *bind.CallOpts, quorum types.QuorumNum, blockNumber uint32) ([]types.OperatorId, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOperatorIdList", opts, quorum, blockNumber)
-	ret0, _ := ret[0].([]types.Bytes32)
+	ret0, _ := ret[0].([]types.OperatorId)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -218,10 +218,10 @@ func (mr *MockAvsReadererMockRecorder) GetOperatorIdList(opts, quorum, blockNumb
 }
 
 // GetOperatorsAvsStateAtBlock mocks base method.
-func (m *MockAvsReaderer) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers types.QuorumNums, blockNumber uint32) (map[types.Bytes32]types1.OperatorAvsState, error) {
+func (m *MockAvsReaderer) GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers types.QuorumNums, blockNumber uint32) (map[types.OperatorId]types1.OperatorAvsState, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOperatorsAvsStateAtBlock", ctx, registryCoordinatorAddr, quorumNumbers, blockNumber)
-	ret0, _ := ret[0].(map[types.Bytes32]types1.OperatorAvsState)
+	ret0, _ := ret[0].(map[types.OperatorId]types1.OperatorAvsState)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -233,7 +233,7 @@ func (mr *MockAvsReadererMockRecorder) GetOperatorsAvsStateAtBlock(ctx, registry
 }
 
 // GetOperatorsFromIds mocks base method.
-func (m *MockAvsReaderer) GetOperatorsFromIds(opts *bind.CallOpts, registryCoordinatorAddr common.Address, operatorIds []types.Bytes32) ([]common.Address, error) {
+func (m *MockAvsReaderer) GetOperatorsFromIds(opts *bind.CallOpts, registryCoordinatorAddr common.Address, operatorIds []types.OperatorId) ([]common.Address, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOperatorsFromIds", opts, registryCoordinatorAddr, operatorIds)
 	ret0, _ := ret[0].([]common.Address)
@@ -263,10 +263,10 @@ func (mr *MockAvsReadererMockRecorder) GetRdTaskRespondedEvents(ctx, blocksAgo a
 }
 
 // GetTypedOperatorsStakesForQuorumAtBlock mocks base method.
-func (m *MockAvsReaderer) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers types.QuorumNums, operatorAddr []common.Address, blockNumber uint32) (map[types.Bytes32]types1.OperatorAvsState, error) {
+func (m *MockAvsReaderer) GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers types.QuorumNums, operatorAddr []common.Address, blockNumber uint32) (map[types.OperatorId]types1.OperatorAvsState, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTypedOperatorsStakesForQuorumAtBlock", ctx, registryCoordinatorAddr, quorumNumbers, operatorAddr, blockNumber)
-	ret0, _ := ret[0].(map[types.Bytes32]types1.OperatorAvsState)
+	ret0, _ := ret[0].(map[types.OperatorId]types1.OperatorAvsState)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -472,21 +472,6 @@ func (mr *MockAvsReadererMockRecorder) ParseOperatorStakeUpdate(log any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseOperatorStakeUpdate", reflect.TypeOf((*MockAvsReaderer)(nil).ParseOperatorStakeUpdate), log)
 }
 
-// ParsePauseTrackingOpState mocks base method.
-func (m *MockAvsReaderer) ParsePauseTrackingOpState(log types0.Log) (*contractFinalizerTaskManager.ContractFinalizerTaskManagerPauseTrackingOpState, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ParsePauseTrackingOpState", log)
-	ret0, _ := ret[0].(*contractFinalizerTaskManager.ContractFinalizerTaskManagerPauseTrackingOpState)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ParsePauseTrackingOpState indicates an expected call of ParsePauseTrackingOpState.
-func (mr *MockAvsReadererMockRecorder) ParsePauseTrackingOpState(log any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParsePauseTrackingOpState", reflect.TypeOf((*MockAvsReaderer)(nil).ParsePauseTrackingOpState), log)
-}
-
 // ParseRdTaskCompleted mocks base method.
 func (m *MockAvsReaderer) ParseRdTaskCompleted(log types0.Log) (*contractFinalizerTaskManager.ContractFinalizerTaskManagerRdTaskCompleted, error) {
 	m.ctrl.T.Helper()
@@ -500,21 +485,6 @@ func (m *MockAvsReaderer) ParseRdTaskCompleted(log types0.Log) (*contractFinaliz
 func (mr *MockAvsReadererMockRecorder) ParseRdTaskCompleted(log any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseRdTaskCompleted", reflect.TypeOf((*MockAvsReaderer)(nil).ParseRdTaskCompleted), log)
-}
-
-// ParseResumeTrackingOpState mocks base method.
-func (m *MockAvsReaderer) ParseResumeTrackingOpState(log types0.Log) (*contractFinalizerTaskManager.ContractFinalizerTaskManagerResumeTrackingOpState, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ParseResumeTrackingOpState", log)
-	ret0, _ := ret[0].(*contractFinalizerTaskManager.ContractFinalizerTaskManagerResumeTrackingOpState)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ParseResumeTrackingOpState indicates an expected call of ParseResumeTrackingOpState.
-func (mr *MockAvsReadererMockRecorder) ParseResumeTrackingOpState(log any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseResumeTrackingOpState", reflect.TypeOf((*MockAvsReaderer)(nil).ParseResumeTrackingOpState), log)
 }
 
 // ParseStrategyMultiplierUpdated mocks base method.
@@ -702,21 +672,6 @@ func (mr *MockAvsSubscribererMockRecorder) SubscribeToRdTaskResponses(taskRespon
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeToRdTaskResponses", reflect.TypeOf((*MockAvsSubscriberer)(nil).SubscribeToRdTaskResponses), taskResponseLogs)
 }
 
-// SubscribeToResumeTrackingOpState mocks base method.
-func (m *MockAvsSubscriberer) SubscribeToResumeTrackingOpState(resumeLogs chan *contractFinalizerTaskManager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SubscribeToResumeTrackingOpState", resumeLogs)
-	ret0, _ := ret[0].(event.Subscription)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SubscribeToResumeTrackingOpState indicates an expected call of SubscribeToResumeTrackingOpState.
-func (mr *MockAvsSubscribererMockRecorder) SubscribeToResumeTrackingOpState(resumeLogs any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubscribeToResumeTrackingOpState", reflect.TypeOf((*MockAvsSubscriberer)(nil).SubscribeToResumeTrackingOpState), resumeLogs)
-}
-
 // MockAvsWriterer is a mock of AvsWriterer interface.
 type MockAvsWriterer struct {
 	ctrl     *gomock.Controller
@@ -817,7 +772,7 @@ func (mr *MockAvsWritererMockRecorder) SendNewOpTask(ctx, quorumThresholdPercent
 }
 
 // SendNewRdTask mocks base method.
-func (m *MockAvsWriterer) SendNewRdTask(ctx context.Context, chainToUpdate uint8, chainBatchIdToUpdate uint32) (contractFinalizerTaskManager.IFinalizerTaskManagerRdTask, uint32, error) {
+func (m *MockAvsWriterer) SendNewRdTask(ctx context.Context, chainToUpdate uint64, chainBatchIdToUpdate uint32) (contractFinalizerTaskManager.IFinalizerTaskManagerRdTask, uint32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendNewRdTask", ctx, chainToUpdate, chainBatchIdToUpdate)
 	ret0, _ := ret[0].(contractFinalizerTaskManager.IFinalizerTaskManagerRdTask)
@@ -900,7 +855,7 @@ func (mr *MockEthRpcClientsInterfaceMockRecorder) BlockNumber(ctx any) *gomock.C
 }
 
 // GetOperatorFromId mocks base method.
-func (m *MockEthRpcClientsInterface) GetOperatorFromId(opts *bind.CallOpts, operatorId types.Bytes32) (common.Address, error) {
+func (m *MockEthRpcClientsInterface) GetOperatorFromId(opts *bind.CallOpts, operatorId types.OperatorId) (common.Address, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOperatorFromId", opts, operatorId)
 	ret0, _ := ret[0].(common.Address)

@@ -193,147 +193,143 @@ pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz/polkadot-sd
 
 [patch."https://github.com/paritytech/polkadot-sdk"]
 # ... which satisfies git dependency `sp-crypto-ec-utils` of package `sp-ark-bls12-381 v0.4.2 (https://github.com/paritytech/arkworks-substrate#caa2eed7)`
-sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "eth-rollup-develop" }
+sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch = "feat/chain-id-removal" }
 
-# #polkdadot sdk
-# [patch."https://github.com/gasp-xyz/polkadot-sdk"]
-# extrinsic-shuffler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# fork-tree = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-benchmarking-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-executive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-support-procedural = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-support-procedural-tools = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-support-procedural-tools-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-system = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-system-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-system-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# frame-try-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# mangata-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# mangata-types = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-authorship = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-balances = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-collective-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-identity = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-membership = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-proxy = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-sudo-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-transaction-payment = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-transaction-payment-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-treasury = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-utility = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-utility-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-vesting-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-allocator = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-basic-authorship-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-block-builder-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-chain-spec = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-chain-spec-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-client-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-client-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-executor = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-executor-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-executor-polkavm = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-executor-wasmtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-informant = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-bitswap = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-gossip = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-light = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-sync = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-network-transactions = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-proposer-metrics = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-rpc-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-rpc-server = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-rpc-spec-v2 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-service = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-state-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-sysinfo = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-telemetry = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-tracing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-transaction-pool-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sc-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-api-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-application-crypto = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-arithmetic = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-blockchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-consensus-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-core = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-crypto-hashing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-crypto-hashing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-database = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-debug-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-externalities = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-genesis-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-inherents = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-io = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-keyring = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-maybe-compressed-blob = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-metadata-ir = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-panic-handler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-runtime-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-runtime-interface-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-staking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-state-machine = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-statement-store = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-std = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-storage = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-transaction-storage-proof = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-trie = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-version = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-version-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-wasm-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# sp-weights = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-bip39 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-build-script-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-prometheus-endpoint = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-test-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-test-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-test-runtime-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# substrate-wasm-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# try-runtime-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# ver-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
-# pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods"}
-
-# [patch."https://github.com/paritytech/polkadot-sdk"]
-# # ... which satisfies git dependency `sp-crypto-ec-utils` of package `sp-ark-bls12-381 v0.4.2 (https://github.com/paritytech/arkworks-substrate#caa2eed7)`
-# sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feature/multiswap-mods" }
+#polkdadot sdk
+[patch."https://github.com/gasp-xyz/polkadot-sdk"]
+extrinsic-shuffler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+fork-tree = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-benchmarking-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-executive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-support-procedural = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-support-procedural-tools = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-support-procedural-tools-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-system = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-system-benchmarking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-system-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+frame-try-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+mangata-support = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+mangata-types = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-authorship = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-balances = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-collective-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-identity = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-membership = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-proxy = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-sudo-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-transaction-payment = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-transaction-payment-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-treasury = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-utility = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-utility-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-vesting-mangata = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-allocator = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-basic-authorship-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-block-builder-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-chain-spec = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-chain-spec-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-client-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-client-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-executor = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-executor-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-executor-polkavm = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-executor-wasmtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-informant = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-bitswap = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-common = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-gossip = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-light = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-sync = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-network-transactions = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-proposer-metrics = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-rpc-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-rpc-server = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-rpc-spec-v2 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-service = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-state-db = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-sysinfo = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-telemetry = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-tracing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-transaction-pool-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sc-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-api-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-application-crypto = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-arithmetic = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-block-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-blockchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-consensus = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-consensus-aura = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-consensus-babe = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-consensus-grandpa = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-consensus-slots = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-core = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-crypto-hashing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-crypto-hashing-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-database = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-debug-derive = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-externalities = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-genesis-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-inherents = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-io = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-keyring = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-keystore = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-maybe-compressed-blob = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-metadata-ir = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-mixnet = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-offchain = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-panic-handler = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-runtime-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-runtime-interface-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-session = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-staking = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-state-machine = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-statement-store = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-std = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-storage = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-timestamp = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-tracing = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-transaction-pool = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-transaction-storage-proof = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-trie = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-ver = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-version = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-version-proc-macro = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-wasm-interface = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+sp-weights = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-bip39 = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-build-script-utils = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-prometheus-endpoint = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-test-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-test-runtime = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-test-runtime-client = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+substrate-wasm-builder = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+try-runtime-cli = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+ver-api = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal" }
+pallet-collective-mangata-rpc = { git = "https://github.com/gasp-xyz//polkadot-sdk", branch = "feat/chain-id-removal"}
 
 # # patch generated by './scripts/dev_manifest.sh ../../open-runtime-module-library/'
 # [patch."https://github.com/gasp-xyz/open-runtime-module-library"]
@@ -349,138 +345,138 @@ sp-crypto-ec-utils = { git = "https://github.com/gasp-xyz/polkadot-sdk", branch 
 # orml-traits = { git = "https://github.com//gasp-xyz/open-runtime-module-library", branch = "eth-rollup-develop" }
 # orml-utilities = { git = "https://github.com//gasp-xyz/open-runtime-module-library", branch = "eth-rollup-develop" }
 
-# # # patch generated by './scripts/dev_manifest.sh ../../../mangata-ws/polkadot-sdk/'
+
+# patch generated by './scripts/dev_manifest.sh ../../polkadot-sdk'
 # [patch."https://github.com/gasp-xyz/polkadot-sdk"]
-# substrate-wasm-builder = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/wasm-builder" }
-# frame-benchmarking-cli = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/frame/benchmarking-cli" }
-# substrate-bip39 = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/substrate-bip39" }
-# substrate-prometheus-endpoint = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/prometheus" }
-# fork-tree = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/fork-tree" }
-# substrate-build-script-utils = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/build-script-utils" }
-# substrate-test-client = { path = "../../../mangata-ws/polkadot-sdk/substrate/test-utils/client" }
-# substrate-test-runtime = { path = "../../../mangata-ws/polkadot-sdk/substrate/test-utils/runtime" }
-# substrate-test-runtime-client = { path = "../../../mangata-ws/polkadot-sdk/substrate/test-utils/runtime/client" }
-# frame-try-runtime = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/try-runtime" }
-# pallet-timestamp = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/timestamp" }
-# pallet-membership = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/membership" }
-# pallet-sudo-mangata = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/sudo-mangata" }
-# pallet-treasury = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/treasury" }
-# pallet-collective-mangata = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/collective-mangata" }
-# frame-system = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/system" }
-# frame-system-benchmarking = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/system/benchmarking" }
-# frame-system-rpc-runtime-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/system/rpc/runtime-api" }
-# mangata-support = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/mangata-support" }
-# pallet-balances = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/balances" }
-# pallet-aura = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/aura" }
-# pallet-vesting-mangata = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/vesting-mangata" }
-# pallet-session = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/session" }
-# pallet-utility-mangata = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/utility-mangata" }
-# pallet-identity = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/identity" }
-# pallet-utility = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/utility" }
-# pallet-authorship = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/authorship" }
-# frame-executive = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/executive" }
-# pallet-babe = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/babe" }
-# pallet-transaction-payment = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/transaction-payment" }
-# pallet-transaction-payment-rpc = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/transaction-payment/rpc" }
-# pallet-transaction-payment-rpc-runtime-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/transaction-payment/rpc/runtime-api" }
-# pallet-proxy = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/proxy" }
-# pallet-grandpa = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/grandpa" }
-# frame-support = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/support" }
-# frame-support-procedural = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/support/procedural" }
-# frame-support-procedural-tools = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/support/procedural/tools" }
-# frame-support-procedural-tools-derive = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/support/procedural/tools/derive" }
-# frame-benchmarking = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/benchmarking" }
-# sp-application-crypto = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/application-crypto" }
-# sp-timestamp = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/timestamp" }
-# sp-crypto-hashing = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/crypto/hashing" }
-# sp-crypto-hashing-proc-macro = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/crypto/hashing/proc-macro" }
-# sp-metadata-ir = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/metadata-ir" }
-# sp-state-machine = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/state-machine" }
-# sp-tracing = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/tracing" }
-# sp-mixnet = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/mixnet" }
-# sp-wasm-interface = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/wasm-interface" }
-# sp-ver = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/ver" }
-# sp-blockchain = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/blockchain" }
-# sp-block-builder = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/block-builder" }
-# sp-storage = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/storage" }
-# sp-session = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/session" }
-# sp-arithmetic = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/arithmetic" }
-# sp-consensus = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/consensus/common" }
-# sp-consensus-aura = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/consensus/aura" }
-# sp-consensus-babe = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/consensus/babe" }
-# sp-consensus-slots = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/consensus/slots" }
-# sp-consensus-grandpa = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/consensus/grandpa" }
-# sp-runtime-interface = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/runtime-interface" }
-# sp-runtime-interface-proc-macro = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/runtime-interface/proc-macro" }
-# ver-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/ver-api" }
-# sp-keystore = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/keystore" }
-# mangata-types = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/mangata-types" }
-# sp-trie = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/trie" }
-# sp-transaction-pool = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/transaction-pool" }
-# sp-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/api" }
-# sp-api-proc-macro = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/api/proc-macro" }
-# sp-std = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/std" }
-# sp-keyring = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/keyring" }
-# sp-version = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/version" }
-# sp-version-proc-macro = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/version/proc-macro" }
-# sp-weights = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/weights" }
-# sp-core = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/core" }
-# sp-maybe-compressed-blob = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/maybe-compressed-blob" }
-# extrinsic-shuffler = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/shuffler" }
-# sp-panic-handler = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/panic-handler" }
-# sp-inherents = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/inherents" }
-# sp-transaction-storage-proof = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/transaction-storage-proof" }
-# sp-runtime = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/runtime" }
-# sp-io = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/io" }
-# sp-database = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/database" }
-# sp-debug-derive = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/debug-derive" }
-# sp-staking = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/staking" }
-# sp-rpc = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/rpc" }
-# sp-offchain = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/offchain" }
-# sp-statement-store = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/statement-store" }
-# sp-externalities = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/externalities" }
-# sp-genesis-builder = { path = "../../../mangata-ws/polkadot-sdk/substrate/primitives/genesis-builder" }
-# sc-allocator = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/allocator" }
-# sc-rpc-spec-v2 = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/rpc-spec-v2" }
-# sc-utils = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/utils" }
-# sc-informant = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/informant" }
-# sc-basic-authorship-ver = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/basic-authorship-ver" }
-# sc-tracing = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/tracing" }
-# sc-tracing-proc-macro = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/tracing/proc-macro" }
-# sc-mixnet = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/mixnet" }
-# sc-state-db = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/state-db" }
-# sc-executor = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/executor" }
-# sc-executor-polkavm = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/executor/polkavm" }
-# sc-executor-wasmtime = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/executor/wasmtime" }
-# sc-executor-common = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/executor/common" }
-# sc-block-builder = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/block-builder" }
-# sc-telemetry = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/telemetry" }
-# sc-consensus = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/consensus/common" }
-# sc-consensus-aura = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/consensus/aura" }
-# sc-consensus-slots = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/consensus/slots" }
-# sc-consensus-grandpa = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/consensus/grandpa" }
-# sc-keystore = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/keystore" }
-# sc-block-builder-ver = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/block-builder-ver" }
-# sc-proposer-metrics = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/proposer-metrics" }
-# sc-transaction-pool = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/transaction-pool" }
-# sc-transaction-pool-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/transaction-pool/api" }
-# sc-network = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network" }
-# sc-network-common = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network/common" }
-# sc-network-bitswap = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network/bitswap" }
-# sc-network-sync = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network/sync" }
-# sc-network-light = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network/light" }
-# sc-network-transactions = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network/transactions" }
-# sc-client-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/api" }
-# sc-network-gossip = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/network-gossip" }
-# sc-chain-spec = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/chain-spec" }
-# sc-chain-spec-derive = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/chain-spec/derive" }
-# sc-rpc-api = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/rpc-api" }
-# sc-cli = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/cli" }
-# sc-service = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/service" }
-# sc-rpc-server = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/rpc-servers" }
-# sc-sysinfo = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/sysinfo" }
-# sc-client-db = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/db" }
-# sc-rpc = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/rpc" }
-# sc-offchain = { path = "../../../mangata-ws/polkadot-sdk/substrate/client/offchain" }
-# try-runtime-cli = { path = "../../../mangata-ws/polkadot-sdk/substrate/utils/frame/try-runtime/cli" }
-# pallet-collective-mangata-rpc = { path = "../../../mangata-ws/polkadot-sdk/substrate/frame/collective-mangata/rpc" }
+# substrate-test-runtime = { path = "../../polkadot-sdk/substrate/test-utils/runtime" }
+# substrate-test-runtime-client = { path = "../../polkadot-sdk/substrate/test-utils/runtime/client" }
+# substrate-test-client = { path = "../../polkadot-sdk/substrate/test-utils/client" }
+# pallet-transaction-payment = { path = "../../polkadot-sdk/substrate/frame/transaction-payment" }
+# pallet-transaction-payment-rpc = { path = "../../polkadot-sdk/substrate/frame/transaction-payment/rpc" }
+# pallet-transaction-payment-rpc-runtime-api = { path = "../../polkadot-sdk/substrate/frame/transaction-payment/rpc/runtime-api" }
+# pallet-collective-mangata = { path = "../../polkadot-sdk/substrate/frame/collective-mangata" }
+# pallet-collective-mangata-rpc = { path = "../../polkadot-sdk/substrate/frame/collective-mangata/rpc" }
+# pallet-proxy = { path = "../../polkadot-sdk/substrate/frame/proxy" }
+# pallet-identity = { path = "../../polkadot-sdk/substrate/frame/identity" }
+# pallet-sudo-mangata = { path = "../../polkadot-sdk/substrate/frame/sudo-mangata" }
+# mangata-support = { path = "../../polkadot-sdk/substrate/frame/mangata-support" }
+# pallet-utility-mangata = { path = "../../polkadot-sdk/substrate/frame/utility-mangata" }
+# pallet-authorship = { path = "../../polkadot-sdk/substrate/frame/authorship" }
+# pallet-grandpa = { path = "../../polkadot-sdk/substrate/frame/grandpa" }
+# pallet-vesting-mangata = { path = "../../polkadot-sdk/substrate/frame/vesting-mangata" }
+# frame-system = { path = "../../polkadot-sdk/substrate/frame/system" }
+# frame-system-benchmarking = { path = "../../polkadot-sdk/substrate/frame/system/benchmarking" }
+# frame-system-rpc-runtime-api = { path = "../../polkadot-sdk/substrate/frame/system/rpc/runtime-api" }
+# frame-support = { path = "../../polkadot-sdk/substrate/frame/support" }
+# frame-support-procedural = { path = "../../polkadot-sdk/substrate/frame/support/procedural" }
+# frame-support-procedural-tools = { path = "../../polkadot-sdk/substrate/frame/support/procedural/tools" }
+# frame-support-procedural-tools-derive = { path = "../../polkadot-sdk/substrate/frame/support/procedural/tools/derive" }
+# pallet-balances = { path = "../../polkadot-sdk/substrate/frame/balances" }
+# pallet-aura = { path = "../../polkadot-sdk/substrate/frame/aura" }
+# frame-benchmarking = { path = "../../polkadot-sdk/substrate/frame/benchmarking" }
+# pallet-treasury = { path = "../../polkadot-sdk/substrate/frame/treasury" }
+# frame-try-runtime = { path = "../../polkadot-sdk/substrate/frame/try-runtime" }
+# pallet-timestamp = { path = "../../polkadot-sdk/substrate/frame/timestamp" }
+# pallet-babe = { path = "../../polkadot-sdk/substrate/frame/babe" }
+# pallet-membership = { path = "../../polkadot-sdk/substrate/frame/membership" }
+# pallet-utility = { path = "../../polkadot-sdk/substrate/frame/utility" }
+# frame-executive = { path = "../../polkadot-sdk/substrate/frame/executive" }
+# pallet-session = { path = "../../polkadot-sdk/substrate/frame/session" }
+# substrate-wasm-builder = { path = "../../polkadot-sdk/substrate/utils/wasm-builder" }
+# fork-tree = { path = "../../polkadot-sdk/substrate/utils/fork-tree" }
+# substrate-build-script-utils = { path = "../../polkadot-sdk/substrate/utils/build-script-utils" }
+# frame-benchmarking-cli = { path = "../../polkadot-sdk/substrate/utils/frame/benchmarking-cli" }
+# substrate-bip39 = { path = "../../polkadot-sdk/substrate/utils/substrate-bip39" }
+# substrate-prometheus-endpoint = { path = "../../polkadot-sdk/substrate/utils/prometheus" }
+# sp-database = { path = "../../polkadot-sdk/substrate/primitives/database" }
+# sp-runtime-interface = { path = "../../polkadot-sdk/substrate/primitives/runtime-interface" }
+# sp-runtime-interface-proc-macro = { path = "../../polkadot-sdk/substrate/primitives/runtime-interface/proc-macro" }
+# sp-consensus-grandpa = { path = "../../polkadot-sdk/substrate/primitives/consensus/grandpa" }
+# sp-consensus = { path = "../../polkadot-sdk/substrate/primitives/consensus/common" }
+# sp-consensus-aura = { path = "../../polkadot-sdk/substrate/primitives/consensus/aura" }
+# sp-consensus-babe = { path = "../../polkadot-sdk/substrate/primitives/consensus/babe" }
+# sp-consensus-slots = { path = "../../polkadot-sdk/substrate/primitives/consensus/slots" }
+# sp-tracing = { path = "../../polkadot-sdk/substrate/primitives/tracing" }
+# sp-crypto-hashing = { path = "../../polkadot-sdk/substrate/primitives/crypto/hashing" }
+# sp-crypto-hashing-proc-macro = { path = "../../polkadot-sdk/substrate/primitives/crypto/hashing/proc-macro" }
+# sp-ver = { path = "../../polkadot-sdk/substrate/primitives/ver" }
+# sp-maybe-compressed-blob = { path = "../../polkadot-sdk/substrate/primitives/maybe-compressed-blob" }
+# sp-core = { path = "../../polkadot-sdk/substrate/primitives/core" }
+# sp-state-machine = { path = "../../polkadot-sdk/substrate/primitives/state-machine" }
+# sp-keystore = { path = "../../polkadot-sdk/substrate/primitives/keystore" }
+# sp-metadata-ir = { path = "../../polkadot-sdk/substrate/primitives/metadata-ir" }
+# sp-statement-store = { path = "../../polkadot-sdk/substrate/primitives/statement-store" }
+# sp-weights = { path = "../../polkadot-sdk/substrate/primitives/weights" }
+# sp-io = { path = "../../polkadot-sdk/substrate/primitives/io" }
+# sp-runtime = { path = "../../polkadot-sdk/substrate/primitives/runtime" }
+# sp-inherents = { path = "../../polkadot-sdk/substrate/primitives/inherents" }
+# sp-transaction-pool = { path = "../../polkadot-sdk/substrate/primitives/transaction-pool" }
+# sp-std = { path = "../../polkadot-sdk/substrate/primitives/std" }
+# sp-storage = { path = "../../polkadot-sdk/substrate/primitives/storage" }
+# sp-panic-handler = { path = "../../polkadot-sdk/substrate/primitives/panic-handler" }
+# sp-debug-derive = { path = "../../polkadot-sdk/substrate/primitives/debug-derive" }
+# sp-blockchain = { path = "../../polkadot-sdk/substrate/primitives/blockchain" }
+# sp-externalities = { path = "../../polkadot-sdk/substrate/primitives/externalities" }
+# sp-mixnet = { path = "../../polkadot-sdk/substrate/primitives/mixnet" }
+# sp-trie = { path = "../../polkadot-sdk/substrate/primitives/trie" }
+# mangata-types = { path = "../../polkadot-sdk/substrate/primitives/mangata-types" }
+# sp-version = { path = "../../polkadot-sdk/substrate/primitives/version" }
+# sp-version-proc-macro = { path = "../../polkadot-sdk/substrate/primitives/version/proc-macro" }
+# sp-block-builder = { path = "../../polkadot-sdk/substrate/primitives/block-builder" }
+# sp-keyring = { path = "../../polkadot-sdk/substrate/primitives/keyring" }
+# sp-staking = { path = "../../polkadot-sdk/substrate/primitives/staking" }
+# sp-wasm-interface = { path = "../../polkadot-sdk/substrate/primitives/wasm-interface" }
+# sp-transaction-storage-proof = { path = "../../polkadot-sdk/substrate/primitives/transaction-storage-proof" }
+# extrinsic-shuffler = { path = "../../polkadot-sdk/substrate/primitives/shuffler" }
+# sp-arithmetic = { path = "../../polkadot-sdk/substrate/primitives/arithmetic" }
+# sp-api = { path = "../../polkadot-sdk/substrate/primitives/api" }
+# sp-api-proc-macro = { path = "../../polkadot-sdk/substrate/primitives/api/proc-macro" }
+# sp-offchain = { path = "../../polkadot-sdk/substrate/primitives/offchain" }
+# sp-timestamp = { path = "../../polkadot-sdk/substrate/primitives/timestamp" }
+# sp-application-crypto = { path = "../../polkadot-sdk/substrate/primitives/application-crypto" }
+# sp-rpc = { path = "../../polkadot-sdk/substrate/primitives/rpc" }
+# ver-api = { path = "../../polkadot-sdk/substrate/primitives/ver-api" }
+# sp-genesis-builder = { path = "../../polkadot-sdk/substrate/primitives/genesis-builder" }
+# sp-session = { path = "../../polkadot-sdk/substrate/primitives/session" }
+# sc-consensus-grandpa = { path = "../../polkadot-sdk/substrate/client/consensus/grandpa" }
+# sc-consensus = { path = "../../polkadot-sdk/substrate/client/consensus/common" }
+# sc-consensus-aura = { path = "../../polkadot-sdk/substrate/client/consensus/aura" }
+# sc-consensus-slots = { path = "../../polkadot-sdk/substrate/client/consensus/slots" }
+# sc-tracing = { path = "../../polkadot-sdk/substrate/client/tracing" }
+# sc-tracing-proc-macro = { path = "../../polkadot-sdk/substrate/client/tracing/proc-macro" }
+# sc-rpc-spec-v2 = { path = "../../polkadot-sdk/substrate/client/rpc-spec-v2" }
+# sc-state-db = { path = "../../polkadot-sdk/substrate/client/state-db" }
+# sc-proposer-metrics = { path = "../../polkadot-sdk/substrate/client/proposer-metrics" }
+# sc-keystore = { path = "../../polkadot-sdk/substrate/client/keystore" }
+# sc-basic-authorship-ver = { path = "../../polkadot-sdk/substrate/client/basic-authorship-ver" }
+# sc-rpc-server = { path = "../../polkadot-sdk/substrate/client/rpc-servers" }
+# sc-network = { path = "../../polkadot-sdk/substrate/client/network" }
+# sc-network-bitswap = { path = "../../polkadot-sdk/substrate/client/network/bitswap" }
+# sc-network-transactions = { path = "../../polkadot-sdk/substrate/client/network/transactions" }
+# sc-network-common = { path = "../../polkadot-sdk/substrate/client/network/common" }
+# sc-network-light = { path = "../../polkadot-sdk/substrate/client/network/light" }
+# sc-network-sync = { path = "../../polkadot-sdk/substrate/client/network/sync" }
+# sc-informant = { path = "../../polkadot-sdk/substrate/client/informant" }
+# sc-transaction-pool = { path = "../../polkadot-sdk/substrate/client/transaction-pool" }
+# sc-transaction-pool-api = { path = "../../polkadot-sdk/substrate/client/transaction-pool/api" }
+# sc-utils = { path = "../../polkadot-sdk/substrate/client/utils" }
+# sc-cli = { path = "../../polkadot-sdk/substrate/client/cli" }
+# sc-chain-spec = { path = "../../polkadot-sdk/substrate/client/chain-spec" }
+# sc-chain-spec-derive = { path = "../../polkadot-sdk/substrate/client/chain-spec/derive" }
+# sc-block-builder-ver = { path = "../../polkadot-sdk/substrate/client/block-builder-ver" }
+# sc-mixnet = { path = "../../polkadot-sdk/substrate/client/mixnet" }
+# sc-block-builder = { path = "../../polkadot-sdk/substrate/client/block-builder" }
+# sc-allocator = { path = "../../polkadot-sdk/substrate/client/allocator" }
+# sc-network-gossip = { path = "../../polkadot-sdk/substrate/client/network-gossip" }
+# sc-client-db = { path = "../../polkadot-sdk/substrate/client/db" }
+# sc-client-api = { path = "../../polkadot-sdk/substrate/client/api" }
+# sc-sysinfo = { path = "../../polkadot-sdk/substrate/client/sysinfo" }
+# sc-executor = { path = "../../polkadot-sdk/substrate/client/executor" }
+# sc-executor-wasmtime = { path = "../../polkadot-sdk/substrate/client/executor/wasmtime" }
+# sc-executor-common = { path = "../../polkadot-sdk/substrate/client/executor/common" }
+# sc-executor-polkavm = { path = "../../polkadot-sdk/substrate/client/executor/polkavm" }
+# sc-telemetry = { path = "../../polkadot-sdk/substrate/client/telemetry" }
+# sc-offchain = { path = "../../polkadot-sdk/substrate/client/offchain" }
+# sc-service = { path = "../../polkadot-sdk/substrate/client/service" }
+# sc-rpc = { path = "../../polkadot-sdk/substrate/client/rpc" }
+# sc-rpc-api = { path = "../../polkadot-sdk/substrate/client/rpc-api" }

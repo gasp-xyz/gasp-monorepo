@@ -1947,13 +1947,6 @@ impl<T: Config> RolldownProviderTrait<ChainIdOf<T>, AccountIdOf<T>> for Pallet<T
 pub struct MultiEvmChainAddressConverter;
 impl Convert<(messages::Chain, [u8; 20]), L1Asset> for MultiEvmChainAddressConverter {
 	fn convert((chain, address): (messages::Chain, [u8; 20])) -> L1Asset {
-		match chain {
-			messages::Chain::Ethereum => L1Asset::Ethereum(address),
-			messages::Chain::Arbitrum => L1Asset::Arbitrum(address),
-			messages::Chain::Base => L1Asset::Base(address),
-			messages::Chain::Monad => L1Asset::Monad(address),
-			messages::Chain::MegaEth => L1Asset::MegaEth(address),
-			messages::Chain::Sonic => L1Asset::Sonic(address),
-		}
+		(chain, address)
 	}
 }

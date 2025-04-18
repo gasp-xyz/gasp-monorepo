@@ -14,6 +14,8 @@ pub type PendingUpdateMetadata =
     gasp_bindings::api::runtime_types::pallet_rolldown::pallet::UpdateMetadata<AccountId20>;
 pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::L1Update;
 
+pub type Chain = u64;
+
 #[derive(Debug)]
 pub struct PendingUpdate {
     pub chain: Chain,
@@ -25,7 +27,6 @@ pub struct PendingUpdate {
 mod l2types {
     pub use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
     // pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Cancel;
-    pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Chain;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Origin;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::RequestId;
     pub use gasp_bindings::api::runtime_types::pallet_rolldown::messages::Withdrawal;
@@ -37,7 +38,6 @@ mod l2types {
 mod l1types {
     pub use alloy::primitives::U256;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
-    pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId as Chain;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
     pub use contract_bindings::rolldown::IRolldownPrimitives::Range;
@@ -49,95 +49,6 @@ mod l1types {
 pub enum Origin {
     L1,
     L2,
-}
-
-#[derive(Debug, PartialEq, Copy, Clone, Hash, Eq)]
-pub enum Chain {
-    Ethereum,
-    Arbitrum,
-    Base,
-    Monad,
-    MegaEth,
-    Sonic,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum ChainParseError {
-    #[error("Unsupported chain id {0}")]
-    UnsupportedChainId(u32),
-}
-
-impl TryFrom<u32> for Chain {
-    type Error = ChainParseError;
-
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            1 | 17000 | 31337 => Ok(Chain::Ethereum),
-            42161 | 421614 | 31338 => Ok(Chain::Arbitrum),
-            8453 | 84532 | 31339 => Ok(Chain::Arbitrum),
-            _ => Err(ChainParseError::UnsupportedChainId(value)),
-        }
-    }
-}
-
-impl From<l2types::Chain> for Chain {
-    fn from(value: l2types::Chain) -> Self {
-        match value {
-            l2types::Chain::Ethereum => Chain::Ethereum,
-            l2types::Chain::Arbitrum => Chain::Arbitrum,
-            l2types::Chain::Base => Chain::Base,
-            l2types::Chain::Monad => Chain::Monad,
-            l2types::Chain::MegaEth => Chain::MegaEth,
-            l2types::Chain::Sonic => Chain::Sonic,
-        }
-    }
-}
-
-const ETHEREUM_CHAIN_ID: u8 = 0;
-const ARBITRUM_CHAIN_ID: u8 = 1;
-const BASE_CHAIN_ID: u8 = 2;
-const MONAD_CHAIN_ID: u8 = 3;
-const MEGAETH_CHAIN_ID: u8 = 4;
-const SONIC_CHAIN_ID: u8 = 5;
-
-impl From<l1types::Chain> for Chain {
-    fn from(value: l1types::Chain) -> Self {
-        match value.into() {
-            ETHEREUM_CHAIN_ID => Chain::Ethereum,
-            ARBITRUM_CHAIN_ID => Chain::Arbitrum,
-            BASE_CHAIN_ID => Chain::Base,
-            MONAD_CHAIN_ID => Chain::Monad,
-            MEGAETH_CHAIN_ID => Chain::MegaEth,
-            SONIC_CHAIN_ID => Chain::Sonic,
-            _ => panic!("unknown chain"),
-        }
-    }
-}
-
-impl Into<l1types::Chain> for Chain {
-    fn into(self) -> l1types::Chain {
-        match self {
-            Chain::Arbitrum => l1types::Chain::from(ARBITRUM_CHAIN_ID),
-            Chain::Ethereum => l1types::Chain::from(ETHEREUM_CHAIN_ID),
-            Chain::Base => l1types::Chain::from(BASE_CHAIN_ID),
-            Chain::Monad => l1types::Chain::from(MONAD_CHAIN_ID),
-            Chain::MegaEth => l1types::Chain::from(MEGAETH_CHAIN_ID),
-            Chain::Sonic => l1types::Chain::from(SONIC_CHAIN_ID),
-        }
-    }
-}
-
-impl Into<l2types::Chain> for Chain {
-    fn into(self) -> l2types::Chain {
-        match self {
-            Chain::Ethereum => l2types::Chain::Ethereum,
-            Chain::Arbitrum => l2types::Chain::Arbitrum,
-            Chain::Base => l2types::Chain::Base,
-            Chain::Monad => l2types::Chain::Monad,
-            Chain::MegaEth => l2types::Chain::MegaEth,
-            Chain::Sonic => l2types::Chain::Sonic,
-        }
-    }
 }
 
 impl From<l2types::Origin> for Origin {

@@ -12,7 +12,6 @@ import {Test} from "forge-std/Test.sol";
 import {FinalizerTaskManager} from "./../src/FinalizerTaskManager.sol";
 import {IFinalizerTaskManager} from "./../src/interfaces/IFinalizerTaskManager.sol";
 import {IRolldown} from "./../src/interfaces/IRolldown.sol";
-import {IRolldownPrimitives} from "./../src/interfaces/IRolldownPrimitives.sol";
 
 contract FinalizerTaskManagerIntegrationTest is Test, BLSMockAVSDeployer {
     using BN254 for BN254.G1Point;
@@ -65,7 +64,7 @@ contract FinalizerTaskManagerIntegrationTest is Test, BLSMockAVSDeployer {
         FinalizerTaskManager.RdTaskResponse memory taskResponse = IFinalizerTaskManager.RdTaskResponse({
             referenceTaskIndex: 0,
             referenceTaskHash: bytes32(0),
-            chainId: IRolldownPrimitives.ChainId.Ethereum,
+            chainId: uint64(block.chainid),
             batchId: 1,
             rdUpdate: bytes32(0),
             rangeStart: 0,
@@ -104,12 +103,12 @@ contract FinalizerTaskManagerIntegrationTest is Test, BLSMockAVSDeployer {
 
         // Now create RD task
         vm.prank(generator);
-        taskManager.createNewRdTask(IRolldownPrimitives.ChainId.Ethereum, 1);
+        taskManager.createNewRdTask(uint64(block.chainid), 1);
 
         // Setup RD task response
         FinalizerTaskManager.RdTask memory task = IFinalizerTaskManager.RdTask({
             taskNum: 0,
-            chainId: IRolldownPrimitives.ChainId.Ethereum,
+            chainId: uint64(block.chainid),
             batchId: 1,
             taskCreatedBlock: uint32(block.number),
             lastCompletedOpTaskNum: 0,

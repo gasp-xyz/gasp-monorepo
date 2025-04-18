@@ -160,12 +160,7 @@ mod test {
             .expect_get_latest_created_request_id()
             .return_once(move |_, _| Ok(l2_req));
 
-        let ferry = FerryHunter::new(
-            gasp_types::Chain::Ethereum,
-            l1mock,
-            l2mock,
-            mpsc::channel(10000).0,
-        );
+        let ferry = FerryHunter::new(1_u64, l1mock, l2mock, mpsc::channel(10000).0);
 
         assert_eq!(
             ferry.get_requests_to_ferry(H256::default()).await.unwrap(),
@@ -191,7 +186,7 @@ mod test {
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
+            FerryHunter::new(1_u64, l1mock, l2mock, sender)
                 .run()
                 .await
                 .unwrap();
@@ -261,7 +256,7 @@ mod test {
 
         let (sender, mut receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
+            FerryHunter::new(1_u64, l1mock, l2mock, sender)
                 .run()
                 .await
                 .unwrap();
@@ -316,7 +311,7 @@ mod test {
             .returning(|_| Ok(l1api::types::RequestStatus::Pending));
         let (sender, mut receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
+            FerryHunter::new(1_u64, l1mock, l2mock, sender)
                 .run()
                 .await
                 .unwrap();

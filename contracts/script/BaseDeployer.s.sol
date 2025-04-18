@@ -5,7 +5,6 @@ import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/p
 import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Utils} from "./utils/Utils.sol";
 
 abstract contract BaseDeployer is Script, Utils {
@@ -20,7 +19,7 @@ abstract contract BaseDeployer is Script, Utils {
         outputPath = string.concat(deployerKind_, "_output");
     }
 
-    function run(IRolldownPrimitives.ChainId chainId, string memory chainName) external {
+    function run(string memory chainName) external {
         if (isProxyDeployed()) {
             _printMessage(string.concat("Upgrading ", deployerKind, " contracts on ", chainName));
             upgrade();
@@ -28,7 +27,7 @@ abstract contract BaseDeployer is Script, Utils {
         }
 
         _printMessage(string.concat("Deploying ", deployerKind, " contracts to ", chainName));
-        deploy(chainId);
+        deploy();
     }
 
     function isProxyDeployed() public returns (bool) {
@@ -41,7 +40,7 @@ abstract contract BaseDeployer is Script, Utils {
         return proxyAdmin.code.length > 0;
     }
 
-    function deploy(IRolldownPrimitives.ChainId chainId) public virtual;
+    function deploy() public virtual;
 
     function upgrade() public virtual;
 

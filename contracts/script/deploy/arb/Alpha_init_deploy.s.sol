@@ -8,7 +8,6 @@ import {console} from "forge-std/console.sol";
 import {Script} from "forge-std/Script.sol";
 import {Test} from "forge-std/Test.sol";
 import {GaspMultiRollupService} from "../../../src/GaspMultiRollupService.sol";
-import {IRolldownPrimitives} from "../../../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../../../src/Rolldown.sol";
 import {Utils} from "../../utils/Utils.sol";
 
@@ -20,8 +19,6 @@ import {Utils} from "../../utils/Utils.sol";
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 contract Deployer is Script, Utils, Test {
     string internal constant _OUTPUT_PATH = "arb_deployment_output";
-    // solhint-disable-next-line const-name-snakecase
-    IRolldownPrimitives.ChainId internal constant chain = IRolldownPrimitives.ChainId.Arbitrum;
 
     ProxyAdmin public avsProxyAdmin;
     PauserRegistry public avsPauserReg;
@@ -73,7 +70,7 @@ contract Deployer is Script, Utils, Test {
         avsProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (avsOwner, chain, address(gmrs)))
+            abi.encodeCall(rolldown.initialize, (avsOwner, address(gmrs)))
         );
 
         gmrsImplementation = new GaspMultiRollupService();
@@ -81,7 +78,7 @@ contract Deployer is Script, Utils, Test {
             TransparentUpgradeableProxy(payable(address(gmrs))),
             address(gmrsImplementation),
             abi.encodeWithSelector(
-                gmrs.initialize.selector, avsPauserReg, avsOwner, avsUpdater, false, address(rolldown), chain
+                gmrs.initialize.selector, avsPauserReg, avsOwner, avsUpdater, false, address(rolldown)
             )
         );
         // transfer ownership of proxy admin to upgrader
@@ -124,9 +121,6 @@ contract Deployer is Script, Utils, Test {
         require(rolldown.hasRole(0x00, avsOwner), "rolldown default role admin != avsOwner");
         require(gmrs.owner() == avsOwner, "gmrs.owner() != avsOwner");
         require(gmrs.updater() == avsUpdater, "gmrs.updater() != avsUpdater");
-
-        require(gmrs.chainId() == chain, "gmrs.chainId() != chain");
-        require(rolldown.chain() == chain, "rolldown.chain() != chain");
     }
 
     function _checkPauserInitializations() internal view {

@@ -28,7 +28,8 @@ pub mod consts {
 	pub const ALICE: u64 = 2;
 	pub const BOB: u64 = 3;
 	pub const CHARLIE: u64 = 4;
-	pub const CHAIN: crate::messages::Chain = crate::messages::Chain::Ethereum;
+	pub const CHAIN_ETH: crate::messages::Chain = 1;
+	pub const CHAIN_ARB: crate::messages::Chain = 2;
 }
 
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -171,7 +172,7 @@ impl ExtBuilder {
 
 		rolldown::GenesisConfig::<Test> {
 			_phantom: Default::default(),
-			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128)].iter().cloned().collect(),
+			dispute_periods: [(consts::CHAIN_ETH, 5u128)].iter().cloned().collect(),
 		}
 		.assimilate_storage(&mut t)
 		.expect("Tokens storage can be assimilated");
@@ -180,7 +181,7 @@ impl ExtBuilder {
 
 		ext.execute_with(|| {
 			for s in vec![consts::ALICE, consts::BOB, consts::CHARLIE].iter() {
-				Pallet::<Test>::new_sequencer_active(consts::CHAIN, s);
+				Pallet::<Test>::new_sequencer_active(consts::CHAIN_ETH, s);
 			}
 		});
 
@@ -194,7 +195,7 @@ impl ExtBuilder {
 
 		rolldown::GenesisConfig::<Test> {
 			_phantom: Default::default(),
-			dispute_periods: [(crate::messages::Chain::Ethereum, 5u128)].iter().cloned().collect(),
+			dispute_periods: [(consts::CHAIN_ETH, 5u128)].iter().cloned().collect(),
 		}
 		.assimilate_storage(&mut t)
 		.expect("Tokens storage can be assimilated");

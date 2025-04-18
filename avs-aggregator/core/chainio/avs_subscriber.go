@@ -27,8 +27,6 @@ type AvsSubscriberer interface {
 	
 	SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *taskmanager.ContractFinalizerTaskManagerOpTaskCompleted) (event.Subscription, error)
 	
-	SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error)
-	
 	SubscribeToOperatorStakeUpdate(updateLogs chan *stakeRegistry.ContractStakeRegistryOperatorStakeUpdate) (event.Subscription, error)
 	
 	ParseRdTaskResponded(rawLog types.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
@@ -98,17 +96,6 @@ func (s *AvsSubscriber) SubscribeToOpTaskCompleted(opTaskCompletionLogs chan *ta
 		s.logger.Error("Failed to subscribe to OpTaskCompleted events", "err", err)
 	}
 	s.logger.Infof("Subscribed to OpTaskCompleted events")
-	return sub, err
-}
-
-func (s *AvsSubscriber) SubscribeToResumeTrackingOpState(resumeLogs chan *taskmanager.ContractFinalizerTaskManagerResumeTrackingOpState) (event.Subscription, error) {
-	sub, err := s.AvsContractBindings.TaskManager.WatchResumeTrackingOpState(
-		&bind.WatchOpts{}, resumeLogs,
-	)
-	if err != nil {
-		s.logger.Error("Failed to subscribe to ResumeTrackingOpState events", "err", err)
-	}
-	s.logger.Infof("Subscribed to ResumeTrackingOpState events")
 	return sub, err
 }
 

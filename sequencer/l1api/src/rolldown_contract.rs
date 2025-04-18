@@ -104,7 +104,7 @@ where
                 .await?;
         tracing::info!("contract deployed");
 
-        let call = contract_handle.initialize(sender, 0, sender);
+        let call = contract_handle.initialize(sender, sender);
         simulate_send_and_wait_for_result(contract_handle.provider(), call).await?;
         tracing::info!("contract initialized");
 

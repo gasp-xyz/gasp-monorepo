@@ -286,7 +286,7 @@ mod test {
         let l2 = MockL2::new();
 
         let (input, output) = mpsc::channel(100);
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -326,7 +326,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -388,7 +388,7 @@ mod test {
             Ok(H256::default())
         });
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 1u128, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 1u128, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -439,7 +439,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 0, output);
 
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
@@ -532,7 +532,7 @@ mod test {
             .await
             .unwrap();
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 0, output);
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
         });
@@ -619,7 +619,7 @@ mod test {
                 Ok(H256::default())
             });
 
-        let mut ferry = Ferry::new(l1, l2, ACCOUNT, Chain::Ethereum, 0, output);
+        let mut ferry = Ferry::new(l1, l2, ACCOUNT, 1_u64, 0, output);
         let handle = tokio::spawn(async move {
             ferry.run().await.unwrap();
         });

@@ -6,7 +6,6 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {IRolldownPrimitives} from "../src/interfaces/IRolldownPrimitives.sol";
 import {Rolldown} from "../src/Rolldown.sol";
 import {GaspTestToken} from "../test/mocks/GaspTestToken.sol";
 import {BaseDeployer} from "./BaseDeployer.s.sol";
@@ -23,7 +22,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
     address public upgrader;
     address public rolldownUpdater;
 
-    function deploy(IRolldownPrimitives.ChainId chainId) public override {
+    function deploy() public override {
         string memory configData = readConfig(_CONFIG_PATH);
         owner = stdJson.readAddress(configData, ".permissions.owner");
         upgrader = stdJson.readAddress(configData, ".permissions.upgrader");
@@ -43,7 +42,7 @@ contract RolldownDeployer is BaseDeployer("rolldown") {
         rolldownProxyAdmin.upgradeAndCall(
             TransparentUpgradeableProxy(payable(address(rolldown))),
             address(rolldownImplementation),
-            abi.encodeCall(rolldown.initialize, (owner, chainId, rolldownUpdater))
+            abi.encodeCall(rolldown.initialize, (owner, rolldownUpdater))
         );
 
         vm.stopBroadcast();

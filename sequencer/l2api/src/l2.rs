@@ -655,21 +655,11 @@ impl L2Interface for Gasp {
         account: [u8; 20],
         at: H256,
     ) -> Result<u128, L2Error> {
-        use gasp_bindings::api::runtime_types::mangata_types::assets::L1Asset;
         use gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20;
-
-        let asset = match chain {
-            gasp_types::Chain::Ethereum => L1Asset::Ethereum(token),
-            gasp_types::Chain::Arbitrum => L1Asset::Arbitrum(token),
-            gasp_types::Chain::Base => L1Asset::Base(token),
-            gasp_types::Chain::Monad => L1Asset::Monad(token),
-            gasp_types::Chain::MegaEth => L1Asset::MegaEth(token),
-            gasp_types::Chain::Sonic => L1Asset::Sonic(token),
-        };
 
         let storage = gasp_bindings::api::storage()
             .asset_registry()
-            .l1_asset_to_id(asset);
+            .l1_asset_to_id(chain, token);
         if let Some(token_id) = self.client.storage().at(at).fetch(&storage).await? {
             let storage = gasp_bindings::api::storage()
                 .tokens()
@@ -708,7 +698,7 @@ mod test {
     const BALTATHAR_PKEY: [u8; 32] =
         hex!("8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b");
     const TEST_TOKEN: [u8; 20] = hex!("c351628eb244ec633d5f21fbd6621e1a683b1181");
-    const ETHEREUM: gasp_types::Chain = gasp_types::Chain::Ethereum;
+    const ETHEREUM: gasp_types::Chain = 1_u64;
 
     #[serial]
     #[tokio::test]
@@ -785,19 +775,11 @@ mod test {
 
         let at = baltathat_gasp.latest_block().await.unwrap().1;
 
-        let dummy_read_rights = dummy_gasp
-            .get_read_rights(gasp_types::Chain::Ethereum, at)
-            .await;
-        let dummy_cancel_rights = dummy_gasp
-            .get_cancel_rights(gasp_types::Chain::Ethereum, at)
-            .await;
+        let dummy_read_rights = dummy_gasp.get_read_rights(1_u64, at).await;
+        let dummy_cancel_rights = dummy_gasp.get_cancel_rights(1_u64, at).await;
 
-        let baltathar_read_rights = baltathat_gasp
-            .get_read_rights(gasp_types::Chain::Ethereum, at)
-            .await;
-        let baltathar_cancel_rights = baltathat_gasp
-            .get_cancel_rights(gasp_types::Chain::Ethereum, at)
-            .await;
+        let baltathar_read_rights = baltathat_gasp.get_read_rights(1_u64, at).await;
+        let baltathar_cancel_rights = baltathat_gasp.get_cancel_rights(1_u64, at).await;
 
         assert!(matches!(dummy_read_rights, Err(L2Error::CanNotFetchRights)),);
         assert!(matches!(
@@ -898,7 +880,7 @@ mod test {
         let next_req_id = latest_req_id.saturating_add(1u128);
 
         let update = L1Update {
-            chain: crate::types::subxt::Chain::Ethereum,
+            chain: 1_u64,
             pendingDeposits: vec![crate::types::subxt::Deposit {
                 requestId: crate::types::subxt::RequestId {
                     origin: crate::types::subxt::Origin::L1,

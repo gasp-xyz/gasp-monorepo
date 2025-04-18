@@ -25,7 +25,6 @@ use sha3::{Digest, Keccak256};
 pub mod types {
     pub mod abi {
         pub use contract_bindings::rolldown::IRolldownPrimitives::Cancel;
-        pub use contract_bindings::rolldown::IRolldownPrimitives::ChainId;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Deposit;
         pub use contract_bindings::rolldown::IRolldownPrimitives::L1Update;
         pub use contract_bindings::rolldown::IRolldownPrimitives::Origin;
@@ -64,6 +63,7 @@ pub const NATIVE_TOKEN_ADDRESS: [u8; 20] = hex!("0000000000000000000000000000000
 
 #[allow(async_fn_in_trait)]
 pub trait L1Interface {
+    async fn get_chain_id(&self) -> Result<u64, L1Error>;
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error>;
     async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
     async fn native_balance(&self, account: [u8; 20]) -> Result<u128, L1Error>;
@@ -130,6 +130,12 @@ where
     P: Provider<T, N> + Clone + WalletProvider<N>,
     N: Network,
 {
+    #[tracing::instrument(skip(self), ret)]
+    async fn get_chain_id(&self) -> Result<u64, L1Error> {
+        let chain_id = self.provider.get_chain_id().await?;
+        Ok(chain_id)
+    }
+
     #[tracing::instrument(skip(self), ret)]
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         let deposit = self.rolldown_contract.get_deposit(request_id).await?;
