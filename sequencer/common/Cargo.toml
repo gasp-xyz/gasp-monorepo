@@ -18,3 +18,8 @@ itertools = "0.14.0"
 hex = "0.4.3"
 hex-literal = "0.4.1"
 oneshot = "0.1.11"
+futures = "0.3.17"
+
+[dev-dependencies]
+tracing-test = "0.2.5"
+async-stream = "0.3.6"

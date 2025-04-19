@@ -107,3 +107,26 @@ services:
       CHAIN: ${ETH_FERRY_WITHDRAWAL_L1_CHAIN}
       TX_COST: ${ETH_FERRY_WITHDRAWAL_TX_COST}
       RUST_LOG: ${ETH_FERRY_WITHDRAWAL_LOG}
+
+  closer-eth:
+    build: .
+    image: gaspxyz/sequencer:${FERRY_WITHDRAWAL_VERSION:-local}
+    restart: unless-stopped
+    command: /app/closer
+    depends_on:
+      eth-contracts-deployment:
+        condition: service_completed_successfully
+      node-alice:
+        condition: service_started
+      node-bob:
+        condition: service_started
+
+    environment:
+      L1_URI: ${ETH_CLOSER_ETH_CHAIN_URL}
+      L2_URI: ${ETH_CLOSER_MANGATA_NODE_URL}
+      ROLLDOWN_CONTRACT: ${ETH_CLOSER_MANGATA_CONTRACT_ADDRESS}
+      PRIVATE_KEY: ${ETH_CLOSER_PRIVATE_KEY}
+      CHAIN: ${ETH_CLOSER_L1_CHAIN}
+      RUST_LOG: ${ETH_CLOSER_LOG}
+      STASH_URI: http://stash-mock:8080
+      SKIP_STASH: false

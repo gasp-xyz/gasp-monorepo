@@ -2,12 +2,15 @@ use futures::future::join_all;
 use gasp_types::L2Request;
 use gasp_types::PendingUpdate;
 use std::collections::HashMap;
+use subxt::config::signed_extensions::ChargeTransactionPaymentParams;
+use subxt::config::signed_extensions::CheckMortalityParams;
+use subxt::config::signed_extensions::CheckNonceParams;
 use subxt::ext::subxt_core;
 use subxt::ext::subxt_core::storage::address::StorageHashers;
 
 use hex::encode as hex_encode;
 
-use crate::types::Finalization;
+use crate::types::{BatchId, BatchInfo, Finalization};
 use crate::L2Error;
 use futures::StreamExt;
 use primitive_types::H256;
@@ -54,7 +57,7 @@ impl Gasp {
 
     #[tracing::instrument(skip(self))]
     async fn wait_for_tx_execution(&self, tx_hash: HashOf<GaspConfig>) -> Result<bool, L2Error> {
-        let mut stream = self.header_stream(Finalization::Finalized).await?;
+        let mut stream = self.header_stream(Finalization::Best).await?;
 
         while let Some(header) = stream.next().await {
             let (number, hash) = header?;
@@ -109,11 +112,56 @@ impl Gasp {
         Err(L2Error::UnknownTxStatus)
     }
 
+    async fn best_header_stream(&self) -> Result<HeaderStream, L2Error> {
+        Ok(self
+            .client
+            .backend()
+            .stream_best_block_headers()
+            .await?
+            .map(|elem| {
+                elem.map(|(header, hash)| (header.number, hash.hash()))
+                    .map_err(L2Error::from)
+            })
+            .boxed())
+    }
+
+    async fn best_block(&self) -> Result<(u32, HashOf<GaspConfig>), L2Error> {
+        self.best_header_stream()
+            .await?
+            .next()
+            .await
+            .expect("infinite stream")
+    }
+
+    async fn fetch_nonce(&self, who: [u8; 20]) -> Result<u32, L2Error> {
+        let at = self.best_block().await?.1;
+
+        let query = gasp_bindings::api::storage()
+            .system()
+            .account(gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20(who));
+
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&query)
+            .await?
+            .map(|elem| elem.nonce)
+            .unwrap_or_default())
+    }
+
     async fn sign_and_send(&self, call: impl subxt::tx::Payload) -> Result<bool, L2Error> {
         let tx = self.client.tx();
 
+        let mortality = CheckMortalityParams::default();
+        let nonce = self
+            .fetch_nonce(self.keypair.address().into_inner())
+            .await?;
+        let nonce = CheckNonceParams(Some((nonce) as u64));
+        let payment = ChargeTransactionPaymentParams::no_tip();
+        let params = ((), (), (), mortality, nonce, payment);
         let partial_signed = tx
-            .create_partial_signed(&call, &self.keypair.address(), Default::default())
+            .create_partial_signed(&call, &self.keypair.address(), params)
             .await?;
 
         tracing::trace!("tx: {}", hex_encode(partial_signed.signer_payload()));
@@ -160,7 +208,6 @@ impl Gasp {
             .ok_or(L2Error::HeaderSubscriptionFailed)?
     }
 
-    #[cfg(test)]
     pub async fn withdraw(
         &self,
         chain: gasp_types::Chain,
@@ -184,14 +231,6 @@ impl L2Interface for Gasp {
         chain: gasp_types::Chain,
         deposit: gasp_types::Deposit,
     ) -> Result<bool, L2Error> {
-        // let request_id: types::ferry_deposit::RequestId,
-        // let deposit_recipient: types::ferry_deposit::DepositRecipient,
-        // let token_address: types::ferry_deposit::TokenAddress,
-        // let amount: types::ferry_deposit::Amount,
-        // let timestamp: types::ferry_deposit::Timestamp,
-        // let ferry_tip: types::ferry_deposit::FerryTip,
-        // let deposit_hash: types::ferry_deposit::DepositHash,
-        //
         let call = gasp_bindings::api::tx().rolldown().ferry_deposit(
             chain.into(),
             deposit.request_id.into(),
@@ -428,6 +467,26 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(level = "trace", skip(self), ret)]
+    async fn get_merkle_root(
+        &self,
+        range: (u128, u128),
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<H256, L2Error> {
+        let chain: crate::types::subxt::Chain = chain.into();
+        let call = gasp_bindings::api::runtime_apis::rolldown_runtime_api::RolldownRuntimeApi
+            .get_merkle_root(chain, range);
+
+        Ok(self
+            .client
+            .runtime_api()
+            .at_latest()
+            .await?
+            .call(call)
+            .await?)
+    }
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
     async fn get_merkle_proof(
         &self,
         request_id: u128,
@@ -452,6 +511,125 @@ impl L2Interface for Gasp {
         });
 
         Ok(proof)
+    }
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
+    #[allow(clippy::type_complexity)]
+    async fn get_latest_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(BatchId, (u128, u128))>, L2Error> {
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .l2_requests_batch_last();
+        let chain: crate::types::subxt::Chain = chain.into();
+        let last_batch = self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default();
+
+        Ok(last_batch
+            .iter()
+            .find(|(c, _)| *c == chain)
+            .map(|(_m, (_block, batch_id, range))| (*batch_id, (range.0, range.1))))
+    }
+
+    #[tracing::instrument(level = "debug", skip(self, at), ret)]
+    async fn get_batch_range(
+        &self,
+        batch_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(u128, u128)>, L2Error> {
+        let gasp_chain: crate::types::subxt::Chain = chain.into();
+
+        #[derive(
+            :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+            :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+            :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+            :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+            Clone,
+            Debug,
+            PartialEq,
+        )]
+        #[allow(non_snake_case)]
+        # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+        #[codec(dumb_trait_bound)]
+        #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+        #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+        pub struct TupleWrapper(pub (crate::types::subxt::Chain, ::core::primitive::u128));
+
+        let x: ::subxt::ext::subxt_core::storage::address::StaticAddress<
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey<TupleWrapper>,
+            gasp_bindings::api::rolldown::storage::types::l2_requests_batch::L2RequestsBatch,
+            ::subxt::ext::subxt_core::utils::Yes,
+            (),
+            (),
+        > = ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+            "Rolldown",
+            "L2RequestsBatch",
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(&TupleWrapper((
+                gasp_chain, batch_id,
+            ))),
+            [0u8; 32],
+        );
+
+        if let Some((_, range, _)) = self.client.storage().at(at).fetch(&x.unvalidated()).await? {
+            Ok(Some(range))
+        } else {
+            Ok(None)
+        }
+    }
+
+    //TODO: add test
+    #[tracing::instrument(level = "debug", skip(self), ret)]
+    async fn bisect_find_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<BatchInfo>, L2Error> {
+        if let Some((batch_id, range)) = self.get_latest_batch(request_id, chain, at).await? {
+            let lastest_request_id = range.1;
+            if request_id > lastest_request_id {
+                Ok(None)
+            } else {
+                let mut left = 1u128;
+                let mut right = batch_id;
+                while left <= right {
+                    let mid = (left + right) / 2;
+                    let (range_start, range_end) = self
+                        .get_batch_range(mid, chain, at)
+                        .await?
+                        .ok_or(L2Error::MissingBatch(mid))?;
+
+                    if request_id >= range_start && request_id <= range_end {
+                        let merkle_root = self
+                            .get_merkle_root((range_start, range_end), chain, at)
+                            .await?;
+                        return Ok(Some(BatchInfo {
+                            batch_id: mid,
+                            range: (range_start, range_end),
+                            merkle_root,
+                        }));
+                    } else if request_id > range_end {
+                        left = mid + 1;
+                    } else if request_id < range_start {
+                        right = mid - 1;
+                    } else {
+                        return Ok(None);
+                    }
+                }
+                Ok(None)
+            }
+        } else {
+            Ok(None)
+        }
     }
 
     #[tracing::instrument(skip(self))]
@@ -590,7 +768,10 @@ impl L2Interface for Gasp {
                     .collect::<HashMap<_, _>>()
             })
             .unwrap_or_default();
-        Ok(latest.get(&chain).cloned())
+        Ok(match latest.get(&chain) {
+            Some(elem) if *elem > 1 => Some(elem - 1u128),
+            _ => None,
+        })
     }
 
     #[tracing::instrument(skip(self))]

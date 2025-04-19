@@ -38,6 +38,14 @@ pub mod types {
 
     pub use super::Finalization;
     pub use super::HeaderStream;
+    pub type BatchId = u128;
+
+    #[derive(Clone, Copy, Debug)]
+    pub struct BatchInfo {
+        pub batch_id: BatchId,
+        pub range: (u128, u128),
+        pub merkle_root: H256,
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -68,6 +76,10 @@ pub enum L2Error {
     UnknownDisputePeriodLength(Chain),
     #[error("unknown pending update `{0}`")]
     UnknownPendingUpdate(H256),
+    #[error("missing batch with id `{0}`")]
+    MissingBatch(u128),
+    #[error("missing batch with id `{0}`")]
+    MissingBatchForRequestId(u128),
 }
 
 #[allow(async_fn_in_trait)]
@@ -88,6 +100,27 @@ pub trait L2Interface {
         range: u128,
         at: H256,
     ) -> Result<Option<L2Request>, L2Error>;
+
+    async fn get_latest_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(types::BatchId, (u128, u128))>, L2Error>;
+
+    async fn get_batch_range(
+        &self,
+        batch_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(u128, u128)>, L2Error>;
+
+    async fn bisect_find_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<types::BatchInfo>, L2Error>;
 
     async fn get_latest_created_request_id(
         &self,
@@ -134,6 +167,13 @@ pub trait L2Interface {
         chain: Chain,
         at: H256,
     ) -> Result<Vec<H256>, L2Error>;
+
+    async fn get_merkle_root(
+        &self,
+        range: (u128, u128),
+        chain: Chain,
+        at: H256,
+    ) -> Result<H256, L2Error>;
 
     async fn get_l2_request_hash(
         &self,
