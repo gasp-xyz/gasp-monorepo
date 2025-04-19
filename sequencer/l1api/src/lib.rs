@@ -1,7 +1,12 @@
 use tokio::time::Duration;
 
 use alloy::{
-    network::{EthereumWallet, Network, NetworkWallet}, primitives::map::HashMap, providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider}, signers::local::PrivateKeySigner, sol_types::SolValue, transports::Transport
+    network::{EthereumWallet, Network, NetworkWallet},
+    primitives::map::HashMap,
+    providers::{PendingTransactionError, Provider, ProviderBuilder, WalletProvider},
+    signers::local::PrivateKeySigner,
+    sol_types::SolValue,
+    transports::Transport,
 };
 use futures::{stream::BoxStream, StreamExt};
 use hex::encode as hex_encode;
@@ -369,29 +374,40 @@ where
         withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
     ) -> Result<H256, L1Error> {
         if let Some(cicka) = &self.cicka {
-            let allowance = withdrawals.iter().filter_map(|(withdrawal, _, _)| {
-                if withdrawal.token_address != NATIVE_TOKEN_ADDRESS {
-                    Some((withdrawal.token_address, withdrawal.amount.saturating_sub(withdrawal.ferry_tip)))
-                }else{
-                    None
-                }
-            }).fold(HashMap::new(), |mut sum, (token, amount)| {
-                    sum
-                        .entry(token)
-                        .and_modify(|allowance| *allowance+=amount)
+            let allowance = withdrawals
+                .iter()
+                .filter_map(|(withdrawal, _, _)| {
+                    if withdrawal.token_address != NATIVE_TOKEN_ADDRESS {
+                        Some((
+                            withdrawal.token_address,
+                            withdrawal.amount.saturating_sub(withdrawal.ferry_tip),
+                        ))
+                    } else {
+                        None
+                    }
+                })
+                .fold(HashMap::new(), |mut sum, (token, amount)| {
+                    sum.entry(token)
+                        .and_modify(|allowance| *allowance += amount)
                         .or_insert_with(|| amount);
                     sum
                 });
 
             let me: [u8; 20] = self.provider.wallet().default_signer_address().into();
-            for (token, amount ) in allowance{
+            for (token, amount) in allowance {
                 let needed_allowance: u128 = amount.try_into().unwrap();
                 let erc20token = Erc20Token::new(token, self.provider.clone());
                 let allowance = erc20token.allowance(cicka.address(), me).await?;
                 if allowance < needed_allowance {
                     let missing_allowance = needed_allowance - allowance;
-                    tracing::info!("increasing allowance for {} to {}", hex::encode(token), missing_allowance);
-                    erc20token.approve(cicka.address(), missing_allowance).await?;
+                    tracing::info!(
+                        "increasing allowance for {} to {}",
+                        hex::encode(token),
+                        missing_allowance
+                    );
+                    erc20token
+                        .approve(cicka.address(), missing_allowance)
+                        .await?;
                 }
             }
             cicka.send_close_withdrawals(withdrawals).await

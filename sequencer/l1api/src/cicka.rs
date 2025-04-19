@@ -51,7 +51,7 @@ mod abi {
 #[derive(Clone)]
 pub struct Cicka<T, P, N> {
     contract_handle: abi::CickaContract::CickaContractInstance<T, P, N>,
-    address: [u8; 20]
+    address: [u8; 20],
 }
 
 impl<T, P, N> Cicka<T, P, N>
@@ -60,7 +60,7 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
-    pub fn address(&self) -> [u8;20] {
+    pub fn address(&self) -> [u8; 20] {
         self.address
     }
 
