@@ -51,6 +51,7 @@ mod abi {
 #[derive(Clone)]
 pub struct Cicka<T, P, N> {
     contract_handle: abi::CickaContract::CickaContractInstance<T, P, N>,
+    address: [u8; 20]
 }
 
 impl<T, P, N> Cicka<T, P, N>
@@ -59,6 +60,10 @@ where
     P: Provider<T, N> + WalletProvider<N>,
     N: Network,
 {
+    pub fn address(&self) -> [u8;20] {
+        self.address
+    }
+
     pub async fn send_close_withdrawals(
         &self,
         withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
@@ -97,6 +102,7 @@ where
                 address.into(),
                 provider,
             ),
+            address,
         }
     }
 }
