@@ -58,24 +58,21 @@ where
             .l2
             .get_latest_created_request_id(self.chain, l2_state)
             .await?;
-        match latest_request_id_on_l2 {
-            Some(id) if id <= self.latest_processed => {
-                return Ok(None);
-            }
-            None => {
-                return Ok(None);
-            }
-            _ => {}
-        };
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
 
-        Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
-            (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id, l2_request_id))
+        //do L1 only when there are new requests on L2
+        match latest_request_id_on_l2 {
+            Some(id) if id > self.latest_processed => {
+                let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
+                Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
+                    (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
+                        Some((l1_request_id + 1, l2_request_id))
+                    }
+                    (None, Some(l2_request_id)) => Some((1, l2_request_id)),
+                    _ => None,
+                })
             }
-            (None, Some(l2_request_id)) => Some((1, l2_request_id)),
-            _ => None,
-        })
+            _ => Ok(None),
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self, at), ret)]
@@ -195,10 +192,10 @@ mod test {
 
         l1mock
             .expect_get_latest_finalized_request_id()
-            .return_once(move || Ok(None));
+            .returning(move || Ok(None));
         l2mock
             .expect_get_latest_created_request_id()
-            .return_once(move |_, _| Ok(None));
+            .returning(move |_, _| Ok(None));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -302,15 +299,15 @@ mod test {
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(1)))
-            .return_once(|_, _| Ok(Some(1u128)));
+            .returning(|_, _| Ok(Some(1u128)));
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(2)))
-            .return_once(|_, _| Ok(Some(2u128)));
+            .returning(|_, _| Ok(Some(2u128)));
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(3)))
-            .return_once(|_, _| Ok(Some(2u128)));
+            .returning(|_, _| Ok(Some(2u128)));
 
         l2mock
             .expect_get_l2_request()

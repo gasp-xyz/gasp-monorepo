@@ -123,7 +123,6 @@ mod test {
     use l1api::L1Error;
     use mockall::{predicate::eq, Sequence};
     use test_case::test_case;
-    use tokio::time::timeout;
     use tracing_test::traced_test;
 
     #[test_case(100u128, None, None; "no l2 requests yet")]
