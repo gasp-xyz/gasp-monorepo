@@ -64,41 +64,48 @@ where
     }
 
     pub async fn run(&mut self) -> HunterResult<()> {
-        let mut stream = self.l2.header_stream(l2api::Finalization::Best).await?;
-        //TODO replace with wait for the next block
-        while let Some(elem) = stream.next().await {
-            let (block_nr, at) = elem?;
+        let mut stream = self.l1.subscribe_deposit().await?;
+        loop {
+            let (block_nr, at) = self.l2.get_best_block().await?;
             tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
-
-            let mut latest = self.latest_processed;
-            if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-                if end <= self.latest_processed {
-                    continue;
-                }
-                let chunks =
-                    common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
-                for (id, range) in chunks.iter().enumerate() {
-                    tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
-                    tracing::info!(
+            match self.get_requests_to_ferry(at).await? {
+                Some((start, end)) if end > self.latest_processed => {
+                    let chunks = common::get_chunks(
+                        std::cmp::max(start, self.latest_processed + 1),
+                        end,
+                        25,
+                    );
+                    for (id, range) in chunks.iter().enumerate() {
+                        tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
+                        tracing::info!(
                         "looking for pending deposit {range:?} batch {id} / {chunks_count} (last : {end})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
-                    let queries = (range.0..=range.1)
-                        .map(|elem| self.get_deposit(elem))
-                        .collect::<Vec<_>>();
+                        let queries = (range.0..=range.1)
+                            .map(|elem| self.get_deposit(elem))
+                            .collect::<Vec<_>>();
 
-                    for w in futures::future::try_join_all(queries)
-                        .await?
-                        .into_iter()
-                        .flatten()
-                    {
-                        self.sink.send(w).await?;
-                        latest = w.request_id.id.try_into().unwrap();
+                        for d in futures::future::try_join_all(queries)
+                            .await?
+                            .into_iter()
+                            .flatten()
+                        {
+                            tracing::info!("Deposit found {d}");
+                            self.sink.send(d).await?;
+                            self.latest_processed = d.request_id.id.try_into().unwrap();
+                        }
                     }
                 }
+                _ => {}
             }
-            self.latest_processed = latest;
+
+            // block until notified
+            if let Some(elem) = stream.next().await {
+                tracing::info!("Deposit rid : {elem} happend on L1");
+            } else {
+                break;
+            }
         }
         tracing::warn!("header stream ended");
         Ok(())
@@ -110,10 +117,10 @@ mod test {
 
     use super::*;
     use futures::stream;
-    use gasp_types::{RequestId, U256};
+    use gasp_types::RequestId;
 
+    use common::timeout_f64;
     use l1api::L1Error;
-    use l2api::L2Error;
     use mockall::{predicate::eq, Sequence};
     use test_case::test_case;
     use tracing_test::traced_test;
@@ -158,16 +165,16 @@ mod test {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
-        l2mock
-            .expect_header_stream()
-            .return_once(|_| Ok(Box::pin(stream::iter(vec![Ok((1u32, [0u8; 32].into()))]))));
-
         l1mock
-            .expect_get_latest_reqeust_id()
-            .return_once(move || Ok(None));
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(stream::pending().boxed()));
+        l2mock
+            .expect_get_best_block()
+            .return_once(|| Ok((1, H256::default())));
+        l1mock.expect_get_latest_reqeust_id().returning(|| Ok(None));
         l2mock
             .expect_get_latest_processed_request_id()
-            .return_once(move |_, _| Ok(0u128));
+            .returning(|_, _| Ok(0u128));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -177,7 +184,9 @@ mod test {
                 .unwrap();
         });
 
-        handle.await.unwrap();
+        tokio::time::timeout(tokio::time::Duration::from_secs_f32(0.1), handle)
+            .await
+            .unwrap_err();
     }
 
     fn deposit_stream() -> impl Iterator<Item = Deposit> {
@@ -202,26 +211,20 @@ mod test {
         Ok(Some(nth_deposit(id as usize)))
     }
 
-    fn block_hash(id: usize) -> H256 {
-        U256::from(id).to_big_endian().into()
-    }
-
-    fn header_stream() -> impl Iterator<Item = Result<(u32, H256), L2Error>> {
-        std::iter::repeat(())
-            .enumerate()
-            .skip(1)
-            .map(|(id, _)| Ok::<_, L2Error>((id as u32, block_hash(id))))
-    }
-
     #[tokio::test]
     #[traced_test]
     async fn test_fetches_single_request() {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
+        l1mock
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(futures::stream::iter(std::iter::once(1u128)).boxed()));
+
         l2mock
-            .expect_header_stream()
-            .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(1)))));
+            .expect_get_best_block()
+            .returning(|| Ok((1, H256::default())));
+
         l1mock
             .expect_get_latest_reqeust_id()
             .returning(|| Ok(Some(1u128)));
@@ -241,13 +244,11 @@ mod test {
             FerryHunter::new(gasp_types::Chain::Ethereum, l1mock, l2mock, sender)
                 .run()
                 .await
-                .unwrap();
         });
 
-        handle.await.unwrap();
-
-        receiver.recv().await.unwrap();
-        assert!(receiver.recv().await.is_none());
+        assert!(timeout_f64(0.5, handle).await.is_ok());
+        assert!(timeout_f64(0.5, receiver.recv()).await.unwrap().is_some());
+        assert!(timeout_f64(0.5, receiver.recv()).await.unwrap().is_none());
     }
 
     #[tokio::test]
@@ -256,9 +257,13 @@ mod test {
         let mut l1mock = l1api::mock::MockL1::default();
         let mut l2mock = l2api::mock::MockL2::default();
 
+        l1mock
+            .expect_subscribe_deposit()
+            .return_once(|| Ok(futures::stream::iter([1, 2, 3]).boxed()));
+
         l2mock
-            .expect_header_stream()
-            .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(3)))));
+            .expect_get_best_block()
+            .returning(|| Ok((1, H256::default())));
 
         l2mock
             .expect_get_latest_processed_request_id()
@@ -273,7 +278,7 @@ mod test {
 
         l1mock
             .expect_get_latest_reqeust_id()
-            .times(2)
+            .times(3)
             .in_sequence(&mut seq)
             .returning(|| Ok(Some(2u128)));
 

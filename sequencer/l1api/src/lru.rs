@@ -1,3 +1,4 @@
+use futures::stream::BoxStream;
 use primitive_types::H256;
 use std::cell::RefCell;
 use std::num::NonZeroUsize;
@@ -29,6 +30,18 @@ impl<L1> L1Interface for CachedL1Interface<L1>
 where
     L1: L1Interface,
 {
+    async fn subscribe_header(&self) -> Result<BoxStream<Result<u128, L1Error>>, L1Error> {
+        self.l1.subscribe_header().await
+    }
+
+    async fn subscribe_deposit(&self) -> Result<BoxStream<u128>, L1Error> {
+        self.l1.subscribe_deposit().await
+    }
+
+    async fn subscribe_new_batch(&self) -> Result<BoxStream<(H256, (u128, u128))>, L1Error> {
+        self.l1.subscribe_new_batch().await
+    }
+
     async fn get_deposit(&self, request_id: u128) -> Result<Option<types::Deposit>, L1Error> {
         self.l1.get_deposit(request_id).await
     }
@@ -76,10 +89,6 @@ where
         }
     }
 
-    // async fn estimate_gas_in_wei(&self) -> Result<(u128, u128), L1Error> {
-    //     self.l1.estimate_gas_in_wei().await
-    // }
-
     async fn close_cancel(
         &self,
         cancel: gasp_types::Cancel,
@@ -98,6 +107,13 @@ where
         self.l1
             .close_withdrawal(withdrawal, merkle_root, proof)
             .await
+    }
+
+    async fn close_withdrawals_at_once(
+        &self,
+        withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
+    ) -> Result<H256, L1Error> {
+        self.l1.close_withdrawals_at_once(withdrawals).await
     }
 
     async fn ferry_withdrawal(&self, withdrawal: gasp_types::Withdrawal) -> Result<H256, L1Error> {
