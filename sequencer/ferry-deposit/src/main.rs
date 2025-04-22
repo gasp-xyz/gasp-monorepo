@@ -1,7 +1,6 @@
 use clap::Parser;
-use ferry::FerryError;
-use hunter::HunterError;
-use l1api::L1;
+use futures::{stream::BoxStream, StreamExt};
+use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
 
@@ -9,14 +8,15 @@ mod cli;
 mod ferry;
 mod filter;
 mod hunter;
+mod metrics;
 
-fn init_logger() {
+fn init_logger(with_colors: bool) {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env_lossy();
     tracing_subscriber::fmt()
         .with_env_filter(filter)
-        .with_ansi(false)
+        .with_ansi(with_colors)
         .init();
 }
 
@@ -38,29 +38,53 @@ pub enum Error {
     L2Error(#[from] l2api::L2Error),
 }
 
+pub type TaskHandle = tokio::task::JoinHandle<Result<(), Error>>;
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
+    init_logger(args.colors);
     let chain: gasp_types::Chain = args.chain_id.try_into()?;
-    init_logger();
 
-    tracing::info!("{args:?}");
+    tracing::info!("config: {args:#?}");
 
-    let (hunter_to_filter, filter_input) = channel(1_000_000);
-    let (to_executor, executor) = channel(1_000_000);
+    let subscription = if args.polling {
+        Subscription::Polling
+    } else {
+        Subscription::Subscription
+    };
 
-    let provider = l1api::create_provider(args.l1_uri, args.private_key).await?;
+    let provider = l1api::create_provider(args.l1_uri, args.private_key.into()).await?;
     let sender = l1api::address(provider.clone());
     let rolldown = l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address);
 
-    let l2 = Gasp::new(&args.l2_uri, args.private_key).await?;
+    let l1 = L1::new(rolldown.clone(), None, provider.clone(), subscription);
+    let l2 = Gasp::new(&args.l2_uri, args.private_key.into()).await?;
 
-    let mut hunter = {
-        let l1 = L1::new(rolldown.clone(), provider.clone());
-        hunter::FerryHunter::new(chain, l1, l2.clone(), hunter_to_filter)
+    let (hunter_to_filter, filter_input) = channel(1_000_000);
+    let stream: BoxStream<'static, Result<u128, l1api::L1Error>> = if args.polling {
+        rolldown.subscribe_blocks().await?.boxed()
+    } else {
+        rolldown
+            .subscribe_blocks_polling(tokio::time::Duration::from_secs_f64(60.0))
+            .await?
+            .boxed()
     };
 
-    let executor = ferry::Ferry::new(l2.clone(), sender, chain, args.tx_cost, executor);
+    let (to_executor, executor, delay_fut) =
+        common::delay::create_delay_channel(stream, args.block_delay);
+
+    let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
+
+    let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
+
+    let executor = ferry::Ferry::new(
+        l1.clone(),
+        l2.clone(),
+        sender,
+        chain,
+        args.tx_cost,
+        executor,
+    );
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {
@@ -71,29 +95,31 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle = tokio::spawn(async move {
-        hunter.run().await?;
-        Ok::<_, HunterError>(())
-    });
+    let hunter_handle: TaskHandle =
+        tokio::spawn(async move { Ok::<_, Error>(hunter.run().await?) });
 
-    let filter_handle = tokio::spawn(async move {
+    let filter_handle: TaskHandle = tokio::spawn(async move {
         filter::filter_deposits(
             filter_input,
             to_executor,
             args.enabled.into_iter().collect(),
         )
-        .await
+        .await;
+        Ok(())
     });
 
-    let executor_handle = tokio::spawn(async move {
-        executor.run().await?;
-        Ok::<_, FerryError>(())
+    let executor_handle: TaskHandle = tokio::spawn(async move {
+        Ok::<_, Error>(
+            executor
+                .run()
+                .await
+                .inspect_err(|e| tracing::error!("Err: {e}"))?,
+        )
     });
 
-    let (hunter, _filter, executor) =
-        tokio::try_join!(hunter_handle, filter_handle, executor_handle,).expect("can join");
-    hunter?;
-    executor?;
+    if let Err(e) = tokio::try_join!(executor_handle, filter_handle, hunter_handle, delay_task) {
+        tracing::error!("err : {e}");
+    }
 
     Ok(())
 }

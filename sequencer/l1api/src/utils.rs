@@ -61,7 +61,7 @@ where
             let status = receipt.status();
             let hash = receipt.transaction_hash().0.into();
             let sender = receipt.from();
-            tracing::trace!("tx: {hash} sender {sender} execution status {status}");
+            tracing::debug!("tx: {hash} sender {sender} execution status {status}");
             if status {
                 Ok(hash)
             } else {

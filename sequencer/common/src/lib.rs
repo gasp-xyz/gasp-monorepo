@@ -1,6 +1,32 @@
+pub mod delay;
 mod metrics;
+use std::future::IntoFuture;
+
 use itertools::Itertools;
 pub use metrics::{report_account_balance, serve_metrics};
+use tokio::time::{error::Elapsed, timeout};
+
+#[derive(Clone, Copy)]
+pub struct PKeyWrapper(pub [u8; 32]);
+
+impl From<PKeyWrapper> for [u8; 32] {
+    fn from(val: PKeyWrapper) -> [u8; 32] {
+        val.0
+    }
+}
+
+impl From<[u8; 32]> for PKeyWrapper {
+    fn from(value: [u8; 32]) -> Self {
+        PKeyWrapper(value)
+    }
+}
+
+impl std::fmt::Debug for PKeyWrapper {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "### SECRET ###")
+    }
+}
+
 pub fn get_chunks(start: u128, end: u128, chunk_size: usize) -> Vec<(u128, u128)> {
     (start..=end)
         .chunks(chunk_size)
@@ -26,7 +52,7 @@ pub fn parse_addr(s: &str) -> Result<[u8; 20], ::hex::FromHexError> {
     Ok(result)
 }
 
-pub fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
+pub fn parse_pkey(s: &str) -> Result<PKeyWrapper, ::hex::FromHexError> {
     let mut result = [0u8; 32];
     let parse_result = match (s.starts_with("0x"), s.len()) {
         (true, 66) => hex::decode(&s[2..]),
@@ -35,7 +61,7 @@ pub fn parse_pkey(s: &str) -> Result<[u8; 32], ::hex::FromHexError> {
     }?;
 
     result.copy_from_slice(parse_result.as_ref());
-    Ok(result)
+    Ok(result.into())
 }
 
 // mockall does not allow for async acion withing calls like `returning` or `return_once`
@@ -83,6 +109,20 @@ pub fn parse_tokens_and_weight(input: &str) -> Result<([u8; 20], u128), ::hex::F
         }
         _ => Err(hex::FromHexError::InvalidStringLength),
     }
+}
+
+pub async fn timeout_f64<F>(
+    duration: f64,
+    future: F,
+) -> Result<<F as std::future::IntoFuture>::Output, Elapsed>
+where
+    F: IntoFuture,
+{
+    timeout(
+        tokio::time::Duration::from_secs_f64(duration),
+        future.into_future(),
+    )
+    .await
 }
 
 #[cfg(test)]
