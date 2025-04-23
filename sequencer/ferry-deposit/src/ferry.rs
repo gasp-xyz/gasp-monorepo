@@ -190,6 +190,36 @@ where
         Ok(())
     }
 
+    pub async fn is_ferried(&self, deposit: &Deposit) -> Result<bool, FerryError> {
+        let (_, at) = self.l2.get_best_block().await?;
+        Ok(self
+            .l2
+            .is_ferried(self.chain, deposit.deposit_hash(), at)
+            .await?)
+    }
+
+    pub async fn remove_already_ferried(&mut self) -> Result<(), FerryError> {
+        let amount_before = self.ferryable_deposits.len();
+        let check_ferried = self.ferryable_deposits.iter().map(|(_, (_, deposit))| {
+            self.is_ferried(deposit)
+                .map(|elem| elem.map(|is_ferried| (deposit.request_id.id, is_ferried)))
+        });
+        let ferried = futures::future::try_join_all(check_ferried)
+            .await?
+            .into_iter()
+            .collect::<HashMap<_, _>>();
+        self.ferryable_deposits
+            .retain(|deposit_id, _| !ferried.get(deposit_id).unwrap_or(&true));
+        let amount_after = self.ferryable_deposits.len();
+        if amount_before > amount_after {
+            tracing::info!(
+                "removed {} already ferried withdrawals",
+                amount_before - amount_after
+            );
+        }
+        Ok(())
+    }
+
     pub async fn run(mut self) -> Result<(), FerryError> {
         let mut now = Instant::now();
         loop {
@@ -224,6 +254,7 @@ where
 
             if !self.ferryable_deposits.is_empty() {
                 self.refresh_balances().await?;
+                self.remove_already_ferried().await?;
                 self.ferry_deposit().await?;
                 continue;
             }
