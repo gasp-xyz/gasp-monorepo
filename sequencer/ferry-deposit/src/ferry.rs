@@ -190,6 +190,36 @@ where
         Ok(())
     }
 
+    pub async fn is_ferried(&self, deposit: &Deposit) -> Result<bool, FerryError> {
+        let (_, at) = self.l2.get_best_block().await?;
+        Ok(self
+            .l2
+            .is_ferried(self.chain, deposit.deposit_hash(), at)
+            .await?)
+    }
+
+    pub async fn remove_already_ferried(&mut self) -> Result<(), FerryError> {
+        let amount_before = self.ferryable_deposits.len();
+        let check_ferried = self.ferryable_deposits.iter().map(|(_, (_, deposit))| {
+            self.is_ferried(deposit)
+                .map(|elem| elem.map(|is_ferried| (deposit.request_id.id, is_ferried)))
+        });
+        let ferried = futures::future::try_join_all(check_ferried)
+            .await?
+            .into_iter()
+            .collect::<HashMap<_, _>>();
+        self.ferryable_deposits
+            .retain(|deposit_id, _| !ferried.get(deposit_id).unwrap_or(&true));
+        let amount_after = self.ferryable_deposits.len();
+        if amount_before > amount_after {
+            tracing::info!(
+                "removed {} already ferried withdrawals",
+                amount_before - amount_after
+            );
+        }
+        Ok(())
+    }
+
     pub async fn run(mut self) -> Result<(), FerryError> {
         let mut now = Instant::now();
         loop {
@@ -224,6 +254,7 @@ where
 
             if !self.ferryable_deposits.is_empty() {
                 self.refresh_balances().await?;
+                self.remove_already_ferried().await?;
                 self.ferry_deposit().await?;
                 continue;
             }
@@ -288,6 +319,7 @@ mod test {
             timestamp: 0.into(),
         };
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -330,6 +362,7 @@ mod test {
             timestamp: 0.into(),
         };
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -397,6 +430,7 @@ mod test {
             .with(eq(3u128))
             .returning(move |_| Ok(Some(high_prio_deposit)));
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(100u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -453,6 +487,7 @@ mod test {
             recipient: RECIPIENT,
             timestamp: 0.into(),
         };
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
             .returning(|_, _, _, _| Ok(90u128));
@@ -530,6 +565,7 @@ mod test {
         l1.expect_get_deposit()
             .with(eq(2u128))
             .returning(move |_| Ok(Some(affordable_deposit)));
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
             .returning(|_, _, _, _| Ok(90u128));

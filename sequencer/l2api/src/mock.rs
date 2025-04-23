@@ -12,6 +12,14 @@ mockall::mock! {
 #[allow(clippy::type_complexity)]
 impl crate::L2Interface for L2{
 
+    async fn is_ferried(
+        &self,
+        chain: Chain,
+        request_hash: H256,
+        at: H256
+    ) -> Result<bool, L2Error>;
+
+
     async fn get_best_block(&self) -> Result<(u32, H256), L2Error>;
 
     async fn get_latest_finalized_block(&self) -> Result<(u32, H256), L2Error>;
