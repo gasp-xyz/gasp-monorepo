@@ -319,6 +319,7 @@ mod test {
             timestamp: 0.into(),
         };
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -361,6 +362,7 @@ mod test {
             timestamp: 0.into(),
         };
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(90u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -428,6 +430,7 @@ mod test {
             .with(eq(3u128))
             .returning(move |_| Ok(Some(high_prio_deposit)));
 
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance().returning(|_, _, _, _| Ok(100u128));
         l2.expect_get_latest_processed_request_id()
             .returning(|_, _| Ok(0u128));
@@ -484,6 +487,7 @@ mod test {
             recipient: RECIPIENT,
             timestamp: 0.into(),
         };
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
             .returning(|_, _, _, _| Ok(90u128));
@@ -561,6 +565,7 @@ mod test {
         l1.expect_get_deposit()
             .with(eq(2u128))
             .returning(move |_| Ok(Some(affordable_deposit)));
+        l2.expect_is_ferried().returning(|_, _, _| Ok(false));
         l2.expect_get_balance()
             .with(always(), eq(ENABLED_TOKEN1), always(), always())
             .returning(|_, _, _, _| Ok(90u128));
