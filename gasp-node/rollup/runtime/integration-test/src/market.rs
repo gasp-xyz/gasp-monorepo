@@ -862,3 +862,55 @@ fn swap_is_pre_validated() {
 		assert_eq!(res.err().unwrap(), orml_tokens::Error::<Runtime>::BalanceTooLow.into());
 	})
 }
+
+#[test]
+// reproduces GASP-2211
+fn test_is_lockless_for_atomic_swap_that_is_not_whitelisted() {
+	test_env().execute_with(|| {
+		let bob = AccountId::from(BOB);
+
+		mint_token(NATIVE_ASSET_ID, &bob, DEFAULT_MINT_AMOUNT);
+		let token_id_1 = create_new_token(&bob, DEFAULT_MINT_AMOUNT);
+		let pool_id = token_id_1 + 1;
+
+		Market::create_pool(
+			RuntimeOrigin::signed(bob),
+			PoolKind::Xyk,
+			NATIVE_ASSET_ID,
+			100_000 * UNIT,
+			token_id_1,
+			100_000 * UNIT,
+		)
+		.unwrap();
+
+		FeeLock::update_fee_lock_metadata(
+			RuntimeOrigin::root(),
+			Some(50),
+			Some(50 * UNIT),
+			Some(100 * UNIT),
+			Some(vec![]),
+		)
+		.unwrap();
+		assert!(FeeLock::get_fee_lock_metadata().unwrap().whitelisted_tokens.is_empty());
+
+		let (sell_info, _) = Market::get_multiswap_sell_info(
+			vec![pool_id],
+			token_id_1,
+			1 * UNIT,
+			NATIVE_ASSET_ID,
+			2000 * UNIT,
+		)
+		.unwrap();
+		assert!(!sell_info.is_lockless);
+
+		let (sell_info, _) = Market::get_multiswap_sell_info(
+			vec![pool_id],
+			token_id_1,
+			150 * UNIT,
+			NATIVE_ASSET_ID,
+			2000 * UNIT,
+		)
+		.unwrap();
+		assert!(sell_info.is_lockless);
+	})
+}

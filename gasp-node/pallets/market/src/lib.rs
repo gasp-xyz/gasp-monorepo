@@ -45,6 +45,7 @@ use sp_std::{
 
 use orml_tokens::MultiTokenCurrencyExtended;
 use orml_traits::asset_registry::Inspect as AssetRegistryInspect;
+use sp_stable_swap::UpdateValutaion;
 
 pub mod weights;
 pub use crate::weights::WeightInfo;
@@ -185,6 +186,7 @@ pub mod pallet {
 		/// StableSwap pools
 		type StableSwap: Mutate<Self::AccountId, CurrencyId = Self::CurrencyId, Balance = Self::Balance>
 			+ ComputeBalances
+			+ sp_stable_swap::UpdateValutaion<Self::CurrencyId>
 			+ ValuateXyk<Self::Balance, Self::CurrencyId>;
 
 		/// Reward apis for native asset LP tokens activation
@@ -1180,6 +1182,19 @@ pub mod pallet {
 				Ok(()) => {},
 			}
 
+			Ok(().into())
+		}
+
+		#[pallet::call_index(8)]
+		#[pallet::weight((Weight::from_parts(25_000_000, 0))
+			.saturating_add(T::DbWeight::get().writes(5 as u64))
+    )]
+		pub fn stable_swap_update_eq_assets(
+			origin: OriginFor<T>,
+			asset_id: T::CurrencyId,
+			eq_assets_update: Vec<(T::CurrencyId, bool)>,
+		) -> DispatchResult {
+			T::StableSwap::update_eq_assets(asset_id, eq_assets_update)?;
 			Ok(().into())
 		}
 	}
