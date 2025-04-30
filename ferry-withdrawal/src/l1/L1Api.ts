@@ -116,6 +116,7 @@ const CONFIG_TO_CHAIN = new Map<string, Chain>([
 class L1Api implements L1Interface {
 	client!: PublicClient;
 	transport: any;
+	chain: Chain;
 
 	constructor(uri: string) {
 		if (!CONFIG_TO_CHAIN.has(L1_CHAIN)) {
@@ -123,6 +124,7 @@ class L1Api implements L1Interface {
 		}
 
 		const chain = CONFIG_TO_CHAIN.get(L1_CHAIN);
+		this.chain = chain!;
 		if (uri.startsWith("ws")) {
 			this.transport = webSocket(uri, { retryCount: 5 });
 			this.client = createPublicClient({

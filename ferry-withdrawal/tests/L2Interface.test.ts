@@ -6,9 +6,10 @@ import 'dotenv/config'
 
 const URI = "ws://localhost:9944";
 const ALITH_PRIVATE_KEY = "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133";
+const CHAIN_ID = 31337;
 
 async function dummyWithdrawal(api: ApiPromise, tokenAddress: Uint8Array, amount: bigint,ferryTip: bigint) :Promise<void> {
-  const chain = getL1ChainType(api);
+  const chain = getL1ChainType(api, CHAIN_ID);
 	const keyring = new Keyring({ type: "ethereum" });
 	const keypair = keyring.createFromUri(ALITH_PRIVATE_KEY);
 
@@ -23,14 +24,14 @@ describe('L2Interface', () => {
 
     it('should fetch native token address', async () => {
       let api = await getApi(URI);
-      let l2 = new L2Api(api);
+      let l2 = new L2Api(api, CHAIN_ID);
       const nativeTokenAddress = await l2.getNativeTokenAddress();
     });
 
 
     it('should fetch latest request id', async () => {
       let api = await getApi(URI);
-      let l2 = new L2Api(api);
+      let l2 = new L2Api(api, CHAIN_ID);
       const nativeTokenAddress = await l2.getNativeTokenAddress();
 
       let firstRequestId = await l2.getLatestRequestId();
@@ -43,7 +44,7 @@ describe('L2Interface', () => {
 
     it('should fetch withdrawals', async () => {
       let api = await getApi(URI);
-      let l2 = new L2Api(api);
+      let l2 = new L2Api(api, CHAIN_ID);
       const nativeTokenAddress = await l2.getNativeTokenAddress();
 
       let firstRequestId = await l2.getLatestRequestId();
@@ -58,7 +59,7 @@ describe('L2Interface', () => {
 
     it('should fetch merkle proof', async () => {
       let api = await getApi(URI);
-      let l2 = new L2Api(api);
+      let l2 = new L2Api(api, CHAIN_ID);
       const nativeTokenAddress = await l2.getNativeTokenAddress();
       await dummyWithdrawal(api, nativeTokenAddress, 1n, 0n);
       await dummyWithdrawal(api, nativeTokenAddress, 1n, 0n);

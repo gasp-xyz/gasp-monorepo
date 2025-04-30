@@ -1,16 +1,15 @@
-import type { BTreeMap, u128 } from "@polkadot/types-codec";
+import { BTreeMap, u64, u128 } from "@polkadot/types-codec";
 import type { H256 } from "@polkadot/types/interfaces/runtime";
 import type { ITuple } from "@polkadot/types-codec/types";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import type { L2Interface } from "./L2Interface.js";
 import type { Option } from "@polkadot/types-codec";
-import type { PalletRolldownMessagesChain } from "@polkadot/types/lookup";
 import { PalletRolldownL2Request } from "@polkadot/types/lookup";
-import { L2_CHAIN } from "../Config.js";
 import { Mangata } from "gasp-sdk";
 import { Withdrawal } from "../Withdrawal.js";
 import { Cancel } from "../Cancel.js";
 import { type ApiPromise } from "@polkadot/api";
+import { logger } from "../logger.js";
 
 async function getApi(nodeUrl: string): Promise<ApiPromise> {
 	const api = await Mangata.instance([nodeUrl]).api();
@@ -26,16 +25,18 @@ function createBigIntArrayFromRange(start: bigint, end: bigint) {
 	return result;
 }
 
-function getL1ChainType(api: ApiPromise): PalletRolldownMessagesChain {
-	return api.createType("PalletRolldownMessagesChain", L2_CHAIN);
+function getL1ChainType(api: ApiPromise, chainId: number): u64 {
+	return api.createType("u64", chainId);
 }
 
 class L2Api implements L2Interface {
 	api!: ApiPromise;
 	keyring!: KeyringPair;
+	chainId: number;
 
-	constructor(api: ApiPromise) {
+	constructor(api: ApiPromise, chainId: number) {
 		this.api = api;
+		this.chainId = chainId;
 	}
 
 	async getMerkleProof(
@@ -43,7 +44,7 @@ class L2Api implements L2Interface {
 		endRange: bigint,
 		txId: bigint,
 	): Promise<Uint8Array[]> {
-		const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
+		const chain: u64 = getL1ChainType(this.api, this.chainId);
 		const result = await this.api.rpc.rolldown.get_merkle_proof(
 			chain,
 			[startRange, endRange],
@@ -54,16 +55,15 @@ class L2Api implements L2Interface {
 
 	async getNativeTokenAddress(): Promise<Uint8Array> {
 		return (await this.api.query.assetRegistry.idToL1Asset(0))
-			.unwrap()
-			.asEthereum.toU8a();
+			.unwrap()[1].toU8a();
 	}
 
 	parseLatestRequestId(
-		nextRequesId: BTreeMap<PalletRolldownMessagesChain, u128>,
+		nextRequesId: BTreeMap<u64, u128>,
 	): bigint | null {
 		// NOTE: looks like === is not implemented for PalletRolldownMessagesChain
 		// therefore its not possible to query valu from map using .get(chain) query ;<
-		const chain: PalletRolldownMessagesChain = getL1ChainType(this.api);
+		const chain: u64 = getL1ChainType(this.api, this.chainId);
 		let found = Array.from(nextRequesId.keys()).findIndex((key) => {
 			return key.toString() === chain.toString();
 		});
@@ -107,7 +107,7 @@ class L2Api implements L2Interface {
 		startRange: bigint,
 		endRange: bigint,
 	): Promise<(Withdrawal | Cancel)[]> {
-		const chain = getL1ChainType(this.api);
+		const chain = getL1ChainType(this.api, this.chainId);
 		let range = createBigIntArrayFromRange(startRange, endRange);
 		const requests = await Promise.all(
 			range.map((idx: bigint) =>
