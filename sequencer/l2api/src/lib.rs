@@ -86,6 +86,9 @@ pub enum L2Error {
 pub trait L2Interface {
     fn account_address(&self) -> [u8; 20];
 
+    async fn is_ferried(&self, chain: Chain, request_hash: H256, at: H256)
+        -> Result<bool, L2Error>;
+
     async fn get_balance(
         &self,
         chain: Chain,

@@ -10,6 +10,7 @@ use subxt::ext::subxt_core::storage::address::StorageHashers;
 
 use hex::encode as hex_encode;
 
+use crate::types;
 use crate::types::{BatchId, BatchInfo, Finalization};
 use crate::L2Error;
 use futures::StreamExt;
@@ -50,7 +51,7 @@ impl Gasp {
             .client
             .storage()
             .at(at)
-            .fetch(&storage)
+            .fetch(&storage.unvalidated())
             .await?
             .unwrap_or_default())
     }
@@ -72,7 +73,9 @@ impl Gasp {
                 .enumerate()
                 .find(|(_, extrinsic)| extrinsic.hash() == tx_hash)
             {
+                tracing::trace!("blah1");
                 let events = self.get_events(hash).await?;
+                tracing::trace!("blah2");
                 let events = events
                     .iter()
                     .filter(|elem| {
@@ -82,13 +85,16 @@ impl Gasp {
                         )
                     })
                     .collect::<Vec<_>>();
+                tracing::trace!("blah3");
 
                 let status = events.iter().find(|elem | {
                         matches!(elem.event, RuntimeEvent::System(gasp_bindings::api::runtime_types::frame_system::pallet::Event::ExtrinsicSuccess{..})) ||
                         matches!(elem.event, RuntimeEvent::System(gasp_bindings::api::runtime_types::frame_system::pallet::Event::ExtrinsicFailed{..}))
                 });
+                tracing::trace!("blah4");
 
                 let elem = status.ok_or(L2Error::UnknownTxStatus)?;
+                tracing::trace!("blah5");
 
                 let status = match elem.event {
                     RuntimeEvent::System(
@@ -559,6 +565,42 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(level = "debug", skip(self, at), ret)]
+    async fn is_ferried(
+        &self,
+        chain: gasp_types::Chain,
+        request_hash: H256,
+        at: H256,
+    ) -> Result<bool, L2Error> {
+        let gasp_chain: crate::types::subxt::Chain = chain.into();
+        let storage: ::subxt::ext::subxt_core::storage::address::StaticAddress<
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey<(
+                types::subxt::Chain,
+                H256,
+            )>,
+            gasp_bindings::api::runtime_types::sp_runtime::account::AccountId20,
+            ::subxt::ext::subxt_core::utils::Yes,
+            (),
+            (),
+        > = ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+            "Rolldown",
+            "FerriedDeposits",
+            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(&(
+                gasp_chain,
+                request_hash,
+            )),
+            [0u8; 32],
+        );
+
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage.unvalidated())
+            .await?
+            .is_some())
+    }
+
+    #[tracing::instrument(level = "debug", skip(self, at), ret)]
     async fn get_batch_range(
         &self,
         batch_id: u128,
@@ -848,6 +890,7 @@ impl L2Interface for Gasp {
             .collect::<Result<Vec<_>, _>>()
     }
 
+    #[tracing::instrument(skip(self))]
     async fn get_balance(
         &self,
         chain: gasp_types::Chain,
@@ -875,14 +918,23 @@ impl L2Interface for Gasp {
                 .tokens()
                 .accounts(AccountId20(account), token_id);
 
-            Ok(self
+            let free_balance = self
                 .client
                 .storage()
                 .at(at)
                 .fetch(&storage)
                 .await?
                 .map(|account| account.free)
-                .unwrap_or_default())
+                .unwrap_or_default();
+
+            tracing::debug!(
+                "account {}, token {} (token id : {}) balance: {}",
+                hex::encode(account),
+                hex::encode(token),
+                token_id,
+                free_balance
+            );
+            Ok(free_balance)
         } else {
             Ok(0u128)
         }
