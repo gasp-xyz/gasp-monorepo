@@ -1248,6 +1248,10 @@ pub mod pallet {
 				};
 			}
 
+			if swap_pool_list.len() == 1 && !T::FeeLock::is_whitelisted(asset_id_in) {
+				is_lockless = Some(false)
+			}
+
 			// We counldn't find a reason to make it lockless so it will be fee_lock
 			if is_lockless.is_none() {
 				is_lockless = Some(false)

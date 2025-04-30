@@ -911,6 +911,6 @@ fn test_is_lockless_for_atomic_swap_that_is_not_whitelisted() {
 			2000 * UNIT,
 		)
 		.unwrap();
-		assert!(sell_info.is_lockless);
+		assert!(!sell_info.is_lockless);
 	})
 }
