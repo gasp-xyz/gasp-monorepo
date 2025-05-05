@@ -23,6 +23,7 @@ fn bootstrap_updates_metadata_and_creates_pool_correctly() {
 					..CustomMetadata::default()
 				},
 			},
+			None,
 		)],
 		..ExtBuilder::default()
 	}
