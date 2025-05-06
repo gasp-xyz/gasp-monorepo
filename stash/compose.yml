@@ -29,6 +29,7 @@ services:
       ARBITRUM_SEPOLIA_CHAIN_URL: ${ARBITRUM_SEPOLIA_CHAIN_URL:-https://evm-node-arb-frontend.gasp.xyz}
       ENVIRONMENT: ${ENVIRONMENT:-frontend}
       MANGATA_NODE_URL: ${MANGATA_NODE_URL:-wss://collator-01-ws-rollup-frontend.gasp.xyz}
+      MINUTES_FOR_TOKEN_REFRESH: ${MINUTES_FOR_TOKEN_REFRESH:-1440}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASS: ${REDIS_PASS} # Has to be empty to work with local redis host
