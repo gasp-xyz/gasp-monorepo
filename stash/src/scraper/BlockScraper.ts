@@ -130,5 +130,7 @@ const getTimestamp = (extrinsics: Extrinsic[]): number => {
   const e = extrinsics.filter(
     ({ section, method }) => 'timestamp.set' === `${section}.${method}`,
   )
-  return e.length === 1 ? Number(e[0].args['now']) : 0
+  return e.length === 1
+    ? Number(parseInt(e[0].args['now'].toString().replace(/,/g, '')))
+    : 0
 }
