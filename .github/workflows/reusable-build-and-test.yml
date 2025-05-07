@@ -46,7 +46,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
           
       - uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -169,7 +169,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
 
       - uses: arduino/setup-protoc@v3
         with:
@@ -332,7 +332,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
   
       - uses: moonrepo/setup-rust@v1
         with:
