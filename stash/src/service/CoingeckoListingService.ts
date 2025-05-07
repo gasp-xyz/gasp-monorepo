@@ -51,12 +51,12 @@ export const tickers = async () => {
       const baseTokenInfo = getTokenInfoBasedOnTheSymbol(assetsInfo, baseToken)
       const targetTokenInfo = getTokenInfoBasedOnTheSymbol(
         assetsInfo,
-        targetToken
+        targetToken,
       )
 
       const poolBalance = await MangataClient.query.getAmountOfTokensInPool(
         baseTokenInfo.id,
-        targetTokenInfo.id
+        targetTokenInfo.id,
       )
       const baseTokenReserve = poolBalance[0]
       const targetTokenReserve = poolBalance[1]
@@ -64,7 +64,7 @@ export const tickers = async () => {
       const price = await calculatePrice(
         baseTokenReserve,
         targetTokenReserve,
-        baseTokenInfo.decimals
+        baseTokenInfo.decimals,
       )
 
       const current = moment.utc()
@@ -75,37 +75,37 @@ export const tickers = async () => {
         pool.id,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
       const baseTokenPrices = await getTokenPrices(
         baseTokenInfo.id,
         baseTokenInfo.decimals,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
       const targetTokenPrices = await getTokenPrices(
         targetTokenInfo.id,
         targetTokenInfo.decimals,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
       const liquidityPoolInUsd = await getLiquidityPoolInUsd(
         pool.id,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
 
       const lastPrice = fromBN(price, targetTokenInfo.decimals)
       const baseVolume = calculateVolumeForTheToken(
         poolTradeVolumeInUsd,
-        baseTokenPrices
+        baseTokenPrices,
       )
       const targetVolume = calculateVolumeForTheToken(
         poolTradeVolumeInUsd,
-        targetTokenPrices
+        targetTokenPrices,
       )
       const liquidityInUsd = calculateLiquidityInUsd(liquidityPoolInUsd)
 
@@ -119,7 +119,7 @@ export const tickers = async () => {
         pool_id: pool.id,
         liquidity_in_usd: liquidityInUsd.toString(),
       })
-    })
+    }),
   )
 
   return tickers

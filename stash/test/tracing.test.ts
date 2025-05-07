@@ -49,7 +49,7 @@ describe('TracingService', () => {
         address: '0x102',
         recipient: '0x102',
         status: 'PendingOnL1',
-      })
+      }),
     )
     expect(result).toHaveProperty('txHash', '0x102')
     expect(result).toHaveProperty('status', 'PendingOnL1')
@@ -105,7 +105,7 @@ describe('TracingService', () => {
     const result = await findTransactionsByAddressAndStatus(
       '0x102',
       'PendingOnL1',
-      'deposit'
+      'deposit',
     )
 
     expect(depositRepository.search).toHaveBeenCalled()

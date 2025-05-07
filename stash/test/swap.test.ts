@@ -24,10 +24,11 @@ describe('TradingService', () => {
       expect(result).toEqual(mockData)
       expect(swapRepository.search().where).toHaveBeenCalledWith('account')
       expect(
-        swapRepository.search().where('account').equals
+        swapRepository.search().where('account').equals,
       ).toHaveBeenCalledWith('0xaccount')
       expect(
-        swapRepository.search().where('account').equals('0xaccount').returnFirst
+        swapRepository.search().where('account').equals('0xaccount')
+          .returnFirst,
       ).toHaveBeenCalled()
     })
 
@@ -43,11 +44,11 @@ describe('TradingService', () => {
       expect(result).toBeNull()
       expect(swapRepository.search().where).toHaveBeenCalledWith('account')
       expect(
-        swapRepository.search().where('account').equals
+        swapRepository.search().where('account').equals,
       ).toHaveBeenCalledWith('0xaccount2')
       expect(
         swapRepository.search().where('account').equals('0xaccount2')
-          .returnFirst
+          .returnFirst,
       ).toHaveBeenCalled()
     })
   })

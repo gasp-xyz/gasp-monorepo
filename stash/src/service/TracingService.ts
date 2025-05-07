@@ -1,20 +1,12 @@
-import { redis } from '../connector/RedisConnector.js'
 import {
   depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
 import logger from '../util/Logger.js'
-const WITHDRAWAL_INITIATED_BY_FE = 'InitiatedByFrontend'
-const NETWORK_LIST_KEY = 'affirmed_networks_list'
 
 export enum CreatedBy {
   Frontend = 'frontend',
   Other = 'other',
-}
-
-interface Network {
-  key: string
-  chainId: string
 }
 
 interface TraceTransactionRequest {
@@ -28,20 +20,13 @@ interface TraceTransactionRequest {
 }
 
 export const startTracingTransaction = async (
-  traceRequest: TraceTransactionRequest
+  traceRequest: TraceTransactionRequest,
 ): Promise<object> => {
-  const { type } = traceRequest
-  const timestamp = new Date().toISOString()
-  let status: string
-  if (type === 'deposit') {
-    try {
-      return await startTracingDeposit(traceRequest)
-    } catch (error) {
-      logger.error(`Error in startTracingDeposit: ${error.message}`)
-      throw error
-    }
-  } else {
-    status = 'UNKNOWN'
+  try {
+    return await startTracingDeposit(traceRequest)
+  } catch (error) {
+    logger.error(`Error in startTracingDeposit: ${error.message}`)
+    throw error
   }
 }
 
@@ -84,17 +69,17 @@ async function startTracingDeposit({
 
     if (existingTransactions.length > 0) {
       logger.info(
-        `Transaction already exists for address: ${address} and txHash: ${txHash}`
+        `Transaction already exists for address: ${address} and txHash: ${txHash}`,
       )
       return existingTransactions[0]
     } else {
       const transaction = await depositRepository.save(transactionData)
       logger.info(
-        `Transaction tracing started for address: ${address} and txHash: ${txHash}`
+        `Transaction tracing started for address: ${address} and txHash: ${txHash}`,
       )
       const symbols = Object.getOwnPropertySymbols(transaction)
       const entityIdSymbol = symbols.find(
-        (symbol) => symbol.toString() === 'Symbol(entityId)'
+        (symbol) => symbol.toString() === 'Symbol(entityId)',
       )
       const value = transaction[entityIdSymbol as any]
 
@@ -105,7 +90,7 @@ async function startTracingDeposit({
     }
   } catch (error) {
     logger.error(
-      `Error storing or retrieving transaction data: ${error.message}`
+      `Error storing or retrieving transaction data: ${error.message}`,
     )
     throw error
   }
@@ -113,7 +98,7 @@ async function startTracingDeposit({
 
 export const getTransactionsByAddress = async (
   address: string,
-  type: string
+  type: string,
 ): Promise<object[]> => {
   const repository =
     type === 'deposit' ? depositRepository : withdrawalRepository
@@ -128,7 +113,7 @@ export const getTransactionsByAddress = async (
 
 export const getByTxHashOrEntityId = async (
   identifier: string,
-  type: string
+  type: string,
 ): Promise<object | null> => {
   const repository =
     type === 'deposit' ? depositRepository : withdrawalRepository
@@ -154,7 +139,7 @@ export const getByTxHashOrEntityId = async (
 export async function findTransactionsByAddressAndStatus(
   address: string,
   status: string,
-  type: string
+  type: string,
 ) {
   const repository =
     type === 'deposit' ? depositRepository : withdrawalRepository
@@ -166,7 +151,7 @@ export async function findTransactionsByAddressAndStatus(
     .equals(status)
     .return.all()
   logger.info(
-    `Found ${transactions.length} transactions for address: ${address} and status: ${status}`
+    `Found ${transactions.length} transactions for address: ${address} and status: ${status}`,
   )
   return transactions
 }

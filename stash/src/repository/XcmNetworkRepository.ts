@@ -53,7 +53,7 @@ export const listAllChannels = async (): Promise<Map<string, XcmChannel>> => {
   return new Map(
     Object.values(allChannels)
       .map((it) => JSON.parse(it) as XcmChannel)
-      .map((it) => [it.channelId, it])
+      .map((it) => [it.channelId, it]),
   )
 }
 
@@ -81,7 +81,7 @@ export const listAllTokens = async (): Promise<
           existentialDeposit: it.existentialDeposit,
         } as XcmChannelTokenDto
       })
-      .map((it) => [tokenIdFromToken(it), it])
+      .map((it) => [tokenIdFromToken(it), it]),
   )
 }
 

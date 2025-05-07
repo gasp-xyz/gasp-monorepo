@@ -7,12 +7,12 @@ import { Block, Event } from './BlockScraper'
 
 export const processFerriedDepositEvents = async (
   api: ApiPromise,
-  block: Block
+  block: Block,
 ) => {
   const events = _.chain(block.events)
     .filter((ev) => filterEvents(ev[1]))
-    .groupBy(([idx, _]) => idx)
-    .map((evs, _) => evs.map(([_, ev]) => ev))
+    .groupBy(([idx]) => idx)
+    .map((evs) => evs.map(([, ev]) => ev))
     .value()
   if (events.length > 0) {
     for (const eventGroup of events) {
@@ -26,7 +26,7 @@ export const processFerriedDepositEvents = async (
 
 export const processFerriedDeposit = async (
   api: ApiPromise,
-  eventData: any
+  eventData: any,
 ): Promise<object> => {
   const transactionsToProcess = await depositRepository
     .search()

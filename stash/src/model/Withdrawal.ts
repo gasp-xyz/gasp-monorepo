@@ -22,7 +22,7 @@ const withdrawalSchema = new Schema(
   },
   {
     dataStructure: 'JSON',
-  }
+  },
 )
 
 export { withdrawalSchema }

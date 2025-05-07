@@ -16,12 +16,12 @@ export const apy = async (collatorAddress: string): Promise<ResponseAPY[]> => {
   const collatorSessions: Session[] = await getDataByAddress<SessionData>(
     KEY,
     collatorAddress,
-    (data) => data.collatorAccount
+    (data) => data.collatorAccount,
   )
 
   if (collatorSessions.length === 0)
     throw new NotFoundException(
-      'This collator has not received any rewards as of yet.'
+      'This collator has not received any rewards as of yet.',
     )
 
   return calculateMultipleCollatorApy(collatorSessions)
@@ -43,7 +43,7 @@ export const collatorsApy = async (): Promise<Session[]> => {
   for (const collator in groupSessions) {
     for (const liquidityTokenId in groupSessions[collator]) {
       const apy = calculateSingleCollatorApy(
-        groupSessions[collator][liquidityTokenId]
+        groupSessions[collator][liquidityTokenId],
       )
       collatorsApy.push(apy)
     }
@@ -54,17 +54,17 @@ export const collatorsApy = async (): Promise<Session[]> => {
 
 export const dailyRewards = async (
   collatorAddress: string,
-  date: string | undefined
+  date: string | undefined,
 ) => {
   const collatorSessions: Session[] = await getDataByAddress<SessionData>(
     KEY,
     collatorAddress,
-    (data) => data.collatorAccount
+    (data) => data.collatorAccount,
   )
 
   if (collatorSessions.length === 0)
     throw new NotFoundException(
-      'This collator has not received any rewards as of yet.'
+      'This collator has not received any rewards as of yet.',
     )
 
   return calculateDailyRewards(collatorSessions, date)

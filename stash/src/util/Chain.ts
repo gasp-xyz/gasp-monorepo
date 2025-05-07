@@ -10,15 +10,14 @@ export type CodecOrArray = Codec | Codec[]
 
 export const processCodecOrArray = (
   codec: CodecOrArray,
-  fn: (c: Codec) => any
+  fn: (c: Codec) => any,
 ) => (Array.isArray(codec) ? codec.map(fn) : fn(codec))
 
 export const toHuman = (codec: CodecOrArray) =>
   processCodecOrArray(codec, (c) => c?.toHuman?.() ?? c)
 
 export const parseNumber = (n: string | number) =>
-  _.isNumber(n) ? n : Number.parseInt(n.replace(/,/g, ''))
-
+  _.isNumber(n) ? n : Number.parseInt(String(n).replace(/,/g, ''))
 export const parseKey = (key: StorageKey) => key.toString().substring(66)
 
 export const blakexx = (n: Codec) => blake2AsHex(n.toHex()).substring(2)

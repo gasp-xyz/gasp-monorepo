@@ -72,7 +72,7 @@ export const startTracing = async (req: Request, res: Response) => {
 
 export const getTransactionByTxHashOrEntityId = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   /*
    #swagger.tags = ['Tracing']
@@ -122,7 +122,7 @@ export const getTransactionByTxHashOrEntityId = async (
 
 export const getAllTransactionsByAddress = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*
    #swagger.tags = ['Tracing']
@@ -167,7 +167,7 @@ export const getAllTransactionsByAddress = async (
 
 export const getAllTransactionsByAddressAndStatus = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   /*
    #swagger.tags = ['Tracing']
@@ -209,7 +209,7 @@ export const getAllTransactionsByAddressAndStatus = async (
     const transactions = await findTransactionsByAddressAndStatus(
       address,
       status,
-      type
+      type,
     )
     if (transactions.length > 0) {
       res.status(200).send({ transactions })

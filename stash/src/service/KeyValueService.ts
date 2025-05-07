@@ -2,7 +2,7 @@ import { redis } from '../connector/RedisConnector.js'
 
 export const store = async (
   key: string,
-  value: string
+  value: string,
 ): Promise<{ value: string; timestamp: number }> => {
   const now = new Date().toISOString()
   const parsed = Date.parse(now)
