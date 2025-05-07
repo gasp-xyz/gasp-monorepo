@@ -306,6 +306,25 @@ impl L2Interface for Gasp {
     }
 
     #[tracing::instrument(level = "trace", skip(self), ret)]
+    async fn get_latest_accepted_request_id(
+        &self,
+        chain: gasp_types::Chain,
+        at: HashOf<GaspConfig>,
+    ) -> Result<u128, L2Error> {
+        let chain: crate::types::subxt::Chain = chain.into();
+        let storage = gasp_bindings::api::storage()
+            .rolldown()
+            .max_accepted_request_id_onl2(chain);
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage)
+            .await?
+            .unwrap_or_default())
+    }
+
+    #[tracing::instrument(level = "trace", skip(self), ret)]
     async fn get_read_rights(
         &self,
         chain: gasp_types::Chain,

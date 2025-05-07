@@ -69,6 +69,13 @@ impl crate::L2Interface for L2{
         at: H256,
     ) -> Result<u128, L2Error>;
 
+    // TODO: maybe rename
+    async fn get_latest_accepted_request_id(
+        &self,
+        chain: Chain,
+        at: H256,
+    ) -> Result<u128, L2Error>;
+
     async fn get_read_rights(&self, chain: Chain, at: H256) -> Result<u128, L2Error>;
     async fn get_selected_sequencer(
         &self,

@@ -365,7 +365,7 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
           echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
       
-      - run: moon ci :run-runtime-benchmarks
+      - run: moon gasp-node:run-runtime-benchmarks-gasp-node
   
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v5
