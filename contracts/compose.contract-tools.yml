@@ -1,0 +1,9 @@
+services:
+  slither:
+    build: .
+    image: trailofbits/eth-security-toolbox:nightly
+    platform: linux/amd64
+    volumes:
+      - .:/share
+    working_dir: /share
+    command: slither .

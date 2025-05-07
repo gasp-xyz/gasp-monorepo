@@ -1,5 +1,5 @@
-import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 import * as crypto from 'crypto'
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
 export const TIMESERIES_HOST_DOCKER_IMAGE_NAME =
   'mangatasolutions/redis-test-stash_ts:8'

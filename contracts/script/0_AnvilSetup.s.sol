@@ -103,7 +103,9 @@ contract AnvilSetup is Script, Test, Utils {
         strategyManager.depositIntoStrategy(erc20MockStrategy, erc20Mock, 100);
         IDelegationManager.OperatorDetails memory op =
             IDelegationManager.OperatorDetails(operatorAddress, address(0), 0);
-        delegation.registerAsOperator(op, "");
+        if (!delegation.isOperator(operatorAddress)) {
+            delegation.registerAsOperator(op, "");
+        }
         vm.stopBroadcast();
 
         _writeOutput();

@@ -27,13 +27,17 @@ sp-core = { workspace = true, default-features = false }
 sp-io = { workspace = true, default-features = false }
 sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
+sp-stable-swap = { workspace = true, default-features = false }
 
 orml-traits = { workspace = true, default-features = false }
 orml-tokens = { workspace = true, default-features = false }
 
+pallet-fee-lock = { path = "../fee-lock", default-features = false }
+
 [dev-dependencies]
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "num-traits", "scale-info"] }
 mockall.workspace = true
+test-case.workspace = true
 
 pallet-xyk = { path = "../xyk" }
 pallet-stable-swap = { path = "../stable-swap" }
@@ -55,8 +59,10 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",
+	"sp-stable-swap/std",
 	"orml-traits/std",
 	"orml-tokens/std",
+	"pallet-fee-lock/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]

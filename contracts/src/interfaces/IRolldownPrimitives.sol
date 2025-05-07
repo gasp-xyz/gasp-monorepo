@@ -136,7 +136,7 @@ interface IRolldownPrimitives {
 
     error InvalidRequestId(uint256 requestId);
 
-    error ZeroRootCount();
+    error BatchNotFound();
 
     error UnexpectedMerkleRoot();
 

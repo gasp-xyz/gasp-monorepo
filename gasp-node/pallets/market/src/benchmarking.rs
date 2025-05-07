@@ -169,7 +169,7 @@ mod benchmarks {
 
 		// xyk returns None in this case, does a swap internally
 		let lp_minted = Market::<T>::calculate_expected_lp_minted(pool_id, amounts)
-			.unwrap_or(2496237962221088530.into());
+			.unwrap_or(2499993499747501522.into());
 
 		#[extrinsic_call]
 		mint_liquidity_fixed_amounts(
@@ -380,6 +380,7 @@ mod benchmarks {
 			create_asset::<T>(&caller);
 		}
 		let pool_id_start = T::Currency::get_next_currency_id();
+		let to = pool_id_start - 1.into();
 		for i in 0..(y - 1) {
 			assert_ok!(Market::<T>::create_pool(
 				SystemOrigin::Signed(caller.clone()).into(),
@@ -391,20 +392,45 @@ mod benchmarks {
 			));
 		}
 		let pool_id_end = T::Currency::get_next_currency_id();
-		for i in 0..y {
-			assert_ok!(Market::<T>::create_pool(
-				SystemOrigin::Signed(caller.clone()).into(),
-				PoolKind::Xyk,
-				native,
-				UNIT.into(),
-				from + i.into(),
-				UNIT.into()
-			));
+		// Only the input token requires a pool with native
+		// Since the commission fee is charged only on the input token
+		// and we will be benchmarking the is_swap_tokens_lockless separately
+		assert_ok!(Market::<T>::create_pool(
+			SystemOrigin::Signed(caller.clone()).into(),
+			PoolKind::Xyk,
+			native,
+			UNIT.into(),
+			from,
+			UNIT.into()
+		));
+		// We make sure that the fee_lock_metadata_is_init
+		// and that there are no whitelisted tokens, so that
+		// process_fee_lock is called and not unlock_fee
+		// We also require the user to have native tokens to pay for
+		// the fee_lock
+		// If in case the fee_lock_metadata is not init, then we will have
+		// to separately calculate and add the do_fee_lock weight
+		assert!(T::FeeLock::is_fee_lock_init());
+		// This assumes from till to are contigous swapped assets
+		for i in Into::<u32>::into(from)..=to.into() {
+			assert!(!pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+				.unwrap()
+				.is_whitelisted(i.into()));
 		}
+		let native_balance_before: u128 = T::Currency::available_balance(native, &caller).into();
+		assert!(
+			native_balance_before >
+				pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+					.unwrap()
+					.fee_lock_amount
+					.into()
+		);
+		assert!(pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
+
 		let swaps: Vec<T::CurrencyId> =
 			(pool_id_start.into()..pool_id_end.into()).map(|id: u32| id.into()).collect();
-
-		let to = pool_id_start - 1.into();
 
 		let before1 = T::Currency::available_balance(from, &caller);
 		let before2 = T::Currency::available_balance(to, &caller);
@@ -422,6 +448,21 @@ mod benchmarks {
 
 		let after1 = T::Currency::available_balance(from, &caller);
 		let after2 = T::Currency::available_balance(to, &caller);
+
+		let native_balance_after: u128 = T::Currency::available_balance(native, &caller).into();
+
+		assert!(
+			native_balance_before ==
+				native_balance_after.saturating_add(
+					pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+						.unwrap()
+						.fee_lock_amount
+						.into()
+				)
+		);
+		assert!(!pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
 
 		assert_eq!(before1, after1 + amount);
 		assert!(before2 < after2);
@@ -441,6 +482,7 @@ mod benchmarks {
 			create_asset::<T>(&caller);
 		}
 		let pool_id_start = T::Currency::get_next_currency_id();
+		let to = pool_id_start - 1.into();
 		for i in 0..(y - 1) {
 			assert_ok!(Market::<T>::create_pool(
 				SystemOrigin::Signed(caller.clone()).into(),
@@ -452,20 +494,42 @@ mod benchmarks {
 			));
 		}
 		let pool_id_end = T::Currency::get_next_currency_id();
-		for i in 0..y {
-			assert_ok!(Market::<T>::create_pool(
-				SystemOrigin::Signed(caller.clone()).into(),
-				PoolKind::Xyk,
-				native,
-				UNIT.into(),
-				from + i.into(),
-				UNIT.into()
-			));
+		assert_ok!(Market::<T>::create_pool(
+			SystemOrigin::Signed(caller.clone()).into(),
+			PoolKind::Xyk,
+			native,
+			UNIT.into(),
+			from,
+			UNIT.into()
+		));
+		// We make sure that the fee_lock_metadata_is_init
+		// and that there are no whitelisted tokens, so that
+		// process_fee_lock is called and not unlock_fee
+		// We also require the user to have native tokens to pay for
+		// the fee_lock
+		// If in case the fee_lock_metadata is not init, then we will have
+		// to separately calculate and add the do_fee_lock weight
+		assert!(T::FeeLock::is_fee_lock_init());
+		// This assumes from till to are contigous swapped assets
+		for i in Into::<u32>::into(from)..=to.into() {
+			assert!(!pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+				.unwrap()
+				.is_whitelisted(i.into()));
 		}
+		let native_balance_before: u128 = T::Currency::available_balance(native, &caller).into();
+		assert!(
+			native_balance_before >
+				pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+					.unwrap()
+					.fee_lock_amount
+					.into()
+		);
+		assert!(pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
+
 		let swaps: Vec<T::CurrencyId> =
 			(pool_id_start.into()..pool_id_end.into()).map(|id: u32| id.into()).collect();
-
-		let to = pool_id_start - 1.into();
 
 		let before1 = T::Currency::available_balance(from, &caller);
 		let before2 = T::Currency::available_balance(to, &caller);
@@ -478,11 +542,26 @@ mod benchmarks {
 			to,
 			amount,
 			from,
-			T::Balance::max_value(),
+			amount * 2.into(),
 		);
 
 		let after1 = T::Currency::available_balance(from, &caller);
 		let after2 = T::Currency::available_balance(to, &caller);
+
+		let native_balance_after: u128 = T::Currency::available_balance(native, &caller).into();
+
+		assert!(
+			native_balance_before ==
+				native_balance_after.saturating_add(
+					pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+						.unwrap()
+						.fee_lock_amount
+						.into()
+				)
+		);
+		assert!(!pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
 
 		assert!(before1 > after1);
 		assert_eq!(before2 + amount, after2);
@@ -794,6 +873,7 @@ mod benchmarks {
 			create_asset::<T>(&caller);
 		}
 		let pool_id_start = T::Currency::get_next_currency_id();
+		let to = pool_id_start - 1.into();
 		for i in 0..(y - 1) {
 			assert_ok!(Market::<T>::create_pool(
 				SystemOrigin::Signed(caller.clone()).into(),
@@ -805,20 +885,45 @@ mod benchmarks {
 			));
 		}
 		let pool_id_end = T::Currency::get_next_currency_id();
-		for i in 0..y {
-			assert_ok!(Market::<T>::create_pool(
-				SystemOrigin::Signed(caller.clone()).into(),
-				PoolKind::Xyk,
-				native,
-				UNIT.into(),
-				from + i.into(),
-				UNIT.into()
-			));
+		// Only the input token requires a pool with native
+		// Since the commission fee is charged only on the input token
+		// and we will be benchmarking the is_swap_tokens_lockless separately
+		assert_ok!(Market::<T>::create_pool(
+			SystemOrigin::Signed(caller.clone()).into(),
+			PoolKind::Xyk,
+			native,
+			UNIT.into(),
+			from,
+			UNIT.into()
+		));
+		// We make sure that the fee_lock_metadata_is_init
+		// and that there are no whitelisted tokens, so that
+		// process_fee_lock is called and not unlock_fee
+		// We also require the user to have native tokens to pay for
+		// the fee_lock
+		// If in case the fee_lock_metadata is not init, then we will have
+		// to separately calculate and add the do_fee_lock weight
+		assert!(T::FeeLock::is_fee_lock_init());
+		// This assumes from till to are contigous swapped assets
+		for i in Into::<u32>::into(from)..=to.into() {
+			assert!(!pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+				.unwrap()
+				.is_whitelisted(i.into()));
 		}
+		let native_balance_before: u128 = T::Currency::available_balance(native, &caller).into();
+		assert!(
+			native_balance_before >
+				pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+					.unwrap()
+					.fee_lock_amount
+					.into()
+		);
+		assert!(pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
+
 		let swaps: Vec<T::CurrencyId> =
 			(pool_id_start.into()..pool_id_end.into()).map(|id: u32| id.into()).collect();
-
-		let to = pool_id_start - 1.into();
 
 		let before1 = T::Currency::available_balance(from, &caller);
 		let before2 = T::Currency::available_balance(to, &caller);
@@ -836,6 +941,21 @@ mod benchmarks {
 
 		let after1 = T::Currency::available_balance(from, &caller);
 		let after2 = T::Currency::available_balance(to, &caller);
+
+		let native_balance_after: u128 = T::Currency::available_balance(native, &caller).into();
+
+		assert!(
+			native_balance_before ==
+				native_balance_after.saturating_add(
+					pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+						.unwrap()
+						.fee_lock_amount
+						.into()
+				)
+		);
+		assert!(!pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
 
 		assert_eq!(before1, after1 + amount);
 		assert!(before2 < after2);
@@ -855,6 +975,7 @@ mod benchmarks {
 			create_asset::<T>(&caller);
 		}
 		let pool_id_start = T::Currency::get_next_currency_id();
+		let to = pool_id_start - 1.into();
 		for i in 0..(y - 1) {
 			assert_ok!(Market::<T>::create_pool(
 				SystemOrigin::Signed(caller.clone()).into(),
@@ -867,21 +988,45 @@ mod benchmarks {
 		}
 
 		let pool_id_end = T::Currency::get_next_currency_id();
-		for i in 0..y {
-			assert_ok!(Market::<T>::create_pool(
-				SystemOrigin::Signed(caller.clone()).into(),
-				PoolKind::Xyk,
-				native,
-				UNIT.into(),
-				from + i.into(),
-				UNIT.into()
-			));
+		// Only the input token requires a pool with native
+		// Since the commission fee is charged only on the input token
+		// and we will be benchmarking the is_swap_tokens_lockless separately
+		assert_ok!(Market::<T>::create_pool(
+			SystemOrigin::Signed(caller.clone()).into(),
+			PoolKind::Xyk,
+			native,
+			UNIT.into(),
+			from,
+			UNIT.into()
+		));
+		// We make sure that the fee_lock_metadata_is_init
+		// and that there are no whitelisted tokens, so that
+		// process_fee_lock is called and not unlock_fee
+		// We also require the user to have native tokens to pay for
+		// the fee_lock
+		// If in case the fee_lock_metadata is not init, then we will have
+		// to separately calculate and add the do_fee_lock weight
+		assert!(T::FeeLock::is_fee_lock_init());
+		// This assumes from till to are contigous swapped assets
+		for i in Into::<u32>::into(from)..=to.into() {
+			assert!(!pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+				.unwrap()
+				.is_whitelisted(i.into()));
 		}
+		let native_balance_before: u128 = T::Currency::available_balance(native, &caller).into();
+		assert!(
+			native_balance_before >
+				pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+					.unwrap()
+					.fee_lock_amount
+					.into()
+		);
+		assert!(pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
 
 		let swaps: Vec<T::CurrencyId> =
 			(pool_id_start.into()..pool_id_end.into()).map(|id: u32| id.into()).collect();
-
-		let to = pool_id_start - 1.into();
 
 		let before1 = T::Currency::available_balance(from, &caller);
 		let before2 = T::Currency::available_balance(to, &caller);
@@ -894,15 +1039,80 @@ mod benchmarks {
 			to,
 			amount,
 			from,
-			T::Balance::max_value(),
+			amount * 2.into(),
 		);
 
 		let after1 = T::Currency::available_balance(from, &caller);
 		let after2 = T::Currency::available_balance(to, &caller);
 
+		let native_balance_after: u128 = T::Currency::available_balance(native, &caller).into();
+
+		assert!(
+			native_balance_before ==
+				native_balance_after.saturating_add(
+					pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+						.unwrap()
+						.fee_lock_amount
+						.into()
+				)
+		);
+		assert!(!pallet_fee_lock::Pallet::<T>::get_account_fee_lock_data(&caller)
+			.total_fee_lock_amount
+			.is_zero());
+
 		assert!(before1 > after1);
 		assert_eq!(before2 + amount, after2);
 	}
 
-	impl_benchmark_test_suite!(Market, crate::mock::new_test_ext(), crate::mock::Test);
+	#[benchmark]
+	fn is_swap_tokens_lockless() {
+		let kind = PoolKind::StableSwap;
+		let caller: T::AccountId = whitelisted_caller();
+		// in test mock this would be native, in runtime we have genesis
+		let _ = create_asset::<T>(&caller);
+		let native = T::NativeCurrencyId::get();
+		assert_ok!(T::Currency::mint(native, &caller, (100_000 * UNIT).into()));
+
+		let fee_lock_amount = pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+			.unwrap()
+			.fee_lock_amount
+			.into();
+
+		let token_id = T::Currency::get_next_currency_id();
+		create_asset::<T>(&caller);
+		let pool_id = T::Currency::get_next_currency_id();
+		// The input token requires a pool with native
+		// This will be the pool used for the valuation
+		assert_ok!(Market::<T>::create_pool(
+			SystemOrigin::Signed(caller.clone()).into(),
+			PoolKind::Xyk,
+			// The order of tokens matters here a lot!
+			// We want the Pools to be read twice
+			// in the worst case due to unknown order
+			token_id,
+			(fee_lock_amount * 10).into(),
+			native,
+			(fee_lock_amount * 10).into()
+		));
+		// We make sure that the fee_lock_metadata_is_init
+		// and that token_id is whitelisted
+		assert!(T::FeeLock::is_fee_lock_init());
+		let mut fee_lock_metadata = pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata().unwrap();
+		let _ = fee_lock_metadata
+			.whitelisted_tokens
+			.try_insert(Into::<u32>::into(token_id).into())
+			.unwrap();
+		pallet_fee_lock::FeeLockMetadata::<T>::put(fee_lock_metadata);
+		assert!(pallet_fee_lock::Pallet::<T>::get_fee_lock_metadata()
+			.unwrap()
+			.is_whitelisted(Into::<u32>::into(token_id).into()));
+
+		let fee_lock_metadata_key = pallet_fee_lock::FeeLockMetadata::<T>::hashed_key().to_vec();
+		frame_benchmarking::benchmarking::add_to_whitelist(fee_lock_metadata_key.into());
+
+		#[block]
+		{
+			assert!(T::FeeLock::is_swap_tokens_lockless(token_id, fee_lock_amount.into(),));
+		}
+	}
 }

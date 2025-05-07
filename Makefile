@@ -67,7 +67,7 @@ bindings-rs: ## generates rust bindings
 
 bindings-rs-alloy: ## generates rust alloy bindings
 	forge --version | grep "forge 0.3.0"
-	forge bind --alloy --bindings-path ./sequencer/bindings --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$'
+	forge bind --alloy --bindings-path ./sequencer/bindings/contracts/ --root ./contracts --crate-name bindings --overwrite  --select 'Rolldown$$' --select 'RolldownPrimitives$$' --select 'IERC20$$' --select 'GaspTestToken$$'
 	cd ./sequencer/bindings && cargo fmt
 
 bindings-json: ## generate JS bindings
@@ -77,10 +77,10 @@ bindings-json: ## generate JS bindings
 
 bindings-gasp:
 	rm -rf metadata.scale || true
-	rm -rf sequencer/sequencer/src/l2/gasp/gasp_bindings.rs || true
+	rm -rf sequencer/bindings/gasp/src/gasp_bindings.rs || true
 	subxt metadata -f bytes -o metadata.scale --url http://127.0.0.1:9944
-	echo "#[allow(non_snake_case)]" >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
-	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout >> sequencer/sequencer/src/l2/gasp/gasp_bindings.rs
+	echo "#[allow(non_snake_case)]" >> sequencer/bindings/gasp/src/gasp_bindings.rs
+	subxt codegen --attribute "#[allow(non_snake_case)]" --derive Clone --derive PartialEq --file metadata.scale | rustfmt --edition=2018 --emit=stdout >> sequencer/bindings/gasp/src/gasp_bindings.rs
 	rm -rf metadata.scale
 
 

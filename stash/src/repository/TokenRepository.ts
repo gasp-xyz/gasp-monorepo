@@ -1,5 +1,6 @@
-import { redis } from '../connector/RedisConnector.js'
 import 'core-js'
+
+import { redis } from '../connector/RedisConnector.js'
 
 const DEFAULT_STRING = 'default'
 const TOKEN_ORDER_BUCKETS_KEY = 'token_order_buckets'

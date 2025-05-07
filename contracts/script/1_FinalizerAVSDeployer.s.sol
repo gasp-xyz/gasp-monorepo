@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { BLSApkRegistry } from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
-import { BLSSignatureChecker } from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
-import { IndexRegistry } from "@eigenlayer-middleware/src/IndexRegistry.sol";
-import { IServiceManager } from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
-import { IRegistryCoordinator, RegistryCoordinator } from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
-import { IStakeRegistry, StakeRegistry } from "@eigenlayer-middleware/src/StakeRegistry.sol";
-import { AVSDirectory } from "@eigenlayer/contracts/core/AVSDirectory.sol";
-import { DelegationManager } from "@eigenlayer/contracts/core/DelegationManager.sol";
-import { RewardsCoordinator } from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import { StrategyManager } from "@eigenlayer/contracts/core/StrategyManager.sol";
-import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
-import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import { console } from "forge-std/console.sol";
-import { Script } from "forge-std/Script.sol";
-import { stdJson } from "forge-std/StdJson.sol";
-import { Test } from "forge-std/Test.sol";
-import { FinalizerServiceManager } from "./../src/FinalizerServiceManager.sol";
-import { FinalizerTaskManager, IFinalizerTaskManager } from "./../src/FinalizerTaskManager.sol";
-import { OperatorStateRetrieverExtended } from "./../src/OperatorStateRetrieverExtended.sol";
-import { Utils } from "./utils/Utils.sol";
+import {BLSApkRegistry} from "@eigenlayer-middleware/src/BLSApkRegistry.sol";
+import {BLSSignatureChecker} from "@eigenlayer-middleware/src/BLSSignatureChecker.sol";
+import {IndexRegistry} from "@eigenlayer-middleware/src/IndexRegistry.sol";
+import {IServiceManager} from "@eigenlayer-middleware/src/interfaces/IServiceManager.sol";
+import {IRegistryCoordinator, RegistryCoordinator} from "@eigenlayer-middleware/src/RegistryCoordinator.sol";
+import {IStakeRegistry, StakeRegistry} from "@eigenlayer-middleware/src/StakeRegistry.sol";
+import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
+import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import {StrategyManager} from "@eigenlayer/contracts/core/StrategyManager.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {console} from "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {Test} from "forge-std/Test.sol";
+import {FinalizerServiceManager} from "./../src/FinalizerServiceManager.sol";
+import {FinalizerTaskManager, IFinalizerTaskManager} from "./../src/FinalizerTaskManager.sol";
+import {OperatorStateRetrieverExtended} from "./../src/OperatorStateRetrieverExtended.sol";
+import {Utils} from "./utils/Utils.sol";
 
 // # To deploy and verify our contract
 // forge script script/1_FinalizerAvsDeployer.s.sol:Deployer --rpc-url $RPC_URL  --private-key $PRIVATE_KEY --broadcast -vvvv

@@ -1,7 +1,7 @@
 name: Pull Request
 on:
   pull_request:
-    types: [labeled, opened, synchronize, unlabeled, closed]
+    types: [labeled, opened, edited, synchronize, unlabeled, closed]
 
 permissions:
   contents: write
@@ -9,6 +9,8 @@ permissions:
   deployments: write
   checks: write
   security-events: write
+  issues: write
+  pull-requests: write
 
 # The following concurrency group cancels in-progress jobs or runs on pull_request events only
 # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-using-a-fallback-value
@@ -18,15 +20,91 @@ concurrency:
 
 jobs:
   init:
-    name: Set global version
+    name: Set global version and check PR title format
     # Ignore pull requests from develop, release/next, or main branches
-    if: github.event.action != 'unlabeled' && github.event.action != 'closed' && !contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)
+    # And also rerun workflow when PR title gets changed
+    # Ref: https://github.com/orgs/community/discussions/101695
+    if: >
+      (github.event.action != 'unlabeled' && 
+      github.event.action != 'closed' && 
+      ! contains(fromJSON('["develop", "release/next", "main"]'), github.event.pull_request.head.ref)) || 
+      (github.event.action == 'edited' && github.event.changes && github.event.changes.title && github.event.changes.title.from)
     runs-on: ubuntu-24.04
     outputs:
       GLOBAL_VERSION: ${{ steps.set_vars.outputs.GLOBAL_VERSION }}
       GIT_BRANCH: ${{ steps.set_vars.outputs.GIT_BRANCH }}
       GIT_BRANCH_UNFORMATTED: ${{ steps.branch-name.outputs.current_branch }}
     steps:
+      - name: Test PR title for conventional commit format
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pullRequestTitle = context.payload.pull_request.title;
+            console.log(`Pull request title: ${pullRequestTitle}`);
+            
+            // Conventional commit patterns
+            const typePattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)/;
+            const fullPattern = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?: .+/;
+            
+            if (fullPattern.test(pullRequestTitle)) {
+              console.log("✅ Title matches conventional commit format");
+              return;
+            }
+            
+            // Determine specific error for helpful feedback
+            let errorMessage = "";
+            if (!typePattern.test(pullRequestTitle)) {
+              errorMessage = "must start with a valid type (feat, fix, docs, etc.)";
+            } else if (!pullRequestTitle.includes(":")) {
+              errorMessage = "missing colon after type/scope";
+            } else {
+              errorMessage = "should follow format: type(optional-scope): description";
+            }
+            
+            const message = [
+              "### ❌ Invalid PR Title Format",
+              "",
+              `**Current title:** \`${pullRequestTitle}\``,
+              `**Issue:** ${errorMessage}`,
+              "",
+              "Please edit your PR title to follow the [Conventional Commits](https://www.conventionalcommits.org/) format:",
+              "```",
+              "<type>(<optional-scope>): <description>",
+              "```",
+              "",
+              "**Examples:**",
+              "- `feat: add user authentication`",
+              "- `fix(api): correct status code`",
+              "- `docs(readme): update installation steps`",
+              "",
+              "### After fixing the title:",
+              "1. Edit the PR title by clicking the pencil icon next to the title at the top of this page",
+              "2. The workflow will automatically re-run when you change the title."
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+            
+            core.setFailed("PR title doesn't match conventional commit format");
+      # TODO: Uncomment this when we decide to enforce commitlint checks in CI
+      # - uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     submodules: false
+      # - run: corepack enable && corepack prepare yarn@4.7.0 --activate
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version-file: .nvmrc
+      #     cache: 'yarn'
+      # - run: yarn install --immutable
+
+      # - name: Run commitlint
+      #   run: yarn commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v8
@@ -48,7 +126,7 @@ jobs:
       security-events: write
     with:
       version: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
   gasp-node-generate-types:
     name: '[gasp-node] Generate types'
     needs: [init, build-and-test]
@@ -58,9 +136,9 @@ jobs:
       branch: ${{ needs.init.outputs.GIT_BRANCH_UNFORMATTED }}
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
   
-  run-e2e-test:
-    name: '[e2e] Run gasp-avs and ferries e2e tests'
-    needs: [init, build-and-test]
+  run-e2e-tests:
+    name: '[e2e] Run e2e tests'
+    needs: [init, build-and-test, gasp-node-generate-types]
     uses: ./.github/workflows/reusable-e2e-tests.yml
     secrets: inherit
     permissions:
@@ -69,18 +147,7 @@ jobs:
       checks: write
     with:
       globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
-  
-  run-e2e-test-gasp-node:
-    name: '[e2e] Run gasp-node and global e2e tests'
-    needs: [init, build-and-test, gasp-node-generate-types]
-    uses: ./.github/workflows/reusable-e2e-tests-new.yml
-    secrets: inherit
-    permissions:
-      contents: read
-      actions: read
-      checks: write
-    with:
-      globalVersion: ${{ needs.init.outputs.GLOBAL_VERSION }}
+      cacheEnabled: ${{ github.ref_name != 'main' && github.ref_name != 'release/next' }}
 
   # deploy-fungible:
   #   name: Deploy fungible environment

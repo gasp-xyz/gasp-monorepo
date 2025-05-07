@@ -6,17 +6,23 @@ pub use frame_support::{
 };
 pub use orml_traits::currency::{MultiCurrency, MultiCurrencyExtended};
 pub use rollup_runtime::Get;
+use rollup_runtime::L1Asset;
 pub use sp_io::TestExternalities;
 pub use sp_runtime::{codec::Encode, BoundedVec, BuildStorage, MultiAddress, Permill};
 
 pub use rollup_imports::*;
 
+use crate::asset_registry;
+
 mod rollup_imports {
 	pub use rollup_runtime::{
 		consts::UNIT,
-		runtime_config::config::{
-			orml_asset_registry::AssetMetadataOf, pallet_membership::FoundationAccountsProvider,
-			pallet_proxy::ProxyType,
+		runtime_config::{
+			config::{
+				orml_asset_registry::AssetMetadataOf,
+				pallet_membership::FoundationAccountsProvider, pallet_proxy::ProxyType,
+			},
+			tokens::RxTokenId,
 		},
 		AccountId, AssetRegistry, Balance, Bootstrap, CustomMetadata, DispatchClass, FeeLock,
 		FoundationMembers, Identity, Maintenance, OnChargeTransaction, Pays, ProofOfStake, Proxy,
@@ -48,7 +54,7 @@ pub fn microcent(decimals: u32) -> Balance {
 }
 
 pub struct ExtBuilder {
-	pub assets: Vec<(TokenId, AssetMetadataOf)>,
+	pub assets: Vec<(TokenId, AssetMetadataOf, Option<L1Asset>)>,
 	pub balances: Vec<(AccountId, TokenId, Balance)>,
 }
 
@@ -59,7 +65,7 @@ impl Default for ExtBuilder {
 }
 
 impl ExtBuilder {
-	pub fn assets(mut self, assets: Vec<(TokenId, AssetMetadataOf)>) -> Self {
+	pub fn assets(mut self, assets: Vec<(TokenId, AssetMetadataOf, Option<L1Asset>)>) -> Self {
 		self.assets = assets;
 		self
 	}
@@ -85,12 +91,12 @@ impl ExtBuilder {
 			.assimilate_storage(&mut t)
 			.unwrap();
 
-		let encoded: Vec<(TokenId, Vec<u8>, Option<_>)> = self
+		let encoded: Vec<(TokenId, Vec<u8>, Option<L1Asset>)> = self
 			.assets
 			.iter()
-			.map(|(id, meta)| {
+			.map(|(id, meta, assset_id)| {
 				let encoded = AssetMetadataOf::encode(&meta);
-				(*id, encoded, None)
+				(*id, encoded, assset_id.clone())
 			})
 			.collect();
 

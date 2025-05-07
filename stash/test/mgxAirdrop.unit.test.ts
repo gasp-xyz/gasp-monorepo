@@ -1,11 +1,12 @@
-import { describe, it, beforeEach, afterEach, vi, expect } from 'vitest'
+import { ApiPromise, Keyring } from '@polkadot/api'
+import { BN, u8aToHex } from '@polkadot/util'
+import { toBN } from 'gasp-sdk'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
   getEligibilityAtBlockN,
   verifySignature,
 } from '../src/service/MgxAirdropService.js'
-import { ApiPromise, Keyring } from '@polkadot/api'
-import { toBN } from 'gasp-sdk'
-import { BN, u8aToHex } from '@polkadot/util'
 
 vi.mock('../src/repository/MgxAirdropRepository')
 

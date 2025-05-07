@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.13;
 
-import { AVSDirectory } from "@eigenlayer/contracts/core/AVSDirectory.sol";
-import { DelegationManager } from "@eigenlayer/contracts/core/DelegationManager.sol";
-import { RewardsCoordinator } from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
-import { Slasher } from "@eigenlayer/contracts/core/Slasher.sol";
-import { IStrategy, StrategyManager } from "@eigenlayer/contracts/core/StrategyManager.sol";
-import { IETHPOSDeposit } from "@eigenlayer/contracts/interfaces/IETHPOSDeposit.sol";
-import { PauserRegistry } from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
-import { EigenPod } from "@eigenlayer/contracts/pods/EigenPod.sol";
-import { EigenPodManager } from "@eigenlayer/contracts/pods/EigenPodManager.sol";
-import { StrategyBase, StrategyBaseTVLLimits } from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
-import { EmptyContract } from "@eigenlayer/test/mocks/EmptyContract.sol";
-import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-import { ProxyAdmin, TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import { console } from "forge-std/console.sol";
-import { Script } from "forge-std/Script.sol";
-import { stdJson } from "forge-std/StdJson.sol";
-import { Test, Vm } from "forge-std/Test.sol";
+import {AVSDirectory} from "@eigenlayer/contracts/core/AVSDirectory.sol";
+import {DelegationManager} from "@eigenlayer/contracts/core/DelegationManager.sol";
+import {RewardsCoordinator} from "@eigenlayer/contracts/core/RewardsCoordinator.sol";
+import {Slasher} from "@eigenlayer/contracts/core/Slasher.sol";
+import {IStrategy, StrategyManager} from "@eigenlayer/contracts/core/StrategyManager.sol";
+import {IETHPOSDeposit} from "@eigenlayer/contracts/interfaces/IETHPOSDeposit.sol";
+import {PauserRegistry} from "@eigenlayer/contracts/permissions/PauserRegistry.sol";
+import {EigenPod} from "@eigenlayer/contracts/pods/EigenPod.sol";
+import {EigenPodManager} from "@eigenlayer/contracts/pods/EigenPodManager.sol";
+import {StrategyBase, StrategyBaseTVLLimits} from "@eigenlayer/contracts/strategies/StrategyBaseTVLLimits.sol";
+import {EmptyContract} from "@eigenlayer/test/mocks/EmptyContract.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import {ProxyAdmin, TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {console} from "forge-std/console.sol";
+import {Script} from "forge-std/Script.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {Test, Vm} from "forge-std/Test.sol";
 
 // # To load the variables in the .env file
 // source .env

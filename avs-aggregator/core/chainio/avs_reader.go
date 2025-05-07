@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,12 +16,13 @@ import (
 	logging "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/utils"
 
+	delegationManager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/DelegationManager"
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
-	// blsSignatureChecker "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/BLSSignatureChecker"
-	// opstateretriever "github.com/Layr-Labs/eigensdk-go/contracts/bindings/OperatorStateRetriever"
+	stakeRegistry "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/StakeRegistry"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 type AvsReaderer interface {
@@ -31,14 +33,48 @@ type AvsReaderer interface {
 	GetRdTaskRespondedEvents(ctx context.Context, blocksAgo uint32) ([]taskmanager.ContractFinalizerTaskManagerRdTaskResponded, error)
 
 	GetNonSigningOperatorPubKeys(event taskmanager.ContractFinalizerTaskManagerRdTaskResponded) ([]*bls.G1Point, error)
+	
+	IsTaskPending(ctx context.Context) (bool, error)
+	LastCompletedOpTaskCreatedBlock(ctx context.Context) (uint32, error)
+	LatestOpTaskNum(ctx context.Context) (uint32, error)
+	LatestRdTaskNum(ctx context.Context) (uint32, error)
+	LastOpTaskCreatedBlock(ctx context.Context) (uint32, error)
+	LastRdTaskCreatedBlock(ctx context.Context) (uint32, error)
+	IdToTaskStatus(ctx context.Context, taskType uint8, taskIndex uint32) (uint8, error)
+	ChainRdBatchNonce(ctx context.Context, chainIndex uint8) (uint32, error)
+	LastCompletedOpTaskCreatedBlockAtBlock(ctx context.Context, atBlock uint64) (uint32, error)
+	GetOperatorsFromIds(opts *bind.CallOpts, registryCoordinatorAddr common.Address, operatorIds []sdktypes.OperatorId) ([]common.Address, error)
+	GetTypedOperatorsStakesForQuorumAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, operatorAddr []common.Address, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error)
+	GetOperatorsAvsStateAtBlock(ctx context.Context, registryCoordinatorAddr common.Address, quorumNumbers sdktypes.QuorumNums, blockNumber sdktypes.BlockNum) (map[sdktypes.OperatorId]types.OperatorAvsState, error)
+	GetOperatorIdList(opts *bind.CallOpts, quorum sdktypes.QuorumNum, blockNumber uint32) ([]sdktypes.OperatorId, error)
+
+	ChainID(ctx context.Context) (*big.Int, error)
+	FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewOpTaskCreatedIterator, error)
+	GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerOpTask, error)
+	FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error)
+	GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerRdTask, error)
+	TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error)
+	ParseOpTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerOpTaskCompleted, error)
+	ParseRdTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskCompleted, error)
+	BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error)
+
+	TaskManagerAddress() common.Address	
+	StakeRegistryAddress() common.Address	
+	DelegationManagerAddress() common.Address	
+	RegistryCoordinatorAddress() common.Address	
+	ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error)	
+	ParseOperatorSharesIncreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesIncreased, error)	
+	ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesDecreased, error)	
+	ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error)	
+	ParseMinimumStakeForQuorumUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryMinimumStakeForQuorumUpdated, error)
 }
+
+var _ AvsReaderer = (*AvsReader)(nil)
 
 type AvsReader struct {
 	AvsServiceBindings *AvsServiceBindings
 	logger             logging.Logger
 }
-
-var _ AvsReaderer = (*AvsReader)(nil)
 
 func NewAvsReaderFromConfig(
 	registry common.Address,
@@ -392,4 +428,124 @@ func (r *AvsReader) GetOperatorIdList(
 		operatorIds = append(operatorIds, id)
 	}
 	return operatorIds, nil
+}
+
+func (r *AvsReader) ChainID(ctx context.Context) (*big.Int, error) {
+	chainId, err := r.AvsServiceBindings.EthClient.ChainID(ctx)
+	return chainId, err 
+}
+
+func (r *AvsReader) FilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewOpTaskCreatedIterator, error) {
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
+		opts, taskIndex,
+	)
+	return eventIter, err 
+}
+
+func (r *AvsReader) GetFirstFilterNewOpTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerOpTask, error) {
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewOpTaskCreated(
+		opts, taskIndex,
+	)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to FilterNewOpTaskCreated: err: %v", err)
+	}
+
+	eventIterBool := eventIter.Next()
+	if eventIterBool == false {
+		return taskmanager.IFinalizerTaskManagerOpTask{}, fmt.Errorf("Aggregator failed to find the opTask via FilterNewOpTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
+	}
+	
+	return eventIter.Event.Task, err 
+}
+
+func (r *AvsReader) FilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (*taskmanager.ContractFinalizerTaskManagerNewRdTaskCreatedIterator, error) {
+
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
+		opts, taskIndex,
+	)
+	return eventIter, err 
+}
+
+func (r *AvsReader) GetFirstFilterNewRdTaskCreated(opts *bind.FilterOpts, taskIndex []uint32) (taskmanager.IFinalizerTaskManagerRdTask, error) {
+
+	eventIter, err := r.AvsServiceBindings.TaskManager.FilterNewRdTaskCreated(
+		opts, taskIndex,
+	)
+	if err != nil {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, fmt.Errorf("Aggregator failed to FilterNewRdTaskCreated: err: %v", err)
+	}
+
+	eventIterBool := eventIter.Next()
+	if eventIterBool == false {
+		return taskmanager.IFinalizerTaskManagerRdTask{}, fmt.Errorf("Aggregator failed to find the rdTask via FilterNewRdTaskCreated: opts: %v, taskIndex: %v", opts, taskIndex)
+	}
+	
+	return eventIter.Event.Task, err 
+}
+
+func (r *AvsReader) TaskResponseWindowBlock(opts *bind.CallOpts) (uint32, error) {
+	
+	taskResponseWindowBlock, err := r.AvsServiceBindings.TaskManager.TaskResponseWindowBlock(opts)
+	return taskResponseWindowBlock, err
+
+}
+
+func (r *AvsReader) ParseOpTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerOpTaskCompleted, error) {
+	
+	v, err := r.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseOpTaskCompleted(log)
+	return v, err
+}
+
+func (r *AvsReader) ParseRdTaskCompleted(log ethtypes.Log) (*taskmanager.ContractFinalizerTaskManagerRdTaskCompleted, error) {
+	v, err := r.AvsServiceBindings.TaskManager.ContractFinalizerTaskManagerFilterer.ParseRdTaskCompleted(log)
+	return v, err
+}
+
+func (r *AvsReader) BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	account_balance, err := r.AvsServiceBindings.EthClient.BalanceAt(ctx, account, blockNumber)
+	return account_balance, err
+}
+
+func (r *AvsReader) TaskManagerAddress() common.Address {
+	return r.AvsServiceBindings.TaskManagerAddress
+}
+
+func (r *AvsReader) StakeRegistryAddress() common.Address {
+	return r.AvsServiceBindings.StakeRegistryAddress
+}
+
+func (r *AvsReader) DelegationManagerAddress() common.Address {
+	return r.AvsServiceBindings.DelegationManagerAddress
+}
+
+func (r *AvsReader) RegistryCoordinatorAddress() common.Address {
+	return r.AvsServiceBindings.RegistryCoordinatorAddress
+}
+
+func (r *AvsReader) ParseOperatorStakeUpdate(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryOperatorStakeUpdate, error) {
+	
+	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseOperatorStakeUpdate(log)
+	return event, err
+}
+
+func (r *AvsReader) ParseOperatorSharesIncreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesIncreased, error) {
+	event, err := r.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesIncreased(log)
+	return event, err
+}
+
+func (r *AvsReader) ParseOperatorSharesDecreased(log ethtypes.Log) (*delegationManager.ContractDelegationManagerOperatorSharesDecreased, error) {
+	event, err := r.AvsServiceBindings.DelegationManager.ContractDelegationManagerFilterer.ParseOperatorSharesDecreased(log)
+	return event, err
+}
+
+func (r *AvsReader) ParseStrategyMultiplierUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryStrategyMultiplierUpdated, error) {
+	
+	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseStrategyMultiplierUpdated(log)
+	return event, err
+}
+
+func (r *AvsReader) ParseMinimumStakeForQuorumUpdated(log ethtypes.Log) (*stakeRegistry.ContractStakeRegistryMinimumStakeForQuorumUpdated, error) {
+	
+	event, err := r.AvsServiceBindings.StakeRegistry.ContractStakeRegistryFilterer.ParseMinimumStakeForQuorumUpdated(log)
+	return event, err
 }

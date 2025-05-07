@@ -1,0 +1,18 @@
+[package]
+name = "sp-stable-swap"
+version = "1.0.0"
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+
+[dependencies]
+sp-runtime = { workspace = true, default-features = false }
+sp-std = { workspace = true, default-features = false }
+
+[features]
+default = ["std"]
+std = [
+	"sp-runtime/std",
+	"sp-std/std",
+]

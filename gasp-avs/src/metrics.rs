@@ -1,9 +1,12 @@
 use std::sync::Arc;
 
 use ethers::{providers::Middleware, types::NameOrAddress};
-use prometheus::{opts, register_gauge, Encoder, Gauge, TextEncoder};
+use prometheus::{opts, register_gauge, register_gauge_vec, Encoder, Gauge, GaugeVec, TextEncoder};
 use sp_runtime::SaturatedConversion;
 use warp::Filter;
+
+pub const OP_TASK_TYPE_STR: &str = &"op_task";
+pub const RD_TASK_TYPE_STR: &str = &"rd_task";
 
 lazy_static::lazy_static! {
     static ref BALANCE: Gauge = register_gauge!(opts!(
@@ -11,6 +14,30 @@ lazy_static::lazy_static! {
         "Balance of the gasp-avs account",
     ))
     .unwrap();
+
+    static ref LAST_TASK_SEEN: GaugeVec = register_gauge_vec!(
+        opts!("last_task_seen", "Last task seen by the avs of each type"),
+        &["task_type"]
+    )
+    .unwrap();
+
+    static ref LAST_TASK_RESPONDED: GaugeVec = register_gauge_vec!(
+        opts!("last_task_responded", "Last task responded to by the avs of each type"),
+        &["task_type"]
+    )
+    .unwrap();
+}
+
+pub fn record_last_task_seen_metrics(task_type: &str, task_index: u32) {
+    LAST_TASK_SEEN
+        .with_label_values(&[task_type])
+        .set(task_index.into())
+}
+
+pub fn record_last_task_responded_metrics(task_type: &str, task_index: u32) {
+    LAST_TASK_RESPONDED
+        .with_label_values(&[task_type])
+        .set(task_index.into())
 }
 
 pub async fn report_account_balance(

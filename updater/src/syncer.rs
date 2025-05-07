@@ -25,6 +25,7 @@ use ethers::{
     types::{Bytes, Filter},
 };
 
+use crate::metrics::{record_last_task_synced_metrics, OP_TASK_TYPE_STR, RD_TASK_TYPE_STR};
 use crate::ALERT_WARNING;
 use ethers::abi::AbiEncode;
 use eyre::{eyre, OptionExt};
@@ -77,8 +78,9 @@ impl Syncer {
             crate::metrics::report_account_balance(provider, address.0).await;
         });
 
+        let metrics_port = cfg.metrics_port;
         let _serve_metrics_handle = tokio::spawn(async move {
-            crate::metrics::serve_metrics(80).await;
+            crate::metrics::serve_metrics(metrics_port).await;
         });
 
         let (source_client, target_client) = (Arc::new(source_client), Arc::new(target_client));
@@ -315,6 +317,7 @@ impl Syncer {
                 info!("sucessfully synced op task - {:?}", call.task.clone());
                 *latest_completed_op_task_created_block = call.task.task_created_block;
                 *latest_completed_op_task_number = call.task.task_num;
+                record_last_task_synced_metrics(OP_TASK_TYPE_STR, call.task.task_num);
             }
             FinalizerTaskManagerEvents::RdTaskCompletedFilter(_event) => {
                 let txn_hash = log.transaction_hash;
@@ -422,6 +425,7 @@ impl Syncer {
                 info!("sucessfully synced rd task - {:?}", call.task.clone());
                 *latest_completed_rd_task_number = call.task.task_num;
                 *last_processed_rd_task_number = Some(call.task.task_num);
+                record_last_task_synced_metrics(RD_TASK_TYPE_STR, call.task.task_num);
             }
             _ => return Err(eyre!("Got unexpected stream event")),
         }

@@ -1,11 +1,11 @@
 import MangataClient from '../connector/MangataNode.js'
 import * as store from '../repository/ChainRepository.js'
 import * as blocks from '../scraper/BlockScraper.js'
+import * as deposits from '../scraper/DepositScraper.js'
 import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
-import * as withdrawals from '../scraper/WithdrawalScraper.js'
-import * as deposits from '../scraper/DepositScraper.js'
 import * as swaps from '../scraper/SwapScraper.js'
+import * as withdrawals from '../scraper/WithdrawalScraper.js'
 import logger from '../util/Logger.js'
 
 export const initService = async () => {

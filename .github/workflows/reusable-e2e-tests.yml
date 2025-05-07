@@ -1,23 +1,28 @@
-name: Run e2e tests
+name: "[e2e] Reusable e2e tests workflow"
+
 on:
-  workflow_call:
-    inputs:
-      e2eBranch:
-        type: string
-        required: false
-      globalVersion:
-        type: string
-        required: false
-        default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
   workflow_dispatch:
     inputs:
-      e2eBranch:
-        type: string
-        required: false
       globalVersion:
+        description: "Set global version for all tests."
         type: string
+        required: true
+      cacheEnabled:
+        description: "Enable caching for all tests."
+        type: boolean
         required: false
-        default: "8dd0c81aa88b967334d001d8cae031f8799a189f"
+        default: true
+  workflow_call:
+    inputs:
+      globalVersion:
+        description: "Set global version for all tests."
+        type: string
+        required: true
+      cacheEnabled:
+        description: "Enable caching for all tests."
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: read
@@ -25,38 +30,161 @@ permissions:
   checks: write
 
 env:
-  CURRENT_BRANCH: ${{ github.head_ref || github.ref_name }}
-  DEFAULT_E2E_REPO_BRANCH: eth-rollup-develop
-  AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
-  UPDATER_VERSION: ${{ inputs.globalVersion }}
-  ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
-  GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
-  GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
-  FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
-  FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
-  ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
-  IMAGE_TAG: ${{ inputs.globalVersion }}
-  CACHE_VERSION: 1
+  MOON_CACHE: "${{ inputs.cacheEnabled && 'read-write' || 'off' }}"
+  MOON_COLOR: 2
+  CACHE_VERSION: 2
 
 jobs:
-  run-avs-tests:
-    runs-on: ubuntu-24.04
+  setup-report:
+    runs-on: [ubuntu-24.04]
+    outputs:
+      testmo-run-id: ${{ steps.setTestRun.outputs.testmo-run-id }}
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+      - name: Add url
+        run: |
+          npx testmo automation:resources:add-field --name git --type string \
+            --value ${GITHUB_SHA:0:7} --resources resources.json
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          npx testmo automation:resources:add-link --name build \
+            --url $RUN_URL --resources resources.json
+
+      - name: Create test run
+        run: |
+          npx testmo automation:run:create \
+            --instance https://mangata-finance.testmo.net  \
+            --project-id 2 \
+            --name "BE tests from node-repo" \
+            --resources resources.json \
+            --source "BE-e2e-regression" > testmo-run-id.txt
+          ID=$(cat testmo-run-id.txt)
+          echo "testmo-run-id=$ID" >> $GITHUB_OUTPUT
+          echo "ID=$ID" >> $GITHUB_ENV
+
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        id: setTestRun
+
+  e2e-test-matrix:
+    needs: [setup-report]
     strategy:
+      fail-fast: false
       matrix:
-        test:
+        include:
+          #####################################################################
+          # gasp-node-specific tests (running only two instances of gasp-node)
+          #####################################################################
+          - command: "moon gasp-node:e2e-test-parallel"
+            name: test-parallel
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sequential-no-bootstrap"
+            name: test-sequential-no-bootstrap
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-seqgasless"
+            name: test-seqgasless
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-maintenance"
+            name: test-maintenance
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-rollupUpdate"
+            name: test-rollupUpdate
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-bootstrap"
+            name: test-bootstrap
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-rewards-bootstrap"
+            name: test-rewards-bootstrap
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-parallel-autocompound"
+            name: test-parallel-autocompound
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sequential-autocompound"
+            name: test-sequential-autocompound
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-poolliquidity"
+            name: test-poolliquidity
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-governance"
+            name: test-governance
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-multiswap"
+            name: test-multiswap
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-experimentalStaking"
+            name: test-experimentalStaking
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-crowdloan"
+            name: test-crowdloan
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sdk"
+            name: test-sdk
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-parallel-3rdPartyRewards"
+            name: test-parallel-3rdPartyRewards
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sequencerStaking"
+            name: test-sequencerStaking
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sequencerCancellation"
+            name: test-sequencerCancellation
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-rolldown"
+            name: test-rolldown
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-rolldownWithdrawal"
+            name: test-rolldownWithdrawal
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-rolldownPreOperationWithdrawal"
+            name: test-rolldownPreOperationWithdrawal
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sequencerRewards"
+            name: test-sequencerRewards
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-nonTransToken"
+            name: test-nonTransToken
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-issuanceConfig"
+            name: test-issuanceConfig
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-sudoRemoval"
+            name: test-sudoRemoval
+            buildContractsBeforeTestsExecution: false
+          - command: "moon gasp-node:e2e-test-marketSwap"
+            name: test-marketSwap
+            buildContractsBeforeTestsExecution: false
+          #####################################################################
+          # full avs environment specific tests (running full avs environment)
+          #####################################################################
+          - command: "moon gasp-node:e2e-test-rollup"
+            name: "avs-test-rollup"
+            buildContractsBeforeTestsExecution: false
           - command: "moon gasp-avs:e2e-test-opt-out"
-            name: "test-opt-out"
+            name: "gasp-avs-test-opt-out"
+            buildContractsBeforeTestsExecution: true
           - command: "moon gasp-avs:e2e-test-corrupted"
-            name: "test-corrupted"
+            name: "gasp-avs-test-corrupted"
+            buildContractsBeforeTestsExecution: true
+    runs-on: ubuntu-24.04
+    name: ${{ matrix.name }}
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: gasp-node
     env:
       MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+      API_URL: "ws://127.0.0.1:9946"
+      NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
       IMAGE_TAG: ${{ inputs.globalVersion }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: false
+      
       - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
         uses: actions/cache@v4
         id: cache
         with:
@@ -68,34 +196,70 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
+
+      - uses: moonrepo/setup-rust@v1
+        name: Setup nightly-2024-01-20 rust toolchain
+        with:
+          channel: nightly-2024-01-20
+          targets: wasm32-unknown-unknown
+          components: rustfmt,clippy,rust-src
+          cache: ${{ inputs.cacheEnabled }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Foundry
+        if: matrix.buildContractsBeforeTestsExecution == true
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          cache: ${{ inputs.cacheEnabled }}
       - name: build and copy contracts
+        if: matrix.buildContractsBeforeTestsExecution == true
         working-directory: contracts
         run: forge build
 
-      - name: Install proto manually
-        run: |
-          curl -fsSL https://moonrepo.dev/install/proto.sh -o /tmp/proto_install.sh && chmod +x /tmp/proto_install.sh
-          bash /tmp/proto_install.sh 0.47.3 --yes && rm /tmp/proto_install.sh
-          echo "$HOME/.proto/bin" >> $GITHUB_PATH
-      - run: cd gasp-avs/tests && proto setup --yes
-      - run: cd gasp-avs/tests && proto install
-      - run: cd gasp-avs/tests && proto diagnose
-      - run: cd gasp-avs/tests && proto status
-      
-      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+      - uses: docker/setup-compose-action@v1
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
-          node-version-file: ./gasp-avs/.nvmrc
-          cache: yarn
-          cache-dependency-path: './gasp-avs/tests/yarn.lock'
-      - run: cd gasp-avs/tests && yarn install
+          node-version-file: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/.nvmrc' || './gasp-node/gasp-e2e/.nvmrc' }}
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
+          cache-dependency-path: ${{ matrix.buildContractsBeforeTestsExecution == true && './gasp-avs/tests/yarn.lock' || './gasp-node/gasp-e2e/yarn.lock' }}
+      - name: Get Yarn cache directory and version
+        id: yarn-cache
+        run: |
+          YARN_VERSION=$(yarn --version)
+          if [[ "$YARN_VERSION" =~ ^1\. ]]; then
+            CACHE_DIR=$(yarn cache dir)
+            echo "version=1" >> $GITHUB_OUTPUT
+          else
+            CACHE_DIR=$(yarn config get cacheFolder)
+            echo "version=2plus" >> $GITHUB_OUTPUT
+          fi
+          echo "dir=$CACHE_DIR" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        if: inputs.cacheEnabled == true
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-${{ hashFiles('gasp-node/gasp-e2e/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.CACHE_VERSION }}-yarn-${{ steps.yarn-cache.outputs.version }}-
 
-      - name: Run test command "${{ matrix.test.command }}"
-        run: ${{ matrix.test.command }}
+      - run: cd $GITHUB_WORKSPACE/gasp-node/gasp-e2e && yarn install --immutable
+
+      - uses: moonrepo/setup-toolchain@v0.4.1
+        with:
+          cache: ${{ inputs.cacheEnabled }}
+          cache-version: ${{ env.CACHE_VERSION }}
+          
+      - name: Run tests
+        run: ${{ matrix.command }}
+        env:
+          IMAGE_TAG: ${{ inputs.globalVersion }}
+          NODE_OPTIONS: --max_old_space_size=12288
+          MOON_TOOLCHAIN_FORCE_GLOBALS: node,yarn
+          NODE_DOCKER_COMPOSE_NETWORK: gasp-node_default
+          API_URL: "ws://127.0.0.1:9946"
 
       - name: Show Docker Compose logs in case of failure
         if: failure()
@@ -105,15 +269,44 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.test.name }}-logs
+          name: ${{ matrix.name }}-logs
           path: tmp/logs/
 
-      - uses: appthrust/moon-ci-retrospect@v1
-        if: success() || failure()
+      - name: Test Report
+        uses: dorny/test-reporter@v1.9.1
+        continue-on-error: true
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: E2E report ${{ matrix.command }} # Name of the check run which will be created
+          path: gasp-node/gasp-e2e/reports/*.xml # Path to test results
+          reporter: jest-junit # Format of test results
+          fail-on-empty: false
+
+      - name: Submit results to the testmo-run
+        continue-on-error: true
+        if: always()
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        run: |
+          yarn dlx @testmo/testmo-cli automation:run:submit-thread \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+            --results $GITHUB_WORKSPACE/gasp-node/gasp-e2e/reports/*.xml
 
   ferry-withdrawal-test:
-    name: Ferry withdrawal tests
+    name: '[ferry-withdrawal] e2e tests'
     runs-on: ubuntu-24.04
+    env:
+      AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
+      UPDATER_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
+      GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+      GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
+      FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
+      FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+      IMAGE_TAG: ${{ inputs.globalVersion }}
     defaults:
       run:
         working-directory: ferry-withdrawal
@@ -123,6 +316,7 @@ jobs:
           fetch-depth: 0
           submodules: false
       - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
         uses: actions/cache@v4
         id: cache
         with:
@@ -134,37 +328,47 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
-
-      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+          git submodule update --init --recursive
+  
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: ./ferry-withdrawal/.nvmrc
-          cache: yarn
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
           cache-dependency-path: "./ferry-withdrawal/yarn.lock"
-
+  
       - run: yarn install --immutable
       - run: yarn run build
-
+  
       - name: Build
         working-directory: .
-        run: docker compose up --wait ferry-withdrawal-eth
-
+        run: docker compose up --no-build --wait ferry-withdrawal-eth
+  
       - name: Test L1 interface
         run: yarn run test-l1
-
+  
       - name: Test L2 interface
         run: yarn run test-l2
-
+  
       - name: Test ferry
         run: yarn run test-ferry
-
+  
       - name: Test closer service
         run: yarn run test-closer
-
+  
   ferry-deposit-test:
-    name: Ferry deposit tests
+    name: '[ferry-deposit] e2e tests'
     runs-on: ubuntu-24.04
+    env:
+      AVS_AGGREGATOR_VERSION: ${{ inputs.globalVersion }}
+      UPDATER_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_SEQUENCER_VERSION: ${{ inputs.globalVersion }}
+      GASP_AVS_VERSION: ${{ inputs.globalVersion }}-fast
+      GASP_CONTRACTS_VERSION: ${{ inputs.globalVersion }}
+      FERRY_DEPOSIT_VERSION: ${{ inputs.globalVersion }}
+      FERRY_WITHDRAWAL_VERSION: ${{ inputs.globalVersion }}
+      ROLLUP_NODE_VERSION: ${{ inputs.globalVersion }}-fast
+      IMAGE_TAG: ${{ inputs.globalVersion }}
     defaults:
       run:
         working-directory: ferry-deposit
@@ -174,6 +378,7 @@ jobs:
           fetch-depth: 0
           submodules: false
       - name: Cache Git submodules
+        if: inputs.cacheEnabled == true
         uses: actions/cache@v4
         id: cache
         with:
@@ -185,28 +390,84 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
-
-      - run: corepack enable && corepack prepare yarn@4.6.0 --activate
+          git submodule update --init --recursive
+  
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: ./ferry-deposit/.nvmrc
-          cache: yarn
+          cache: ${{ inputs.cacheEnabled && 'yarn' || '' }}
           cache-dependency-path: "./ferry-deposit/yarn.lock"
-
+  
       - run: yarn install --immutable
       - run: yarn run build
-
+  
       - name: Build
         working-directory: .
-        run: docker compose up --wait ferry-deposit-eth
-
+        run: docker compose up --no-build --wait ferry-deposit-eth
+  
       - name: Test L1 interface
         run: yarn run test-l1
-
+  
       - name: Test L2 interface
         run: yarn run test-l2
-
+  
       - name: Test ferry
         run: yarn run test-ferry
 
+  e2e-tests-status:
+    name: 'E2E Tests Status'
+    needs: [e2e-test-matrix, ferry-withdrawal-test, ferry-deposit-test]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check test results
+        run: |
+          # Check results of all test jobs
+          if [[ "${{ contains(needs.e2e-test-matrix.result, 'failure') || 
+                  contains(needs.ferry-withdrawal-test.result, 'failure') || 
+                  contains(needs.ferry-deposit-test.result, 'failure') }}" == "true" ]]; then
+            echo "::error::One or more test jobs failed"
+            exit 1
+          # Check for cancelled jobs
+          elif [[ "${{ contains(needs.e2e-test-matrix.result, 'cancelled') || 
+                    contains(needs.ferry-withdrawal-test.result, 'cancelled') || 
+                    contains(needs.ferry-deposit-test.result, 'cancelled') }}" == "true" ]]; then
+            echo "::warning::One or more test jobs were cancelled"
+            exit 1
+          # Success case
+          else
+            echo "::notice::All tests completed successfully"
+          fi
+
+  test-complete:
+    needs: [e2e-tests-status]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install testmo
+        run: npm install --no-save @testmo/testmo-cli
+
+      - name: Complete test run
+        run: |
+          npx testmo automation:run:complete \
+            --instance https://mangata-finance.testmo.net \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+        env:
+          TESTMO_URL: ${{ secrets.TESTMO_URL }}
+          TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
+        continue-on-error: true
+
+  slack-notify-nook:
+    needs: [test-complete]
+    if: failure()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Slack Notification - Error
+        uses: bryannice/gitactions-slack-notification@2.0.0
+        env:
+          SLACK_INCOMING_WEBHOOK: ${{ secrets.BNB_E2E_NOTIFICATION_WEBHOOK }}
+          SLACK_TITLE: "gasp-monorepo e2e test execution - NOOK"
+          SLACK_COLOR: "#ff0011"
+          SLACK_MESSAGE: "Test failures in gasp-monorepo testmo report: https://mangata-finance.testmo.net/automation/runs/view/${{needs.setup-report.outputs.testmo-run-id}}"
+          GITHUB_REF: "https://gasp-xyz.github.io/gasp-monorepo/${{ github.run_number }}"

@@ -1,0 +1,38 @@
+[package]
+name = "l2api"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+
+[dependencies]
+subxt = "0.38.0"
+subxt-signer = "0.38.0"
+tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
+parity-scale-codec = { version = "3.6.1",  features = ["bit-vec", "derive"] }
+scale-info = { version = "2.10.0", features = ["bit-vec", "derive", "serde"] }
+serde = { version = "1.0.197" ,features = ["alloc", "derive"]}
+primitive-types = "0.13.1"
+secp256k1 = { version = "0.28.0", features = ["recovery", "rand-std", "global-context"] }
+sha3 = "0.10.8"
+hex = "0.4.3"
+hex-literal = "0.4.1"
+futures = "0.3.17"
+thiserror = "2.0.3"
+tracing = "0.1.40"
+tracing-log = "0.2.0"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+lru = "0.12.5"
+prometheus = "0.13.4"
+lazy_static = "1.4.0"
+mockall = "0.13.0"
+gasp-types = { workspace = true }
+gasp-bindings = { workspace = true }
+
+[dev-dependencies]
+serial_test = "3.2.0"
+tracing-test = "0.2.5"
+
+# [profile.dev]
+# incremental = true
+# lto = true

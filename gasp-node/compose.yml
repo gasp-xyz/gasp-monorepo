@@ -6,7 +6,7 @@ services:
       context: .
       args:
         ENABLE_FAST_RUNTIME: true
-    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local-fast}
     command:
       - --alith
       - --chain=rollup-local-seq
@@ -25,7 +25,7 @@ services:
       context: .
       args:
         ENABLE_FAST_RUNTIME: true
-    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local}
+    image: gaspxyz/rollup-node:${ROLLUP_NODE_VERSION:-local-fast}
     command:
       - --baltathar
       - --chain=rollup-local-seq

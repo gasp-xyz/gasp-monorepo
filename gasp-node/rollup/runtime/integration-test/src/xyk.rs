@@ -17,6 +17,7 @@ fn test_env(xyk_metadata: Option<XykMetadata>) -> TestExternalities {
 				existential_deposit: Default::default(),
 				additional: CustomMetadata { xyk: xyk_metadata, ..CustomMetadata::default() },
 			},
+			None,
 		)],
 		..ExtBuilder::default()
 	}

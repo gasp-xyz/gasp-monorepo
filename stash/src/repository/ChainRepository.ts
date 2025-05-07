@@ -1,5 +1,6 @@
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
+
 import { redis } from '../connector/RedisConnector.js'
 import { Event } from '../scraper/BlockScraper.js'
 import logger from '../util/Logger.js'
