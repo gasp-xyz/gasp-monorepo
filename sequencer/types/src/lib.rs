@@ -74,7 +74,7 @@ impl TryFrom<u32> for Chain {
         match value {
             1 | 17000 | 31337 => Ok(Chain::Ethereum),
             42161 | 421614 | 31338 => Ok(Chain::Arbitrum),
-            8453 | 84532 | 31339 => Ok(Chain::Arbitrum),
+            8453 | 84532 | 31339 => Ok(Chain::Base),
             146 => Ok(Chain::Sonic),
             10143 => Ok(Chain::Monad),
             6342 => Ok(Chain::MegaEth),
