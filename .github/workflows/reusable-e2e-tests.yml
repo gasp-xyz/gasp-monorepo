@@ -196,7 +196,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
 
       - uses: moonrepo/setup-rust@v1
         name: Setup nightly-2024-01-20 rust toolchain
@@ -328,7 +328,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
   
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
@@ -390,7 +390,7 @@ jobs:
             submodules-${{ env.CACHE_VERSION }}-
       - run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
   
       - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
@@ -441,7 +441,7 @@ jobs:
           fi
 
   test-complete:
-    needs: [e2e-tests-status]
+    needs: [e2e-tests-status, setup-report]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -452,7 +452,7 @@ jobs:
         run: |
           npx testmo automation:run:complete \
             --instance https://mangata-finance.testmo.net \
-            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}}
         env:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}
