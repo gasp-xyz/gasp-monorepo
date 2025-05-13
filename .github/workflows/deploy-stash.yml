@@ -32,6 +32,7 @@ jobs:
         working-directory: stash
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable && corepack prepare yarn@4.7.0 --activate
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'stash/.nvmrc'
@@ -109,7 +110,7 @@ jobs:
 
   deploy-staging:
     name: Deploy `stash` to `staging` environment
-    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     runs-on: ubuntu-24.04
     needs: build
     defaults:

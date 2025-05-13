@@ -1,0 +1,9 @@
+implicitInputs:
+  - package.json
+  - yarn.lock
+
+fileGroups:
+  dockerBuildInputs:
+    - Dockerfile
+    - .dockerignore
+    - /.dockerignore

@@ -1,56 +1,24 @@
-use envconfig::Envconfig;
-use hex::FromHex;
+use alloy::{network::NetworkWallet, providers::WalletProvider};
+use clap::Parser;
+use l1api::{CachedL1Interface, Subscription};
 use tracing::level_filters::LevelFilter;
 
-mod metrics;
+mod cli;
 mod sequencer;
 mod watchdog;
+
+use gasp_types::Chain;
+use l2api::Gasp;
+use sequencer::Sequencer;
 use tokio::time::Duration;
 use watchdog::Watchdog;
-
-use sequencer::Sequencer;
-mod l1;
-use l1::{CachedL1Interface, RolldownContract};
-
-mod l2;
-use l2::Gasp;
-
-#[derive(Envconfig, Debug)]
-struct Config {
-    #[envconfig(from = "ETH_CHAIN_URL")]
-    pub l1_uri: String,
-
-    #[envconfig(from = "PRIVATE_KEY")]
-    pub l1_private_key: String,
-
-    #[envconfig(from = "MANGATA_NODE_URL")]
-    pub l2_uri: String,
-
-    #[envconfig(from = "MNEMONIC")]
-    pub l2_mnemonic: String,
-
-    #[envconfig(from = "L1_CHAIN")]
-    pub chain: String,
-
-    #[envconfig(from = "MANGATA_CONTRACT_ADDRESS")]
-    pub rolldown_contract_address: String,
-
-    #[envconfig(from = "LIMIT")]
-    pub update_size_limit: u128,
-
-    #[envconfig(from = "WATCHDOG")]
-    pub timeout: u128,
-
-    #[envconfig(from = "TX_COST")]
-    pub tx_cost: Option<u128>,
-}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Sequencer error")]
     SequencerError(#[from] sequencer::Error),
     #[error("L1 error")]
-    L1Error(#[from] l1::L1Error),
+    L1Error(#[from] l1api::L1Error),
     #[error("Deserialization error")]
     DeserializationError(#[from] hex::FromHexError),
     #[error("Unsupported chain `{0}`")]
@@ -66,7 +34,9 @@ pub async fn main() {
         .from_env_lossy();
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    let mut config = Config::init_from_env().unwrap();
+    let mut config = cli::Cli::parse();
+
+    tracing::info!("config: {config:#?}");
 
     config.tx_cost = match config.tx_cost {
         Some(0u128) => None,
@@ -81,15 +51,12 @@ pub async fn main() {
     }
 }
 
-fn strip_prefix(str: &String) -> &str {
-    if let Some(without_prefix) = str.strip_prefix("0x") {
-        without_prefix
+async fn run(config: cli::Cli) -> Result<(), Error> {
+    let subscription = if config.polling {
+        Subscription::Polling
     } else {
-        str
-    }
-}
-
-async fn run(config: Config) -> Result<(), Error> {
+        Subscription::Subscription
+    };
     let timeout = config.timeout;
     let duration = Duration::from_secs(timeout.try_into().expect("overflow"));
     let (tx, mut watchdog) = Watchdog::new(duration);
@@ -99,8 +66,9 @@ async fn run(config: Config) -> Result<(), Error> {
         watchdog.run().await;
     });
 
+    let metrics_port = config.metrics_port;
     let _metrics = tokio::spawn(async move {
-        metrics::serve_metrics(80).await;
+        common::serve_metrics(metrics_port).await;
     });
 
     let update_size_limit = config.update_size_limit;
@@ -108,17 +76,16 @@ async fn run(config: Config) -> Result<(), Error> {
         update_size_limit > 0,
         "Update size limit must be greater than 0"
     );
-    let eth_secret_key = <[u8; 32]>::from_hex(strip_prefix(&config.l1_private_key))?;
-    let gasp_secret_key = <[u8; 32]>::from_hex(strip_prefix(&config.l2_mnemonic))?;
-    let rolldown_contract_address =
-        <[u8; 20]>::from_hex(strip_prefix(&config.rolldown_contract_address))?;
+    let eth_secret_key = config.l1_private_key.into();
+    let gasp_secret_key = config.l2_mnemonic.into();
+    let rolldown_contract_address = config.rolldown_contract_address;
     let chain = match config.chain.to_lowercase().as_ref() {
-        "ethereum" => Ok(l2::types::Chain::Ethereum),
-        "arbitrum" => Ok(l2::types::Chain::Arbitrum),
-        "base" => Ok(l2::types::Chain::Base),
-        "monad" => Ok(l2::types::Chain::Monad),
-        "megaeth" => Ok(l2::types::Chain::MegaEth),
-        "sonic" => Ok(l2::types::Chain::Sonic),
+        "ethereum" => Ok(Chain::Ethereum),
+        "arbitrum" => Ok(Chain::Arbitrum),
+        "base" => Ok(Chain::Base),
+        "monad" => Ok(Chain::Monad),
+        "megaeth" => Ok(Chain::MegaEth),
+        "sonic" => Ok(Chain::Sonic),
         _ => Err(Error::UnsupportedChain(config.chain.clone())),
     }?;
 
@@ -128,17 +95,31 @@ async fn run(config: Config) -> Result<(), Error> {
         .map_err(Into::<sequencer::Error>::into)?;
     tracing::info!("Connected to {}", config.l2_uri);
 
-    let provider = l1::create_provider(config.l1_uri.as_str(), eth_secret_key).await?;
+    let provider = l1api::create_provider(config.l1_uri.clone(), eth_secret_key).await?;
+    let rolldown = l1api::RolldownContract::new(provider.clone(), rolldown_contract_address);
     tracing::info!("Connected to {}", config.l1_uri);
 
-    let rolldown = RolldownContract::from_provider(rolldown_contract_address, provider.clone());
+    let l1_account_addr = provider.wallet().default_signer_address().0 .0;
+    let l2_account_addr = l2api::signer::Keypair::from_secret_key(gasp_secret_key)
+        .address()
+        .into_inner();
+
+    let rolldown = l1api::L1::new(rolldown, None, provider.clone(), subscription);
 
     let _balance_tracker = tokio::spawn(async move {
-        metrics::report_account_balance(provider).await;
+        common::report_account_balance(provider).await;
     });
 
     let lru = CachedL1Interface::new(rolldown, std::num::NonZeroUsize::new(100).unwrap());
-    let seq = Sequencer::new(lru, gasp, chain, update_size_limit, config.tx_cost);
+    let seq = Sequencer::new(
+        lru,
+        gasp,
+        chain,
+        l1_account_addr,
+        l2_account_addr,
+        update_size_limit,
+        config.tx_cost,
+    );
     let sequencer_service = tokio::spawn(async move { seq.run(tx).await });
 
     watchdog

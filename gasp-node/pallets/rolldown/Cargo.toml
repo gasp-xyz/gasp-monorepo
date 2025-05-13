@@ -43,6 +43,7 @@ mockall.workspace = true
 
 sp-io = { workspace = true, default-features = false }
 orml-traits = { workspace = true, default-features = false }
+sha3 = "0.10.8"
 
 
 [features]

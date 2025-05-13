@@ -27,16 +27,22 @@ COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/usr/local/cargo/git,sharing=locked \
     --mount=type=cache,target=/app/target,sharing=locked \
-		cargo build --locked --release && \
-		# copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
-		cp target/release/sequencer /app/sequencer-bin
+    cargo build --locked --release && \
+	  # copy build artifacts to the root directory to avoid issues with accessing cache mount from 2nd stage
+		cp target/release/sequencer /app/sequencer-bin && \
+		cp target/release/ferry-withdrawal /app/ferry-withdrawal-bin && \
+		cp target/release/closer /app/closer-bin && \
+		cp target/release/ferry-deposit /app/ferry-deposit-bin
 
 
 FROM debian:stable-slim
-RUN apt update -y && apt install -y libssl-dev
+RUN apt update -y && apt install -y libssl-dev ca-certificates && update-ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY --from=builder /app/sequencer-bin /app/sequencer
+COPY --from=builder /app/ferry-withdrawal-bin /app/ferry-withdrawal
+COPY --from=builder /app/ferry-deposit-bin /app/ferry-deposit
+COPY --from=builder /app/closer-bin /app/closer
 
 CMD ["/app/sequencer"]

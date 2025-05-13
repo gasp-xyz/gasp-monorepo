@@ -1,0 +1,48 @@
+services:
+  stash:
+    build: .
+    image: gaspxyz/stash:${STASH_VERSION:-local}
+    restart: unless-stopped
+    # depends_on:
+    #   eth-contracts-deployment:
+    #     condition: service_completed_successfully
+    #   node-alice:
+    #     condition: service_started
+    #   node-bob:
+    #     condition: service_started
+    ports:
+      - 8080:8080
+    environment:
+      MGX_AIRDROP_SNAPSHOTS: ${MGX_AIRDROP_SNAPSHOTS}
+      MGX_TOKEN_ID: ${MGX_TOKEN_ID:-0}
+      TOKEN_FOR_PRICE_ID: ${TOKEN_FOR_PRICE_ID:-1}
+      GAE_APPLICATION: ${GAE_APPLICATION:-smth}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY}
+      CAPTCHA_SITEKEY: ${CAPTCHA_SITEKEY}
+      CAPTCHA_SECRET: ${CAPTCHA_SECRET}
+      ORIGIN_ACCOUNT_PRIVATE_KEY: ${ORIGIN_ACCOUNT_PRIVATE_KEY}
+      RPC_ADDRESS: ${RPC_ADDRESS:-https://evm-node-eth-frontend.gasp.xyz}
+      GASPV2_TOKEN_ADDRESS: ${GASPV2_TOKEN_ADDRESS:-5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3}
+      CONTRACT_ADDRESS_ETH: ${CONTRACT_ADDRESS_ETH:-cbEAF3BDe82155F56486Fb5a1072cb8baAf547cc}
+      CONTRACT_ADDRESS_ARB: ${CONTRACT_ADDRESS_ARB:-Dc64a140Aa3E981100a9becA4E685f962f0cF6C9}
+      ETH_CHAIN_URL: ${ETH_CHAIN_URL:-https://evm-node-eth-frontend.gasp.xyz}
+      ARBITRUM_SEPOLIA_CHAIN_URL: ${ARBITRUM_SEPOLIA_CHAIN_URL:-https://evm-node-arb-frontend.gasp.xyz}
+      ENVIRONMENT: ${ENVIRONMENT:-frontend}
+      MANGATA_NODE_URL: ${MANGATA_NODE_URL:-wss://collator-01-ws-rollup-frontend.gasp.xyz}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASS: ${REDIS_PASS} # Has to be empty to work with local redis host
+      TIMESERIES_HOST: ${TIMESERIES_HOST:-redis-timeseries}
+      TIMESERIES_PORT: ${TIMESERIES_PORT:-6379}
+      TIMESERIES_PASS: ${TIMESERIES_PASS} # Has to be empty to work with local redis host
+
+  redis:
+    image: redis/redis-stack:7.4.0-v3
+    ports:
+      - 6379:6379
+      - 8001:8001 # Redis Insight UI: http://localhost:8001
+  redis-timeseries:
+    image: redis/redis-stack:7.4.0-v3
+    ports:
+      - 6380:6379
+      - 8002:8001 # Redis Insight UI: http://localhost:8002

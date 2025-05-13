@@ -1,11 +1,12 @@
-import { Request, Response } from 'express'
-import * as errorHandler from '../error/Handler.js'
-import MangataClient from '../connector/MangataNode.js'
 import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
+import { Request, Response } from 'express'
 import { fromBN } from 'gasp-sdk'
-import logger from '../util/Logger.js'
+
+import MangataClient from '../connector/MangataNode.js'
+import * as errorHandler from '../error/Handler.js'
 import { getTokenPrice } from '../service/TokenPriceService.js'
+import logger from '../util/Logger.js'
 
 export const tokenNetworkPortfolio = async (req: Request, res: Response) => {
   try {

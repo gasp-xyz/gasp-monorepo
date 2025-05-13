@@ -6,8 +6,17 @@ repository = "https://github.com/gasp-xyz/gasp-monorepo.git"
 [workspace]
 resolver = "2"
 members = [
-	'sequencer',
-	'bindings',
+  'sequencer',
+  'bindings/contracts', 
+  'bindings/gasp', 
+  "types",
+  "common",
+  "l1api",
+  "l2api",
+  "closer",
+  "ferry-withdrawal",
+  "ferry-deposit",
+  "stash-api", "l2cli",
 ]
 
 [profile.dev]
@@ -25,4 +34,12 @@ codegen-units = 1
 
 
 [workspace.dependencies]
-bindings = { path = "./bindings" }
+alloy = { version = "0.8.3", features = ["sol-types", "contract", "signer-local", "provider-http", "provider-ws"] }
+
+contract-bindings = { path = "./bindings/contracts/" }
+gasp-bindings = { path = "./bindings/gasp" }
+l1api = { path = "./l1api/" }
+l2api = { path = "./l2api/" }
+gasp-types = { path = "./types/" }
+common = { path = "./common/" }
+stash-api = { path = "./stash-api/" }

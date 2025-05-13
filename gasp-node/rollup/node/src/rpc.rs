@@ -14,9 +14,12 @@ use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 
-use rollup_runtime::runtime_config::{
-	opaque::Block,
-	types::{AccountId, Balance, Nonce, TokenId},
+use rollup_runtime::{
+	runtime_config::{
+		opaque::Block,
+		types::{AccountId, Balance, Nonce, TokenId},
+	},
+	Runtime, RuntimeCall,
 };
 
 use metamask_signature_rpc::MetamaskSignatureApiServer;
@@ -47,7 +50,6 @@ where
 	C: Send + Sync + 'static,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
-	C::Api: xyk_runtime_api::XykRuntimeApi<Block, Balance, TokenId, AccountId>,
 	C::Api: proof_of_stake_rpc::ProofOfStakeRuntimeApi<Block, Balance, TokenId, AccountId>,
 	C::Api: metamask_signature_rpc::MetamaskSignatureRuntimeApi<Block>,
 	C::Api: rolldown_runtime_api::RolldownRuntimeApi<
@@ -56,28 +58,32 @@ where
 		pallet_rolldown::messages::Chain,
 	>,
 	C::Api: pallet_market::MarketRuntimeApi<Block, Balance, TokenId>,
+	C::Api: pallet_collective_mangata::CouncilRuntimeApi<
+		Block,
+		<Runtime as frame_system::Config>::Hash,
+	>,
 	C::Api: BlockBuilder<Block>,
 	C::Api: VerNonceApi<Block, AccountId>,
 	P: TransactionPool + 'static,
 {
 	use market_rpc::{Market, MarketApiServer};
 	use metamask_signature_rpc::MetamaskSignature;
+	use pallet_collective_mangata_rpc::{Council, CouncilApiServer};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use proof_of_stake_rpc::{ProofOfStake, ProofOfStakeApiServer};
 	use rolldown_rpc::{Rolldown, RolldownApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
-	use xyk_rpc::{Xyk, XykApiServer};
 
 	let mut module = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe } = deps;
 
 	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-	module.merge(Xyk::new(client.clone()).into_rpc())?;
 	module.merge(Rolldown::new(client.clone()).into_rpc())?;
 	module.merge(ProofOfStake::new(client.clone()).into_rpc())?;
 	module.merge(MetamaskSignature::new(client.clone()).into_rpc())?;
-	module.merge(Market::new(client).into_rpc())?;
+	module.merge(Market::new(client.clone()).into_rpc())?;
+	module.merge(Council::new(client).into_rpc())?;
 
 	// Extend this RPC with a custom API by using the following syntax.
 	// `YourRpcStruct` should have a reference to a client, which is needed

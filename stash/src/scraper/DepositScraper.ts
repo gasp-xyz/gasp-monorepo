@@ -1,8 +1,9 @@
-import { Block, Event } from './BlockScraper'
-import _ from 'lodash'
-import { depositRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
+import _ from 'lodash'
+
+import { depositRepository } from '../repository/TransactionRepository.js'
 import logger from '../util/Logger.js'
+import { Block, Event } from './BlockScraper'
 
 export const processFerriedDepositEvents = async (
   api: ApiPromise,
