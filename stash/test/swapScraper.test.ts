@@ -438,7 +438,7 @@ describe('TVL history events', () => {
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-        "Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged",
+      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged'
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
