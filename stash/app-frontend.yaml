@@ -1,5 +1,5 @@
 runtime: nodejs
-env: standard
+env: flex
 
 runtime_config:
   operating_system: "ubuntu18"
