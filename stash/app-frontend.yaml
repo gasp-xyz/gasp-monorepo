@@ -1,4 +1,5 @@
 runtime: nodejs18
+env: standard
 
 service: gasp-stash-frontend
 
