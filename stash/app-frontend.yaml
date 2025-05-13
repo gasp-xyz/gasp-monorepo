@@ -1,8 +1,9 @@
 runtime: nodejs
-env: standard
+env: flex
+
 runtime_config:
-  operating_system: 'ubuntu'
-  runtime_version: '18'
+  operating_system: "ubuntu18"
+  runtime_version: "18"
 
 service: gasp-stash-frontend
 
