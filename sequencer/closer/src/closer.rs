@@ -136,7 +136,7 @@ where
                 .await?;
             metrics::CLOSED_WITHDRAWAL.add(amount as f64);
 
-            tracing::info!("batch closed successfully {tx}");
+            tracing::info!("batch closed successfully {}", hex::encode(tx));
         } else {
             for w in withdrawals {
                 if self.is_pending(w).await? {
