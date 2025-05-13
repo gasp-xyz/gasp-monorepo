@@ -258,7 +258,7 @@ describe('volume history events', () => {
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new volume is =  133.70512668894136 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 pool volume stays unchanged'
+      'Formula for poolId 6 new volume is =  133.70512668894136 + 0 + 0.024621506869392466 but if the price of one token is 0 pool volume stays unchanged'
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
@@ -437,7 +437,7 @@ describe('TVL history events', () => {
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0.04959135350576975 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged'
+      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged'
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
