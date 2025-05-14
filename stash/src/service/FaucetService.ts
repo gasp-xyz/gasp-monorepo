@@ -1,17 +1,17 @@
 import axios from 'axios'
 import * as process from 'node:process'
-import { redis } from '../connector/RedisConnector.js'
-import logger from '../util/Logger.js'
 import {
   createWalletClient,
   createPublicClient,
   http,
   publicActions,
 } from 'viem'
-import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import { privateKeyToAccount } from 'viem/accounts'
-import Gasp from '../Gasp.json' assert { type: 'json' }
+import { redis } from '../connector/RedisConnector.js'
 import { ForbiddenException } from '../error/Exception.js'
+import Gasp from '../Gasp.json' with { type: 'json' }
+import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
+import logger from '../util/Logger.js'
 
 interface SimulateTransactionRequest {
   client: any
