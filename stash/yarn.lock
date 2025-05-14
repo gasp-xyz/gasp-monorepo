@@ -7299,37 +7299,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gasp-sdk@npm:0.0.2-feature-gasp-node-multiswap-mods.41":
-  version: 0.0.2-feature-gasp-node-multiswap-mods.41
-  resolution: "gasp-sdk@npm:0.0.2-feature-gasp-node-multiswap-mods.41"
+"gasp-sdk@npm:0.0.2-feature-gasp-node-multiswap-mods.42":
+  version: 0.0.2-feature-gasp-node-multiswap-mods.42
+  resolution: "gasp-sdk@npm:0.0.2-feature-gasp-node-multiswap-mods.42"
   dependencies:
     big.js: "npm:6.2.1"
-    gasp-type-definitions: "npm:0.0.2-feature-gasp-node-multiswap-mods.44"
+    gasp-type-definitions: "npm:0.0.2-feature-gasp-node-multiswap-mods.45"
     tslib: "npm:^2.3.0"
     tslog: "npm:4.8.2"
     viem: "npm:^2.17.4"
     wagmi: "npm:^2.10.10"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/28d3406b826997f4929e15ba7f45ec3484ff2d9ae5ef33307e4d2e5c885835b88deefd093c307569d0ad883cfc699e354ea6328912359f97a7e210167ca2d01c
+  checksum: 10c0/93b2832fc161375fbf7ec938fcabeb59c09576c91bc56589d5a96114736dae2c8e13564017a9a3e3ba0d628c42f6361f11f9ebe7e220773e809e43ccb11e2185
   languageName: node
   linkType: hard
 
-"gasp-type-definitions@npm:0.0.2-feature-gasp-node-multiswap-mods.44":
-  version: 0.0.2-feature-gasp-node-multiswap-mods.44
-  resolution: "gasp-type-definitions@npm:0.0.2-feature-gasp-node-multiswap-mods.44"
+"gasp-type-definitions@npm:0.0.2-feature-gasp-node-multiswap-mods.45":
+  version: 0.0.2-feature-gasp-node-multiswap-mods.45
+  resolution: "gasp-type-definitions@npm:0.0.2-feature-gasp-node-multiswap-mods.45"
   peerDependencies:
     "@polkadot/types": ^11.1.1
-  checksum: 10c0/d067890f0eba31584f5efee9fb3f627e4263d143db114f69560ba58f41edf5fe6a40a730471d9381df5f256c32061e8cce66618e2a6846dbfdc026a350180e89
+  checksum: 10c0/deb15846303ffb7a9a02066e00025728486dfb1d7999f166705bfaebe3ea26a0d1f175bba45f921409cb7c0f91d3d6878da7f44f37118a8972a808e42c346837
   languageName: node
   linkType: hard
 
-"gasp-types@npm:0.0.2-feature-gasp-node-multiswap-mods.44":
-  version: 0.0.2-feature-gasp-node-multiswap-mods.44
-  resolution: "gasp-types@npm:0.0.2-feature-gasp-node-multiswap-mods.44"
+"gasp-types@npm:0.0.2-feature-gasp-node-multiswap-mods.45":
+  version: 0.0.2-feature-gasp-node-multiswap-mods.45
+  resolution: "gasp-types@npm:0.0.2-feature-gasp-node-multiswap-mods.45"
   peerDependencies:
     "@polkadot/api": ^11.1.1
-  checksum: 10c0/2cd6f0178ed58d82e06f45f67b714852d4c1323d2b82e15a7f59fbc50eb21953f47c010fe0e5e994a241db76c6909c9a1d919d22ae60c0fc9483757c08fa5026
+  checksum: 10c0/ddf7ccad790e7857723d3189af4e2bfaefe439dac43a5f678b0ba8ff347b3946c81af901ec1a329e9883c1ec09bac154665e1c8002cb041e1f4952474a49da7c
   languageName: node
   linkType: hard
 
@@ -12852,8 +12852,8 @@ __metadata:
     eslint-plugin-simple-import-sort: "npm:^12.1.1"
     express: "npm:^4.19.2"
     express-validator: "npm:6.14.2"
-    gasp-sdk: "npm:0.0.2-feature-gasp-node-multiswap-mods.41"
-    gasp-types: "npm:0.0.2-feature-gasp-node-multiswap-mods.44"
+    gasp-sdk: "npm:0.0.2-feature-gasp-node-multiswap-mods.42"
+    gasp-types: "npm:0.0.2-feature-gasp-node-multiswap-mods.45"
     husky: "npm:^8.0.3"
     ioredis: "npm:^5.3.0"
     joi: "npm:^17.10.1"
