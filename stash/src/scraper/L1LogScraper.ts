@@ -9,7 +9,6 @@ import {
   depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
-// eslint-disable-next-line prettier/prettier
 import RolldownContract from '../Rolldown.json' with { type: 'json' }
 import logger from '../util/Logger.js'
 
