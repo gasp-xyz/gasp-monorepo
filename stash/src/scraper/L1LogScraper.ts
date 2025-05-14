@@ -9,7 +9,8 @@ import {
   depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
-import RolldownContract from '../Rolldown.json' assert { type: 'json' }
+// eslint-disable-next-line prettier/prettier
+import RolldownContract from '../Rolldown.json' with { type: 'json' }
 import logger from '../util/Logger.js'
 
 export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'

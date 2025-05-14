@@ -11,7 +11,8 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 import { redis } from '../connector/RedisConnector.js'
 import { ForbiddenException } from '../error/Exception.js'
-import Gasp from '../Gasp.json' assert { type: 'json' }
+// eslint-disable-next-line prettier/prettier
+import Gasp from '../Gasp.json' with { type: 'json' }
 import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import logger from '../util/Logger.js'
 
