@@ -65,8 +65,7 @@ pub async fn main() -> anyhow::Result<()> {
     let (closer_input, closer_sink, delay_fut) =
         common::delay::create_delay_channel(header_stream, args.block_delay as u128);
 
-    let delay_task =
-        tokio::spawn(async move { delay_fut.await }).map(|elem| Ok::<_, anyhow::Error>(elem??));
+    let delay_task = tokio::spawn(delay_fut).map(|elem| Ok::<_, anyhow::Error>(elem??));
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
         chain,

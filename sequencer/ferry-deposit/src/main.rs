@@ -75,8 +75,7 @@ pub async fn main() -> Result<(), Error> {
     let (to_executor, executor, delay_fut) =
         common::delay::create_delay_channel(stream, args.block_delay);
 
-    let delay_task =
-        tokio::spawn(async move { delay_fut.await }).map(|elem| Ok::<_, Error>(elem??));
+    let delay_task = tokio::spawn(delay_fut).map(|elem| Ok::<_, Error>(elem??));
 
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 

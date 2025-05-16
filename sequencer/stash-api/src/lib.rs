@@ -34,7 +34,7 @@ impl StashInterface for Stash {
         let uri = format!(
             "{}/tracing/type/withdrawal/tx/0x{}",
             self.uri,
-            hex::encode(&withdrawal_hash)
+            hex::encode(withdrawal_hash)
         );
 
         let response = Client::builder()

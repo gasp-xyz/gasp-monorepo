@@ -78,8 +78,7 @@ pub async fn main() -> Result<(), Error> {
         .boxed();
     let (to_executor, executor, delay_fut) =
         common::delay::create_delay_channel(header_stream, args.block_delay);
-    let task_delay = tokio::spawn(async move { Ok::<_, Error>(delay_fut.await?) })
-        .map(|elem| Ok::<_, Error>(elem??));
+    let task_delay = tokio::spawn(async move { Ok::<_, Error>(delay_fut.await) }).map(|elem| elem?);
 
     let mut cleaner = {
         cleaner::FerryCleaner::new(
