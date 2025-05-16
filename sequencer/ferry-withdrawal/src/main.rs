@@ -1,5 +1,5 @@
 use clap::Parser;
-use futures::StreamExt;
+use futures::{FutureExt, StreamExt};
 use l1api::{Subscription, L1};
 use l2api::{Gasp, L2Interface};
 use tokio::sync::mpsc::channel;
@@ -40,6 +40,9 @@ pub enum Error {
 
     #[error("L2Error error `{0}`")]
     L2Error(#[from] l2api::L2Error),
+
+    #[error("Task error `{0}`")]
+    TaskError(#[from] tokio::task::JoinError),
 }
 
 #[tokio::main]
@@ -75,7 +78,8 @@ pub async fn main() -> Result<(), Error> {
         .boxed();
     let (to_executor, executor, delay_fut) =
         common::delay::create_delay_channel(header_stream, args.block_delay);
-    let task_delay = tokio::spawn(async move { Ok::<_, Error>(delay_fut.await?) });
+    let task_delay = tokio::spawn(async move { Ok::<_, Error>(delay_fut.await?) })
+        .map(|elem| Ok::<_, Error>(elem??));
 
     let mut cleaner = {
         cleaner::FerryCleaner::new(
@@ -120,26 +124,25 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle = tokio::spawn(async move { Ok(hunter.run().await?) });
+    let hunter_handle =
+        tokio::spawn(async move { hunter.run().await }).map(|elem| Ok::<_, Error>(elem??));
 
-    let filter_handle = tokio::spawn(async move {
-        filter.run().await;
-        Ok(())
-    });
+    let filter_handle =
+        tokio::spawn(async move { filter.run().await }).map(|elem| Ok::<_, Error>(elem?));
 
-    let executor_handle = tokio::spawn(async move { Ok(executor.run().await?) });
+    let executor_handle =
+        tokio::spawn(async move { executor.run().await }).map(|elem| Ok::<_, Error>(elem??));
 
-    let cleaner_handle = tokio::spawn(async move { Ok(cleaner.run().await?) });
+    let cleaner_handle =
+        tokio::spawn(async move { cleaner.run().await }).map(|elem| Ok::<_, Error>(elem??));
 
-    if let Err(e) = futures::future::try_join_all([
+    if let Err(e) = futures::try_join!(
         task_delay,
         hunter_handle,
         filter_handle,
         executor_handle,
         cleaner_handle,
-    ])
-    .await
-    {
+    ) {
         tracing::error!("err : {e}");
     }
 
