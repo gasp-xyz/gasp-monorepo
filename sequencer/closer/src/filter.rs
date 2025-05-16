@@ -26,7 +26,10 @@ pub async fn filter_deposits_created_by_frontend(
                 );
             }
             Err(e) => {
-                tracing::warn!("err {e}, ignoring withdrawal {}", withdrawal.request_id.id);
+                tracing::warn!(
+                    "Stash error: {e}, ignoring withdrawal {}",
+                    withdrawal.request_id.id
+                );
             }
         };
     }
