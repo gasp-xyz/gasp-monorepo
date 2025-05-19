@@ -59,7 +59,7 @@ export const initService = async () => {
           ETH_CHAIN,
           process.env.CONTRACT_ADDRESS_ETH
         ).then(resolve)
-      }, 10000) // Delay of 10000 milliseconds (10 seconds) to allow past withdrawals to be started and confirmed first
+      }, 90000) // Delay of 90000 milliseconds (90 seconds) to allow past withdrawals to be started and confirmed first
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -70,7 +70,7 @@ export const initService = async () => {
           ARB_CHAIN,
           process.env.CONTRACT_ADDRESS_ARB
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -81,7 +81,7 @@ export const initService = async () => {
           BASE_CHAIN,
           process.env.CONTRACT_ADDRESS_BASE
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {
@@ -92,7 +92,7 @@ export const initService = async () => {
           MONAD_CHAIN,
           process.env.CONTRACT_ADDRESS_MONAD
         ).then(resolve)
-      }, 10000)
+      }, 90000)
     }),
     new Promise((resolve) => {
       setTimeout(() => {
