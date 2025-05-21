@@ -1,5 +1,4 @@
 import { type PublicClientConfig, createPublicClient, http } from 'viem'
-import RolldownContract from '../Rolldown.json' assert { type: 'json' }
 import {
   depositRepository,
   withdrawalRepository,
@@ -8,6 +7,7 @@ import process from 'node:process'
 import { ApiPromise } from '@polkadot/api'
 import { timeseries } from '../connector/RedisConnector.js'
 import { setTimeout } from 'timers/promises'
+import RolldownContract from '../Rolldown.json' with { type: 'json' }
 import logger from '../util/Logger.js'
 
 export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
