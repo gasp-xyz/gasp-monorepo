@@ -1,17 +1,15 @@
-import * as process from 'node:process'
-
 import axios from 'axios'
+import * as process from 'node:process'
 import {
-  createPublicClient,
   createWalletClient,
+  createPublicClient,
   http,
   publicActions,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-
 import { redis } from '../connector/RedisConnector.js'
 import { ForbiddenException } from '../error/Exception.js'
-import Gasp from '../Gasp.json' assert { type: 'json' }
+import Gasp from '../Gasp.json' with { type: 'json' }
 import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import logger from '../util/Logger.js'
 

@@ -105,6 +105,8 @@ export const processDataForVolumeHistory = async (
   event: Event
 ) => {
   logger.info('Entered processDataForVolumeHistory')
+  const totalAmountIn = String((event.data as any).totalAmountIn)
+  let isFirstSwap = true
   // Implementation for processing data for volume history
   for (const swap of (event.data as any).swaps) {
     try {
@@ -130,10 +132,19 @@ export const processDataForVolumeHistory = async (
         `Fetched pool volume for ${poolId}, latest value from the database is : ${poolVolumeValue}`
       )
       const { decimals: decimalsIn } = await decimalsFromTokenId(api, assetIn)
-      const volumeInUSD =
-        decimalsIn !== null
-          ? await calculateVolume(assetIn, decimalsIn, amountIn)
-          : 0
+      let volumeInUSD: number | string = 0
+      if (isFirstSwap) {
+        volumeInUSD =
+          decimalsIn !== null
+            ? await calculateVolume(assetIn, decimalsIn, totalAmountIn) //for the first swap we use totalAmountIn
+            : 0
+        isFirstSwap = false
+      } else {
+        volumeInUSD =
+          decimalsIn !== null
+            ? await calculateVolume(assetIn, decimalsIn, amountIn) //for all the other swaps we use amountIn
+            : 0
+      }
       const { decimals: decimalsOut } = await decimalsFromTokenId(api, assetOut)
       const volumeOutUSD =
         decimalsOut !== null
@@ -265,6 +276,8 @@ export const processDataForTVLHistory = async (
   event: Event
 ) => {
   logger.info('Entered processDataForTVLHistory')
+  const totalAmountIn = String((event.data as any).totalAmountIn)
+  let isFirstSwap = true
   // Implementation for processing data for TVL history
   for (const swap of (event.data as any).swaps) {
     try {
@@ -290,10 +303,21 @@ export const processDataForTVLHistory = async (
         `Fetched pool TVL for ${poolId}, value in the database is: ${poolTVLValue}`
       )
       const { decimals: decimalsIn } = await decimalsFromTokenId(api, assetIn)
-      const volumeInUSD =
-        decimalsIn !== null
-          ? await calculateVolume(assetIn, decimalsIn, amountIn)
-          : 0
+      let volumeInUSD: number | string = 0
+      if (isFirstSwap) {
+        volumeInUSD =
+          decimalsIn !== null
+            ? (await calculateVolume(assetIn, decimalsIn, totalAmountIn)) *
+              0.999 //for the first swap we use 99.9% of totalAmountIn
+            : 0
+        isFirstSwap = false
+      } else {
+        volumeInUSD =
+          decimalsIn !== null
+            ? await calculateVolume(assetIn, decimalsIn, amountIn)
+            : 0
+      }
+
       const { decimals: decimalsOut } = await decimalsFromTokenId(api, assetOut)
       const volumeOutUSD =
         decimalsOut !== null
@@ -418,7 +442,7 @@ export async function calculateVolume(
   tokenId: string,
   decimals: number,
   volume: string
-): Promise<number | string> {
+): Promise<number> {
   try {
     const price = await getTokenPrice(tokenId)
     if (price == null) {

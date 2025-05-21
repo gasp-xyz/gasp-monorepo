@@ -1,15 +1,13 @@
-import process from 'node:process'
-
-import { ApiPromise } from '@polkadot/api'
-import { setTimeout } from 'timers/promises'
-import { createPublicClient, http, type PublicClientConfig } from 'viem'
-
-import { timeseries } from '../connector/RedisConnector.js'
+import { type PublicClientConfig, createPublicClient, http } from 'viem'
 import {
   depositRepository,
   withdrawalRepository,
 } from '../repository/TransactionRepository.js'
-import RolldownContract from '../Rolldown.json' assert { type: 'json' }
+import process from 'node:process'
+import { ApiPromise } from '@polkadot/api'
+import { timeseries } from '../connector/RedisConnector.js'
+import { setTimeout } from 'timers/promises'
+import RolldownContract from '../Rolldown.json' with { type: 'json' }
 import logger from '../util/Logger.js'
 
 export const DEPOSIT_SUBMITTED_TO_L2 = 'SubmittedToL2'
@@ -69,7 +67,7 @@ export const watchDepositAcceptedIntoQueue = async (
         if (existingTransaction) {
           existingTransaction.status = DEPOSIT_SUBMITTED_TO_L2
           existingTransaction.requestId = Number(
-            String((log as any).args.requestId).replace(/,/g, '')
+              String((log as any).args.requestId).replace(/,/g, '')
           )
           const timestamp = new Date().toISOString()
           existingTransaction.updated = Date.parse(timestamp)
