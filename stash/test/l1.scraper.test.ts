@@ -1,17 +1,16 @@
-import { holesky } from 'viem/chains'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { timeseries } from '../src/connector/RedisConnector'
+import { describe, expect, vi, beforeEach, it } from 'vitest'
+import {
+  watchDepositAcceptedIntoQueue,
+  processRequests,
+  watchWithdrawalClosed,
+} from '../src/scraper/L1LogScraper'
 import {
   depositRepository,
   withdrawalRepository,
 } from '../src/repository/TransactionRepository'
-import {
-  processRequests,
-  watchDepositAcceptedIntoQueue,
-  watchWithdrawalClosed,
-} from '../src/scraper/L1LogScraper'
+import { timeseries } from '../src/connector/RedisConnector'
 import logger from '../src/util/Logger'
+import { holesky } from 'viem/chains'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/connector/RedisConnector')

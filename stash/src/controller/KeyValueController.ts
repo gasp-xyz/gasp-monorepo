@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
-
 import * as errorHandler from '../error/Handler.js'
-import { keyValueSchema } from '../schema/KeyValueSchema.js'
 import * as keyValueService from '../service/KeyValueService.js'
+import { keyValueSchema } from '../schema/KeyValueSchema.js'
 
 export const store = async (req: Request, res: Response): Promise<void> => {
   try {

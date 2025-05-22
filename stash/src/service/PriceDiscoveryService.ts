@@ -1,10 +1,9 @@
+import { fromBN, TokenInfo } from 'gasp-sdk'
 import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
-import { fromBN, TokenInfo } from 'gasp-sdk'
 import _ from 'lodash'
 import moment from 'moment'
 import { string, StringSchema } from 'yup'
-
 import * as coinGecko from '../connector/CoinGecko.js'
 import { CoinGeckoCoinData } from '../connector/CoinGecko.js'
 import MangataClient from '../connector/MangataNode.js'
@@ -95,12 +94,9 @@ const refresh = async () => {
     nextPriceRefresh = new Date()
   }
 }
+
 const getAsset = (id: string, isPool: boolean) => {
-  if (isPool) {
-    poolSchema.validateSync(id)
-  } else {
-    assetSchema.validateSync(id)
-  }
+  isPool ? poolSchema.validateSync(id) : assetSchema.validateSync(id)
   return assetInfo.get(id)
 }
 

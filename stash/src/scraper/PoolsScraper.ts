@@ -1,16 +1,15 @@
-import { StorageKey } from '@polkadot/types'
-import { Option } from '@polkadot/types-codec/base'
-import { u32, u128 } from '@polkadot/types-codec/primitive'
-import { ITuple } from '@polkadot/types-codec/types/interfaces'
-import { BN } from '@polkadot/util'
 import { Decimal } from 'decimal.js'
-
 import * as store from '../repository/ChainRepository.js'
 import { Asset, PoolEntry } from '../repository/ChainRepository.js'
-import { toHuman } from '../util/Chain.js'
 import logger from '../util/Logger.js'
 import { ZERO } from '../util/Misc.js'
 import { Block } from './BlockScraper.js'
+import { StorageKey } from '@polkadot/types'
+import { ITuple } from '@polkadot/types-codec/types/interfaces'
+import { u32, u128 } from '@polkadot/types-codec/primitive'
+import { Option } from '@polkadot/types-codec/base'
+import { BN } from '@polkadot/util'
+import { toHuman } from '../util/Chain.js'
 
 let assets: Map<string, Asset> = new Map()
 
