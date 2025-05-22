@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { ForbiddenException } from '../src/error/Exception'
+import { describe, it, beforeEach, expect, vi } from 'vitest'
 import * as faucetService from '../src/service/FaucetService'
+import { ForbiddenException } from '../src/error/Exception'
 
 describe('FaucetService', () => {
   const toAddress = '0x00000000000000000000000000000000'

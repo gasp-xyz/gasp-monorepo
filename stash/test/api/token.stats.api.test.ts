@@ -1,9 +1,8 @@
- 
-import Joi from 'joi'
-import supertest from 'supertest'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, expect, it } from 'vitest'
-
+import supertest from 'supertest'
 import app from '../../src/app'
+import Joi from 'joi'
 import MangataClient from '../../src/connector/MangataNode'
 
 const tokenSchema = Joi.object({

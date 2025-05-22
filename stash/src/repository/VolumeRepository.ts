@@ -1,5 +1,4 @@
 import { Decimal } from 'decimal.js'
-
 import { timeseries } from '../connector/RedisConnector.js'
 import { TimestampedAmount } from '../schema/Models.js'
 import { API_LIMIT } from '../util/Misc.js'

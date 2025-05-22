@@ -1,10 +1,9 @@
- 
-import Joi from 'joi'
-import supertest from 'supertest'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { beforeAll, describe, expect, it } from 'vitest'
-
-import app from '../../src/app'
+import supertest from 'supertest'
+import Joi from 'joi'
 import mangataNode from '../../src/connector/MangataNode'
+import app from '../../src/app'
 import { redis } from '../../src/connector/RedisConnector'
 
 const bucketsSchema = Joi.object({

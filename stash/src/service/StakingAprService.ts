@@ -1,15 +1,16 @@
 import { NotFoundException } from '../error/Exception.js'
 import {
   calculateDailyRewards,
-  calculateMultipleCollatorApy,
-  calculateSingleCollatorApy,
   getDataByAddress,
-  getTimeSeriesRedisData,
-  KEY,
+  SessionData,
   ResponseAPY,
   Session,
-  SessionData,
+  getTimeSeriesRedisData,
+  KEY,
+  calculateSingleCollatorApy,
+  calculateMultipleCollatorApy,
 } from '../repository/StakingRepository.js'
+
 import { groupDataForCollatorsApy } from '../util/Staking.js'
 
 export const apy = async (collatorAddress: string): Promise<ResponseAPY[]> => {

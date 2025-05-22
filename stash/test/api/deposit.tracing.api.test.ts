@@ -1,6 +1,5 @@
+import { describe, expect, it, beforeAll } from 'vitest'
 import supertest from 'supertest'
-import { beforeAll,describe, expect, it } from 'vitest'
-
 import app from '../../src/app'
 import logger from '../../src/util/Logger'
 import { generateRandomAddress, generateRandomHash } from './utils'

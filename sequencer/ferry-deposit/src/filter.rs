@@ -8,12 +8,16 @@ pub async fn filter_deposits(
     enabled: HashMap<[u8; 20], u128>,
 ) {
     while let Some(deposit) = input.recv().await {
+        let rid = deposit.request_id.id;
         if let Some(min_profit) = enabled.get(&deposit.token_address) {
             if deposit.ferry_tip > (*min_profit).into() {
+                tracing::info!("Deposit {rid} meets ferry criteria");
                 output
                     .send((deposit.ferry_tip, deposit))
                     .await
                     .expect("infinite");
+            } else {
+                tracing::info!("Deposit {rid} ignored - doest meets criteria");
             }
         }
     }

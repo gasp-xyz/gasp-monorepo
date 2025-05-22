@@ -1,11 +1,11 @@
 import MangataClient from '../connector/MangataNode.js'
 import {
-  processRequests,
   watchDepositAcceptedIntoQueue,
+  processRequests,
   watchWithdrawalClosed,
 } from '../scraper/L1LogScraper.js'
-import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import logger from '../util/Logger.js'
+import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 const ETH_CHAIN = 'Ethereum'
 const ARB_CHAIN = 'Arbitrum'
 const BASE_CHAIN = 'Base'

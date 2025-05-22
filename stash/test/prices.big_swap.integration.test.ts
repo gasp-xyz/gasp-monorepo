@@ -1,7 +1,7 @@
+import { afterAll, beforeAll, chai, describe, it, vi } from 'vitest'
+import { GenericContainer, Wait } from 'testcontainers'
 import Decimal from 'decimal.js'
 import IORedis from 'ioredis'
-import { GenericContainer, Wait } from 'testcontainers'
-import { afterAll, beforeAll, chai, describe, it, vi } from 'vitest'
 chai.should()
 
 describe.skip('Integration Test using Test Containers', function () {

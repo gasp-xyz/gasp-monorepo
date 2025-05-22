@@ -1,15 +1,14 @@
 import { Response } from 'express'
-
-import logger from '../util/Logger.js'
 import {
   AlreadyExistsException,
   BadRequestException,
-  ForbiddenException,
   HttpResponseException,
   NotEnoughException,
   NotFoundException,
+  ForbiddenException,
   ValidationException,
 } from './Exception.js'
+import logger from '../util/Logger.js'
 
 export abstract class HttpStatusConstants {
   static readonly BAD_REQUEST: number = 400

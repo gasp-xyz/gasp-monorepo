@@ -1,4 +1,5 @@
 use crate::L1Error;
+use futures::stream::BoxStream;
 use gasp_types::H256;
 
 mockall::mock! {
@@ -7,6 +8,9 @@ mockall::mock! {
 
     #[allow(clippy::type_complexity)]
     impl crate::L1Interface for L1{
+        async fn subscribe_header<'a>(&'a self) -> Result<BoxStream<'a, Result<u128, L1Error>>, L1Error>;
+        async fn subscribe_deposit<'a>(&'a self) -> Result<BoxStream<'a, u128>, L1Error>;
+        async fn subscribe_new_batch<'a>(&'a self) -> Result<BoxStream<'a, (H256, (u128, u128))>, L1Error>;
         async fn get_deposit(&self, request_id: u128) -> Result<Option<crate::types::Deposit>, L1Error>;
         async fn erc20_balance(&self, token: [u8; 20], account: [u8; 20]) -> Result<u128, L1Error>;
         async fn ferry_withdrawal(&self, withdrawal: crate::types::Withdrawal) -> Result<H256, L1Error>;
@@ -33,6 +37,11 @@ mockall::mock! {
             withdrawal: gasp_types::Withdrawal,
             merkle_root: H256,
             proof: Vec<H256>,
+        ) -> Result<H256, L1Error>;
+
+        async fn close_withdrawals_at_once(
+            &self,
+            withdrawals: Vec<(gasp_types::Withdrawal, H256, Vec<H256>)>,
         ) -> Result<H256, L1Error>;
 
     }

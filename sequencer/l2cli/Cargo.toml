@@ -1,0 +1,15 @@
+[package]
+name = "l2cli"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+l2api = { workspace = true }
+common = { workspace = true }
+gasp-types = { workspace = true }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tokio = { version = "1.41", features = ["macros", "time", "rt-multi-thread", "net"] }
+clap = { version = "4.4.8", features = ["derive", "env"] }
+tracing = "0.1.40"

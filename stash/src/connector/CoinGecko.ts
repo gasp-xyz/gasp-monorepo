@@ -1,10 +1,9 @@
-import fetch from 'cross-fetch'
-import { Decimal } from 'decimal.js'
-
 import {
   BadRequestException,
   HttpResponseException,
 } from '../error/Exception.js'
+import fetch from 'cross-fetch'
+import { Decimal } from 'decimal.js'
 
 const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
 

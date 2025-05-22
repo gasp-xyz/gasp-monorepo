@@ -1,16 +1,15 @@
 import 'dotenv/config'
-
 import app from './app.js'
-import * as poolRatesService from './processing/PoolRatesProcessorService.js'
 import * as priceService from './processing/PriceProcessorService.js'
-import { BLOCK_TIME } from './scraper/BlockScraper.js'
-import * as networkService from './service/NetworkService.js'
 import * as blockService from './service/SyncBlockService.js'
 import * as syncTransactionsService from './service/SyncTransactionsService.js'
-import * as tokenPriceService from './service/TokenPriceService.js'
 import * as tokenService from './service/TokenService.js'
 import * as xcmService from './service/XcmNetworkService.js'
+import * as networkService from './service/NetworkService.js'
+import * as poolRatesService from './processing/PoolRatesProcessorService.js'
+import * as tokenPriceService from './service/TokenPriceService.js'
 import logger from './util/Logger.js'
+import { BLOCK_TIME } from './scraper/BlockScraper.js'
 
 // Express Server boot
 const server = app.listen(app.get('port'), async () => {

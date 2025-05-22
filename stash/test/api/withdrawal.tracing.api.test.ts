@@ -1,10 +1,9 @@
+import { describe, expect, it, beforeAll, vi } from 'vitest'
 import supertest from 'supertest'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
-
 import app from '../../src/app'
-import { withdrawalRepository } from '../../src/repository/TransactionRepository'
 import logger from '../../src/util/Logger'
 import { generateRandomAddress, generateRandomHash } from './utils'
+import { withdrawalRepository } from '../../src/repository/TransactionRepository'
 
 const wrongType = 'deposittt'
 const type = 'withdrawal'

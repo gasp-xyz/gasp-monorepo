@@ -1,12 +1,11 @@
- 
-import { BN } from '@polkadot/util'
-import { BN_TEN } from 'gasp-sdk'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { describe, expect, it } from 'vitest'
+import supertest from 'supertest'
+import app from '../../src/app'
 import Joi from 'joi'
 import moment from 'moment'
-import supertest from 'supertest'
-import { describe, expect, it } from 'vitest'
-
-import app from '../../src/app'
+import { BN } from '@polkadot/util'
+import { BN_TEN } from 'gasp-sdk'
 
 const apySchema = Joi.array().items(
   Joi.object({

@@ -1,8 +1,7 @@
-import { Request, Response } from 'express'
-
-import * as errorHandler from '../error/Handler.js'
-import { pathFaucetSchema } from '../schema/FaucetSchema.js'
 import * as faucetService from '../service/FaucetService.js'
+import * as errorHandler from '../error/Handler.js'
+import { Request, Response } from 'express'
+import { pathFaucetSchema } from '../schema/FaucetSchema.js'
 
 export const captcha = async (req: Request, res: Response) => {
   /*

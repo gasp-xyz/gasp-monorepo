@@ -1,9 +1,8 @@
-import fetch from 'cross-fetch'
-
+import logger from '../util/Logger.js'
 import MangataClient from '../connector/MangataNode.js'
 import { tokenPricesRepository } from '../repository/TransactionRepository.js'
+import fetch from 'cross-fetch'
 import * as priceDiscoveryService from '../service/PriceDiscoveryService.js'
-import logger from '../util/Logger.js'
 
 let assets: any = {}
 const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'

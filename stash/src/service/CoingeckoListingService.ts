@@ -2,6 +2,7 @@ import { fromBN } from 'gasp-sdk'
 import moment from 'moment'
 
 import MangataClient from '../connector/MangataNode.js'
+import { matchInterval } from './PriceDiscoveryService.js'
 import {
   calculateLiquidityInUsd,
   calculatePrice,
@@ -12,7 +13,6 @@ import {
   getTokenPrices,
   poolsWithNonZeroIssuance,
 } from '../util/Listing.js'
-import { matchInterval } from './PriceDiscoveryService.js'
 
 export const pairs = async () => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()

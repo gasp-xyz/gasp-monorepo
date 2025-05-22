@@ -9,11 +9,42 @@ mockall::mock! {
     pub L2 {}
 
 
+#[allow(clippy::type_complexity)]
 impl crate::L2Interface for L2{
+
+    async fn is_ferried(
+        &self,
+        chain: Chain,
+        request_hash: H256,
+        at: H256
+    ) -> Result<bool, L2Error>;
+
 
     async fn get_best_block(&self) -> Result<(u32, H256), L2Error>;
 
     async fn get_latest_finalized_block(&self) -> Result<(u32, H256), L2Error>;
+
+    async fn get_latest_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(crate::types::BatchId, (u128, u128))>, L2Error>;
+
+    async fn get_batch_range(
+        &self,
+        batch_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<(u128, u128)>, L2Error>;
+
+    async fn bisect_find_batch(
+        &self,
+        request_id: u128,
+        chain: gasp_types::Chain,
+        at: H256,
+    ) -> Result<Option<crate::types::BatchInfo>, L2Error> ;
+
 
     async fn get_balance(&self, chain: gasp_types::Chain, token: [u8; 20], account: [u8; 20], at: H256) -> Result<u128, L2Error>;
 
@@ -24,7 +55,7 @@ impl crate::L2Interface for L2{
     async fn get_l2_request(
         &self,
         chain: Chain,
-        range: u128,
+        request_id: u128,
         at: H256,
     ) -> Result<Option<L2Request>, L2Error>;
 
@@ -67,6 +98,13 @@ impl crate::L2Interface for L2{
         chain: Chain,
         at: H256,
     ) -> Result<Vec<H256>, L2Error>;
+
+    async fn get_merkle_root(
+        &self,
+        range: (u128, u128),
+        chain: Chain,
+        at: H256,
+    ) -> Result<H256, L2Error>;
 
     async fn get_l2_request_hash(
         &self,
