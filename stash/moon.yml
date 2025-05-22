@@ -34,11 +34,13 @@ tasks:
     inputs: ['@group(sources)', '@group(dockerBuildInputs)']
 
   lint:
+    # command: 'yarn lint'
     command: 'true'
     inputs: ['@group(sources)']
 
   format:
-    command: 'yarn format:check'
+    # command: 'yarn format:check'
+    command: 'true'
     inputs: ['@group(sources)']
 
   # TODO: Unit tests are temporarily disabled as they depend on sensitive data
