@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-
 import * as errorHandler from '../error/Handler.js'
 import * as coingeckoListingService from '../service/CoingeckoListingService.js'
 

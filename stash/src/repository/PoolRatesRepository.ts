@@ -1,6 +1,5 @@
 import { Decimal } from 'decimal.js'
 import { ChainableCommander } from 'ioredis'
-
 import { timeseries } from '../connector/RedisConnector.js'
 import {
   TimestampedAmount,

@@ -1,14 +1,7 @@
+import { describe, it, beforeEach, vi, expect } from 'vitest'
+import { processFerriedDepositEvents, processFerriedDeposit } from '../src/scraper/DepositScraper'
+import {depositRepository, withdrawalRepository} from '../src/repository/TransactionRepository'
 import { ApiPromise } from '@polkadot/api'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import {
-  depositRepository,
-  withdrawalRepository,
-} from '../src/repository/TransactionRepository'
-import {
-  processFerriedDeposit,
-  processFerriedDepositEvents,
-} from '../src/scraper/DepositScraper'
 import logger from '../src/util/Logger'
 
 vi.mock('../src/repository/TransactionRepository')
@@ -27,14 +20,7 @@ describe('DepositScraper', () => {
     it('should process ferried deposit events', async () => {
       const mockBlock = {
         events: [
-          [
-            0,
-            {
-              section: 'rolldown',
-              method: 'DepositFerried',
-              data: { deposit: { requestId: { id: '1' } }, chain: 'testchain' },
-            },
-          ],
+          [0, { section: 'rolldown', method: 'DepositFerried', data: { deposit: { requestId: { id: '1' } }, chain: 'testchain' } }],
           [1, { section: 'other', method: 'OtherEvent', data: {} }],
         ],
       }

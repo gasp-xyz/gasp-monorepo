@@ -1,12 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { depositRepository } from '../src/repository/TransactionRepository'
+import { describe, expect, vi, beforeEach, it } from 'vitest'
 import {
-  findTransactionsByAddressAndStatus,
-  getByTxHashOrEntityId,
-  getTransactionsByAddress,
   startTracingTransaction,
+  getTransactionsByAddress,
+  getByTxHashOrEntityId,
+  findTransactionsByAddressAndStatus,
 } from '../src/service/TracingService'
+import { depositRepository } from '../src/repository/TransactionRepository'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/util/Logger')
