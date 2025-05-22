@@ -18,6 +18,7 @@ codegen-units = 1
 [workspace]
 resolver = "2"
 members = [
+	'primitives/*',
 	'pallets/*',
 	'rpc/nonce',
 	'rollup/node',
@@ -26,6 +27,8 @@ members = [
 ]
 
 [workspace.dependencies]
+sp-stable-swap = { path = "./primitives/stable-swap", default-features = false }
+
 alloy-primitives = { version = "0.5.0", default-features = false }
 alloy-sol-types = { version = "0.5.0", default-features = false }
 aquamarine = "0.1.12"

@@ -1,5 +1,6 @@
 #![cfg(test)]
 
+mod asset_registry;
 mod bootstrap;
 mod council;
 mod fee_lock;

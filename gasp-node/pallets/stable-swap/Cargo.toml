@@ -29,6 +29,7 @@ sp-core = { workspace = true, default-features = false }
 sp-io = { workspace = true, default-features = false }
 sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
+sp-stable-swap = { workspace = true, default-features = false }
 
 orml-traits = { workspace = true, default-features = false }
 orml-tokens = { workspace = true, default-features = false }
@@ -51,6 +52,7 @@ std = [
 	"scale-info/std",
 	"sp-arithmetic/std",
 	"sp-core/std",
+	"sp-stable-swap/std",
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",
