@@ -10,6 +10,10 @@ edition.workspace = true
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3
+
 [dependencies]
 codec = { workspace = true, default-features = false }
 scale-info = { workspace = true, default-features = false, features = ["derive"] }
@@ -25,12 +29,17 @@ sp-core = { workspace = true, default-features = false }
 sp-io = { workspace = true, default-features = false }
 sp-runtime = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
+sp-stable-swap = { workspace = true, default-features = false }
 
 orml-traits = { workspace = true, default-features = false }
 orml-tokens = { workspace = true, default-features = false }
 
 [dev-dependencies]
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "num-traits", "scale-info"] }
+insta = { version = "1.36.1", features = ["yaml"] }
+test-case = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+
 
 [features]
 default = ["std"]
@@ -43,6 +52,7 @@ std = [
 	"scale-info/std",
 	"sp-arithmetic/std",
 	"sp-core/std",
+	"sp-stable-swap/std",
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",

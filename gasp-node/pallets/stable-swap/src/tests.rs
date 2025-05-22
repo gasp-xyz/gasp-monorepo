@@ -191,19 +191,15 @@ fn add_liquidity_should_work() {
 			amounts_provided: BoundedVec::truncate_from(amounts),
 			lp_token: 3,
 			lp_token_minted: expected,
-			total_supply: 3_000 * UNIT + 45322880144288283584179,
-			fees: BoundedVec::truncate_from(vec![
-				12498711677479364060,
-				21094110011003080268,
-				30692298654602638774
-			]),
+			total_supply: 3_000 * UNIT + expected,
+			fees: BoundedVec::truncate_from(vec![0, 0, 0]),
 		});
 
 		// half of fees goes to treasury
-		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 4166237226659702131);
-		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 7031370005073967423);
-		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 10230766220247032834);
-		assert_eq!(StableSwap::get_virtual_price(&3).unwrap(), 1000961844675256200);
+		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 0);
+		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 0);
+		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 0);
+		assert_eq!(StableSwap::get_virtual_price(&3).unwrap(), UNIT);
 	});
 }
 
@@ -250,8 +246,8 @@ fn add_liquidity_balanced_for_single_asset_minimal_fees() {
 			amounts_provided: BoundedVec::truncate_from(amounts),
 			lp_token: 3,
 			lp_token_minted: exp,
-			total_supply: 74881186777958934408403,
-			fees: BoundedVec::truncate_from(vec![0, 0, 1]),
+			total_supply: 74881186777958934408404,
+			fees: BoundedVec::truncate_from(vec![0, 0, 0]),
 		});
 	});
 }
@@ -275,13 +271,12 @@ fn remove_liquidity_one_asset_should_work() {
 			who: 2,
 			pool_id: 3,
 			asset_id: 0,
-			// a bit less then 10, minus fees
-			amount: 9_984_833_787_927_106_037,
+			amount: 9999833236889663201,
 			burned_amount: 10 * UNIT,
 			total_supply: total_supply - 10 * UNIT,
 		});
 
-		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 4999816321852351);
+		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 0);
 		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 0);
 		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 0);
 	});
@@ -309,24 +304,20 @@ fn remove_liquidity_imbalanced_should_work() {
 			who: 2,
 			pool_id: 3,
 			amounts: BoundedVec::truncate_from(amounts.clone()),
-			burned_amount: 35019044399900264325,
+			burned_amount: 35000294130481446030,
 			total_supply,
-			fees: BoundedVec::truncate_from(vec![
-				1875110298930542,
-				9374909700834153,
-				7500120299077607,
-			]),
+			fees: BoundedVec::truncate_from(vec![0, 0, 0,]),
 		});
 
 		// got what requested
 		assert_eq!(StableSwap::balance(0, 2), balance - mint + amounts[0]);
 		assert_eq!(StableSwap::balance(1, 2), balance - mint + amounts[1]);
 		assert_eq!(StableSwap::balance(2, 2), balance - mint + amounts[2]);
-		assert_eq!(StableSwap::balance(3, 2), 3 * mint - 35019044399900264325);
+		assert_eq!(StableSwap::balance(3, 2), 3 * mint - 35000294130481446030);
 
-		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 625036766435188);
-		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 3124969900903044);
-		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 2500040100192543);
+		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 0);
+		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 0);
+		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 0);
 	});
 }
 
@@ -385,7 +376,7 @@ fn swap_should_work_dy() {
 
 		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 0);
 		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 0);
-		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 50037401982926047);
+		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 0);
 	});
 }
 
@@ -409,6 +400,119 @@ fn swap_should_work_dx() {
 
 		assert_eq!(StableSwap::balance(0, TreasuryAccount::get()), 0);
 		assert_eq!(StableSwap::balance(1, TreasuryAccount::get()), 0);
-		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 50213816221710612);
+		assert_eq!(StableSwap::balance(2, TreasuryAccount::get()), 0);
+	});
+}
+
+#[test]
+fn dy_dx_should_work() {
+	new_test_ext().execute_with(|| {
+		let account: AccountId = 2;
+		let amount: Balance = 1_000_000 * UNIT;
+
+		StableSwap::create_new_token(&account, amount);
+		StableSwap::create_new_token(&account, amount);
+
+		StableSwap::create_pool(
+			RuntimeOrigin::signed(account),
+			vec![0, 1],
+			vec![5 * UNIT, 10 * UNIT],
+			100_000,
+		)
+		.unwrap();
+
+		assert_ok!(StableSwap::add_liquidity(
+			RuntimeOrigin::signed(account),
+			2,
+			vec![10_000_000, 5_000_000],
+			0,
+		));
+
+		let swap = 250_000;
+		let dx = StableSwap::get_dx(&2, 0, 1, swap).unwrap();
+		let dy = StableSwap::get_dy(&2, 0, 1, dx).unwrap();
+
+		assert_eq!(dy, swap);
+	});
+}
+
+#[test_case::test_matrix(
+    // Pool configurations
+    [200, 1000],
+    [
+        vec![1_000 * UNIT, 1_000 * UNIT],
+        vec![500 * UNIT, 10_000 * UNIT]
+    ],
+    [
+        vec![UNIT, UNIT],
+        vec![UNIT, UNIT * 2]
+    ],
+    // Dy values to test
+    [10 * UNIT, 50 * UNIT, 100 * UNIT, 200 * UNIT, UNIT / 10]
+)]
+fn test_dx_calculations_matrix(
+	amp_coeff: u128,
+	initial_liquidity: Vec<Balance>,
+	rate_multipliers: Vec<Balance>,
+	dy: Balance,
+) {
+	use insta::assert_yaml_snapshot;
+	use serde::Serialize;
+
+	#[derive(Serialize)]
+	struct TestCase {
+		amp_coeff: u128,
+		initial_liquidity: Vec<Balance>,
+		rate_multipliers: Vec<Balance>,
+		dy: Balance,
+		calculated_dx: Balance,
+	}
+
+	// Use a static vector to collect results across all test cases
+	static RESULTS: std::sync::Mutex<Vec<TestCase>> = std::sync::Mutex::new(Vec::new());
+
+	new_test_ext().execute_with(|| {
+		// Create a pool with parameterized values
+		let account: AccountId = 2;
+		let amount: Balance = 1_000_000 * UNIT;
+
+		// Create tokens and pool
+		StableSwap::create_new_token(&account, amount);
+		StableSwap::create_new_token(&account, amount);
+		StableSwap::create_pool(
+			RuntimeOrigin::signed(account),
+			vec![0, 1],
+			rate_multipliers.clone(),
+			amp_coeff,
+		)
+		.unwrap();
+
+		// Add initial liquidity
+		assert_ok!(StableSwap::add_liquidity(
+			RuntimeOrigin::signed(account),
+			2,
+			initial_liquidity.clone(),
+			0,
+		));
+
+		// Calculate dx for given dy
+		let calculated_dx = StableSwap::get_dx(&2, 0, 1, dy).unwrap();
+
+		// Add result to collection
+		RESULTS.lock().unwrap().push(TestCase {
+			amp_coeff,
+			initial_liquidity,
+			rate_multipliers,
+			dy,
+			calculated_dx,
+		});
+
+		// Create snapshot on the last test case (2 amp coeffs × 2 liquidity levels × 2 rate configs × 5 dy values = 40 total)
+		if RESULTS.lock().unwrap().len() == 40 {
+			let mut results = std::mem::take(&mut *RESULTS.lock().unwrap());
+			// Sort results by calculated_dx only
+			results.sort_by(|a, b| a.calculated_dx.cmp(&b.calculated_dx));
+			assert_yaml_snapshot!("dx_calculations_matrix", results);
+		}
 	});
 }

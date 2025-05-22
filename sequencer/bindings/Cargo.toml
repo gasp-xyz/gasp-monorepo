@@ -1,7 +1,0 @@
-[package]
-name = "bindings"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-alloy = { version = "0.8.3", features = ["sol-types", "contract"] }

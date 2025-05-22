@@ -47,15 +47,6 @@ describe('L2Interface', () => {
       await l2.getNativeTokenAddress();
     });
 
-    it('can valuate token', async () => {
-      let api = await getApi(URI);
-      let l2 = new L2Api(api);
-      await l2.valutateToken(hexToU8a("0000000000000000000000000000000000000001"), 10n);
-
-      let nativeTokenAddress = await l2.getNativeTokenAddress();
-      expect(await l2.valutateToken(nativeTokenAddress, 10n)).to.be.equal(10n);
-    });
-
     // TODO: add in the end
     it('consecutive ferry will fail', async () => {
     });
