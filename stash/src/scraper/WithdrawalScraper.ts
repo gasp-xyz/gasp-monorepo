@@ -1,12 +1,11 @@
-import { ApiPromise } from '@polkadot/api'
-import { GenericExtrinsic } from '@polkadot/types'
-import { AnyTuple } from '@polkadot/types-codec/types'
-import _ from 'lodash'
-
-import { redis } from '../connector/RedisConnector.js'
-import { withdrawalRepository } from '../repository/TransactionRepository.js'
-import logger from '../util/Logger.js'
 import { Block, Event } from './BlockScraper'
+import _ from 'lodash'
+import { withdrawalRepository } from '../repository/TransactionRepository.js'
+import { ApiPromise } from '@polkadot/api'
+import { redis } from '../connector/RedisConnector.js'
+import logger from '../util/Logger.js'
+import { AnyTuple } from '@polkadot/types-codec/types'
+import { GenericExtrinsic } from '@polkadot/types'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const WITHDRAWAL_PENDING_ON_L2 = 'PendingOnL2'
@@ -66,9 +65,7 @@ export const processWithdrawalEvents = async (
               .search()
               .where('requestId')
               .equals(
-                Number(
-                  String((event.ev.data as any).requestId.id).replace(/,/g, '')
-                )
+                Number(String((event.ev.data as any).requestId.id).replace(/,/g, ''))
               )
               .and('chain')
               .equals((event.ev.data as any).chain)

@@ -1,9 +1,9 @@
-import { ApiPromise } from '@polkadot/api'
-import { ApiDecoration } from '@polkadot/api/types/index.js'
-import { u32, u128 } from '@polkadot/types-codec'
 import { BN } from '@polkadot/util'
-import { signatureVerify } from '@polkadot/util-crypto'
+import { ApiDecoration } from '@polkadot/api/types/index.js'
 import { BN_ZERO } from 'gasp-sdk'
+import { u128, u32 } from '@polkadot/types-codec'
+import { signatureVerify } from '@polkadot/util-crypto'
+import { ApiPromise } from '@polkadot/api'
 
 const AIRDROP_WEIGHT_SCALE_FACTOR = new BN(10000000)
 const AIRDROP_WEIGHT = new BN(34466)

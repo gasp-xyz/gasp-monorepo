@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
-
 import { Asset, EventEntry, PoolEntry } from '../src/repository/ChainRepository'
 import { TimestampedAmount } from '../src/schema/Models'
 
