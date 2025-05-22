@@ -5085,6 +5085,7 @@ dependencies = [
 name = "stash-api"
 version = "0.1.0"
 dependencies = [
+ "hex",
  "mockall",
  "primitive-types 0.13.1",
  "reqwest",

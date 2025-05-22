@@ -1,11 +1,16 @@
+use std::time::Duration;
+
 use primitive_types::H256;
+use reqwest::Client;
 use serde::Deserialize;
 use serde_query::{DeserializeQuery, Query};
 
 #[derive(Debug, thiserror::Error)]
 pub enum StashError {
-    #[error("Http error")]
+    #[error("Http error {0}")]
     HttpError(#[from] reqwest::Error),
+    #[error("Http status != 200 ({0})")]
+    NokResponse(u16),
     #[error("Deserialization error")]
     DeserializationError(#[from] serde_json::Error),
 }
@@ -27,14 +32,28 @@ impl StashInterface for Stash {
         withdrawal_hash: H256,
     ) -> Result<WithdrawalStatus, StashError> {
         let uri = format!(
-            "{uri}/tracing/type/withdrawal/tx/{withdrawal_hash}",
-            uri = self.uri
+            "{}/tracing/type/withdrawal/tx/0x{}",
+            self.uri,
+            hex::encode(withdrawal_hash)
         );
-        let raw_response = reqwest::get(uri).await?.text().await?;
-        tracing::trace!("stash response: {raw_response}");
-        let status: WithdrawalStatus =
-            serde_json::from_str::<Query<WithdrawalStatus>>(&raw_response)?.into();
-        Ok(status)
+
+        let response = Client::builder()
+            .timeout(Duration::new(5, 0))
+            .build()?
+            .get(uri)
+            .send()
+            .await?;
+
+        let status = response.status();
+        let raw_response = response.text().await?;
+        tracing::debug!("stash response: {status:?} {raw_response}");
+        if status.is_success() {
+            let status: WithdrawalStatus =
+                serde_json::from_str::<Query<WithdrawalStatus>>(&raw_response)?.into();
+            Ok(status)
+        } else {
+            Err(StashError::NokResponse(status.as_u16()))
+        }
     }
 }
 

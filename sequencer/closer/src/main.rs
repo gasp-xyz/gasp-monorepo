@@ -1,10 +1,11 @@
+use std::convert::Infallible;
+
 use clap::Parser;
 use closer::Closer;
-use futures::StreamExt;
+use futures::{FutureExt, StreamExt};
 use l1api::{Subscription, L1};
 use l2api::{Gasp, L2Interface};
 use tokio::sync::mpsc;
-use tokio::task::JoinHandle;
 use tokio::time::Duration;
 
 mod batch_subscription;
@@ -25,11 +26,8 @@ fn init_logger(enable_colors: bool) {
         .init();
 }
 
-pub type Result = anyhow::Result<()>;
-pub type TaskHandle = JoinHandle<Result>;
-
 #[tokio::main]
-pub async fn main() -> Result {
+pub async fn main() -> anyhow::Result<()> {
     let args = cli::Cli::parse();
 
     init_logger(args.colors);
@@ -66,7 +64,8 @@ pub async fn main() -> Result {
         .boxed();
     let (closer_input, closer_sink, delay_fut) =
         common::delay::create_delay_channel(header_stream, args.block_delay as u128);
-    let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
+
+    let delay_task = tokio::spawn(delay_fut).map(|elem| Ok::<_, anyhow::Error>(elem??));
 
     let mut finder = past_withdrawals_finder::FerryHunter::new(
         chain,
@@ -79,7 +78,9 @@ pub async fn main() -> Result {
         args.replica_id,
         args.replica_count,
     );
-    let finder_task: TaskHandle = tokio::spawn(async move { Ok(finder.run().await?) });
+    let finder_task =
+        tokio::spawn(async move { finder.run().await }).map(|elem| Ok::<_, anyhow::Error>(elem??));
+
     let mut new_withdrawals_subscriber = batch_subscription::WithdrawalSubscriber::new(
         chain,
         l1.clone(),
@@ -89,44 +90,45 @@ pub async fn main() -> Result {
         args.replica_id,
         args.replica_count,
     );
-    let new_withdrawals_subscriber_task: TaskHandle =
-        tokio::spawn(async move { Ok(new_withdrawals_subscriber.run().await?) });
+    let new_withdrawals_subscriber_task =
+        tokio::spawn(async move { new_withdrawals_subscriber.run().await })
+            .map(|elem| Ok::<_, anyhow::Error>(elem??));
 
-    let filter_task: TaskHandle = match (args.stash_uri, args.skip_stash) {
+    let filter_task = match (args.stash_uri, args.skip_stash) {
         (Some(stash_uri), false) => {
             tracing::info!("filtering withdrawals created by frontend");
             tokio::spawn(async move {
                 let stash = stash_api::Stash::new(stash_uri);
                 filter::filter_deposits_created_by_frontend(stash, filter, closer_input).await;
-                Ok(())
+                Ok::<_, Infallible>(())
             })
         }
         (_, true) => {
             tracing::info!("filtering withdrawals with ferry tip > 0");
             tokio::spawn(async move {
                 filter::filter_deposits_without_fee(filter, closer_input).await;
-                Ok(())
+                Ok::<_, Infallible>(())
             })
         }
         (None, false) => {
             panic!("!!! stash uri not set !!!");
         }
-    };
+    }
+    .map(|elem| Ok::<_, anyhow::Error>(elem??));
 
-    let closer_task: TaskHandle = tokio::spawn(async move {
+    let closer_task = tokio::spawn(async move {
         let mut closer = Closer::new(chain, l1, l2, closer_sink, cicka.is_some());
-        Ok(closer.run().await?)
-    });
+        closer.run().await
+    })
+    .map(|elem| Ok::<_, anyhow::Error>(elem??));
 
-    if let Err(e) = futures::future::try_join_all([
+    if let Err(e) = tokio::try_join!(
         closer_task,
         finder_task,
         delay_task,
         new_withdrawals_subscriber_task,
         filter_task,
-    ])
-    .await
-    {
+    ) {
         tracing::error!("err : {e}");
     }
 

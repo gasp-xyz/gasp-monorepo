@@ -1,5 +1,5 @@
 use clap::Parser;
-use futures::{stream::BoxStream, StreamExt};
+use futures::{stream::BoxStream, FutureExt, StreamExt};
 use l1api::{Subscription, L1};
 use l2api::Gasp;
 use tokio::sync::mpsc::channel;
@@ -36,9 +36,11 @@ pub enum Error {
 
     #[error("L2Error error `{0}`")]
     L2Error(#[from] l2api::L2Error),
+
+    #[error("Task error `{0}`")]
+    TaskError(#[from] tokio::task::JoinError),
 }
 
-pub type TaskHandle = tokio::task::JoinHandle<Result<(), Error>>;
 #[tokio::main]
 pub async fn main() -> Result<(), Error> {
     let args = cli::Cli::parse();
@@ -73,7 +75,7 @@ pub async fn main() -> Result<(), Error> {
     let (to_executor, executor, delay_fut) =
         common::delay::create_delay_channel(stream, args.block_delay);
 
-    let delay_task: TaskHandle = tokio::spawn(async move { Ok(delay_fut.await?) });
+    let delay_task = tokio::spawn(delay_fut).map(|elem| Ok::<_, Error>(elem??));
 
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
@@ -95,29 +97,23 @@ pub async fn main() -> Result<(), Error> {
         });
     }
 
-    let hunter_handle: TaskHandle =
-        tokio::spawn(async move { Ok::<_, Error>(hunter.run().await?) });
+    let hunter_handle =
+        tokio::spawn(async move { hunter.run().await }).map(|elem| Ok::<_, Error>(elem??));
 
-    let filter_handle: TaskHandle = tokio::spawn(async move {
+    let filter_handle = tokio::spawn(async move {
         filter::filter_deposits(
             filter_input,
             to_executor,
             args.enabled.into_iter().collect(),
         )
-        .await;
-        Ok(())
-    });
+        .await
+    })
+    .map(|elem| Ok::<_, Error>(elem?));
 
-    let executor_handle: TaskHandle = tokio::spawn(async move {
-        Ok::<_, Error>(
-            executor
-                .run()
-                .await
-                .inspect_err(|e| tracing::error!("Err: {e}"))?,
-        )
-    });
+    let executor_handle =
+        tokio::spawn(async move { executor.run().await }).map(|elem| Ok::<_, Error>(elem??));
 
-    if let Err(e) = tokio::try_join!(executor_handle, filter_handle, hunter_handle, delay_task) {
+    if let Err(e) = futures::try_join!(executor_handle, filter_handle, hunter_handle, delay_task) {
         tracing::error!("err : {e}");
     }
 
