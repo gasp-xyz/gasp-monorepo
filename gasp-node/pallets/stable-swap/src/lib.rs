@@ -572,7 +572,31 @@ pub mod pallet {
 			eq_assets_update: Vec<(T::CurrencyId, bool)>,
 		) -> DispatchResult {
 			let _ = ensure_root(origin)?;
+			Self::do_update_eq_assets(asset_id, eq_assets_update)?;
+			Ok(().into())
+		}
+	}
 
+	impl<T: Config> sp_stable_swap::UpdateValutaion<T::CurrencyId> for Pallet<T> {
+		fn update_eq_assets(
+			asset_id: T::CurrencyId,
+			eq_assets_update: Vec<(T::CurrencyId, bool)>,
+		) -> Result<(), DispatchError> {
+			Pallet::<T>::do_update_eq_assets(asset_id, eq_assets_update)?;
+			Ok(())
+		}
+	}
+
+	impl<T: Config> Pallet<T> {
+		pub const FEE_DENOMINATOR: u128 = 10_u128.pow(10);
+		pub(crate) const PRECISION_EXP: u32 = 18;
+		const PRECISION: u128 = 10_u128.pow(Self::PRECISION_EXP);
+		const A_PRECISION: u128 = 100;
+
+		pub fn do_update_eq_assets(
+			asset_id: T::CurrencyId,
+			eq_assets_update: Vec<(T::CurrencyId, bool)>,
+		) -> Result<(), Error<T>> {
 			let mut eq_assets = EqAssets::<T>::get(asset_id).unwrap_or_default();
 
 			for (eq_asset, is_eq) in eq_assets_update {
@@ -599,13 +623,6 @@ pub mod pallet {
 
 			Ok(())
 		}
-	}
-
-	impl<T: Config> Pallet<T> {
-		pub const FEE_DENOMINATOR: u128 = 10_u128.pow(10);
-		pub(crate) const PRECISION_EXP: u32 = 18;
-		const PRECISION: u128 = 10_u128.pow(Self::PRECISION_EXP);
-		const A_PRECISION: u128 = 100;
 
 		// calls impl
 		pub fn do_create_pool(

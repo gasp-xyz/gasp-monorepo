@@ -5974,6 +5974,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-stable-swap",
  "sp-std",
  "test-case",
 ]
@@ -6202,6 +6203,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-stable-swap",
  "sp-std",
  "test-case",
 ]
@@ -10216,6 +10218,14 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "sp-staking",
+ "sp-std",
+]
+
+[[package]]
+name = "sp-stable-swap"
+version = "1.0.0"
+dependencies = [
+ "sp-runtime",
  "sp-std",
 ]
 
