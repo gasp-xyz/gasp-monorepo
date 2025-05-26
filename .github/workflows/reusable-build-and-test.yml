@@ -23,6 +23,7 @@ env:
   MOON_DEBUG_PROTO_INSTALL: false
   MOON_CACHE: ${{ inputs.cacheEnabled && 'read-write' || 'off' }}
   CACHE_VERSION: 2
+  MOON_VERSION: '1.34.0'
 jobs:
   contracts-build-and-test:
     name: '[contracts] Build and test'
@@ -68,6 +69,7 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
           cache: ${{ inputs.cacheEnabled }}
+          moon-version: ${{ env.MOON_VERSION }}
       - run: cd contracts && yarn install --immutable
       - run: moon ci :contracts-format
       - run: moon ci :contracts-lint
@@ -272,6 +274,7 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
           cache: ${{ inputs.cacheEnabled }}
+          moon-version: ${{ env.MOON_VERSION }}
       
       - name: Run command "${{ matrix.command }}"
         run: ${{ matrix.command }}
@@ -347,6 +350,7 @@ jobs:
         with:
           cache-version: ${{ env.CACHE_VERSION }}
           cache: ${{ inputs.cacheEnabled }}
+          moon-version: ${{ env.MOON_VERSION }}
 
       - uses: google-github-actions/auth@v2
         id: auth
