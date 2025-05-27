@@ -1082,7 +1082,7 @@ tasks:
   e2e-test-rollup:
     script: |
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
       export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
       export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}

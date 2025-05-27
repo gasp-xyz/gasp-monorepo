@@ -2,9 +2,7 @@ services:
   gasp-avs:
     build:
       context: .
-      args:
-        ROLLUP_NODE_VERSION: ${ROLLUP_NODE_VERSION:-local-fast}
-    image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local-fast}
+    image: gaspxyz/gasp-avs:${GASP_AVS_VERSION:-local}
     restart: unless-stopped
     depends_on:
       eth-stub:
@@ -23,6 +21,4 @@ services:
       TESTNET: true
       OPT_IN_AT_STARTUP: true
       METRICS_PORT: 8080
-      # rollup-node configs
-      ROLLUP_NODE_BOOTNODE: /dns/node-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
-      ROLLUP_NODE_CHAIN: rollup-local-seq
+      SUBSTRATE_RPC_URL: ${SUBSTRATE_RPC_URL:-ws://node-alice:9944}
