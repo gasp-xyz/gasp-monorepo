@@ -69,7 +69,7 @@ const tokenAmountMapping = {
   '1-0': [new BN('11788919631539815'), new BN('486263164987593456634092965')],
 }
 
-const mockMangata = (urls: string[]) => ({
+const mockMangata = () => ({
   query: {
     getAssetsInfo: () => {
       return new Promise((resolve) => {
@@ -125,12 +125,6 @@ const mockMangata = (urls: string[]) => ({
     },
   },
 })
-
-type Reserve = {
-  inputReserve: BN
-  outputReserve: BN
-  amount: BN
-}
 
 const Mangata = {
   instance: vi.fn((urls) => mockMangata(urls)),

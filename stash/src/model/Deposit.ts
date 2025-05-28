@@ -20,7 +20,7 @@ const depositSchema = new Schema(
   },
   {
     dataStructure: 'JSON',
-  }
+  },
 )
 
 export { depositSchema }

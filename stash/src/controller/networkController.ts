@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
-import * as networkService from '../service/NetworkService.js'
+
 import * as errorHandler from '../error/Handler.js'
+import * as networkService from '../service/NetworkService.js'
 
 export const networkList = async (_: Request, res: Response) => {
   try {

@@ -1,5 +1,6 @@
 import { ChainableCommander } from 'ioredis'
 import _ from 'lodash'
+
 import { RedisClient } from '../connector/RedisConnector.js'
 import logger from './Logger.js'
 
@@ -9,8 +10,8 @@ export type CreateTableArgs = [string, (string | number)[]][]
 export const execute = async (trx: ChainableCommander) => {
   const r = await trx.exec()
   const result = r
-    .filter(([err, res]) => _.isArray(res))
-    .map(([err, res]) => res)
+    .filter(([, res]) => Array.isArray(res))
+    .map(([, res]) => res)
     .flat()
   const err = result.find((r) => !_.isNumber(r))
   if (err) {
@@ -25,7 +26,7 @@ export const execute = async (trx: ChainableCommander) => {
 
 export const hasKey = async (
   client: RedisClient,
-  key: string
+  key: string,
 ): Promise<boolean> => {
   return (await client.client.exists(key)) > 0
 }

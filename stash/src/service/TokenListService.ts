@@ -1,5 +1,8 @@
-import MangataClient from '../connector/MangataNode.js'
+import Decimal from 'decimal.js'
 import moment from 'moment'
+
+import MangataClient from '../connector/MangataNode.js'
+import { NotFoundException } from '../error/Exception.js'
 import {
   calculate24PriceChange,
   calculate24VolumeChange,
@@ -9,15 +12,11 @@ import {
   TokenInfoStats,
 } from '../util/Listing.js'
 import { matchInterval } from './PriceDiscoveryService.js'
-import Decimal from 'decimal.js'
-import { NotFoundException } from '../error/Exception.js'
-
-const FILTER_LIQUIDITY_TOKENS = 'Liquidity'
 
 export const tokenDetails = async (id: number): Promise<TokenInfoStats> => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
   const tokenInfo = Object.values(assetsInfo).find(
-    (item) => Number(item.id) === id
+    (item) => Number(item.id) === id,
   )
   if (!tokenInfo) throw new NotFoundException('Unknown currency id.')
 
@@ -31,7 +30,7 @@ export const tokenDetails = async (id: number): Promise<TokenInfoStats> => {
       tokenInfo.decimals,
       current.subtract(2, 'days').valueOf(),
       to,
-      matchInterval('day')
+      matchInterval('day'),
     ),
     getTokenVolumeInUsd(tokenInfo.id, from, to, matchInterval('day')),
     getLiquidityTokenInUsd(tokenInfo.id, from, to, matchInterval('day')),
@@ -68,9 +67,7 @@ export const tokenList = async (): Promise<TokenInfoStats[]> => {
   const assetsInfo = await MangataClient.query.getAssetsInfo()
   const api = await MangataClient.api()
   const liquidityPools = await api.query.xyk.liquidityPools.entries()
-  const liquidityPoolIds = liquidityPools.map(([key, _]) =>
-    key.args[0].toString()
-  )
+  const liquidityPoolIds = liquidityPools.map(([key]) => key.args[0].toString())
   const listedTokens = Object.entries(assetsInfo)
     .map(([id, info]) => ({ id, ...info }))
     .filter((asset) => !liquidityPoolIds.includes(asset.id))
@@ -85,19 +82,19 @@ export const tokenList = async (): Promise<TokenInfoStats[]> => {
         token.decimals,
         from,
         to,
-        matchInterval('hour')
+        matchInterval('hour'),
       )
       const tokenVolume = await getTokenVolumeInUsd(
         token.id,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
       const tokenLiquidityInUsd = await getLiquidityTokenInUsd(
         token.id,
         from,
         to,
-        matchInterval('day')
+        matchInterval('day'),
       )
       const priceChange = calculate24PriceChange(tokenPrice)
       const volumeChange = calculate24VolumeChange(tokenVolume)
@@ -121,7 +118,7 @@ export const tokenList = async (): Promise<TokenInfoStats[]> => {
         priceChange24hInPerc: priceChange.toString(),
         volumeChange24hInPerc: volumeChange.toString(),
       })
-    })
+    }),
   )
   return tokens
 }

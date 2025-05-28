@@ -1,11 +1,12 @@
-import { Block, Event } from './BlockScraper'
-import _ from 'lodash'
-import { withdrawalRepository } from '../repository/TransactionRepository.js'
 import { ApiPromise } from '@polkadot/api'
-import { redis } from '../connector/RedisConnector.js'
-import logger from '../util/Logger.js'
-import { AnyTuple } from '@polkadot/types-codec/types'
 import { GenericExtrinsic } from '@polkadot/types'
+import { AnyTuple } from '@polkadot/types-codec/types'
+import _ from 'lodash'
+
+import { redis } from '../connector/RedisConnector.js'
+import { withdrawalRepository } from '../repository/TransactionRepository.js'
+import logger from '../util/Logger.js'
+import { Block, Event } from './BlockScraper'
 
 const NETWORK_LIST_KEY = 'affirmed_networks_list'
 const WITHDRAWAL_PENDING_ON_L2 = 'PendingOnL2'
@@ -25,7 +26,7 @@ export enum CreatedBy {
 export async function extractExtrinsicHashAndAnAddressFromBlock(
   api: ApiPromise,
   phaseApplyExtrinsic: number,
-  block: Block
+  block: Block,
 ) {
   let extrinsicHash, address
   try {
@@ -47,13 +48,13 @@ export async function extractExtrinsicHashAndAnAddressFromBlock(
 
 export const processWithdrawalEvents = async (
   api: ApiPromise,
-  block: Block
+  block: Block,
 ) => {
   const events = _.chain(block.events)
     .filter((ev) => filterEvents(ev[1]))
-    .groupBy(([idx, _]) => idx)
-    .map((evs, idx) =>
-      evs.map(([phaseApplyExtrinsic, ev]) => ({ phaseApplyExtrinsic, ev }))
+    .groupBy(([idx]) => idx)
+    .map((evs) =>
+      evs.map(([phaseApplyExtrinsic, ev]) => ({ phaseApplyExtrinsic, ev })),
     )
     .value()
   if (events.length > 0) {
@@ -65,7 +66,9 @@ export const processWithdrawalEvents = async (
               .search()
               .where('requestId')
               .equals(
-                Number(String((event.ev.data as any).requestId.id).replace(/,/g, ''))
+                Number(
+                  String((event.ev.data as any).requestId.id).replace(/,/g, ''),
+                ),
               )
               .and('chain')
               .equals((event.ev.data as any).chain)
@@ -75,7 +78,7 @@ export const processWithdrawalEvents = async (
             if (existingWithdrawal) {
               logger.info(
                 'Existing withdrawal found, skipping the WithdrawalRequestCreated data: ',
-                existingWithdrawal
+                existingWithdrawal,
               )
               continue
             }
@@ -83,7 +86,7 @@ export const processWithdrawalEvents = async (
               api,
               event.ev.data,
               event.phaseApplyExtrinsic,
-              block
+              block,
             )
             logger.info('Tracing started for withdrawal', withdrawalData)
           } catch (error) {
@@ -101,12 +104,12 @@ export const startTracingWithdrawal = async (
   api: ApiPromise,
   eventData: any,
   phaseApplyExtrinsic: number,
-  block: Block
+  block: Block,
 ): Promise<object> => {
   const timestamp = new Date().toISOString()
   const calldata = await api.rpc.rolldown.get_abi_encoded_l2_request(
     eventData.chain,
-    Number(String(eventData.requestId.id).replace(/,/g, ''))
+    Number(String(eventData.requestId.id).replace(/,/g, '')),
   )
   const affirmedNetworks = await redis.client.get(NETWORK_LIST_KEY)
   const networks = affirmedNetworks ? JSON.parse(affirmedNetworks) : []
@@ -117,7 +120,7 @@ export const startTracingWithdrawal = async (
     await extractExtrinsicHashAndAnAddressFromBlock(
       api,
       phaseApplyExtrinsic,
-      block
+      block,
     )
   const redisKey = `withdrawal:${extrinsicHash}`
   const keyExists = await redis.client.exists(redisKey)
@@ -146,12 +149,12 @@ export const startTracingWithdrawal = async (
 
 export const updateWithdrawalsWhenBatchCreated = async (
   api: ApiPromise,
-  eventData: any
+  eventData: any,
 ): Promise<void> => {
   const updateTimestamp = new Date().toISOString()
   const firstElement = Number(String(eventData.range[0]).replace(/,/g, ''))
   const lastElement = Number(
-    String(eventData.range[eventData.range.length - 1]).replace(/,/g, '')
+    String(eventData.range[eventData.range.length - 1]).replace(/,/g, ''),
   )
   const existingWithdrawal = await withdrawalRepository
     .search()
@@ -170,7 +173,7 @@ export const updateWithdrawalsWhenBatchCreated = async (
       let proof = await api.rpc.rolldown.get_merkle_proof(
         chain,
         [firstElement, lastElement],
-        withdrawal.requestId
+        withdrawal.requestId,
       )
       let root = await api.rpc.rolldown.get_merkle_root(chain, [
         firstElement,

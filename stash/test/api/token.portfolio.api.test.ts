@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
-import app from '../../src/app'
 import supertest from 'supertest'
+import { describe, expect,it } from 'vitest'
+
+import app from '../../src/app'
 
 describe('/GET token-portfolio', () => {
   it('should return token portfolio for provided account', async () => {

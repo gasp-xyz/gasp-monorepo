@@ -11,7 +11,7 @@ const swapSchema = new Schema(
   },
   {
     dataStructure: 'JSON',
-  }
+  },
 )
 
 export { swapSchema }

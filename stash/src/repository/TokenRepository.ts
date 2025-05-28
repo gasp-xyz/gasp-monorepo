@@ -1,5 +1,6 @@
-import { redis } from '../connector/RedisConnector.js'
 import 'core-js'
+
+import { redis } from '../connector/RedisConnector.js'
 
 const DEFAULT_STRING = 'default'
 const TOKEN_ORDER_BUCKETS_KEY = 'token_order_buckets'
@@ -27,7 +28,7 @@ export const listTokenOrderBuckets = async (): Promise<
   return new Map(
     Object.values(allChannels)
       .map((it) => JSON.parse(it) as TokenOrderBucket)
-      .map((it) => [it.bucket, it])
+      .map((it) => [it.bucket, it]),
   )
 }
 
