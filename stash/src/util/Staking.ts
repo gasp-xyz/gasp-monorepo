@@ -1,19 +1,20 @@
 import BigNumber from 'bignumber.js'
 import moment from 'moment'
+
 import { Session } from '../repository/StakingRepository'
 
 const BG_HUNDRED = new BigNumber('100')
 
 export function calculateAnnualPercentageYieldPerSession(
   rewards: BigNumber,
-  stake: BigNumber
+  stake: BigNumber,
 ) {
   return rewards.dividedBy(stake).multipliedBy(BG_HUNDRED)
 }
 
 export function calculateAnnualPercentageYield(
   totalStake: BigNumber,
-  totalRewards: BigNumber
+  totalRewards: BigNumber,
 ) {
   return totalRewards
     .dividedBy(totalStake)

@@ -5,7 +5,7 @@ import * as tokenService from '../service/TokenService.js'
 
 export const listTokenOrderBuckets = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*
           #swagger.tags = ['Token Order Buckets']

@@ -1,11 +1,12 @@
-import { describe, it, beforeEach, afterEach, vi, expect } from 'vitest'
+import { ApiPromise, Keyring } from '@polkadot/api'
+import { BN, u8aToHex } from '@polkadot/util'
+import { toBN } from 'gasp-sdk'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import {
   getEligibilityAtBlockN,
   verifySignature,
 } from '../src/service/MgxAirdropService.js'
-import { ApiPromise, Keyring } from '@polkadot/api'
-import { toBN } from 'gasp-sdk'
-import { BN, u8aToHex } from '@polkadot/util'
 
 vi.mock('../src/repository/MgxAirdropRepository')
 
@@ -129,7 +130,7 @@ describe('MGX Airdrop', () => {
       ethereumAddress: 'eth',
     }
     const message = `0x${Buffer.from(JSON.stringify(signedData)).toString(
-      'hex'
+      'hex',
     )}`
 
     const signature = u8aToHex(pair.sign(message))
@@ -152,7 +153,7 @@ function provideTokensMock(tokens: Array<[string, [string, string]]>) {
           reserved: toBN(reserved),
         },
       ]
-    })
+    }),
   )
 }
 
@@ -167,7 +168,7 @@ function provideTotalIssuanceMock(totalIssuance: Array<[string, string]>) {
           toBn: () => toBN(totalIssuance),
         },
       ]
-    })
+    }),
   )
 }
 
@@ -182,7 +183,7 @@ function provideLiquidityPoolsMock(pools: Array<[string, [string, string]]>) {
           unwrap: () => [new BN(token1), new BN(token2)],
         },
       ]
-    })
+    }),
   )
 }
 

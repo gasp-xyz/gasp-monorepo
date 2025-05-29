@@ -1,13 +1,14 @@
 import { Client } from 'redis-om'
+
+import { getRedisUrl } from '../connector/RedisConnector.js'
 import { depositSchema } from '../model/Deposit.js'
-import { withdrawalSchema } from '../model/Withdrawal.js'
 import { swapSchema } from '../model/Swap.js'
 import { tokenPricesSchema } from '../model/TokenPrice.js'
-import { getTimeseriesUrl } from '../connector/RedisConnector.js'
+import { withdrawalSchema } from '../model/Withdrawal.js'
 import logger from '../util/Logger.js'
 
 const client = new Client()
-await client.open(getTimeseriesUrl())
+await client.open(getRedisUrl())
 
 const depositRepository = client.fetchRepository(depositSchema)
 const withdrawalRepository = client.fetchRepository(withdrawalSchema)
@@ -61,7 +62,7 @@ try {
 
 export {
   depositRepository,
-  withdrawalRepository,
   swapRepository,
   tokenPricesRepository,
+  withdrawalRepository,
 }

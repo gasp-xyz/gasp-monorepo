@@ -1,4 +1,5 @@
 import _ from 'lodash'
+
 import * as chainStore from '../repository/ChainRepository.js'
 import * as ratesStore from '../repository/PoolRatesRepository.js'
 import { TimestampedBaseTargetAmount } from '../schema/Models.js'
@@ -25,18 +26,18 @@ const processAsset = async (asset: chainStore.Asset, head: number) => {
     const latest = await ratesStore.getLatest(asset.id)
     pools = await chainStore.getPools(asset.id, latest, head)
     logger.debug(
-      `PoolRatesService: processing pool ${asset} in ${latest}-${head} with ${pools.length} pools`
+      `PoolRatesService: processing pool ${asset} in ${latest}-${head} with ${pools.length} pools`,
     )
     processed += await processPools(asset, pools)
   } while (pools.length === chainStore.LIMIT)
   logger.info(
-    `PoolRatesService: processed asset ${asset} with ${processed} volumes`
+    `PoolRatesService: processed asset ${asset} with ${processed} volumes`,
   )
 }
 
 const processPools = async (
   asset: chainStore.Asset,
-  pools: chainStore.PoolEntry[]
+  pools: chainStore.PoolEntry[],
 ) => {
   if (pools.length === 0) {
     return 0
@@ -56,7 +57,7 @@ const processPools = async (
 
   await ratesStore.save(asset, [rates, rates_rev], _.last(pools).timestamp)
   logger.debug(
-    `PoolRatesService: processed ${rates.length}/${pools.length} pools`
+    `PoolRatesService: processed ${rates.length}/${pools.length} pools`,
   )
   return rates.length
 }
