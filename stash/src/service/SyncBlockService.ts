@@ -15,7 +15,9 @@ export const initService = async () => {
   // const latestBlock = 3719278
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
-      await blocks.processEvents(block)
+      if (process.env.SAVE_EVENTS === 'true') {
+        await blocks.processEvents(block)
+      }
       await withdrawals.processWithdrawalEvents(api, block)
       await deposits.processFerriedDepositEvents(api, block)
       await pools.fetchPools(block)
