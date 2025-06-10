@@ -34,6 +34,7 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASS: ${REDIS_PASS} # Has to be empty to work with local redis host
       TOKENS_TO_HARDCODE: ${TOKENS_TO_HARDCODE:-0}
+      SAVE_EVENTS: ${SAVE_EVENTS:-false}
 
   redis:
     image: gaspxyz/redis-stash-test-data:stable
