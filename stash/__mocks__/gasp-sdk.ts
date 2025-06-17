@@ -1,6 +1,6 @@
+import { vi } from 'vitest'
 import { BN } from '@polkadot/util'
 import { fromBN } from 'gasp-sdk'
-import { vi } from 'vitest'
 
 const CUSTOM_ISSUANCE = {
   '0': new BN(100), // Custom issuance for ID 0

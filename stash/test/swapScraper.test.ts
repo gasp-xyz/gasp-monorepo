@@ -1,18 +1,17 @@
-import { ApiPromise } from '@polkadot/api'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { timeseries } from '../src/connector/RedisConnector'
-import { swapRepository } from '../src/repository/TransactionRepository'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   calculateVolume,
-  checkKey,
   decimalsFromTokenId,
   processDataForDashboard,
-  processDataForTVLHistory,
   processDataForVolumeHistory,
+  processDataForTVLHistory,
+  checkKey,
 } from '../src/scraper/SwapScraper'
-import * as tokenPriceService from '../src/service/TokenPriceService'
+import { swapRepository } from '../src/repository/TransactionRepository'
 import logger from '../src/util/Logger'
+import { ApiPromise } from '@polkadot/api'
+import * as tokenPriceService from '../src/service/TokenPriceService'
+import { timeseries } from '../src/connector/RedisConnector'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/util/Logger')

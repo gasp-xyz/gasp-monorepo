@@ -1,8 +1,7 @@
 import { Request, Response } from 'express'
-
+import * as tokenListService from '../service/TokenListService.js'
 import * as errorHandler from '../error/Handler.js'
 import { tokenIdSchema } from '../schema/PriceDiscoverySchema.js'
-import * as tokenListService from '../service/TokenListService.js'
 
 export const tokenList = async (_: Request, res: Response) => {
   /* #swagger.tags = ['Token List']

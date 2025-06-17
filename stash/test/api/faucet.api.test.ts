@@ -1,9 +1,8 @@
+import { describe, it, beforeEach, expect, vi } from 'vitest'
 import supertest from 'supertest'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import app from '../../src/app'
-import { ForbiddenException } from '../../src/error/Exception.js'
 import * as faucetService from '../../src/service/FaucetService.js'
+import { ForbiddenException } from '../../src/error/Exception.js'
 
 describe('FaucetController', () => {
   const toAddress = '0x00000000000000000000000000000000'

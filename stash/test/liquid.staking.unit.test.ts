@@ -1,14 +1,13 @@
-import moment from 'moment'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
-
-import {
-  ProofOfStakeReward,
-  ResponseRewards,
-} from '../src/repository/StakingRepository'
 import {
   rewards24hours,
   rewardsMonth,
 } from '../src/service/LiquidityStakingService'
+import { describe, it, vi, expect, beforeAll, afterAll } from 'vitest'
+import {
+  ProofOfStakeReward,
+  ResponseRewards,
+} from '../src/repository/StakingRepository'
+import moment from 'moment'
 
 describe('[Staking]', () => {
   beforeAll(() => {

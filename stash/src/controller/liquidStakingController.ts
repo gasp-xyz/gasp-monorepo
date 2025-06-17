@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
-
-import * as errorHandler from '../error/Handler.js'
 import * as liquidityStakingService from '../service/LiquidityStakingService.js'
+import * as errorHandler from '../error/Handler.js'
 
 export const rewards24hours = async (req: Request, res: Response) => {
   try {

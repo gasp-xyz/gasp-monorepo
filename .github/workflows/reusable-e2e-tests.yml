@@ -33,6 +33,7 @@ env:
   MOON_CACHE: "${{ inputs.cacheEnabled && 'read-write' || 'off' }}"
   MOON_COLOR: 2
   CACHE_VERSION: 2
+  MOON_VERSION: '1.34.0'
 
 jobs:
   setup-report:
@@ -251,6 +252,7 @@ jobs:
         with:
           cache: ${{ inputs.cacheEnabled }}
           cache-version: ${{ env.CACHE_VERSION }}
+          moon-version: ${{ env.MOON_VERSION }}
           
       - name: Run tests
         run: ${{ matrix.command }}
@@ -441,7 +443,7 @@ jobs:
           fi
 
   test-complete:
-    needs: [e2e-tests-status]
+    needs: [e2e-tests-status, setup-report]
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -452,7 +454,7 @@ jobs:
         run: |
           npx testmo automation:run:complete \
             --instance https://mangata-finance.testmo.net \
-            --run-id ${{needs.setup-report.outputs.testmo-run-id}} \
+            --run-id ${{needs.setup-report.outputs.testmo-run-id}}
         env:
           TESTMO_URL: ${{ secrets.TESTMO_URL }}
           TESTMO_TOKEN: ${{ secrets.TESTMO_TOKEN }}

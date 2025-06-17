@@ -54,18 +54,25 @@ where
     }
 
     async fn get_requests_to_ferry(&self, l2_state: H256) -> HunterResult<Option<(u128, u128)>> {
-        let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
         let latest_request_id_on_l2 = self
             .l2
             .get_latest_created_request_id(self.chain, l2_state)
             .await?;
-        Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
-            (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
-                Some((l1_request_id + 1, l2_request_id))
+
+        //do L1 only when there are new requests on L2
+        match latest_request_id_on_l2 {
+            Some(id) if id > self.latest_processed => {
+                let latest_request_id_on_l1 = self.l1.get_latest_finalized_request_id().await?;
+                Ok(match (latest_request_id_on_l1, latest_request_id_on_l2) {
+                    (Some(l1_request_id), Some(l2_request_id)) if l2_request_id > l1_request_id => {
+                        Some((l1_request_id + 1, l2_request_id))
+                    }
+                    (None, Some(l2_request_id)) => Some((1, l2_request_id)),
+                    _ => None,
+                })
             }
-            (None, Some(l2_request_id)) => Some((1, l2_request_id)),
-            _ => None,
-        })
+            _ => Ok(None),
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self, at), ret)]
@@ -90,19 +97,20 @@ where
         //TODO replace with wait for the next block
         while let Some(elem) = stream.next().await {
             let (block_nr, at) = elem?;
-            tracing::info!("#{block_nr} Looking for ferry requests at block {at}");
 
-            let mut latest = self.latest_processed;
+            let latest_request_id_on_l2 = self
+                .l2
+                .get_latest_created_request_id(self.chain, at)
+                .await?;
+            tracing::info!("#{block_nr} Looking for ferry requests at block {at} - latest rid : {latest_request_id_on_l2:?}");
+
             if let Some((start, end)) = self.get_requests_to_ferry(at).await? {
-                if end <= self.latest_processed {
-                    continue;
-                }
                 let chunks =
                     common::get_chunks(std::cmp::max(start, self.latest_processed + 1), end, 25);
                 for (id, range) in chunks.iter().enumerate() {
                     tokio::time::sleep(std::time::Duration::from_secs_f64(0.25)).await;
                     tracing::info!(
-                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count} (last : {end})",
+                        "looking for pending withdrawals {range:?} batch {id} / {chunks_count})",
                         id = id + 1,
                         chunks_count = chunks.len()
                     );
@@ -114,12 +122,12 @@ where
                         .into_iter()
                         .flatten()
                     {
+                        tracing::info!("found pending withdrawal: {w}");
                         self.sink.send(w).await?;
-                        latest = w.request_id.id.try_into().unwrap();
                     }
                 }
+                self.latest_processed = end;
             }
-            self.latest_processed = latest;
         }
         tracing::warn!("header stream ended");
         Ok(())
@@ -184,10 +192,10 @@ mod test {
 
         l1mock
             .expect_get_latest_finalized_request_id()
-            .return_once(move || Ok(None));
+            .returning(move || Ok(None));
         l2mock
             .expect_get_latest_created_request_id()
-            .return_once(move |_, _| Ok(None));
+            .returning(move |_, _| Ok(None));
 
         let (sender, __receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
@@ -245,6 +253,7 @@ mod test {
         l2mock
             .expect_header_stream()
             .returning(|_| Ok(Box::pin(stream::iter(header_stream().take(1)))));
+
         l1mock
             .expect_get_latest_finalized_request_id()
             .returning(|| Ok(None));
@@ -290,15 +299,15 @@ mod test {
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(1)))
-            .return_once(|_, _| Ok(Some(1u128)));
+            .returning(|_, _| Ok(Some(1u128)));
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(2)))
-            .return_once(|_, _| Ok(Some(2u128)));
+            .returning(|_, _| Ok(Some(2u128)));
         l2mock
             .expect_get_latest_created_request_id()
             .with(always(), eq(block_hash(3)))
-            .return_once(|_, _| Ok(Some(2u128)));
+            .returning(|_, _| Ok(Some(2u128)));
 
         l2mock
             .expect_get_l2_request()
