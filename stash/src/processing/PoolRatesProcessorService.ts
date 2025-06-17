@@ -5,18 +5,18 @@ import * as ratesStore from '../repository/PoolRatesRepository.js'
 import { TimestampedBaseTargetAmount } from '../schema/Models.js'
 import logger from '../util/Logger.js'
 
-export const initService = async () => {
-  await processRates()
-}
 
-const processRates = async () => {
+export const processRates = async (): Promise<Map<number, number>>  => {
   const head = (await chainStore.getLatest()).timestamp
   const assets = await chainStore.getAssets()
+  const latestProcessed = new Map<number, number>();
   logger.info(`PoolRatesService: have assets: ${assets}`)
   for (const asset of assets) {
     logger.info(`PoolRatesService: processing asset ${asset}`)
     await processAsset(asset, head)
+    latestProcessed.set(asset.id, head)
   }
+  return latestProcessed
 }
 
 const processAsset = async (asset: chainStore.Asset, head: number) => {

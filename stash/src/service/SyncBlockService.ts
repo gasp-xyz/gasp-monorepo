@@ -6,6 +6,9 @@ import * as pools from '../scraper/PoolsScraper.js'
 import * as staking from '../scraper/StakingScraper.js'
 import * as swaps from '../scraper/SwapScraper.js'
 import * as withdrawals from '../scraper/WithdrawalScraper.js'
+import * as poolRatesService from '../processing/PoolRatesProcessorService.js'
+import * as priceService from '../processing/PriceProcessorService.js'
+
 import logger from '../util/Logger.js'
 
 export const initService = async () => {
@@ -24,10 +27,24 @@ export const initService = async () => {
       await staking.processStaking(api, block)
       await staking.processLiquidStaking(api, block)
       await swaps.processSwapEvents(api, block)
+
       await store.saveLatest({
         timestamp: block.timestamp,
         block: block.number,
       })
+      //
+      let processedByPoolRates = await poolRatesService.processRates();
+      let processedByPriceService = await priceService.processPrices(1);
+      const mergedProcessed = new Map([...processedByPoolRates])
+      for (const [key, value] of processedByPriceService) {
+        if (!mergedProcessed.has(key) || value < mergedProcessed.get(key)) {
+          mergedProcessed.set(key, value)
+        }
+      }
+      await store.removeUnusedKeys(mergedProcessed)
+
+
+
     } catch (e) {
       logger.error('Error in processing block: ', e)
     }
