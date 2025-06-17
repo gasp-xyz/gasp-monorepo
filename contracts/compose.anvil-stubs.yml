@@ -1,6 +1,6 @@
 services:
   eth-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    image: gaspxyz/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6
     platform: linux/amd64
     ports:
       - 8545:8545
@@ -14,7 +14,7 @@ services:
       retries: 3
 
   arbitrum-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    image: gaspxyz/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6
     platform: linux/amd64
     ports:
       - 8546:8545
@@ -28,7 +28,7 @@ services:
       retries: 3
 
   base-stub:
-    image: ghcr.io/foundry-rs/foundry:nightly-2f4b5dbe7f04d974bf99625325200d214089ee66
+    image: gaspxyz/foundry:nightly-c2e529786c07ee7069cefcd4fe2db41f0e46cef6
     platform: linux/amd64
     ports:
       - 8547:8545

@@ -68,9 +68,9 @@ pub enum L1Error {
     InvalidRange,
     #[error("Overflow error")]
     OverflowError,
-    #[error("alloy error")]
+    #[error("alloy error {0:?}")]
     Alloy(#[from] alloy::contract::Error),
-    #[error("alloy error")]
+    #[error("alloy error {0:?}")]
     TransportAlloy(#[from] alloy::transports::TransportError),
     #[error("transaction error")]
     TxSendError(#[from] PendingTransactionError),

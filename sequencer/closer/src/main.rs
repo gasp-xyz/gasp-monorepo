@@ -50,6 +50,16 @@ pub async fn main() -> anyhow::Result<()> {
         l1api::RolldownContract::new(provider.clone(), args.rolldown_contract_address)
     };
 
+    let p = provider.clone();
+    if let Some(port) = args.prometheus_port {
+        let _balance = tokio::spawn(async move {
+            common::report_account_balance(p).await;
+        });
+        let _metrics = tokio::spawn(async move {
+            common::serve_metrics(port).await;
+        });
+    }
+
     let cicka = args
         .cicka_address
         .map(|addr| l1api::cicka::Cicka::new(provider.clone(), addr));
