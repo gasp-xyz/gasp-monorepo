@@ -99,7 +99,7 @@ pub async fn main() -> Result<(), Error> {
             l2.clone(),
             filter_input,
             to_executor,
-            args.enabled.into_iter().collect(),
+            args.enabled.clone().into_iter().collect(),
         )
     };
 
@@ -113,6 +113,12 @@ pub async fn main() -> Result<(), Error> {
             executor,
         )
     };
+
+    for (addr, _) in args.enabled.iter() {
+        if let Err(e) = executor.track_balance(*addr).await{
+            tracing::error!("{}", e);
+        }
+    }
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {

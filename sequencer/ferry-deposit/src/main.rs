@@ -79,7 +79,7 @@ pub async fn main() -> Result<(), Error> {
 
     let mut hunter = { hunter::FerryHunter::new(chain, l1.clone(), l2.clone(), hunter_to_filter) };
 
-    let executor = ferry::Ferry::new(
+    let mut executor = ferry::Ferry::new(
         l1.clone(),
         l2.clone(),
         sender,
@@ -87,6 +87,12 @@ pub async fn main() -> Result<(), Error> {
         args.tx_cost,
         executor,
     );
+
+    for (addr, _) in args.enabled.iter(){
+        if let Err(e) = executor.track_balance(*addr).await{
+            tracing::error!("{}", e);
+        }
+    }
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {
