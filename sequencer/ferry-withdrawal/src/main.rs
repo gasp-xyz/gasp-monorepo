@@ -115,10 +115,11 @@ pub async fn main() -> Result<(), Error> {
     };
 
     for (addr, _) in args.enabled.iter() {
-        if let Err(e) = executor.track_balance(*addr).await{
+        if let Err(e) = executor.track_balance(*addr).await {
             tracing::error!("{}", e);
         }
     }
+    executor.refresh_balances().await?;
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {

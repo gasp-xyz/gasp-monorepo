@@ -88,8 +88,8 @@ pub async fn main() -> Result<(), Error> {
         executor,
     );
 
-    for (addr, _) in args.enabled.iter(){
-        if let Err(e) = executor.track_balance(*addr).await{
+    for (addr, _) in args.enabled.iter() {
+        if let Err(e) = executor.track_balance(*addr).await {
             tracing::error!("{}", e);
         }
     }
