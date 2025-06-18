@@ -93,6 +93,7 @@ pub async fn main() -> Result<(), Error> {
             tracing::error!("{}", e);
         }
     }
+    executor.refresh_balances().await?;
 
     if let Some(port) = args.prometheus_port {
         let _balance = tokio::spawn(async move {
