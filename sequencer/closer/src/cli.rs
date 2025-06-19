@@ -54,4 +54,7 @@ pub struct Cli {
 
     #[arg(long, default_value_t = false, env = "COLORS")]
     pub colors: bool,
+
+    #[arg(long, env = "PROMETHEUS_PORT")]
+    pub prometheus_port: Option<u16>,
 }

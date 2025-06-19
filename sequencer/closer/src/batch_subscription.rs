@@ -7,9 +7,9 @@ use tokio::time::{timeout, Duration};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("L1 error")]
+    #[error("L1 error {0:?}")]
     L1(#[from] L1Error),
-    #[error("L2 error")]
+    #[error("L2 error {0:?}")]
     L2(#[from] L2Error),
     #[error("Sink send error")]
     NoBatchForL2RequestId(#[from] mpsc::error::SendError<Withdrawal>),
