@@ -14,6 +14,10 @@ import { ZERO } from '../util/Misc.js'
 const ETHEREUM_ID = 'ethereum'
 const ETH_DECIMALS = new Decimal(1e18)
 
+export const initService = async (base: number = BASE_TOKEN) => {
+  await prepareKusama()
+  await processPrices(base)
+}
 
 export const processPrices = async (base: number): Promise<Map<number, number>> => {
   // we will price in all assets until head, if an asset can't be priced it is safe to use head as latest
