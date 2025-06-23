@@ -53,21 +53,21 @@ export const initService = async () => {
       timings.saveLatest = Date.now() - stepStart
 
       stepStart = Date.now()
-      let processedByPoolRates = await poolRatesService.processRates();
+      // let processedByPoolRates = await poolRatesService.processRates();
       timings.poolRates = Date.now() - stepStart
 
       stepStart = Date.now()
-      let processedByPriceService = await priceService.processPrices(1);
+      // let processedByPriceService = await priceService.processPrices(1);
       timings.priceService = Date.now() - stepStart
 
       stepStart = Date.now()
-      const mergedProcessed = new Map([...processedByPoolRates])
-      for (const [key, value] of processedByPriceService) {
-        if (!mergedProcessed.has(key) || value < mergedProcessed.get(key)) {
-          mergedProcessed.set(key, value)
-        }
-      }
-      await store.removeUnusedKeys(mergedProcessed)
+      // const mergedProcessed = new Map([...processedByPoolRates])
+      // for (const [key, value] of processedByPriceService) {
+      //   if (!mergedProcessed.has(key) || value < mergedProcessed.get(key)) {
+      //     mergedProcessed.set(key, value)
+      //   }
+      // }
+      // await store.removeUnusedKeys(mergedProcessed)
       timings.removeUnusedKeys = Date.now() - stepStart
 
       const totalTime = Date.now() - blockStart

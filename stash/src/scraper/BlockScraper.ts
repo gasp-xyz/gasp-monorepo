@@ -58,7 +58,13 @@ export const withBlocks = async (
     }
 
     store.setBatchMode(current, last)
+
+    let stepStart = Date.now()
     const block = await getBlockByNumber(api, current)
+    let timings = Date.now() - stepStart
+    logger.debug(`Fetch block time : ${timings}`)
+
+
     await fn(block)
 
     metrics.tick()
