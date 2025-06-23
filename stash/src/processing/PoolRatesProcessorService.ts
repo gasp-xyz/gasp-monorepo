@@ -9,10 +9,10 @@ export const initService = async () => {
   await processRates()
 }
 
-export const processRates = async (): Promise<Map<number, number>>  => {
+export const processRates = async (): Promise<Map<number, number>> => {
   const head = (await chainStore.getLatest()).timestamp
   const assets = await chainStore.getAssets()
-  const latestProcessed = new Map<number, number>();
+  const latestProcessed = new Map<number, number>()
   logger.info(`PoolRatesService: have assets: ${assets}`)
   for (const asset of assets) {
     logger.info(`PoolRatesService: processing asset ${asset}`)

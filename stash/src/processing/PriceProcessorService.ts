@@ -19,12 +19,14 @@ export const initService = async (base: number = BASE_TOKEN) => {
   await processPrices(base)
 }
 
-export const processPrices = async (base: number): Promise<Map<number, number>> => {
+export const processPrices = async (
+  base: number,
+): Promise<Map<number, number>> => {
   // we will price in all assets until head, if an asset can't be priced it is safe to use head as latest
   const head = (await chainStore.getLatest()).timestamp
   const assets = await getAssets(base)
   const pricedIn = [base]
-  const latestProcessed = new Map<number, number>();
+  const latestProcessed = new Map<number, number>()
 
   logger.debug(`PriceService: have assets: ${assets}`)
   for (const asset of assets) {
@@ -57,7 +59,6 @@ export const processPrices = async (base: number): Promise<Map<number, number>> 
       )
       await priceStore.saveLatest(asset.id, head)
     }
-
   }
   return latestProcessed
 }
