@@ -1,15 +1,16 @@
 name: rollup
 
 include:
-  - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
+  # - path: ./contracts/compose.anvil-stubs.yml # anvil stubs
   # - path: ./contracts/compose.reth-stubs.yml # reth stubs
-  - path: ./avs-aggregator/compose.yml
-  - path: ./gasp-avs/compose.yml
-  - path: ./gasp-node/compose.yml
+  # - path: ./avs-aggregator/compose.yml
+  # - path: ./gasp-avs/compose.yml
+  # - path: ./gasp-node/compose.yml
+  - path: ./gasp-node/prod.yml
   # - path: ./gasp-node/compose.persistent.yml # uncomment to use persistent gasp-node storage volumes
-  - path: ./sequencer/compose.yml
-  - path: ./contracts/compose.yml
-  - path: ./updater/compose.yml
+  # - path: ./sequencer/compose.yml
+  # - path: ./contracts/compose.yml
+  # - path: ./updater/compose.yml
   # - path: ./ferry-deposit/compose.yml
   # - path: ./ferry-withdrawal/compose.yml
-  # - path: ./stash/compose.yml
+  - path: ./stash/compose.yml

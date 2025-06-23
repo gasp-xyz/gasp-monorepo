@@ -14,13 +14,14 @@ import logger from '../util/Logger.js'
 export const initService = async () => {
   const api = await MangataClient.api()
 
-  const latestBlock = (await store.getLatest()).block
-  // const latestBlock = 3719278
+  // const latestBlock = (await store.getLatest()).block
+  const latestBlock = 2500000
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
-      if (process.env.SAVE_EVENTS === 'true') {
-        await blocks.processEvents(block)
-      }
+      // if (process.env.SAVE_EVENTS === 'true') {
+      //   await blocks.processEvents(block)
+      // }
+      //
       await withdrawals.processWithdrawalEvents(api, block)
       await deposits.processFerriedDepositEvents(api, block)
       await pools.fetchPools(block)
@@ -33,15 +34,15 @@ export const initService = async () => {
         block: block.number,
       })
       //
-      let processedByPoolRates = await poolRatesService.processRates();
-      let processedByPriceService = await priceService.processPrices(1);
-      const mergedProcessed = new Map([...processedByPoolRates])
-      for (const [key, value] of processedByPriceService) {
-        if (!mergedProcessed.has(key) || value < mergedProcessed.get(key)) {
-          mergedProcessed.set(key, value)
-        }
-      }
-      await store.removeUnusedKeys(mergedProcessed)
+      // let processedByPoolRates = await poolRatesService.processRates();
+      // let processedByPriceService = await priceService.processPrices(1);
+      // const mergedProcessed = new Map([...processedByPoolRates])
+      // for (const [key, value] of processedByPriceService) {
+      //   if (!mergedProcessed.has(key) || value < mergedProcessed.get(key)) {
+      //     mergedProcessed.set(key, value)
+      //   }
+      // }
+      // await store.removeUnusedKeys(mergedProcessed)
 
 
 
