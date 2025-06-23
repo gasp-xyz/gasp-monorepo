@@ -3,6 +3,11 @@ services:
     build: .
     image: gaspxyz/stash:${STASH_VERSION:-local}
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - collator
     # depends_on:
     #   eth-contracts-deployment:
     #     condition: service_completed_successfully
@@ -16,7 +21,7 @@ services:
       MGX_AIRDROP_SNAPSHOTS: ${MGX_AIRDROP_SNAPSHOTS}
       MGX_TOKEN_ID: ${MGX_TOKEN_ID:-0}
       TOKEN_FOR_PRICE_ID: ${TOKEN_FOR_PRICE_ID:-1}
-      GAE_APPLICATION: ${GAE_APPLICATION:-smth}
+      GAE_APPLICATION: ""
       COINGECKO_API_KEY: ${COINGECKO_API_KEY}
       CAPTCHA_SITEKEY: ${CAPTCHA_SITEKEY}
       CAPTCHA_SECRET: ${CAPTCHA_SECRET}
@@ -25,6 +30,8 @@ services:
       GASPV2_TOKEN_ADDRESS: ${GASPV2_TOKEN_ADDRESS:-5620cDb94BaAaD10c20483bd8705DA711b2Bc0a3}
       CONTRACT_ADDRESS_ETH: ${CONTRACT_ADDRESS_ETH:-cbEAF3BDe82155F56486Fb5a1072cb8baAf547cc}
       CONTRACT_ADDRESS_ARB: ${CONTRACT_ADDRESS_ARB:-Dc64a140Aa3E981100a9becA4E685f962f0cF6C9}
+      CONTRACT_ADDRESS_BASE: ${CONTRACT_ADDRESS_BASE:-Dc64a140Aa3E981100a9becA4E685f962f0cF6C9}
+      CONTRACT_ADDRESS_SONIC: ${CONTRACT_ADDRESS_SONIC:-Dc64a140Aa3E981100a9becA4E685f962f0cF6C9}
       ETH_CHAIN_URL: ${ETH_CHAIN_URL:-https://evm-node-eth-frontend.gasp.xyz}
       ARBITRUM_SEPOLIA_CHAIN_URL: ${ARBITRUM_SEPOLIA_CHAIN_URL:-https://evm-node-arb-frontend.gasp.xyz}
       ENVIRONMENT: ${ENVIRONMENT:-frontend}
@@ -37,7 +44,7 @@ services:
       SAVE_EVENTS: ${SAVE_EVENTS:-false}
 
   redis:
-    image: gaspxyz/redis-stash-test-data:stable
+    image: redis/redis-stack-server
     ports:
       - 6379:6379
-      - 8001:8001 # Redis Insight UI: http://localhost:8001
+      # - 8001:8001 # Redis Insight UI: http://localhost:8001
