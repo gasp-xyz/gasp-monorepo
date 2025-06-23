@@ -98,7 +98,7 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
   })
 
   const poolEntriesProcessStart = performance.now()
-  const poolEntries = (await Promise.all(filteredPools)).filter(
+  const poolEntries = filteredPools.filter(
     (p) => p.amounts[0].gt(ZERO) && p.amounts[1].gt(ZERO),
   )
   const poolEntriesProcessEnd = performance.now()
