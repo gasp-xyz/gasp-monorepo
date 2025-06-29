@@ -12,7 +12,6 @@ services:
     environment:
       CHAIN_ID: ${CHAIN_ID:-31337}
       RUST_LOG: info
-      ETH_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
       ETH_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
       AVS_RPC_URL: ${AVS_RPC_URL:-http://avs-aggregator:8090}
       AVS_REGISTRY_COORDINATOR_ADDR: 0xf5059a5D33d5853360D16C683c16e67980206f36
