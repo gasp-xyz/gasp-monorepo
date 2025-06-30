@@ -1,4 +1,6 @@
 import MangataClient from '../connector/MangataNode.js'
+import * as poolRatesService from '../processing/PoolRatesProcessorService.js'
+import * as priceService from '../processing/PriceProcessorService.js'
 import * as store from '../repository/ChainRepository.js'
 import * as blocks from '../scraper/BlockScraper.js'
 import * as deposits from '../scraper/DepositScraper.js'
@@ -12,22 +14,27 @@ export const initService = async () => {
   const api = await MangataClient.api()
 
   const latestBlock = (await store.getLatest()).block
-  // const latestBlock = 3719278
+  // const latestBlock = 1500000
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
-      if (process.env.SAVE_EVENTS === 'true') {
-        await blocks.processEvents(block)
-      }
-      await withdrawals.processWithdrawalEvents(api, block)
-      await deposits.processFerriedDepositEvents(api, block)
-      await pools.fetchPools(block)
-      await staking.processStaking(api, block)
-      await staking.processLiquidStaking(api, block)
-      await swaps.processSwapEvents(api, block)
+
+      let blockStart = Date.now()
+      await Promise.all([
+        withdrawals.processWithdrawalEvents(api, block),
+        deposits.processFerriedDepositEvents(api, block),
+        pools.fetchPools(block),
+        staking.processStaking(api, block),
+        staking.processLiquidStaking(api, block),
+        swaps.processSwapEvents(api, block)
+      ]);
+
       await store.saveLatest({
         timestamp: block.timestamp,
         block: block.number,
       })
+
+      const totalTime = Date.now() - blockStart
+      logger.info(`Block ${block.number} processed in ${totalTime}ms`)
     } catch (e) {
       logger.error('Error in processing block: ', e)
     }

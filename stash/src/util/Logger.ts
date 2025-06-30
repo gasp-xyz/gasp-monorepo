@@ -18,7 +18,7 @@ const logger = winston.createLogger({
     winston.format.splat(),
     winston.format.simple(),
   ),
-  level: 'debug',
+  level: process.env.LOG_LEVEL || 'warn',
   transports: [
     process.env.GAE_APPLICATION
       ? loggingWinston

@@ -8,6 +8,68 @@ import { CodecOrArray, toHuman } from '../util/Chain.js'
 import logger from '../util/Logger.js'
 import { Metrics } from '../util/Metrics.js'
 
+class AsyncBlockBuffer {
+  private queue: Block[] = []
+  private readonly bufferSize: number
+  private readonly api: ApiPromise
+  private fillInProgress = false
+  private currentBlockNumber: number
+
+  constructor(api: ApiPromise, startBlock: number, bufferSize = 5) {
+    this.api = api
+    this.currentBlockNumber = startBlock
+    this.bufferSize = bufferSize
+  }
+
+  async initialize() {
+    await this.fillBuffer()
+  }
+
+  async getNextBlock(): Promise<Block | null> {
+    if (this.queue.length === 0) {
+      return null
+    }
+
+    const block = this.queue.shift()!
+    this.fillBuffer()
+    return block
+  }
+
+  private async fillBuffer() {
+    if (this.fillInProgress || this.queue.length >= this.bufferSize) {
+      return
+    }
+
+    this.fillInProgress = true
+    try {
+      const blocksToFetch = this.bufferSize - this.queue.length
+      const fetchPromises: Promise<Block>[] = []
+
+      for (let i = 0; i < blocksToFetch; i++) {
+        const blockNumber = this.currentBlockNumber + i
+        fetchPromises.push(getBlockByNumber(this.api, blockNumber))
+      }
+
+      const blocks = await Promise.all(fetchPromises)
+      this.queue.push(...blocks)
+      this.currentBlockNumber += blocks.length
+      logger.info(`current block number in buffer: ${this.currentBlockNumber}`)
+    } catch (error) {
+      logger.error('Error filling block buffer:', error)
+    } finally {
+      this.fillInProgress = false
+    }
+  }
+
+  isEmpty(): boolean {
+    return this.queue.length === 0
+  }
+
+  size(): number {
+    return this.queue.length
+  }
+}
+
 export const BLOCK_TIME = 6000
 
 export interface Block {
@@ -41,6 +103,8 @@ export const withBlocks = async (
   const metrics = new Metrics('BlockScraper')
   let last = 0
   let current = from
+  const buffer = new AsyncBlockBuffer(api, from, 5)
+
   const unsub = await api.rpc.chain.subscribeFinalizedHeads(async (head) => {
     const headBlock = await getBlockByHash(
       api,
@@ -51,15 +115,34 @@ export const withBlocks = async (
     logger.debug(`BlockScraper: new head ${last}`)
   })
 
+  await buffer.initialize()
+
   // infinite
   while (last >= 0) {
     if (current >= last) {
       await new Promise((f) => setTimeout(f, BLOCK_TIME))
+      continue
     }
 
     store.setBatchMode(current, last)
-    const block = await getBlockByNumber(api, current)
+
+    let stepStart = Date.now()
+    const block = await buffer.getNextBlock()
+    if (!block) {
+      await new Promise((f) => setTimeout(f, BLOCK_TIME))
+      continue
+    }
+    let timings = Date.now() - stepStart
+    logger.debug(`Fetch block time : ${timings}`)
+
+
+    stepStart = Date.now()
     await fn(block)
+    let processingTime = Date.now() - stepStart
+
+    if (block.number % 100 === 0) {
+      logger.warn(`Block #${block.number} processed in ${processingTime}ms`)
+    }
 
     metrics.tick()
     current++

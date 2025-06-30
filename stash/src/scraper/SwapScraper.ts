@@ -105,7 +105,7 @@ export const processDataForVolumeHistory = async (
   event: Event,
 ) => {
   logger.info('Entered processDataForVolumeHistory')
-  const totalAmountIn = String((event.data as any).totalAmountIn)
+  const totalAmountIn = String((event.data as any).totalAmountIn ? (event.data as any).totalAmountIn : (event.data as any).swaps[0].amountIn)
   let isFirstSwap = true
   // Implementation for processing data for volume history
   for (const swap of (event.data as any).swaps) {
@@ -271,7 +271,7 @@ export const processDataForTVLHistory = async (
   event: Event,
 ) => {
   logger.info('Entered processDataForTVLHistory')
-  const totalAmountIn = String((event.data as any).totalAmountIn)
+  const totalAmountIn = String((event.data as any).totalAmountIn ? (event.data as any).totalAmountIn : (event.data as any).swaps[0].amountIn)
   let isFirstSwap = true
   // Implementation for processing data for TVL history
   for (const swap of (event.data as any).swaps) {
@@ -440,8 +440,7 @@ export async function calculateVolume(
 ): Promise<number> {
   try {
     const price = await getTokenPrice(tokenId)
-    console.log('price of the token', price)
-    if (price == null) {
+    if (price === null || price === undefined) {
       throw new Error(`Token price for token id ${tokenId} is null`)
     }
     const currentPrice = price.toString()
