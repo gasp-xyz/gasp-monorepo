@@ -13,8 +13,10 @@ import logger from '../util/Logger.js'
 export const initService = async () => {
   const api = await MangataClient.api()
 
-  const latestBlock = (await store.getLatest()).block
-  // const latestBlock = 1500000
+  const latestBlock = process.env.START_BLOCK ? parseInt(process.env.START_BLOCK, 10) : (await store.getLatest()).block
+  if (process.env.START_BLOCK) {
+    logger.warn(`Starting from block ${latestBlock} (override via START_BLOCK environment variable)`)
+  }
   await blocks.withBlocks(api, latestBlock, async (block) => {
     try {
 
