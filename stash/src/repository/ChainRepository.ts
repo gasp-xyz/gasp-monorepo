@@ -133,6 +133,16 @@ export const getPools = async (
     })
 }
 
+export const removeUnusedKeys = async (poolTimestamps: Map<number, number>) => {
+  const trx = redis.client.multi()
+
+  for (const [poolId, timestamp] of poolTimestamps) {
+    trx.zremrangebyscore(keyPool(poolId), '-inf', `(${timestamp - 300000}`)
+  }
+
+  await trx.exec()
+}
+
 export const getAssets = async (): Promise<Asset[]> => {
   const assets = await redis.client.get(KEY_ASSETS)
   return _.isNull(assets)
