@@ -74,10 +74,6 @@ Data in this service are managed by
 
 `gcloud compute ssh port-forward-vm --zone=europe-west6-a -- -N -L 6379:REPLACE_WITH_REDIS_INERNAL_IP:6379`
 
-### FRONTEND
-
-`10.15.245.67`
-
 ### HOLESKY
 
 `10.37.94.163`
@@ -95,7 +91,7 @@ gcloud auth application-default login
 git config --global diff.sopsdiffer.textconv "sops -d --config /dev/null"
 
 # To edit secrets.enc.yaml file run next command
-sops frontend.enc.env
+sops holesky.enc.env
 ```
 
 ## Running with Docker Compose
