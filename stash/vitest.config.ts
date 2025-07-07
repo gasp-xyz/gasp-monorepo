@@ -8,7 +8,7 @@ export default defineConfig({
     globalSetup: 'test/globalSetup.ts',
     globalTeardown: 'test/globalTeardown.ts',
     env: {
-      MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-frontend.gasp.xyz',
+      MANGATA_NODE_URL: 'wss://collator-01-ws-rollup-staging.gasp.xyz',
       OLD_MANGATA_NODE_URL: 'wss://kusama-archive.mangata.online',
       REDIS_HOST: 'localhost',
       REDIS_PORT: '6380',
