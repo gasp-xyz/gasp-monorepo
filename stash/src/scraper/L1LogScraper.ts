@@ -1,4 +1,5 @@
 import { ApiPromise } from '@polkadot/api'
+import BN from "bn.js";
 import { setTimeout } from 'timers/promises'
 import { createPublicClient, http, type PublicClientConfig } from 'viem'
 
@@ -32,11 +33,12 @@ export const watchDepositAcceptedIntoQueue = async (
 
   while (keepProcessing) {
     try {
-      const toBlock = await publicClient.getBlockNumber()
+      const latestBlock = await publicClient.getBlockNumber()
       let fromBlock = await getLastProcessedBlock(chainName, 'deposit')
       if (fromBlock === 0n) {
-        fromBlock = toBlock
+        fromBlock = latestBlock
       }
+      const toBlock = fromBlock + 100n < latestBlock ? fromBlock + 100n : latestBlock;
       logger.info({
         message: `Deposit: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })
@@ -104,11 +106,12 @@ export const watchWithdrawalClosed = async (
 
   while (keepProcessing) {
     try {
-      const toBlock = await publicClient.getBlockNumber()
+      const latestBlock = await publicClient.getBlockNumber()
       let fromBlock = await getLastProcessedBlock(chainName, 'withdrawal')
       if (fromBlock === 0n) {
-        fromBlock = toBlock
+        fromBlock = latestBlock
       }
+      const toBlock = fromBlock + 100n < latestBlock ? fromBlock + 100n : latestBlock;
       logger.info({
         message: ` Withdrawal: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
       })

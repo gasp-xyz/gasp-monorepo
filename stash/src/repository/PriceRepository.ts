@@ -6,8 +6,8 @@ import logger from '../util/Logger.js'
 import { API_LIMIT } from '../util/Misc.js'
 import * as redisUtil from '../util/Redis.js'
 
-const PREFIX = '{price}:asset:'
-const PREFIX_LATEST = '{price}:pool:latest:'
+const PREFIX = 'price:asset:'
+const PREFIX_LATEST = 'price:pool:latest:'
 
 const keyPrice = (id: number | string) => PREFIX + id
 const keyLatest = (id: number | string) => PREFIX_LATEST + id

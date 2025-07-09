@@ -5,7 +5,7 @@ import { redis } from '../connector/RedisConnector.js'
 import { Event } from '../scraper/BlockScraper.js'
 import logger from '../util/Logger.js'
 
-const PREFIX = '{chain}:'
+const PREFIX = 'chain:'
 const PREFIX_POOL = PREFIX + 'pool:'
 const KEY_ASSETS = PREFIX + 'assets'
 const KEY_EVENTS = PREFIX + 'events'
