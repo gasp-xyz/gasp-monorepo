@@ -21,6 +21,7 @@ import * as tokenPriceController from './controller/TokenPriceController.js'
 import * as tracingController from './controller/TracingController.js'
 import * as tradingController from './controller/TradingController.js'
 import * as xcmController from './controller/XcmController.js'
+import * as chainRepository from './repository/ChainRepository.js'
 const require = createRequire(import.meta.url)
 const swaggerFile = require('../swagger-output.json')
 
@@ -132,6 +133,16 @@ app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
 
 //key value storage endpoints
 app.post('/key-value/store', keyValueController.store)
+
+// Garbage collection endpoint
+app.post('/gc', async (req: Request, res: Response): Promise<void> => {
+  try {
+    await chainRepository.removeProcessedPoolRates()
+    res.json({ success: true, message: 'Pool rates cleanup completed' })
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
 
 app.use('/doc', swaggerUI.serve, swaggerUI.setup(swaggerFile))
 
