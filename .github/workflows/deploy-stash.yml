@@ -12,12 +12,14 @@ on:
           - holesky
           - staging
           - prod
-  push:
-    branches:
-      - main
-    paths:
-      - "stash/**/*"
-      - ".github/workflows/stash.yml"
+  #The following section will be commented out to 
+  #Disable automatic deployment on merge to main.
+  #push:
+  #  branches:
+  #    - main
+  #  paths:
+  #    - "stash/**/*"
+  #    - ".github/workflows/stash.yml"
 
 permissions:
   contents: 'read'
