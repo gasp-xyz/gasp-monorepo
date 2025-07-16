@@ -55,6 +55,7 @@ export const withBlocks = async (
   while (last >= 0) {
     if (current >= last) {
       await new Promise((f) => setTimeout(f, BLOCK_TIME))
+      continue
     }
 
     store.setBatchMode(current, last)
@@ -91,6 +92,7 @@ const getBlockByNumber = async (api: ApiPromise, n: number) => {
 }
 
 const getBlockByHash = async (api: ApiPromise, hash: BlockHash) => {
+  logger.debug(`BlockScraper: getBlock by hash - ${hash}`)
   const blockRpc = await api.rpc.chain.getBlock(hash)
   const apiAt: ApiDecoration<'promise'> = await api.at(hash)
   const events = await apiAt.query.system.events()

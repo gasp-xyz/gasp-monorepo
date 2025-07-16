@@ -11,7 +11,7 @@ import { API_LIMIT } from '../util/Misc.js'
 import * as redisUtil from '../util/Redis.js'
 import { Asset } from './ChainRepository.js'
 
-const PREFIX = '{rates}:'
+const PREFIX = 'rates:'
 const PREFIX_LATEST = PREFIX + 'latest:'
 
 const keyPair = (base: number | string, target: number | string) =>

@@ -4,8 +4,9 @@ import _ from 'lodash'
 import { redis } from '../connector/RedisConnector.js'
 import { Event } from '../scraper/BlockScraper.js'
 import logger from '../util/Logger.js'
+import * as ratesStore from './PoolRatesRepository.js'
 
-const PREFIX = '{chain}:'
+const PREFIX = 'chain:'
 const PREFIX_POOL = PREFIX + 'pool:'
 const KEY_ASSETS = PREFIX + 'assets'
 const KEY_EVENTS = PREFIX + 'events'
@@ -148,6 +149,25 @@ export const getAssets = async (): Promise<Asset[]> => {
         asset.toString = () => `${asset.id}->[${asset.pool}]`
         return asset
       })
+}
+
+export const removeProcessedPoolRates = async (): Promise<void> => {
+  const assets = await getAssets()
+  
+  logger.info(`Starting pool rates cleanup for ${assets.length} assets`)
+  
+  const trx = redis.client.multi()
+  for (const asset of assets) {
+    const latestTimestamp = await ratesStore.getLatest(asset.id)
+    const cutoffTimestamp = latestTimestamp - (24 * 60 * 60 * 1000) // 24 hours ago in ms
+    const poolKey = keyPool(asset.id)
+    trx.zremrangebyscore(poolKey, '-inf', cutoffTimestamp)
+  }
+  
+  const results = await trx.exec()
+  const removedCount = results?.reduce((sum, result) => sum + (result?.[1] as number || 0), 0) || 0
+  
+  logger.info(`Pool rates cleanup completed. Removed ${removedCount} entries from ${assets.length} pools`)
 }
 
 export interface Asset {
