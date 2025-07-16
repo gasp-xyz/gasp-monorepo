@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Ref: https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md
 
-ARG NODE_VERSION=18.20.7
+ARG NODE_VERSION=22.14.0
 FROM node:${NODE_VERSION} AS build
 # # Install necessary build tools for native addons using apt-get for Debian-based image
 # RUN apt-get update && \

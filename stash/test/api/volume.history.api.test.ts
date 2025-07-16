@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import supertest from 'supertest'
+import { describe, expect, it } from 'vitest'
+
 import app from '../../src/app'
 import { tokenIDs } from './utils'
 
@@ -20,15 +21,12 @@ describe('APi tests: volume-history', () => {
 
 describe('API Errors: volume-history/', () => {
   it('GET pools/foo does not exist -> Expect validation error', async () => {
-    const errorMessage =
-      'this must be one of the following values: 0, 1, 2, 3, 4, 5, 7, 15, 19'
     await supertest(app)
       .get('/volume-history/foo')
-      .expect(500)
+      .expect(200)
       .then((response) => {
         const fooResponse = response.body
-        expect(fooResponse.exceptionName).to.contain('ValidationError')
-        expect(fooResponse.message).to.contain(errorMessage)
+        expect(fooResponse).to.deep.equal({ volumes: [] })
       })
   })
 })

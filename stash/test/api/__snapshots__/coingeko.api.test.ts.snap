@@ -3,137 +3,194 @@
 exports[`Snapshots tests: Coingeko > GET /pairs - Schema validation > Pairs 1`] = `
 [
   {
-    "base": "GASPV2",
+    "base": "GOLD",
     "pool_id": "5",
-    "target": "ETH",
-    "ticker_id": "GASPV2_ETH",
+    "target": "GETH",
+    "ticker_id": "GOLD_GETH",
   },
   {
-    "base": "L1Asset",
-    "pool_id": "6",
-    "target": "ETH",
-    "ticker_id": "L1Asset_ETH",
-  },
-  {
-    "base": "L1Asset",
+    "base": "SLVR",
     "pool_id": "7",
-    "target": "GASPV2",
-    "ticker_id": "L1Asset_GASPV2",
+    "target": "COPP",
+    "ticker_id": "SLVR_COPP",
   },
   {
-    "base": "GASPV2",
-    "pool_id": "8",
-    "target": "L1Asset",
-    "ticker_id": "GASPV2_L1Asset",
+    "base": "GASP",
+    "pool_id": "10",
+    "target": "GETH",
+    "ticker_id": "GASP_GETH",
   },
   {
-    "base": "L1Asset",
-    "pool_id": "18",
-    "target": "L1Asset",
-    "ticker_id": "L1Asset_L1Asset",
+    "base": "USDT",
+    "pool_id": "12",
+    "target": "GETH",
+    "ticker_id": "USDT_GETH",
   },
   {
-    "base": "ETH",
-    "pool_id": "19",
-    "target": "L1Asset",
-    "ticker_id": "ETH_L1Asset",
+    "base": "SLVR",
+    "pool_id": "15",
+    "target": "PLAT",
+    "ticker_id": "SLVR_PLAT",
   },
   {
-    "base": "L1Asset",
+    "base": "DEEPSEEK AI",
     "pool_id": "20",
-    "target": "L1Asset",
-    "ticker_id": "L1Asset_L1Asset",
+    "target": "PEPE",
+    "ticker_id": "DEEPSEEK AI_PEPE",
+  },
+  {
+    "base": "PEPE",
+    "pool_id": "21",
+    "target": "LINK",
+    "ticker_id": "PEPE_LINK",
+  },
+  {
+    "base": "GETH",
+    "pool_id": "22",
+    "target": "SLVR",
+    "ticker_id": "GETH_SLVR",
+  },
+  {
+    "base": "PLAT",
+    "pool_id": "23",
+    "target": "GOLD",
+    "ticker_id": "PLAT_GOLD",
+  },
+  {
+    "base": "LINK",
+    "pool_id": "24",
+    "target": "GOLD",
+    "ticker_id": "LINK_GOLD",
   },
 ]
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 1`] = `
 {
-  "base_currency": "GASPV2",
+  "base_currency": "GOLD",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
   "pool_id": "5",
-  "target_currency": "ETH",
+  "target_currency": "GETH",
   "target_volume": Any<String>,
-  "ticker_id": "GASPV2_ETH",
+  "ticker_id": "GOLD_GETH",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 2`] = `
 {
-  "base_currency": "L1Asset",
+  "base_currency": "SLVR",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "6",
-  "target_currency": "ETH",
+  "pool_id": "7",
+  "target_currency": "COPP",
   "target_volume": Any<String>,
-  "ticker_id": "L1Asset_ETH",
+  "ticker_id": "SLVR_COPP",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 3`] = `
 {
-  "base_currency": "L1Asset",
+  "base_currency": "GASP",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "7",
-  "target_currency": "GASPV2",
+  "pool_id": "10",
+  "target_currency": "GETH",
   "target_volume": Any<String>,
-  "ticker_id": "L1Asset_GASPV2",
+  "ticker_id": "GASP_GETH",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 4`] = `
 {
-  "base_currency": "GASPV2",
+  "base_currency": "USDT",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "8",
-  "target_currency": "L1Asset",
+  "pool_id": "12",
+  "target_currency": "GETH",
   "target_volume": Any<String>,
-  "ticker_id": "GASPV2_L1Asset",
+  "ticker_id": "USDT_GETH",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 5`] = `
 {
-  "base_currency": "L1Asset",
+  "base_currency": "SLVR",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "18",
-  "target_currency": "L1Asset",
+  "pool_id": "15",
+  "target_currency": "PLAT",
   "target_volume": Any<String>,
-  "ticker_id": "L1Asset_L1Asset",
+  "ticker_id": "SLVR_PLAT",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 6`] = `
 {
-  "base_currency": "ETH",
+  "base_currency": "DEEPSEEK AI",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "19",
-  "target_currency": "L1Asset",
+  "pool_id": "20",
+  "target_currency": "PEPE",
   "target_volume": Any<String>,
-  "ticker_id": "ETH_L1Asset",
+  "ticker_id": "DEEPSEEK AI_PEPE",
 }
 `;
 
 exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 7`] = `
 {
-  "base_currency": "L1Asset",
+  "base_currency": "PEPE",
   "base_volume": Any<String>,
   "last_price": Any<String>,
   "liquidity_in_usd": Any<String>,
-  "pool_id": "20",
-  "target_currency": "L1Asset",
+  "pool_id": "21",
+  "target_currency": "LINK",
   "target_volume": Any<String>,
-  "ticker_id": "L1Asset_L1Asset",
+  "ticker_id": "PEPE_LINK",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 8`] = `
+{
+  "base_currency": "GETH",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "22",
+  "target_currency": "SLVR",
+  "target_volume": Any<String>,
+  "ticker_id": "GETH_SLVR",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 9`] = `
+{
+  "base_currency": "PLAT",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "23",
+  "target_currency": "GOLD",
+  "target_volume": Any<String>,
+  "ticker_id": "PLAT_GOLD",
+}
+`;
+
+exports[`Snapshots tests: Coingeko > GET /tickers - Schema validation 10`] = `
+{
+  "base_currency": "LINK",
+  "base_volume": Any<String>,
+  "last_price": Any<String>,
+  "liquidity_in_usd": Any<String>,
+  "pool_id": "24",
+  "target_currency": "GOLD",
+  "target_volume": Any<String>,
+  "ticker_id": "LINK_GOLD",
 }
 `;

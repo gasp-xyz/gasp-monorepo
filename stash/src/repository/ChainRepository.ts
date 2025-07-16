@@ -1,10 +1,11 @@
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
+
 import { redis } from '../connector/RedisConnector.js'
 import { Event } from '../scraper/BlockScraper.js'
 import logger from '../util/Logger.js'
 
-const PREFIX = 'chain:'
+const PREFIX = '{chain}:'
 const PREFIX_POOL = PREFIX + 'pool:'
 const KEY_ASSETS = PREFIX + 'assets'
 const KEY_EVENTS = PREFIX + 'events'
@@ -69,7 +70,7 @@ export const saveEvents = async (event: EventEntry) => {
 
 export const getEvents = async (
   latest: number,
-  to: number
+  to: number,
 ): Promise<EventEntry[]> => {
   const stored = await redis.client.zrangebyscore(
     KEY_EVENTS,
@@ -77,7 +78,7 @@ export const getEvents = async (
     to,
     'LIMIT',
     0,
-    LIMIT
+    LIMIT,
   )
   return stored
     .map((s) => JSON.parse(s))
@@ -108,7 +109,7 @@ export const savePools = async (pools: PoolEntry[]) => {
 export const getPools = async (
   poolId: number,
   from: number,
-  to: number = -1
+  to: number = -1,
 ): Promise<PoolEntry[]> => {
   const max = to === -1 ? '+inf' : to
   const stored = await redis.client.zrangebyscore(
@@ -117,7 +118,7 @@ export const getPools = async (
     max,
     'LIMIT',
     0,
-    LIMIT
+    LIMIT,
   )
   return stored
     .map((s) => JSON.parse(s))

@@ -1,17 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { ApiPromise } from '@polkadot/api'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { redis } from '../src/connector/RedisConnector'
+import { swapRepository } from '../src/repository/TransactionRepository'
 import {
   calculateVolume,
+  checkKey,
   decimalsFromTokenId,
   processDataForDashboard,
-  processDataForVolumeHistory,
   processDataForTVLHistory,
-  checkKey,
+  processDataForVolumeHistory,
 } from '../src/scraper/SwapScraper'
-import { swapRepository } from '../src/repository/TransactionRepository'
-import logger from '../src/util/Logger'
-import { ApiPromise } from '@polkadot/api'
 import * as tokenPriceService from '../src/service/TokenPriceService'
-import { timeseries } from '../src/connector/RedisConnector'
+import logger from '../src/util/Logger'
 
 vi.mock('../src/repository/TransactionRepository')
 vi.mock('../src/util/Logger')
@@ -131,7 +132,7 @@ describe('process dashboard events', () => {
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
       'Error processing data for a specific swap for dashboard:',
-      error
+      error,
     )
   })
 })
@@ -163,6 +164,7 @@ describe('volume history events', () => {
     mockEvent = {
       data: {
         who: '0x0404040404040404040404040404040404040404',
+        totalAmountIn: '40648650414565365',
         swaps: [
           {
             poolId: 6,
@@ -180,134 +182,134 @@ describe('volume history events', () => {
     await processDataForVolumeHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      'Entered processDataForVolumeHistory'
+      'Entered processDataForVolumeHistory',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       2,
       'Swap data:',
-      expect.any(Object)
+      expect.any(Object),
     )
     const poolId = 6
     const key = `trades:pool:${poolId}`
-    const [timestamp, value] = (await timeseries.client.call(
-      'TS.GET',
-      key
-    )) as [string, string]
+    const [timestamp, value] = (await redis.client.call('TS.GET', key)) as [
+      string,
+      string,
+    ]
     console.log(`Timestamp: ${timestamp}, Value: ${value}`)
     expect(logger.info).toHaveBeenNthCalledWith(
       3,
-      `Fetched pool volume for 6, latest value from the database is : ${value}`
+      `Fetched pool volume for 6, latest value from the database is : ${value}`,
     ) //todo: replace everywhere with value from db
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new volume is =  133.70512668894136 + 0 + 0 but if the price of one token is 0 pool volume stays unchanged'
+      'Formula for poolId 6 new volume is =  133.70512668894136 + 0 + 0 but if the price of one token is 0 pool volume stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
-      'Updated pool volume for 6, new value in the database is : 133.70512668894136'
+      'Updated pool volume for 6, new value in the database is : 133.70512668894136',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       6,
-      'Formula for ALL pools new volume is =  3.0801617002600388 + 0 + 0 but if the price of one token is 0 ALL pool volume stays unchanged'
+      'Formula for ALL pools new volume is =  3.0801617002600388 + 0 + 0 but if the price of one token is 0 ALL pool volume stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       7,
-      'Updated pool volume for ALL: 3.0801617002600388'
+      'Updated pool volume for ALL: 3.0801617002600388',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       8,
-      'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536'
+      'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       9,
-      'Formula for assetId 0 new volume is =  3.0847888679184536 + 0'
+      'Formula for assetId 0 new volume is =  3.0847888679184536 + 0',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       10,
-      'Updated volume for asset with id 0, new value in the database is: 3.0847888679184536'
+      'Updated volume for asset with id 0, new value in the database is: 3.0847888679184536',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       11,
-      'Fetched volume for asset with id 1, value from the database is: 3.075534532601624'
+      'Fetched volume for asset with id 1, value from the database is: 3.075534532601624',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       12,
-      'Formula for assetId 1 new volume is =  3.075534532601624 + 0'
+      'Formula for assetId 1 new volume is =  3.075534532601624 + 0',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       13,
-      'Updated volume for asset with id 1, new value in the database is: 3.075534532601624'
+      'Updated volume for asset with id 1, new value in the database is: 3.075534532601624',
     )
   })
 
-  it('should process volume history when there are prices for tokens', async () => {
+  it('should process volume history when there are prices for tokens', async () => { //check data
     vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(1.22)
     await processDataForVolumeHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      'Entered processDataForVolumeHistory'
+      'Entered processDataForVolumeHistory',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       2,
       'Swap data:',
-      expect.any(Object)
+      expect.any(Object),
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       3,
-      'Fetched pool volume for 6, latest value from the database is : 133.70512668894136'
+      'Fetched pool volume for 6, latest value from the database is : 133.70512668894136',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new volume is =  133.70512668894136 + 0 + 0.024621506869392466 but if the price of one token is 0 pool volume stays unchanged'
+      'Formula for poolId 6 new volume is =  133.70512668894136 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 pool volume stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
-      'Updated pool volume for 6, new value in the database is : 133.77933954931652'
+      'Updated pool volume for 6, new value in the database is : 133.77933954931652',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       6,
-      'Formula for ALL pools new volume is =  3.0801617002600388 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 ALL pool volume stays unchanged'
+      'Formula for ALL pools new volume is =  3.0801617002600388 + 0.04959135350576975 + 0.024621506869392466 but if the price of one token is 0 ALL pool volume stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       7,
-      'Updated pool volume for ALL: 3.154374560635201'
+      'Updated pool volume for ALL: 3.154374560635201',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       8,
-      'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536'
+      'Fetched volume for asset with id 0, value from the database is: 3.0847888679184536',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       9,
-      'Formula for assetId 0 new volume is =  3.0847888679184536 + 0.04959135350576975'
+      'Formula for assetId 0 new volume is =  3.0847888679184536 + 0.04959135350576975',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       10,
-      'Updated volume for asset with id 0, new value in the database is: 3.1343802214242236'
+      'Updated volume for asset with id 0, new value in the database is: 3.1343802214242236',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       11,
-      'Fetched volume for asset with id 1, value from the database is: 3.075534532601624'
+      'Fetched volume for asset with id 1, value from the database is: 3.075534532601624',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       12,
-      'Formula for assetId 1 new volume is =  3.075534532601624 + 0.024621506869392466'
+      'Formula for assetId 1 new volume is =  3.075534532601624 + 0.024621506869392466',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       13,
-      'Updated volume for asset with id 1, new value in the database is: 3.1001560394710164'
+      'Updated volume for asset with id 1, new value in the database is: 3.1001560394710164',
     )
   })
 
   it('should handle errors if a specific swap in  volume history processing fails', async () => {
     const error = new Error('Timeseries error')
-    vi.spyOn(timeseries.client, 'call').mockRejectedValue(
-      new Error('Timeseries error')
+    vi.spyOn(redis.client, 'call').mockRejectedValue(
+      new Error('Timeseries error'),
     )
     await processDataForVolumeHistory(mockApi, mockEvent)
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
       'Error processing data for a specific swap for volume history:',
-      error
+      error,
     )
   })
 })
@@ -341,6 +343,7 @@ describe('TVL history events', () => {
     mockEvent = {
       data: {
         who: '0x0404040404040404040404040404040404040404',
+        totalAmountIn: '40648650414565365',
         swaps: [
           {
             poolId: 6,
@@ -360,60 +363,60 @@ describe('TVL history events', () => {
     await processDataForTVLHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      'Entered processDataForTVLHistory'
+      'Entered processDataForTVLHistory',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       2,
       'Swap data:',
-      expect.any(Object)
+      expect.any(Object),
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       3,
-      'Fetched pool TVL for 6, value in the database is: 11018.218716490845'
+      'Fetched pool TVL for 6, value in the database is: 11018.218716490845',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0 but if the price of one token is 0 pool TVL stays unchanged'
+      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0 but if the price of one token is 0 pool TVL stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
-      'Updated pool TVL for 6, new value in the database is: 11018.218716490845'
+      'Updated pool TVL for 6, new value in the database is: 11018.218716490845',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       6,
-      'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899'
+      'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       7,
-      'Formula for ALL pools new TVL is =  632439770.9843899 + 0 - 0 but if the price of one token is 0 ALL pool TVL stays unchanged'
+      'Formula for ALL pools new TVL is =  632439770.9843899 + 0 - 0 but if the price of one token is 0 ALL pool TVL stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       8,
-      'Updated pool TVL for ALL, new value in the database is: 632439770.9843899'
+      'Updated pool TVL for ALL, new value in the database is: 632439770.9843899',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       9,
-      'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797'
+      'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       10,
-      'Formula for assetId 0 new TVL is =  316215799.41475797 + 0'
+      'Formula for assetId 0 new TVL is =  316215799.41475797 + 0',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       11,
-      'Updated TVL for asset with id 0, new value in the database is: 316215799.41475797'
+      'Updated TVL for asset with id 0, new value in the database is: 316215799.41475797',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       12,
-      'Fetched TVL for asset with id 1, value in the database is : 316131011.7208412'
+      'Fetched TVL for asset with id 1, value in the database is : 316131011.7208412',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       13,
-      'Formula for assetId 1 new TVL is =  316131011.7208412 - 0 but if the formula value is negative, new TVL value will be 0'
+      'Formula for assetId 1 new TVL is =  316131011.7208412 - 0 but if the formula value is negative, new TVL value will be 0',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       14,
-      'Updated TVL for asset with id 1, new value in the database is: 316131011.7208412'
+      'Updated TVL for asset with id 1, new value in the database is: 316131011.7208412',
     )
   })
 
@@ -424,60 +427,60 @@ describe('TVL history events', () => {
     await processDataForTVLHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(
       1,
-      'Entered processDataForTVLHistory'
+      'Entered processDataForTVLHistory',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       2,
       'Swap data:',
-      expect.any(Object)
+      expect.any(Object),
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       3,
-      'Fetched pool TVL for 6, value in the database is: 11018.218716490845'
+      'Fetched pool TVL for 6, value in the database is: 11018.218716490845',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       4,
-      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged'
+      'Formula for poolId 6 new TVL is =  11018.218716490845 + 0.04954176215226398 - 0.024621506869392466 but if the price of one token is 0 pool TVL stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       5,
-      'Updated pool TVL for 6, new value in the database is: 11018.24368633748'
+      'Updated pool TVL for 6, new value in the database is: 11018.243636746127',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       6,
-      'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899'
+      'Fetched pool TVL ALL pools, value in the database is: 632439770.9843899',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       7,
-      'Formula for ALL pools new TVL is =  632439770.9843899 + 0.04959135350576975 - 0.024621506869392466 but if the price of one token is 0 ALL pool TVL stays unchanged'
+      'Formula for ALL pools new TVL is =  632439770.9843899 + 0.04954176215226398 - 0.024621506869392466 but if the price of one token is 0 ALL pool TVL stays unchanged',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       8,
-      'Updated pool TVL for ALL, new value in the database is: 632439771.0093597'
+      'Updated pool TVL for ALL, new value in the database is: 632439771.0093101',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       9,
-      'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797'
+      'Fetched TVL for asset with id 0, value in the database is: 316215799.41475797',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       10,
-      'Formula for assetId 0 new TVL is =  316215799.41475797 + 0.04959135350576975'
+      'Formula for assetId 0 new TVL is =  316215799.41475797 + 0.04954176215226398',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       11,
-      'Updated TVL for asset with id 0, new value in the database is: 316215799.4643493'
+      'Updated TVL for asset with id 0, new value in the database is: 316215799.46429974',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       12,
-      'Fetched TVL for asset with id 1, value in the database is : 316131011.7208412'
+      'Fetched TVL for asset with id 1, value in the database is : 316131011.7208412',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       13,
-      'Formula for assetId 1 new TVL is =  316131011.7208412 - 0.024621506869392466 but if the formula value is negative, new TVL value will be 0'
+      'Formula for assetId 1 new TVL is =  316131011.7208412 - 0.024621506869392466 but if the formula value is negative, new TVL value will be 0',
     )
     expect(logger.info).toHaveBeenNthCalledWith(
       14,
-      'Updated TVL for asset with id 1, new value in the database is: 316131011.69621974'
+      'Updated TVL for asset with id 1, new value in the database is: 316131011.69621974',
     )
   })
 
@@ -485,14 +488,14 @@ describe('TVL history events', () => {
     vi.spyOn(logger, 'error').mockImplementation(() => {})
     vi.spyOn(logger, 'info').mockImplementation(() => {})
     const error = new Error('Timeseries error')
-    vi.spyOn(timeseries.client, 'call').mockRejectedValue(
-      new Error('Timeseries error')
+    vi.spyOn(redis.client, 'call').mockRejectedValue(
+      new Error('Timeseries error'),
     )
     await processDataForTVLHistory(mockApi, mockEvent)
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
       'Error processing data for a specific swap for TVL history:',
-      error
+      error,
     )
   })
 })
@@ -515,7 +518,7 @@ describe('calculateVolume', () => {
     expect(result).toBe(0)
     expect(logger.error).toHaveBeenCalledWith(
       'Error: Unable to retrieve token price data for token id 1',
-      error
+      error,
     )
   })
 })
@@ -557,7 +560,7 @@ describe('decimalsFromTokenId', () => {
 
 describe('checkKey', () => {
   it('should create a new key if it does not exist', async () => {
-    const callSpy = vi.spyOn(timeseries.client, 'call').mockResolvedValue('OK')
+    const callSpy = vi.spyOn(redis.client, 'call').mockResolvedValue('OK')
 
     await checkKey('testKey', ['label1', 'label2'])
 
@@ -570,12 +573,12 @@ describe('checkKey', () => {
       'SUM',
       'LABELS',
       'label1',
-      'label2'
+      'label2',
     )
   })
 
   it('should not create a new key if it already exists', async () => {
-    const callSpy = vi.spyOn(timeseries.client, 'call')
+    const callSpy = vi.spyOn(redis.client, 'call')
 
     await checkKey('testKey', ['label1', 'label2'])
 

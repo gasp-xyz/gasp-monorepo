@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Decimal } from 'decimal.js'
 import _ from 'lodash'
+
 import { Asset, EventEntry, PoolEntry } from '../src/repository/ChainRepository'
 import { TimestampedAmount } from '../src/schema/Models'
 
@@ -78,7 +78,7 @@ export const assets: Asset[] = [
 }))
 
 export const basePrices = RANGE().map(
-  (t) => [t, new Decimal(1)] as TimestampedAmount
+  (t) => [t, new Decimal(1)] as TimestampedAmount,
 )
 
 export const pool = (asset, n1, n2) =>

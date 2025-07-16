@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 
 import * as errorHandler from '../error/Handler.js'
-
 import {
   bodyHistorySchema,
   pathCurrencySchema,
@@ -50,7 +49,7 @@ export const getPrice = async (req: Request, res: Response): Promise<void> => {
 
 export const getHistoryPair = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*
    #swagger.tags = ['Price History Pair']
@@ -103,7 +102,7 @@ export const getHistoryPair = async (
       ids.baseCurrencyId,
       ids.targetCurrencyId,
       args.days,
-      args.interval
+      args.interval,
     )
 
     res.json(response)
@@ -114,7 +113,7 @@ export const getHistoryPair = async (
 
 export const getHistory = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /* #swagger.tags = ['Price History']
    #swagger.summary = 'Get the price history of the token.'
@@ -161,7 +160,7 @@ export const getHistory = async (
     const response = await priceDiscoveryService.priceHistory(
       id.currencyId,
       args.days,
-      args.interval
+      args.interval,
     )
 
     res.json(response)
@@ -172,7 +171,7 @@ export const getHistory = async (
 
 export const getVolumeAsset = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*       #swagger.tags = ['TVL History']
          #swagger.summary = 'Get the trade volume history of the token.'
@@ -215,7 +214,7 @@ export const getVolumeAsset = async (
 }
 export const getVolumePool = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*       #swagger.tags = ['TVL History']
          #swagger.summary = 'Get the TVL history of the pool.'
@@ -259,7 +258,7 @@ export const getVolumePool = async (
 const getVolume = async (
   req: Request,
   res: Response,
-  isPool: boolean
+  isPool: boolean,
 ): Promise<void> => {
   try {
     const id = pathCurrencySchema.validateSync(req.params)
@@ -269,7 +268,7 @@ const getVolume = async (
       id.currencyId,
       isPool,
       args.days,
-      args.interval
+      args.interval,
     )
 
     res.json(response)
@@ -280,7 +279,7 @@ const getVolume = async (
 
 export const getTradesAsset = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*       #swagger.tags = ['Volume History']
           #swagger.summary = 'Get the trade volume history of the token.'
@@ -323,7 +322,7 @@ export const getTradesAsset = async (
 }
 export const getTradesPool = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   /*       #swagger.tags = ['Volume History']
           #swagger.summary = 'Get the trade volume history of the pool. '
@@ -367,7 +366,7 @@ export const getTradesPool = async (
 const getTrades = async (
   req: Request,
   res: Response,
-  isPool: boolean
+  isPool: boolean,
 ): Promise<void> => {
   try {
     const id = pathCurrencySchema.validateSync(req.params)
@@ -377,7 +376,7 @@ const getTrades = async (
       id.currencyId,
       isPool,
       args.days,
-      args.interval
+      args.interval,
     )
 
     res.json(response)

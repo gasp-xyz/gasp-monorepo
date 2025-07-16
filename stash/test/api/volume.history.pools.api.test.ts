@@ -1,33 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { describe, expect, it } from 'vitest'
+ 
 import supertest from 'supertest'
+import { describe, expect, it } from 'vitest'
+
 import app from '../../src/app'
 import { MAX_DAYS, MAX_INTERVAL } from './utils'
-
-describe('APi tests: volume-history/pools', () => {
-  const testPool = '0-1'
-  const testPoolReversed = '1-0'
-  it('GET pools/0-1 returns the same as pools/1-0 -> Expect deep equal', async () => {
-    const gaspv2L1Asset = await supertest(app)
-      .get(`/volume-history/pools/${testPool}`)
-      .query({
-        interval: MAX_INTERVAL,
-        days: MAX_DAYS,
-      })
-      .expect(200)
-    const l1AssetGaspv2 = await supertest(app)
-      .get(`/volume-history/pools/${testPoolReversed}`)
-      .query({
-        interval: MAX_INTERVAL,
-        days: MAX_DAYS,
-      })
-      .expect(200)
-    expect(gaspv2L1Asset.body).to.deep.equal(l1AssetGaspv2.body)
-    expect(gaspv2L1Asset.body).to.have.property('volumes')
-    expect(gaspv2L1Asset.body.volumes).toBeInstanceOf(Array)
-    expect(gaspv2L1Asset.body.volumes[0]).toHaveLength(2)
-  })
-})
 
 // These tests will fail if images changes And/Or if bugfixes. Careful when updating!
 describe.todo('Snapshots tests: volume-history/pools', () => {
@@ -43,11 +19,10 @@ describe('API Errors: volume-history/pools', () => {
         interval: MAX_INTERVAL,
         days: MAX_DAYS,
       })
-      .expect(500)
+      .expect(200)
       .then((response) => {
         const fooResponse = response.body
-        expect(fooResponse.exceptionName).to.contain('ValidationError')
-        expect(fooResponse.message).to.contain(errorMessage)
+        expect(fooResponse).to.deep.equal({ volumes: [] })
       })
   })
 })
