@@ -272,8 +272,13 @@ impl L2Interface for Gasp {
             .rolldown()
             .l2_requests(chain, request_id);
 
-        Ok(self.client.storage().at(at).fetch(&storage).await?.map(
-            |(request, _hash)| match request {
+        Ok(self
+            .client
+            .storage()
+            .at(at)
+            .fetch(&storage.unvalidated())
+            .await?
+            .map(|(request, _hash)| match request {
                 SubxtL2Request::FailedDepositResolution(_deposit) => {
                     todo!()
                 }
@@ -282,8 +287,7 @@ impl L2Interface for Gasp {
                 SubxtL2Request::Cancel(cancel) => {
                     L2Request::Cancel(gasp_types::Cancel::from(cancel))
                 }
-            },
-        ))
+            }))
     }
 
     #[tracing::instrument(level = "trace", skip(self), ret)]
@@ -802,7 +806,7 @@ impl L2Interface for Gasp {
             .client
             .storage()
             .at(at)
-            .fetch(&storage)
+            .fetch(&storage.unvalidated())
             .await?
             .map(|elem| {
                 elem.into_iter()
