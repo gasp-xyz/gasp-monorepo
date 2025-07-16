@@ -28,20 +28,22 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
 
   const liquidityTokenIds = (
     await block.api.query.xyk.liquidityAssets.entries()
-  ).map(([, tokenId]) => {
-    return tokenId.toString()
+  ).map(([key, tokenId]) => {
+    let first = key.args[0][0].toString()
+    let second = key.args[0][1].toString()
+    return [`${first}:${second}`, tokenId] as [string, BN]
   })
 
-  const filteredPools = pools.map(async ([storageKey, poolAssetsAmount]) => {
+  let mapping = new Map(liquidityTokenIds)
+  const filteredPools = pools.map(([storageKey, poolAssetsAmount]) => {
     const amounts = poolAssetsAmount.toHuman() as [string, string]
     const liquidityAssetsInPool = storageKey.args[0].toHuman() as [
       string,
       string,
     ]
-    const liquidityPoolId = await block.api.query.xyk.liquidityAssets([
-      liquidityAssetsInPool[0].toString(),
-      liquidityAssetsInPool[1].toString(),
-    ])
+    const liquidityPoolId = mapping.get(
+      `${liquidityAssetsInPool[0].toString()}:${liquidityAssetsInPool[1].toString()}`,
+    )
     const humanLiquidityPoolId = toHuman(liquidityPoolId)
     const numberLiquidityPoolId = Number(humanLiquidityPoolId)
     const entry: PoolEntry = {
@@ -60,12 +62,12 @@ const getPools = async (block: Block): Promise<PoolEntry[]> => {
     return entry
   })
 
-  const poolEntries = (await Promise.all(filteredPools)).filter(
+  const poolEntries = filteredPools.filter(
     (p) => p.amounts[0].gt(ZERO) && p.amounts[1].gt(ZERO),
   )
 
-  for (const key of liquidityTokenIds) {
-    await checkHasAsset(block, key)
+  for (const [, tokenId] of liquidityTokenIds) {
+    await checkHasAsset(block, tokenId.toString())
   }
 
   return poolEntries
