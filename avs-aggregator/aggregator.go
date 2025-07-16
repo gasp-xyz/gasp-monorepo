@@ -211,6 +211,8 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 		go agg.rpcServer.startServer(ctx, agg.apiKey, runTriggerC)
 	}
 	
+	recordMetrics(agg.logger, agg.ethRpc)
+
 	if agg.startIdle {
 		// blocking wait for the run trigger
 		agg.logger.Infof("ALERT:INFO Aggregator awaiting run trigger.")
@@ -233,8 +235,6 @@ func (agg *Aggregator) Start(ctx context.Context) error {
 	if agg.opStateUpdater != nil {
 		go agg.opStateUpdater.startAsyncOpStateUpdater(ctx, sendNewOpTaskC, asyncOpStateUpdaterErrorC)
 	}
-
-	recordMetrics(agg.logger, agg.ethRpc)
 
 	var sub *gsrpcrpcchain.NewHeadsSubscription
 	const maxRetries = 5
