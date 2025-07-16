@@ -16,8 +16,8 @@ import (
 	taskmanager "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/bindings/FinalizerTaskManager"
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core"
 
-	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	blsagg "github.com/Layr-Labs/eigensdk-go/services/bls_aggregation"
 	"github.com/Layr-Labs/eigensdk-go/types"
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -35,31 +35,31 @@ var (
 )
 
 type RpcServer struct {
-	logger      logging.Logger
-	tasks                    map[sdktypes.TaskId]interface{}
-	tasksMu                  *sync.RWMutex
-	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
-	taskResponsesMu          *sync.RWMutex
-	blsAggregationService    blsagg.BlsAggregationService
-	serverIpPortAddr   string
+	logger                logging.Logger
+	tasks                 map[sdktypes.TaskId]interface{}
+	tasksMu               *sync.RWMutex
+	taskResponses         map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{}
+	taskResponsesMu       *sync.RWMutex
+	blsAggregationService blsagg.BlsAggregationService
+	serverIpPortAddr      string
 }
 
 func NewRpcServer(
-	logger      logging.Logger,
-	tasks                    map[sdktypes.TaskId]interface{},
-	tasksMu                  *sync.RWMutex,
-	taskResponses            map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{},
-	taskResponsesMu          *sync.RWMutex,
-	blsAggregationService    blsagg.BlsAggregationService,
-	serverIpPortAddr   string,) (*RpcServer, error) {
+	logger logging.Logger,
+	tasks map[sdktypes.TaskId]interface{},
+	tasksMu *sync.RWMutex,
+	taskResponses map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{},
+	taskResponsesMu *sync.RWMutex,
+	blsAggregationService blsagg.BlsAggregationService,
+	serverIpPortAddr string) (*RpcServer, error) {
 	return &RpcServer{
-		logger      :logger,
-		tasks                    :tasks,
-		tasksMu                  :tasksMu,
-		taskResponses            :taskResponses,
-		taskResponsesMu          :taskResponsesMu,
-		blsAggregationService    :blsAggregationService,
-		serverIpPortAddr		 :serverIpPortAddr,
+		logger:                logger,
+		tasks:                 tasks,
+		tasksMu:               tasksMu,
+		taskResponses:         taskResponses,
+		taskResponsesMu:       taskResponsesMu,
+		blsAggregationService: blsAggregationService,
+		serverIpPortAddr:      serverIpPortAddr,
 	}, nil
 }
 
@@ -286,7 +286,7 @@ func (rs *RpcServer) ProcessSignedTaskResponse(signedTaskResponse *SignedTaskRes
 		isTaskInitialized = true
 	}
 	rs.tasksMu.RUnlock()
-	if !isTaskInitialized{
+	if !isTaskInitialized {
 		return blsagg.TaskNotFoundErrorFn()
 	}
 

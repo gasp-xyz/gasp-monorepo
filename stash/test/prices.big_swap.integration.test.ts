@@ -1,18 +1,18 @@
-import { afterAll, beforeAll, chai, describe, it, vi } from 'vitest'
-import { GenericContainer, Wait } from 'testcontainers'
 import Decimal from 'decimal.js'
 import IORedis from 'ioredis'
+import { GenericContainer, Wait } from 'testcontainers'
+import { afterAll, beforeAll, chai, describe, it, vi } from 'vitest'
 chai.should()
 
 describe.skip('Integration Test using Test Containers', function () {
   let redisClientTs
   let container
-  let timeseriesContainer
+  let redisContainer
 
   beforeAll(async () => {
     //perhaps we should pull this separatetdly, its a 2GB image. `docker pull p1k1m4n/stash:1`
     container = await new GenericContainer(
-      'mangatasolutions/redis-test-stash:latest'
+      'mangatasolutions/redis-test-stash:latest',
     )
       .withWorkingDir('/')
       .withEntrypoint(['redis-server'])
@@ -20,24 +20,16 @@ describe.skip('Integration Test using Test Containers', function () {
       .withNetworkMode('host')
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .start()
-    timeseriesContainer = await new GenericContainer('redis/redis-stack:latest')
-      .withExposedPorts({ container: 6379, host: 6380 })
-      .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-      .start()
 
     process.env.REDIS_HOST = container.getHost()
     process.env.REDIS_PORT = '6379'
     process.env.REDIS_PASS = ''
 
-    process.env.TIMESERIES_HOST = timeseriesContainer.getHost()
-    process.env.TIMESERIES_PORT = '6380'
-    process.env.TIMESERIES_PASS = ''
-
     vi.mock('../src/repository/ChainRepository', async () => {
       const actual = await vi.importActual('../src/repository/ChainRepository')
       return {
         ...actual,
-        getPools: vi.fn().mockImplementation((id, from, to) => {
+        getPools: vi.fn().mockImplementation(() => {
           return [
             '{"id":5,"amounts":["13565789249280502","3.90486697526747697749232102e+26"],"assets":[4,0],"block":2288098,"timestamp":1683581142721}',
             '{"id":5,"amounts":["13565789249280502","3.90486697526747697749232102e+26"],"assets":[4,0],"block":2288099,"timestamp":1683581154821}',
@@ -76,13 +68,13 @@ describe.skip('Integration Test using Test Containers', function () {
 
     redisClientTs = new IORedis({
       port: 6380,
-      host: timeseriesContainer.getHost(),
+      host: redisContainer.getHost(),
     })
     const res = (await redisClientTs.call(
       'TS.RANGE',
       'price:asset:0',
       '1683581142721',
-      '1683581166793'
+      '1683581166793',
     )) as [number, string][]
     res.length.should.be.equal(3)
     const storeValues = res.map(([tsp, price]) => [tsp, new Decimal(price)])

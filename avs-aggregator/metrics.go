@@ -2,12 +2,12 @@ package aggregator
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"time"
-	"fmt"
 
-	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
+	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
 
 	"github.com/gasp-xyz/gasp-monorepo/avs-aggregator/core/chainio"
 
@@ -100,7 +100,7 @@ func recordLatestBatchProcessedOnL1PerL1Metric(chainId uint8, BatchId uint32) {
 	latest_batch_processed_on_l1_per_l1.WithLabelValues(fmt.Sprintf("%v", chainId)).Set(float64(BatchId))
 }
 
-func recordLastTaskCreatedMetric(lastTaskCreatedType sdktypes.TaskType, lastTaskCreatedIndex sdktypes.TaskIndex ) {
+func recordLastTaskCreatedMetric(lastTaskCreatedType sdktypes.TaskType, lastTaskCreatedIndex sdktypes.TaskIndex) {
 	if lastTaskCreatedType == sdktypes.TaskType(0) {
 		last_task_created.WithLabelValues("op_task").Set(float64(lastTaskCreatedIndex))
 	} else {
@@ -108,7 +108,7 @@ func recordLastTaskCreatedMetric(lastTaskCreatedType sdktypes.TaskType, lastTask
 	}
 }
 
-func recordLastTaskRespondedMetric(lastTaskRespondedType sdktypes.TaskType, lastTaskRespondedIndex sdktypes.TaskIndex ) {
+func recordLastTaskRespondedMetric(lastTaskRespondedType sdktypes.TaskType, lastTaskRespondedIndex sdktypes.TaskIndex) {
 	if lastTaskRespondedType == sdktypes.TaskType(0) {
 		last_task_responded.WithLabelValues("op_task").Set(float64(lastTaskRespondedIndex))
 	} else {
@@ -116,7 +116,7 @@ func recordLastTaskRespondedMetric(lastTaskRespondedType sdktypes.TaskType, last
 	}
 }
 
-func recordLastTaskCompletedMetric(lastTaskCompletedType sdktypes.TaskType, lastTaskCompletedIndex sdktypes.TaskIndex ) {
+func recordLastTaskCompletedMetric(lastTaskCompletedType sdktypes.TaskType, lastTaskCompletedIndex sdktypes.TaskIndex) {
 	if lastTaskCompletedType == sdktypes.TaskType(0) {
 		last_task_completed.WithLabelValues("op_task").Set(float64(lastTaskCompletedIndex))
 	} else {

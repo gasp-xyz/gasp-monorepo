@@ -18,7 +18,7 @@ export const startTracingSchema = yup.object().shape({
     .required('chain is required')
     .oneOf(
       ['Ethereum', 'Arbitrum', 'Base', 'Sonic'],
-      'network must be either "Ethereum", "Arbitrum", "Base" or "Sonic"'
+      'network must be either "Ethereum", "Arbitrum", "Base" or "Sonic"',
     ),
   amount: yup.string().required('amount is required'),
   asset_chainId: yup
@@ -38,7 +38,7 @@ export const getStatusByTxHashOrEntityIdSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      "type must be either 'deposit' or 'withdrawal'"
+      "type must be either 'deposit' or 'withdrawal'",
     ),
 })
 
@@ -49,7 +49,7 @@ export const getAllTransactionsByAddressSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      "type must be either 'deposit' or 'withdrawal'"
+      "type must be either 'deposit' or 'withdrawal'",
     ),
 })
 
@@ -61,7 +61,7 @@ export const getAllTransactionsByAddressAndStatusSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      "type must be either 'deposit' or 'withdrawal'"
+      "type must be either 'deposit' or 'withdrawal'",
     ),
 })
 
@@ -72,6 +72,6 @@ export const getTransactionByEntityIdSchema = yup.object().shape({
     .required('type is required')
     .oneOf(
       ['deposit', 'withdrawal'],
-      "type must be either 'deposit' or 'withdrawal'"
+      "type must be either 'deposit' or 'withdrawal'",
     ),
 })

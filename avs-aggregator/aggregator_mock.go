@@ -2,11 +2,11 @@ package aggregator
 
 import (
 	"sync"
-	
+
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
 
 	sdktypes "github.com/Layr-Labs/eigensdk-go/types"
-	
+
 	mocks "github.com/gasp-xyz/gasp-monorepo/avs-aggregator/mocks"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -17,7 +17,7 @@ type MockAggConfigExt struct {
 
 // We have to put it here instead of with the mocks because Aggregator fields are private
 // Kicker, Osu and RpcServer will have to be treated the same way
-func NewMockAggregator (ctrl *gomock.Controller, c *Config, mce *MockAggConfigExt) (*Aggregator, error) {
+func NewMockAggregator(ctrl *gomock.Controller, c *Config, mce *MockAggConfigExt) (*Aggregator, error) {
 	logger, err := sdklogging.NewZapLogger(c.LogLevel)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func NewMockAggregator (ctrl *gomock.Controller, c *Config, mce *MockAggConfigEx
 	}
 
 	tasks := make(map[sdktypes.TaskId]interface{})
-	tasksMu :=  &sync.RWMutex{}
+	tasksMu := &sync.RWMutex{}
 	taskResponses := make(map[sdktypes.TaskId]map[sdktypes.TaskResponseDigest]interface{})
 	taskResponsesMu := &sync.RWMutex{}
 
@@ -61,10 +61,10 @@ func NewMockAggregator (ctrl *gomock.Controller, c *Config, mce *MockAggConfigEx
 		blockPeriodOpsTask:      uint32(c.BlockPeriodOpsTask),
 		kicker:                  nil,
 		opStateUpdater:          nil,
-		rpcServer:				 nil,
+		rpcServer:               nil,
 		expiration:              uint32(c.Expiration),
-		startIdle:			   	 c.AggIdleStart,
-		apiKey:			   	     c.AggRunTriggerApiKey,	
-		enableTraceLogs:		 c.EnableTraceLogs,	
+		startIdle:               c.AggIdleStart,
+		apiKey:                  c.AggRunTriggerApiKey,
+		enableTraceLogs:         c.EnableTraceLogs,
 	}, nil
 }

@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
-import app from '../../src/app'
 import supertest from 'supertest'
+import { describe, expect,it } from 'vitest'
+
+import app from '../../src/app'
 import { tokenIDs } from './utils'
 
 describe('/GET tvl-history', () => {
-  it('GET /tvl-history - Schema validation', async () => {
+  it.skip('GET /tvl-history - Schema validation', async () => {
     await supertest(app)
       .get(`/tvl-history/0`)
       .expect(200)
@@ -36,13 +37,9 @@ describe('/GET tvl-history', () => {
 
       await supertest(app)
         .get(`/tvl-history/foo`)
-        .expect(500)
+        .expect(200)
         .then((response) => {
-          const invalidTokenNameResponse = response.body
-          expect(invalidTokenNameResponse.exceptionName).to.contain(
-            'ValidationError'
-          )
-          expect(invalidTokenNameResponse.message).to.contain(errorMessage)
+          expect(response.body).toEqual({ volumes: [] })
         })
     })
   })

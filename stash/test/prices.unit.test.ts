@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { afterAll, beforeAll, chai, describe, expect, it, vi } from 'vitest'
+
 import { TimestampedAmount } from '../src/schema/Models'
 import * as fixtures from './fixtures'
 chai.should()
@@ -16,8 +16,8 @@ describe('test pricing processor', () => {
           id === fixtures.BASE
             ? fixtures.LEN
             : latests.has(id)
-            ? latests.get(id)
-            : 0
+              ? latests.get(id)
+              : 0,
         ),
       save: vi.fn().mockImplementation(async (poolId, id, prices, latest) => {
         const all = (store.has(id) ? store.get(id) : [])!.concat(prices)
@@ -29,8 +29,8 @@ describe('test pricing processor', () => {
           id === fixtures.BASE
             ? fixtures.basePrices
             : !store.has(id)
-            ? []
-            : store.get(id)
+              ? []
+              : store.get(id)
         return arr!.filter(([t]) => t >= from && t <= to)
       }),
       saveLatest: vi
@@ -43,7 +43,7 @@ describe('test pricing processor', () => {
         fixtures.pools
           .get(id)!
           .filter((p) => p.timestamp > from && p.timestamp <= to)
-          .slice(0, fixtures.LIMIT)
+          .slice(0, fixtures.LIMIT),
       ),
       getLatest: vi.fn().mockReturnValue({ timestamp: fixtures.LEN }),
       LIMIT: fixtures.LIMIT,
@@ -72,7 +72,7 @@ describe('test pricing processor', () => {
     //asset_10 (1000 pools)
     store.get(1)!.length.should.be.equal(fixtures.LEN)
     // asset_11(500 pools) + asset_18 dependent of 7 (750 prices)
-    store.get(2)!.length.should.be.equal((fixtures.LEN / 4)) //todo: qa to check this
+    store.get(2)!.length.should.be.equal(fixtures.LEN / 4) //todo: qa to check this
     // dependent on asset 2
     store.get(3)!.length.should.be.equal(0)
     // zeros

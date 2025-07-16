@@ -19,13 +19,13 @@ type Config struct {
 	ChainId           *big.Int
 	SubstrateWsRpcUrl string
 
-	ServerAddressPort string
-	BlockPeriod       int
-	BlockPeriodOpsTask       int
-	Expiration        int
-	UpdatePeriod      int
-	DebounceRpc       int
-	EnableKicker      bool
+	ServerAddressPort  string
+	BlockPeriod        int
+	BlockPeriodOpsTask int
+	Expiration         int
+	UpdatePeriod       int
+	DebounceRpc        int
+	EnableKicker       bool
 
 	AvsRegistryCoordinatorAddr common.Address
 	AvsDeploymentBlock         uint64
@@ -33,18 +33,18 @@ type Config struct {
 	SignerFn signerv2.SignerFn `json:"-"`
 	Address  common.Address
 
-	KickPeriod int
+	KickPeriod          int
 	MinOpUpdateInterval int
 
-	ReinitOpStateAtInit bool
-	CheckTriggerOpStateUpdate bool
+	ReinitOpStateAtInit             bool
+	CheckTriggerOpStateUpdate       bool
 	CheckTriggerOpStateUpdateWindow bool
 
-	AggIdleStart bool
+	AggIdleStart        bool
 	AggRunTriggerApiKey string
 
 	EnableTraceLogs bool
-	
+
 	AggSSFetchTimeout int
 }
 
@@ -92,31 +92,31 @@ func NewConfig(ctx *cli.Context) (*Config, error) {
 	}
 
 	return &Config{
-		LogLevel:                   logLevel,
-		ServerAddressPort:          ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
-		BlockPeriod:                ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
-		BlockPeriodOpsTask:                ctx.GlobalInt(config.AvsOpTaskPeriodFlag.Name),
-		Expiration:                 ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
-		KickPeriod:                 ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
-		MinOpUpdateInterval:            ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
-		UpdatePeriod:               ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
-		DebounceRpc:                ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
-		EnableKicker:                ctx.GlobalBool(config.AvsEnableKickerFlag.Name),
-		EthRpcUrl:                  ctx.GlobalString(config.EthRpcFlag.Name),
-		EthWsUrl:                   ctx.GlobalString(config.EthWsFlag.Name),
-		ChainId:                    chainId,
-		SubstrateWsRpcUrl:          ctx.GlobalString(config.SubstrateRpcFlag.Name),
-		AvsRegistryCoordinatorAddr: common.HexToAddress(ctx.GlobalString(config.AvsRegistryCoordinatorFlag.Name)),
-		AvsDeploymentBlock:         uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
-		SignerFn:                   signer,
-		Address:                    address,
-		ReinitOpStateAtInit:  ctx.GlobalBool(config.AggOsuReinitOpStateAtInit.Name),
-		CheckTriggerOpStateUpdate:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdate.Name),
-		CheckTriggerOpStateUpdateWindow:  ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
-		AggIdleStart: ctx.GlobalBool(config.AggIdleStart.Name),
-		AggRunTriggerApiKey: ctx.GlobalString(config.AggRunTriggerApiKey.Name),
-		EnableTraceLogs: ctx.GlobalBool(config.EnableTraceLogs.Name),
-		AggSSFetchTimeout: ctx.GlobalInt(config.AggSSFetchTimeout.Name),
+		LogLevel:                        logLevel,
+		ServerAddressPort:               ctx.GlobalString(config.AvsServerPortAddressFlag.Name),
+		BlockPeriod:                     ctx.GlobalInt(config.AvsBlockValidationPeriodFlag.Name),
+		BlockPeriodOpsTask:              ctx.GlobalInt(config.AvsOpTaskPeriodFlag.Name),
+		Expiration:                      ctx.GlobalInt(config.AvsTaskExpirationFlag.Name),
+		KickPeriod:                      ctx.GlobalInt(config.AvsKickPeriodFlag.Name),
+		MinOpUpdateInterval:             ctx.GlobalInt(config.AvsMinOpUpdateInterval.Name),
+		UpdatePeriod:                    ctx.GlobalInt(config.AvsUpdateStakePeriodFlag.Name),
+		DebounceRpc:                     ctx.GlobalInt(config.AvsDebounceRpcFlag.Name),
+		EnableKicker:                    ctx.GlobalBool(config.AvsEnableKickerFlag.Name),
+		EthRpcUrl:                       ctx.GlobalString(config.EthRpcFlag.Name),
+		EthWsUrl:                        ctx.GlobalString(config.EthWsFlag.Name),
+		ChainId:                         chainId,
+		SubstrateWsRpcUrl:               ctx.GlobalString(config.SubstrateRpcFlag.Name),
+		AvsRegistryCoordinatorAddr:      common.HexToAddress(ctx.GlobalString(config.AvsRegistryCoordinatorFlag.Name)),
+		AvsDeploymentBlock:              uint64(ctx.GlobalInt(config.AvsDeploymentBlockFlag.Name)),
+		SignerFn:                        signer,
+		Address:                         address,
+		ReinitOpStateAtInit:             ctx.GlobalBool(config.AggOsuReinitOpStateAtInit.Name),
+		CheckTriggerOpStateUpdate:       ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdate.Name),
+		CheckTriggerOpStateUpdateWindow: ctx.GlobalBool(config.AggOsuCheckTriggerOpStateUpdateWindow.Name),
+		AggIdleStart:                    ctx.GlobalBool(config.AggIdleStart.Name),
+		AggRunTriggerApiKey:             ctx.GlobalString(config.AggRunTriggerApiKey.Name),
+		EnableTraceLogs:                 ctx.GlobalBool(config.EnableTraceLogs.Name),
+		AggSSFetchTimeout:               ctx.GlobalInt(config.AggSSFetchTimeout.Name),
 	}, nil
 }
 

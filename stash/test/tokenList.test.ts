@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest'
 import { Decimal } from 'decimal.js'
-import { TimestampedAmount } from '../src/schema/Models'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+
 import { tokenDetails, tokenList } from '../src/service/TokenListService'
 import { TokenInfoStats } from '../src/util/Listing'
 
@@ -42,16 +42,12 @@ describe.skip('[Token list]', () => {
               resolve(volumeTokenResponse[tokenId] || [])
             })
           }),
-        calculate24PriceChange: vi
-          .fn()
-          .mockImplementation((tokenPrices: TimestampedAmount[]) => {
-            return new Decimal(2.33).toFixed(2)
-          }),
-        calculate24VolumeChange: vi
-          .fn()
-          .mockImplementation((tokenVolumes: TimestampedAmount[]) => {
-            return new Decimal(4.21).toFixed(2)
-          }),
+        calculate24PriceChange: vi.fn().mockImplementation(() => {
+          return new Decimal(2.33).toFixed(2)
+        }),
+        calculate24VolumeChange: vi.fn().mockImplementation(() => {
+          return new Decimal(4.21).toFixed(2)
+        }),
       }
     })
   })

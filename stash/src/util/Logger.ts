@@ -1,5 +1,5 @@
-import winston from 'winston'
 import { LoggingWinston } from '@google-cloud/logging-winston'
+import winston from 'winston'
 
 const loggingWinston = new LoggingWinston({
   // https://github.com/googleapis/nodejs-logging-winston?tab=readme-ov-file#error-handling-with-a-default-callback
@@ -16,7 +16,7 @@ const loggingWinston = new LoggingWinston({
 const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.splat(),
-    winston.format.simple()
+    winston.format.simple(),
   ),
   level: 'debug',
   transports: [

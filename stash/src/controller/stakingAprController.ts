@@ -1,14 +1,15 @@
 import { Request, Response } from 'express'
-import * as stakingAprService from '../service/StakingAprService.js'
-import { dailyRewardDateSchema } from '../schema/StakingSchema.js'
+
 import * as errorHandler from '../error/Handler.js'
+import { dailyRewardDateSchema } from '../schema/StakingSchema.js'
+import * as stakingAprService from '../service/StakingAprService.js'
 
 export const dailyReward = async (req: Request, res: Response) => {
   try {
     const { date } = dailyRewardDateSchema.validateSync(req.query)
     const dailyRewards = await stakingAprService.dailyRewards(
       req.params.collatorAddress,
-      date
+      date,
     )
     res.json(dailyRewards)
   } catch (e) {

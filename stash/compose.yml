@@ -29,20 +29,15 @@ services:
       ARBITRUM_SEPOLIA_CHAIN_URL: ${ARBITRUM_SEPOLIA_CHAIN_URL:-https://evm-node-arb-frontend.gasp.xyz}
       ENVIRONMENT: ${ENVIRONMENT:-frontend}
       MANGATA_NODE_URL: ${MANGATA_NODE_URL:-wss://collator-01-ws-rollup-frontend.gasp.xyz}
+      MINUTES_FOR_TOKEN_REFRESH: ${MINUTES_FOR_TOKEN_REFRESH:-1440}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASS: ${REDIS_PASS} # Has to be empty to work with local redis host
-      TIMESERIES_HOST: ${TIMESERIES_HOST:-redis-timeseries}
-      TIMESERIES_PORT: ${TIMESERIES_PORT:-6379}
-      TIMESERIES_PASS: ${TIMESERIES_PASS} # Has to be empty to work with local redis host
+      TOKENS_TO_HARDCODE: ${TOKENS_TO_HARDCODE:-0}
+      SAVE_EVENTS: ${SAVE_EVENTS:-false}
 
   redis:
-    image: redis/redis-stack:7.4.0-v3
+    image: gaspxyz/redis-stash-test-data:stable
     ports:
       - 6379:6379
       - 8001:8001 # Redis Insight UI: http://localhost:8001
-  redis-timeseries:
-    image: redis/redis-stack:7.4.0-v3
-    ports:
-      - 6380:6379
-      - 8002:8001 # Redis Insight UI: http://localhost:8002

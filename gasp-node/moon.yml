@@ -161,16 +161,16 @@ tasks:
       IMAGE_DIGEST_FAST_RUNTIME=$(jq -r '."containerimage.digest"' build/gasp-node-fast-runtime-buildkit-metadata.json)
   
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG} \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci} \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_STANDARD_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG} from existing digests"
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci} from existing digests"
 
       docker buildx imagetools create \
-        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast \
-        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG}-fast \
+        --tag ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
+        --tag ${DOCKERHUB_REPOSITORY}:${IMAGE_TAG:-ci}-fast \
         ${IMAGE_BUILD_REPOSITORY}@${IMAGE_DIGEST_FAST_RUNTIME}
-      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG}-fast from existing digests"      
+      echo "Successfully created ${IMAGE_BUILD_REPOSITORY}:${IMAGE_TAG:-ci}-fast from existing digests"      
     deps: ['buildkit-build-and-push-image-digests-standard-runtime', 'buildkit-build-and-push-image-digests-fast-runtime']
     inputs: 
       - 'build/gasp-node-standard-runtime-buildkit-metadata.json'
@@ -1082,7 +1082,7 @@ tasks:
   e2e-test-rollup:
     script: |
       export ROLLUP_NODE_VERSION=${IMAGE_TAG:-local}-fast
-      export GASP_AVS_VERSION=${IMAGE_TAG:-local}-fast
+      export GASP_AVS_VERSION=${IMAGE_TAG:-local}
       export GASP_CONTRACTS_VERSION=${IMAGE_TAG:-local}
       export AVS_AGGREGATOR_VERSION=${IMAGE_TAG:-local}
       export FERRY_WITHDRAWAL_VERSION=${IMAGE_TAG:-local}

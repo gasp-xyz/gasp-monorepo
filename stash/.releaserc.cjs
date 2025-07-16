@@ -23,7 +23,7 @@ module.exports = {
             if (context.version) {
               context.cleanVersion = context.version.replace(
                 `${SERVICE_PREFIX}v`,
-                ''
+                '',
               )
             }
             return commit
