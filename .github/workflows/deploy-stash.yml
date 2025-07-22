@@ -51,34 +51,6 @@ jobs:
       - run: sops exec-env frontend.enc.env 'yarn run build'
       - run: sops exec-env frontend.enc.env 'yarn run test:unit'
 
-  deploy-frontend:
-    name: Deploy `stash` to `frontend` environment
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'frontend')
-    runs-on: ubuntu-24.04
-    environment: "stash-frontend"
-    defaults:
-      run:
-        working-directory: stash
-    env:
-      ENVIRONMENT: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: google-github-actions/auth@v2
-        id: auth
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
-      - uses: mdgreenwald/mozilla-sops-action@v1.6.0
-
-      - run: yarn install --immutable
-      - run: sops exec-env ${ENVIRONMENT}.enc.env 'yarn run build'
-
-      - name: Deploy to Google App Engine
-        run: |
-          sops exec-env ${ENVIRONMENT}.enc.env "envsubst < app-${ENVIRONMENT}.yaml > app.tmp.yaml"
-          gcloud app deploy app.tmp.yaml --quiet
-
   deploy-holesky:
     name: Deploy `stash` to `holesky` environment
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'holesky') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
