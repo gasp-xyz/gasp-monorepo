@@ -38,7 +38,6 @@ export async function extractExtrinsicHashAndAnAddressFromBlock(
     let extrinsic = extinsics[phaseApplyExtrinsic]
     extrinsicHash = extrinsic.hash.toString()
     address = extrinsic.signer.toString()
-    console.log('Extrinsic Hash:', extrinsicHash, 'Address:', address)
     return { extrinsicHash, address }
   } catch (error) {
     logger.error('Error extracting extrinsic hash and address:', error)
@@ -124,7 +123,6 @@ export const startTracingWithdrawal = async (
     )
   const redisKey = `withdrawal:${extrinsicHash}`
   const keyExists = await redis.client.exists(redisKey)
-  console.log('Key Exists:', keyExists)
 
   const withdrawalData = {
     requestId: Number(String(eventData.requestId.id).replace(/,/g, '')),

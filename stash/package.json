@@ -80,6 +80,7 @@
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "@vitest/coverage-v8": "^3.1.1",
+    "benny": "^3.7.1",
     "concurrently": "7.4.0",
     "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",

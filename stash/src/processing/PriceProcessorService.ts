@@ -19,14 +19,17 @@ export const initService = async (base: number = BASE_TOKEN) => {
   await processPrices(base)
 }
 
-const processPrices = async (base: number) => {
+export const processPrices = async (
+  base: number,
+): Promise<Map<number, number>> => {
   // we will price in all assets until head, if an asset can't be priced it is safe to use head as latest
   const head = (await chainStore.getLatest()).timestamp
   const assets = await getAssets(base)
   const pricedIn = [base]
+  const latestProcessed = new Map<number, number>()
+
   logger.debug(`PriceService: have assets: ${assets}`)
   for (const asset of assets) {
-    // both assets have prices already, we need to traverse twice with base as both
     if (pricedIn.includes(asset.pool[0]) && pricedIn.includes(asset.pool[1])) {
       logger.debug(
         `PriceService: assets ${asset} has both base prices, traverse twice`,
@@ -36,6 +39,7 @@ const processPrices = async (base: number) => {
       // reset the latest a process again with other id as base
       await priceStore.saveLatest(asset.id, latest)
       await processAsset(asset.pool[1], asset, head)
+      latestProcessed.set(asset.id, head)
       continue
     }
     // get the unpriced asset id
@@ -44,17 +48,19 @@ const processPrices = async (base: number) => {
       : pricedIn.includes(asset.pool[1])
         ? asset.pool[0]
         : -1
-    if (id < 0) {
+
+    if (id >= 0) {
+      await processAsset(id, asset, head)
+      latestProcessed.set(asset.id, head)
+      pricedIn.push(id)
+    } else {
       logger.debug(
         `PriceService: assets ${asset} has no base prices, save latest`,
       )
       await priceStore.saveLatest(asset.id, head)
-      continue
     }
-
-    await processAsset(id, asset, head)
-    pricedIn.push(id)
   }
+  return latestProcessed
 }
 
 const processAsset = async (id: number, asset: Asset, head: number) => {

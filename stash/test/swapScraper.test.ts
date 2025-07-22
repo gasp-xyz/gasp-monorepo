@@ -242,7 +242,8 @@ describe('volume history events', () => {
     )
   })
 
-  it('should process volume history when there are prices for tokens', async () => { //check data
+  it('should process volume history when there are prices for tokens', async () => {
+    //check data
     vi.spyOn(tokenPriceService, 'getTokenPrice').mockResolvedValue(1.22)
     await processDataForVolumeHistory(mockApi, mockEvent)
     expect(logger.info).toHaveBeenNthCalledWith(
