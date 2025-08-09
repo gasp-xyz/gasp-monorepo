@@ -8,3 +8,4 @@ eigenlayer-middleware/=lib/eigenlayer-middleware/
 openzeppelin-contracts/=lib/eigenlayer-middleware/lib/openzeppelin-contracts/
 openzeppelin-contracts-upgradeable/=lib/eigenlayer-middleware/lib/openzeppelin-contracts-upgradeable/
 forge-std/=lib/forge-std/src/
+murky/=lib/murky/src/

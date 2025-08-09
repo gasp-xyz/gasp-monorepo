@@ -12,3 +12,6 @@
 	path = gasp-node/gasp-e2e
 	branch = eth-rollup-develop
 	url = https://github.com/gasp-xyz/gasp-e2e.git
+[submodule "contracts/lib/murky"]
+	path = contracts/lib/murky
+	url = https://github.com/dmfxyz/murky
