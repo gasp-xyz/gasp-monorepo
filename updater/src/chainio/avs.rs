@@ -29,9 +29,7 @@ pub struct AvsContracts {
     pub registry: RegistryCoordinator<Client>,
     pub stake_registry: StakeRegistry<Client>,
     pub bls_apk_registry: BLSApkRegistry<Client>,
-    #[allow(dead_code)]
-    pub client: Arc<Client>,
-    pub ws_client: Arc<Provider<Ws>>,
+    pub ws_client: Arc<Client>,
 }
 
 impl Debug for AvsContracts {
@@ -46,23 +44,21 @@ impl Debug for AvsContracts {
 }
 
 impl AvsContracts {
-    pub async fn build(config: &CliArgs, client: Arc<Client>) -> eyre::Result<Self> {
-        let ws_client = Arc::new(Provider::connect(config.source_ws_url.to_owned()).await?);
-
+    pub async fn build(config: &CliArgs, ws_client: Arc<Client>) -> eyre::Result<Self> {
         let registry =
-            RegistryCoordinator::new(config.avs_registry_coordinator_addr, client.clone());
+            RegistryCoordinator::new(config.avs_registry_coordinator_addr, ws_client.clone());
 
         let service_manager_addr = registry.service_manager().await?;
-        let service_manager = FinalizerServiceManager::new(service_manager_addr, client.clone());
+        let service_manager = FinalizerServiceManager::new(service_manager_addr, ws_client.clone());
 
         let task_manager_addr = service_manager.task_manager().await?;
-        let task_manager = FinalizerTaskManager::new(task_manager_addr, client.clone());
+        let task_manager = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
         let task_manager_sub = FinalizerTaskManager::new(task_manager_addr, ws_client.clone());
 
         let bls_apk_registry_addr = registry.bls_apk_registry().await?;
-        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, client.clone());
+        let bls_apk_registry = BLSApkRegistry::new(bls_apk_registry_addr, ws_client.clone());
         let stake_registry_addr = registry.stake_registry().await?;
-        let stake_registry = StakeRegistry::new(stake_registry_addr, client.clone());
+        let stake_registry = StakeRegistry::new(stake_registry_addr, ws_client.clone());
 
         Ok(Self {
             service_manager,
@@ -72,7 +68,6 @@ impl AvsContracts {
             registry,
             stake_registry,
             bls_apk_registry,
-            client,
             ws_client,
         })
     }

@@ -14,9 +14,7 @@ services:
         condition: service_completed_successfully
     environment:
       RUST_LOG: "info"
-      SOURCE_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
       SOURCE_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
-      TARGET_RPC_URL: ${ARB_RPC_URL:-http://arbitrum-stub:8545}
       TARGET_WS_URL: ${ARB_WS_URL:-ws://arbitrum-stub:8545}
       SOURCE_CHAIN_ID: 31337
       TARGET_CHAIN_ID: 31338
@@ -42,9 +40,7 @@ services:
         condition: service_completed_successfully
     environment:
       RUST_LOG: "info"
-      SOURCE_RPC_URL: ${ETH_RPC_URL:-http://eth-stub:8545}
       SOURCE_WS_URL: ${ETH_WS_URL:-ws://eth-stub:8545}
-      TARGET_RPC_URL: ${BASE_RPC_URL:-http://base-stub:8545}
       TARGET_WS_URL: ${BASE_WS_URL:-ws://base-stub:8545}
       SOURCE_CHAIN_ID: 31337
       TARGET_CHAIN_ID: 31339
