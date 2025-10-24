@@ -61,6 +61,7 @@ export const processWithdrawalEvents = async (
     for (const eventGroup of events) {
       for (const event of eventGroup) {
         if (event.ev.method === 'WithdrawalRequestCreated') {
+          logger.info('Recieved withdrawal request event:', event.ev.data)
           try {
             const existingWithdrawal = await withdrawalRepository
               .search()
@@ -93,6 +94,7 @@ export const processWithdrawalEvents = async (
             logger.error('Error tracing withdrawal:', error)
           }
         } else if (event.ev.method === 'TxBatchCreated') {
+          logger.info('Recieved batch created event:', event.ev.data)
           await updateWithdrawalsWhenBatchCreated(api, event.ev.data)
         }
       }

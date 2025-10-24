@@ -6,7 +6,41 @@ import {
   HttpResponseException,
 } from '../error/Exception.js'
 
-const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
+const coinGeckoApi = 'https://api.coingecko.com/api/v3/'
+
+// Rate limiting state
+let callCount = 0
+let lastResetTime = Date.now()
+const RATE_LIMIT = 30
+const RATE_WINDOW = 60000 // 1 minute in milliseconds
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms))
+
+const checkRateLimit = async (): Promise<void> => {
+  const now = Date.now()
+
+  // Reset counter if more than 1 minute has passed
+  if (now - lastResetTime >= RATE_WINDOW) {
+    callCount = 0
+    lastResetTime = now
+  }
+
+  // If we've hit the limit, wait for the remainder of the window
+  if (callCount >= RATE_LIMIT) {
+    const timeToWait = RATE_WINDOW - (now - lastResetTime)
+    if (timeToWait > 0) {
+      console.log(
+        `Rate limit reached (${RATE_LIMIT} calls/minute). Waiting ${Math.ceil(timeToWait / 1000)} seconds...`,
+      )
+      await sleep(timeToWait)
+      callCount = 0
+      lastResetTime = Date.now()
+    }
+  }
+
+  callCount++
+}
 
 export const getCoinInfo = async (
   tokenId: string,
@@ -14,8 +48,10 @@ export const getCoinInfo = async (
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
 
+  await checkRateLimit()
+
   const url = new URL(coinGeckoApi + '/coins/' + tokenId)
-  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
+  url.searchParams.append('x_cg_demo_api_key', process.env.COINGECKO_API_KEY!)
 
   const coinDataResponse = await fetch(url, {
     method: 'get',
@@ -42,11 +78,13 @@ export const getCoinHistory = async (
   if (tokenId == null || tokenId.length <= 0)
     throw new BadRequestException('Missing token ID information.')
 
+  await checkRateLimit()
+
   const url = new URL(`${coinGeckoApi}/coins/${tokenId}/market_chart`)
   url.searchParams.append('vs_currency', currency)
   url.searchParams.append('days', days.toString())
   url.searchParams.append('interval', 'daily')
-  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
+  url.searchParams.append('x_cg_demo_api_key', process.env.COINGECKO_API_KEY!)
 
   const headers = {
     Accept: 'application/json',
@@ -57,11 +95,12 @@ export const getCoinHistory = async (
     headers: headers,
   })
 
-  if (coinDataResponse.status !== HttpStatus.OK)
+  if (coinDataResponse.status !== HttpStatus.OK) {
+    const errorBody = await coinDataResponse.text()
     throw new HttpResponseException(
-      'Coin Gecko returned unexpected status. Status: ' +
-        coinDataResponse.status,
+      `Coin Gecko returned unexpected status. Status: ${coinDataResponse.status}, Body: ${errorBody}`,
     )
+  }
 
   const prices: CoinGeckoPrice[] = (await coinDataResponse.json()).prices.map(
     ([ts, p]) => {
