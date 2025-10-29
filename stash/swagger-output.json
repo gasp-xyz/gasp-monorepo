@@ -1338,6 +1338,38 @@
         }
       }
     },
+    "/close_withdrawal/{txHash}": {
+      "post": {
+        "tags": [
+          "Withdrawal"
+        ],
+        "summary": "Close a withdrawal by calling Rolldown contract.",
+        "description": "Close a withdrawal by providing transaction hash. Stash will fetch withdrawal data and call close_withdrawal on Rolldown contract.",
+        "parameters": [
+          {
+            "name": "txHash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Transaction hash of the withdrawal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transaction hash"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "Withdrawal not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/gc": {
       "post": {
         "description": "",

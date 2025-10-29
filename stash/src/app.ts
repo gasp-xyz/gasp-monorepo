@@ -11,6 +11,7 @@ import * as faucetController from './controller/FaucetController.js'
 import * as keyValueController from './controller/KeyValueController.js'
 import * as liquidStakingController from './controller/liquidStakingController.js'
 import * as airdropController from './controller/mgxAirdropController.js'
+import * as closeWithdrawalController from './controller/CloseWithdrawalController.js'
 import * as networkController from './controller/networkController.js'
 import * as priceDiscoveryController from './controller/PriceDiscoveryController.js'
 import * as stakingAprController from './controller/stakingAprController.js'
@@ -133,6 +134,9 @@ app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
 
 //key value storage endpoints
 app.post('/key-value/store', keyValueController.store)
+
+// Close withdrawal endpoint
+app.post('/close_withdrawal/:txHash', closeWithdrawalController.closeWithdrawalEndpoint)
 
 // Garbage collection endpoint
 app.post('/gc', async (req: Request, res: Response): Promise<void> => {

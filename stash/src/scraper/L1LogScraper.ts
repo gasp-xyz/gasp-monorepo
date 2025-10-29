@@ -49,7 +49,6 @@ export const watchDepositAcceptedIntoQueue = async (
         fromBlock,
         toBlock,
       })
-
       for (const log of logs) {
         logger.info({
           message: 'Processing deposit log:',

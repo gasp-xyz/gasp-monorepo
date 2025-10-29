@@ -19,14 +19,14 @@ export const initService = async () => {
       process.env.ETH_CHAIN_URL,
       CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
       ETH_CHAIN,
-      process.env.CONTRACT_ADDRESS_ETH,
+      process.env.CONTRACT_ADDRESS_ETHEREUM,
     ),
     watchDepositAcceptedIntoQueue(
       api,
       process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
       CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-arbitrum'),
       ARB_CHAIN,
-      process.env.CONTRACT_ADDRESS_ARB,
+      process.env.CONTRACT_ADDRESS_ARBITRUM,
     ),
     watchDepositAcceptedIntoQueue(
       api,
@@ -49,7 +49,7 @@ export const initService = async () => {
           process.env.ETH_CHAIN_URL,
           CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
           ETH_CHAIN,
-          process.env.CONTRACT_ADDRESS_ETH,
+          process.env.CONTRACT_ADDRESS_ETHEREUM,
         ).then(resolve)
       }, 90000) // Delay of 90000 milliseconds (90 seconds) to allow past withdrawals to be started and confirmed first
     }),
@@ -60,7 +60,7 @@ export const initService = async () => {
           process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
           CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-arbitrum'),
           ARB_CHAIN,
-          process.env.CONTRACT_ADDRESS_ARB,
+          process.env.CONTRACT_ADDRESS_ARBITRUM,
         ).then(resolve)
       }, 90000)
     }),

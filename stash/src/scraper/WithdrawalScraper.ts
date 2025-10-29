@@ -145,6 +145,8 @@ export const startTracingWithdrawal = async (
     calldata: calldata.toHex(),
     createdBy: keyExists ? CreatedBy.Frontend : CreatedBy.Other,
     closedBy: null,
+    ferryTip: String(eventData.ferry_tip || '0').replace(/,/g, ''),
+    root: '',
   }
   return withdrawalRepository.save(withdrawalData)
 }
@@ -185,6 +187,7 @@ export const updateWithdrawalsWhenBatchCreated = async (
       withdrawal.updated = Date.parse(updateTimestamp)
       withdrawal.status = WITHDRAWAL_BATCHED_FOR_L1
       withdrawal.proof = proof.toHex()
+      withdrawal.root = root.toHex()
       await withdrawalRepository.save(withdrawal)
       logger.info('Withdrawal batch created and status updated', withdrawal)
     }

@@ -19,6 +19,8 @@ const withdrawalSchema = new Schema(
     calldata: { type: 'string' },
     createdBy: { type: 'string' },
     closedBy: { type: 'string' },
+    ferryTip: { type: 'string' },
+    root: { type: 'string' },
   },
   {
     dataStructure: 'JSON',
