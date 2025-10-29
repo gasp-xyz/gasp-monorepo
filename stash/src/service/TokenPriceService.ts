@@ -6,7 +6,7 @@ import * as priceDiscoveryService from '../service/PriceDiscoveryService.js'
 import logger from '../util/Logger.js'
 
 let assets: any = {}
-const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
+const coinGeckoApi = 'https://api.coingecko.com/api/v3/'
 
 class CoinGeckoCoinPriceData {
   [contractAddress: string]: {
