@@ -9,6 +9,7 @@ import * as coingeckoController from './controller/coingeckoListingController.js
 import * as coinmarketcapController from './controller/coinmarketcapListingController.js'
 import * as faucetController from './controller/FaucetController.js'
 import * as keyValueController from './controller/KeyValueController.js'
+import * as lastCloseableController from './controller/LastCloseableController.js'
 import * as liquidStakingController from './controller/liquidStakingController.js'
 import * as airdropController from './controller/mgxAirdropController.js'
 import * as networkController from './controller/networkController.js'
@@ -133,6 +134,9 @@ app.get('/coinmarketcap/v1/summary', coinmarketcapController.summary)
 
 //key value storage endpoints
 app.post('/key-value/store', keyValueController.store)
+
+// Last closeable endpoints
+app.get('/last-closeable', lastCloseableController.lastCloseable)
 
 // Garbage collection endpoint
 app.post('/gc', async (req: Request, res: Response): Promise<void> => {

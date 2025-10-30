@@ -3,6 +3,7 @@ import {
   processRequests,
   watchDepositAcceptedIntoQueue,
   watchWithdrawalClosed,
+  watchL2UpdateAccepted,
 } from '../scraper/L1LogScraper.js'
 import { CONFIG_TO_CHAIN } from '../util/ConfigToChain.js'
 import logger from '../util/Logger.js'
@@ -86,6 +87,34 @@ export const initService = async () => {
         ).then(resolve)
       }, 90000)
     }),
+    watchL2UpdateAccepted(
+      api,
+      process.env.ETH_CHAIN_URL,
+      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-ethereum'),
+      ETH_CHAIN,
+      process.env.CONTRACT_ADDRESS_ETH,
+    ),
+    watchL2UpdateAccepted(
+      api,
+      process.env.ARBITRUM_SEPOLIA_CHAIN_URL,
+      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-arbitrum'),
+      ARB_CHAIN,
+      process.env.CONTRACT_ADDRESS_ARB,
+    ),
+    watchL2UpdateAccepted(
+      api,
+      process.env.BASE_CHAIN_URL,
+      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-base'),
+      BASE_CHAIN,
+      process.env.CONTRACT_ADDRESS_BASE,
+    ),
+    watchL2UpdateAccepted(
+      api,
+      process.env.SONIC_CHAIN_URL,
+      CONFIG_TO_CHAIN.get(process.env.ENVIRONMENT + '-sonic'),
+      SONIC_CHAIN,
+      process.env.CONTRACT_ADDRESS_SONIC,
+    ),
     processRequests(api, 'Arbitrum'),
     processRequests(api, 'Ethereum'),
     processRequests(api, 'Base'),

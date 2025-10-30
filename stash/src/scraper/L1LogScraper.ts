@@ -273,6 +273,72 @@ export const processRequests = async (api: ApiPromise, l1Chain: string) => {
   }
 }
 
+export const watchL2UpdateAccepted = async (
+  api: any,
+  chainUrl: string,
+  chain: any,
+  chainName: string,
+  contractAddress: string,
+) => {
+  const publicClient = getPublicClient({
+    transport: http(chainUrl),
+    chain: chain,
+  })
+
+  while (keepProcessing) {
+    try {
+      const latestBlock = await publicClient.getBlockNumber()
+      let fromBlock = await getLastProcessedBlock(chainName, 'l2update')
+      if (fromBlock === 0n) {
+        fromBlock = latestBlock
+      }
+      const toBlock = fromBlock + 100n < latestBlock ? fromBlock + 100n : latestBlock;
+      logger.info({
+        message: `L2UpdateAccepted: chainName: ${chainName}, fromBlock: ${fromBlock}, toBlock: ${toBlock}`,
+      })
+      const logs = await publicClient.getContractEvents({
+        address: `0x${contractAddress}` as `0x${string}`,
+        abi: RolldownContract.abi,
+        eventName: 'L2UpdateAccepted',
+        fromBlock,
+        toBlock,
+      })
+
+      for (const log of logs) {
+        logger.info({
+          message: 'Processing L2UpdateAccepted log:',
+          log: log,
+        })
+        const { blockNumber } = log
+        const { range } = (log as any).args
+        const endValue = range.end
+
+        await saveLastProcessedRequestId(
+          chainName,
+          Number(endValue.toString().replace(/,/g, '')),
+          'l2update',
+        )
+        
+        logger.info({
+          message: 'L2UpdateAccepted processed:',
+          chainName,
+          endValue: endValue.toString(),
+          blockNumber: blockNumber.toString(),
+        })
+        
+        await saveLastProcessedBlock(chainName, blockNumber, 'l2update')
+      }
+      await saveLastProcessedBlock(chainName, toBlock, 'l2update')
+    } catch (error) {
+      logger.error({
+        message: 'Error in watchL2UpdateAccepted loop:',
+        error: error,
+      })
+    }
+    await setTimeout(5000)
+  }
+}
+
 export const getPublicClient = (options: PublicClientConfig) => {
   return createPublicClient({ ...options })
 }
