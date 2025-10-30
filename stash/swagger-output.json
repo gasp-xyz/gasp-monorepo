@@ -1338,6 +1338,75 @@
         }
       }
     },
+    "/last-closeable": {
+      "get": {
+        "tags": [
+          "Last Closeable"
+        ],
+        "summary": "Get last closeable request IDs for all networks.",
+        "description": "Retrieve the last processed L2 update request IDs for all supported networks.",
+        "responses": {
+          "200": {
+            "description": "Successful response with last closeable request IDs",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "network": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Ethereum"
+                            }
+                          }
+                        },
+                        "lastRequestId": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "number"
+                            },
+                            "example": {
+                              "type": "number",
+                              "example": 12345
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/gc": {
       "post": {
         "description": "",

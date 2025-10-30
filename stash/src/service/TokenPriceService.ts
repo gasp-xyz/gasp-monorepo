@@ -6,7 +6,7 @@ import * as priceDiscoveryService from '../service/PriceDiscoveryService.js'
 import logger from '../util/Logger.js'
 
 let assets: any = {}
-const coinGeckoApi = 'https://api.coingecko.com/api/v3/'
+const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
 
 class CoinGeckoCoinPriceData {
   [contractAddress: string]: {
@@ -77,7 +77,7 @@ async function getCoingeckoPrice(chainId: any, contractAddress: any) {
   const url = new URL(`${coinGeckoApi}/simple/token_price/${chainId}`)
   url.searchParams.append('contract_addresses', contractAddress)
   url.searchParams.append('vs_currencies', 'usd')
-  url.searchParams.append('x_cg_demo_api_key', process.env.COINGECKO_API_KEY!)
+  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
   const coinPriceResponse = await fetch(url, {
     method: 'get',
     headers: {

@@ -6,7 +6,7 @@ import {
   HttpResponseException,
 } from '../error/Exception.js'
 
-const coinGeckoApi = 'https://api.coingecko.com/api/v3/'
+const coinGeckoApi = 'https://pro-api.coingecko.com/api/v3'
 
 // Rate limiting state
 let callCount = 0
@@ -51,7 +51,7 @@ export const getCoinInfo = async (
   await checkRateLimit()
 
   const url = new URL(coinGeckoApi + '/coins/' + tokenId)
-  url.searchParams.append('x_cg_demo_api_key', process.env.COINGECKO_API_KEY!)
+  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
 
   const coinDataResponse = await fetch(url, {
     method: 'get',
@@ -84,7 +84,7 @@ export const getCoinHistory = async (
   url.searchParams.append('vs_currency', currency)
   url.searchParams.append('days', days.toString())
   url.searchParams.append('interval', 'daily')
-  url.searchParams.append('x_cg_demo_api_key', process.env.COINGECKO_API_KEY!)
+  url.searchParams.append('x_cg_pro_api_key', process.env.COINGECKO_API_KEY!)
 
   const headers = {
     Accept: 'application/json',
