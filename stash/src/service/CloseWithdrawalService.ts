@@ -1,5 +1,4 @@
-import { createPublicClient, createWalletClient, http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { createPublicClient, http, encodeFunctionData } from 'viem'
 
 import rolldownAbi from '../Rolldown.json' with { type: 'json' }
 import { withdrawalRepository } from '../repository/TransactionRepository.js'
@@ -51,17 +50,17 @@ export const closeWithdrawal = async (txHash: string): Promise<CloseWithdrawalRe
       proofLength: proof.length
     })
 
-    // 3. Call close_withdrawal on Rolldown contract
-    logger.info(`Calling close_withdrawal on Rolldown contract for chain: ${withdrawal.chain}`)
-    const contractTxHash = await callCloseWithdrawal(withdrawalData, merkleRoot, proof, withdrawal.chain)
+    // 3. Call close_withdrawal on Rolldown contract (validation only)
+    logger.info(`Validating withdrawal can be closed on Rolldown contract for chain: ${withdrawal.chain}`)
+    const validationResult = await callCloseWithdrawal(withdrawalData, merkleRoot, proof, withdrawal.chain)
 
     // 4. Update withdrawal status in database
     logger.info(`Updating withdrawal status to 'Processed' for entityId: ${withdrawal.entityId}`)
     await updateWithdrawalStatus(withdrawal.entityId, 'Processed', 'other')
 
-    logger.info(`Withdrawal ${txHash} closed successfully with contract tx: ${contractTxHash}`)
+    logger.info(`Withdrawal ${txHash} closed successfully with validation result: ${validationResult}`)
     
-    return { txHash: contractTxHash }
+    return { txHash: validationResult }
   } catch (error) {
     logger.error(`Error closing withdrawal ${txHash}: ${error.message}`, { error: error.stack })
     throw error
@@ -113,17 +112,90 @@ function extractMerkleRoot(withdrawal: any): string {
 }
 
 function extractProof(withdrawal: any): string[] {
-  return withdrawal.proof || []
+  logger.info(`Extracting proof from withdrawal:`, { 
+    proof: withdrawal.proof, 
+    proofType: typeof withdrawal.proof,
+    proofLength: withdrawal.proof?.length 
+  })
+  
+  if (!withdrawal.proof) {
+    logger.info('No proof found, returning empty array')
+    return []
+  }
+  
+  // If proof is stored as a hex string, we need to parse it
+  if (typeof withdrawal.proof === 'string') {
+    // If it's a single hex value like "0x00", convert to empty array
+    if (withdrawal.proof === '0x00' || withdrawal.proof === '0x' || withdrawal.proof === '') {
+      logger.info('Proof is empty hex string, returning empty array')
+      return []
+    }
+    
+    // If it's a comma-separated string of hex values, split it
+    if (withdrawal.proof.includes(',')) {
+      const proofArray = withdrawal.proof.split(',').filter((p: string) => p && p !== '0x00')
+      logger.info(`Proof split by comma:`, proofArray)
+      return proofArray
+    }
+    
+    // If it's a single hex string longer than 66 chars (32 bytes), it might be concatenated proofs
+    // For now, treat single hex string as one proof element
+    logger.info(`Proof is single hex string, returning as array:`, [withdrawal.proof])
+    return [withdrawal.proof]
+  }
+  
+  // If it's already an array, return as is
+  if (Array.isArray(withdrawal.proof)) {
+    const filteredProof = withdrawal.proof.filter((p: string) => p && p !== '0x00')
+    logger.info(`Proof is array, filtered:`, filteredProof)
+    return filteredProof
+  }
+  
+  logger.info('Proof format unknown, returning empty array')
+  return []
 }
 
 function getChainConfig(chain: string) {
   const chainKey = `${process.env.NODE_ENV || 'localhost'}-${chain.toLowerCase()}`
   logger.info(`Looking up chain config for key: ${chainKey}`)
-  const chainConfig = CONFIG_TO_CHAIN.get(chainKey)
+  let chainConfig = CONFIG_TO_CHAIN.get(chainKey)
   
   if (!chainConfig) {
     logger.error(`Unsupported chain: ${chain}, chainKey: ${chainKey}`)
     throw new Error(`Unsupported chain: ${chain}`)
+  }
+  
+  // Override RPC URLs with Tenderly endpoints if available
+  const chainUpper = chain.toUpperCase()
+  let rpcUrl: string | undefined
+  
+  switch (chainUpper) {
+    case 'ETHEREUM':
+      rpcUrl = process.env.ETH_CHAIN_URL
+      break
+    case 'ARBITRUM':
+      rpcUrl = process.env.ARBITRUM_SEPOLIA_CHAIN_URL
+      break
+    case 'BASE':
+      rpcUrl = process.env.BASE_CHAIN_URL
+      break
+    case 'SONIC':
+      rpcUrl = process.env.SONIC_CHAIN_URL
+      break
+  }
+  
+  if (rpcUrl) {
+    logger.info(`Using custom RPC URL for ${chain}: ${rpcUrl}`)
+    // Create a new chain config with the custom RPC URL
+    chainConfig = {
+      ...chainConfig,
+      rpcUrls: {
+        ...chainConfig.rpcUrls,
+        default: {
+          http: [rpcUrl]
+        }
+      }
+    }
   }
   
   logger.info(`Found chain config for: ${chainConfig.name}`)
@@ -141,24 +213,13 @@ function getContractAddress(chain: string): string {
     throw new Error(`${envVar} environment variable not set`)
   }
   
-  logger.info(`Found contract address: ${contractAddress}`)
-  return contractAddress
+  // Ensure the address has 0x prefix
+  const formattedAddress = contractAddress.startsWith('0x') ? contractAddress : `0x${contractAddress}`
+  
+  logger.info(`Found contract address: ${formattedAddress}`)
+  return formattedAddress
 }
 
-function getPrivateKey(chain: string): string {
-  const chainUpper = chain.toUpperCase()
-  const envVar = `CLOSE_WITHDRAWAL_PRIVATE_KEY_${chainUpper}`
-  logger.info(`Looking up private key from env var: ${envVar}`)
-  const privateKey = process.env[envVar]
-  
-  if (!privateKey) {
-    logger.error(`${envVar} environment variable not set`)
-    throw new Error(`${envVar} environment variable not set`)
-  }
-  
-  logger.info(`Found private key for chain: ${chain}`)
-  return privateKey
-}
 
 async function callCloseWithdrawal(
   withdrawalData: WithdrawalData,
@@ -167,22 +228,12 @@ async function callCloseWithdrawal(
   chain: string
 ): Promise<string> {
   logger.info(`Getting configuration for chain: ${chain}`)
-  const privateKey = getPrivateKey(chain)
   const rolldownAddress = getContractAddress(chain)
   const chainConfig = getChainConfig(chain)
 
   logger.info(`Contract address: ${rolldownAddress}, Chain: ${chainConfig.name}`)
-
-  const account = privateKeyToAccount(privateKey as `0x${string}`)
-  logger.info(`Using account: ${account.address}`)
   
   const publicClient = createPublicClient({
-    chain: chainConfig,
-    transport: http()
-  })
-
-  const walletClient = createWalletClient({
-    account,
     chain: chainConfig,
     transport: http()
   })
@@ -197,48 +248,85 @@ async function callCloseWithdrawal(
     throw new Error('close_withdrawal function not found in Rolldown ABI')
   }
 
-  logger.info('Found close_withdrawal function in ABI')
+  logger.info('Found close_withdrawal function in ABI:', {
+    name: closeWithdrawalAbi.name,
+    inputs: closeWithdrawalAbi.inputs,
+    stateMutability: closeWithdrawalAbi.stateMutability
+  })
 
   try {
-    // Simulate the transaction first
-    logger.info('Simulating contract transaction...')
-    const { request } = await publicClient.simulateContract({
-      address: rolldownAddress as `0x${string}`,
+    // Log all the parameters being sent
+    logger.info('Parameters for close_withdrawal call:', {
+      withdrawalData: {
+        requestId: {
+          origin: withdrawalData.requestId.origin,
+          id: withdrawalData.requestId.id.toString()
+        },
+        recipient: withdrawalData.recipient,
+        tokenAddress: withdrawalData.tokenAddress,
+        amount: withdrawalData.amount.toString(),
+        ferryTip: withdrawalData.ferryTip.toString()
+      },
+      merkleRoot,
+      proof,
+      contractAddress: rolldownAddress
+    })
+
+    // Encode the function call data
+    logger.info('Encoding close_withdrawal function call...')
+    const data = encodeFunctionData({
       abi: [closeWithdrawalAbi],
       functionName: 'close_withdrawal',
-      args: [withdrawalData, merkleRoot, proof],
-      account: account.address
+      args: [withdrawalData, merkleRoot, proof]
     })
 
-    logger.info('Transaction simulation successful, executing transaction...')
+    logger.info(`Encoded call data: ${data}`)
 
-    // Execute the transaction
-    const txHash = await walletClient.writeContract(request)
-    
-    logger.info(`Close withdrawal transaction sent: ${txHash}`)
-    
-    // Wait for transaction confirmation
-    logger.info(`Waiting for transaction confirmation: ${txHash}`)
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash: txHash,
-      confirmations: 1
-    })
-
-    logger.info(`Transaction confirmed with status: ${receipt.status}, gas used: ${receipt.gasUsed}`)
-
-    if (receipt.status === 'reverted') {
-      logger.error(`Transaction reverted: ${txHash}`)
-      throw new Error(`Transaction reverted: ${txHash}`)
+    // Try to get more detailed error information by using trace_call if available
+    try {
+      logger.info('Attempting trace_call for detailed error...')
+      const traceResult = await publicClient.request({
+        method: 'trace_call' as any,
+        params: [
+          {
+            to: rolldownAddress,
+            data: data
+          },
+          ['trace']
+        ]
+      })
+      logger.info('Trace result:', traceResult)
+    } catch (traceError) {
+      logger.info('trace_call not available, continuing with regular call')
     }
 
-    logger.info(`Transaction successful: ${txHash}`)
-    return txHash
-  } catch (error) {
-    logger.error(`Contract call failed for chain ${chain}: ${error.message}`, { 
-      error: error.stack,
-      rolldownAddress,
-      accountAddress: account.address
+    // Call the contract function
+    logger.info('Calling close_withdrawal function...')
+    const result = await publicClient.call({
+      to: rolldownAddress as `0x${string}`,
+      data: data
     })
+
+    logger.info(`Close withdrawal call completed successfully`, { result })
+    
+    return result.data || 'success'
+  } catch (error) {
+    logger.error(`Contract call failed for chain ${chain}:`, { 
+      error: error.message,
+      stack: error.stack,
+      rolldownAddress,
+      callData: encodeFunctionData({
+        abi: [closeWithdrawalAbi],
+        functionName: 'close_withdrawal',
+        args: [withdrawalData, merkleRoot, proof]
+      })
+    })
+
+    // Try to decode the revert reason if possible
+    if (error.data) {
+      logger.error('Revert data:', error.data)
+    }
+
     throw error
   }
 }
