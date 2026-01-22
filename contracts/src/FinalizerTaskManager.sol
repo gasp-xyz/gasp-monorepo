@@ -249,6 +249,13 @@ contract FinalizerTaskManager is
     function createNewRdTask(IRolldown.ChainId chainId, uint32 batchId) external onlyTaskGenerator {
         require(isTaskPending == false, "Task already pending");
         require(lastCompletedOpTaskCreatedBlock != 0 && block.number != 0, "Op State uninit");
+
+        require(
+            chainRdBatchNonce[uint8(chainId)] == 0
+                || batchId == chainRdBatchNonce[uint8(chainId)],
+            "chainRdBatchNonce mismatch"
+        );
+
         uint32 latestRdTaskNumMem = latestRdTaskNum;
         // create a new task struct
         RdTask memory newTask = RdTask({
@@ -280,8 +287,6 @@ contract FinalizerTaskManager is
         bytes calldata quorumNumbers = task.lastCompletedOpTaskQuorumNumbers;
         uint32 quorumThresholdPercentage = task.lastCompletedOpTaskQuorumThresholdPercentage;
 
-        // TODO
-        // Maybe this belongs in createNewRdTask
         require(
             chainRdBatchNonce[uint8(taskResponse.chainId)] == 0
                 || taskResponse.batchId == chainRdBatchNonce[uint8(taskResponse.chainId)],
