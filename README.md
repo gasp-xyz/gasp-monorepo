@@ -1,7 +1,5 @@
 # Gasp Monorepo
 
-> **Warning:** For testnet use only. Not production-ready.
-
 ## Project Overview
 
 Gasp is a Layer 2 solution utilizing Eigen Layer for security and consensus:
